@@ -1,13 +1,16 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.25",
+	"EngineAssociation": "{2CB3A95A-4EBE-ECF7-393C-0985F024BECC}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
 		{
 			"Name": "CppGame",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	]
 }
