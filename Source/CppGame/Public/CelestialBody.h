@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CelestialGameMode.h"
 #include "CelestialBody.generated.h"
 
 UCLASS()
@@ -27,14 +28,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Default")
 	FVector initialVelocity;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowProvateAccess = "true"))
-	UStaticMesh* Mesh;
+	UPROPERTY(Category = "Mesh", VisibleAnywhere, BlueprintReadOnly, meta = (AllowProvateAccess = "true"))
+	UStaticMeshComponent* Mesh;
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdatePosition(float timeStep);
+
+	UPROPERTY(VisibleAnywhere)
+	ACelestialGameMode* gameMode;
 
 protected:
 	// Called when the game starts or when spawned

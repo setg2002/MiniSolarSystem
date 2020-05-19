@@ -13,5 +13,5 @@ UCLASS()
 class CPPGAME_API ACppGameGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 };

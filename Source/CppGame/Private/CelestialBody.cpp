@@ -9,6 +9,8 @@ ACelestialBody::ACelestialBody()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	RootComponent = Mesh;
 }
 
 // Called when the game starts or when spawned
@@ -17,6 +19,8 @@ void ACelestialBody::BeginPlay()
 	Super::BeginPlay();
 
 	currentVelocity = initialVelocity;
+
+	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 }
 
 void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep)
@@ -28,7 +32,7 @@ void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float tim
 		if (otherBody != this) {
 			float sqrDst = (otherBody->GetActorLocation() - this->GetActorLocation()).SizeSquared();
 			FVector forceDir = (otherBody->GetActorLocation() - this->GetActorLocation()).GetSafeNormal();
-			FVector force = forceDir * 1 * this->mass * otherBody->mass / sqrDst;       //TODO make the number whith a gamemode variable: gravitationalConstant
+			FVector force = forceDir * gameMode->gravitationalConstant * this->mass * otherBody->mass / sqrDst;       //TODO make the number whith a gamemode variable: gravitationalConstant
 			FVector acceleration = force / this->mass;
 			this->currentVelocity += acceleration * timeStep;
 		}
@@ -47,4 +51,3 @@ void ACelestialBody::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-
