@@ -2,6 +2,8 @@
 
 
 #include "CelestialGameMode.h"
+#include "CelestialBody.h"
+#include "EngineUtils.h"
 
 
 ACelestialGameMode::ACelestialGameMode()
@@ -13,9 +15,11 @@ ACelestialGameMode::ACelestialGameMode()
 void ACelestialGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
-	TSubclassOf<ACelestialBody> bodiesToFind;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), bodiesToFind, bodies);
+	
+	for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
+		bodies.Add(*Itr);
+		//*Itr->gameMode = *this;
+	}
 }
 
 // Called every frame
@@ -23,4 +27,10 @@ void ACelestialGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	for (int i = 0; i < bodies.Num(); i++) {
+		ACelestialBody* thisBody = bodies[i];
+
+		thisBody->UpdateVelocity(bodies, DeltaTime);
+		thisBody->UpdatePosition(DeltaTime);
+	}
 }

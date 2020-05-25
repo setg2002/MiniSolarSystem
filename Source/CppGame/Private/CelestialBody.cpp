@@ -19,7 +19,6 @@ void ACelestialBody::BeginPlay()
 	Super::BeginPlay();
 
 	currentVelocity = initialVelocity;
-
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 }
 
@@ -29,10 +28,10 @@ void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float tim
 	{
 		ACelestialBody* otherBody = allBodies[i];
 
-		if (otherBody != this) {
-			float sqrDst = (otherBody->GetActorLocation() - this->GetActorLocation()).SizeSquared();
+		if (otherBody != this && gameMode != nullptr) {
+			float sqrDst = (otherBody->GetActorLocation() - this->GetActorLocation()).Size();
 			FVector forceDir = (otherBody->GetActorLocation() - this->GetActorLocation()).GetSafeNormal();
-			FVector force = forceDir * gameMode->gravitationalConstant * this->mass * otherBody->mass / sqrDst;       //TODO make the number whith a gamemode variable: gravitationalConstant
+			FVector force = forceDir * gameMode->gravitationalConstant * this->mass * otherBody->mass / sqrDst;
 			FVector acceleration = force / this->mass;
 			this->currentVelocity += acceleration * timeStep;
 		}

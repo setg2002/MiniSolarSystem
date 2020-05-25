@@ -3,9 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "CelestialGameMode.h"
+#include "GameFramework/Actor.h"
 #include "CelestialBody.generated.h"
+
+
+//Forward Declarations
+class ACelestialGameMode;
 
 UCLASS()
 class CPPGAME_API ACelestialBody : public AActor
@@ -19,13 +23,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Default")
+	UPROPERTY(EditInstanceOnly, Category = "Default")
 	float mass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Default")
 	float radius;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Default")
+	UPROPERTY(EditInstanceOnly, Category = "Default")
 	FVector initialVelocity;
 
 	UPROPERTY(Category = "Mesh", VisibleAnywhere, BlueprintReadOnly, meta = (AllowProvateAccess = "true"))
@@ -37,7 +41,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdatePosition(float timeStep);
 
-	UPROPERTY(VisibleAnywhere)
 	ACelestialGameMode* gameMode;
 
 protected:
