@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "CelestialGameMode.h"
+#include "TerrainFace.h"
 #include "GameFramework/Actor.h"
 #include "CelestialBody.generated.h"
 
 
 //Forward Declarations
 class ACelestialGameMode;
+class TerrainFace;
 
 UCLASS()
 class CPPGAME_API ACelestialBody : public AActor
@@ -23,17 +25,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	/*Physics Interaction*/
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	float mass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Default")
+	UPROPERTY(EditInstanceOnly, Category = "Default")
 	float radius;
 	
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	FVector initialVelocity;
-
-	UPROPERTY(Category = "Mesh", VisibleAnywhere, BlueprintReadOnly, meta = (AllowProvateAccess = "true"))
-	UStaticMeshComponent* Mesh;
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep);
@@ -42,6 +42,20 @@ public:
 	void UpdatePosition(float timeStep);
 
 	ACelestialGameMode* gameMode;
+
+	USceneComponent* Root;
+
+	/*Mesh stuff*/
+	TArray<UProceduralMeshComponent*> meshes;
+	TerrainFace* terrainFaces[6];
+
+	UPROPERTY(Category = "Mesh", EditAnywhere, meta = (ClampMin = "2", ClampMax = "256"))
+	int resolution = 16;
+
+	void Initialize();
+
+	void GenerateMesh();
+
 
 protected:
 	// Called when the game starts or when spawned

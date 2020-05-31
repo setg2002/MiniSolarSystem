@@ -9,8 +9,42 @@ ACelestialBody::ACelestialBody()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	RootComponent = Mesh;
+	Root = CreateDefaultSubobject<USceneComponent>("Root");
+	RootComponent = Root;
+
+	meshes = { CreateDefaultSubobject<UProceduralMeshComponent>("Mesh"), 
+			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh1"), 
+			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh2"), 
+			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh3"),
+			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh4"),
+			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh5") 
+	};
+
+	Initialize();
+	GenerateMesh();
+}
+
+void ACelestialBody::Initialize()
+{
+	FVector directions[6] = { FVector().UpVector, 
+							  FVector().DownVector, 
+							  FVector().LeftVector, 
+							  FVector().RightVector, 
+		                      FVector().ForwardVector, 
+							  FVector().BackwardVector };
+
+	for (int i = 0; i < 6; i++)
+	{
+		terrainFaces[i] = new TerrainFace(meshes[i], resolution, directions[i]);
+	}
+}
+
+void ACelestialBody::GenerateMesh()
+{
+	for (auto& face : terrainFaces)
+	{
+		face->ConstructMesh();
+	}
 }
 
 // Called when the game starts or when spawned
@@ -50,3 +84,4 @@ void ACelestialBody::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
