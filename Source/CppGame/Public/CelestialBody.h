@@ -13,7 +13,7 @@
 class ACelestialGameMode;
 class TerrainFace;
 
-UCLASS()
+UCLASS(Blueprintable)
 class CPPGAME_API ACelestialBody : public AActor
 {
 	GENERATED_BODY()
@@ -44,17 +44,6 @@ public:
 	ACelestialGameMode* gameMode;
 
 	USceneComponent* Root;
-
-	/*Mesh stuff*/
-	TArray<UProceduralMeshComponent*> meshes;
-	TerrainFace* terrainFaces[6];
-
-	UPROPERTY(Category = "Mesh", EditAnywhere, meta = (ClampMin = "2", ClampMax = "256"))
-	int resolution = 16;
-
-	void Initialize();
-
-	void GenerateMesh();
 
 
 protected:
