@@ -11,7 +11,6 @@
 
 //Forward Declarations
 class ACelestialGameMode;
-class TerrainFace;
 
 UCLASS(Blueprintable)
 class CPPGAME_API ACelestialBody : public AActor

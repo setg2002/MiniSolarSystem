@@ -3,8 +3,9 @@
 
 #include "TerrainFace.h"
 
-TerrainFace::TerrainFace(UProceduralMeshComponent* mesh, int resolution, FVector localUp)
+TerrainFace::TerrainFace(ShapeGenerator* shapeGenerator, UProceduralMeshComponent* mesh, int resolution, FVector localUp)
 {
+	this->shapeGenerator = shapeGenerator;
 	this->Mesh = mesh;
 	this->resolution = resolution;
 	this->localUp = localUp;
@@ -17,11 +18,18 @@ TerrainFace::~TerrainFace()
 {
 }
 
+void TerrainFace::ColorMesh(UColorSettings* CS)
+{
+	for (int j = 0; j < verticies.Num(); j++)
+	{
+		VertexColors.Add(CS->PlanetColor);
+	}
+
+	Mesh->UpdateMeshSection(0, verticies, TArray<FVector>(), TArray<FVector2D>(), VertexColors, TArray<FProcMeshTangent>());
+}
+
 void TerrainFace::ConstructMesh()
 {
-	TArray<FVector> verticies;
-	TArray<int> triangles;
-
 	int triIndex = 0;
 
 	for (int y = 0; y < resolution; y++)
@@ -32,7 +40,7 @@ void TerrainFace::ConstructMesh()
 			FVector2D percent = FVector2D(x, y) / (resolution - 1);
 			FVector pointOnUnitCube = -localUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
-			verticies.Add(pointOnUnitSphere * 100);
+			verticies.EmplaceAt(i, shapeGenerator->CalculatePointOnPlanet(pointOnUnitSphere));
 
 			if (x != resolution - 1 && y != resolution - 1)
 			{
@@ -48,7 +56,6 @@ void TerrainFace::ConstructMesh()
 			}
 		}
 	}
-	Mesh->CreateMeshSection(0, verticies, triangles, TArray<FVector>(), TArray<FVector2D>(), TArray<FColor>(), TArray<FProcMeshTangent>(), false);
+
+	Mesh->CreateMeshSection(0, verticies, triangles, TArray<FVector>(), TArray<FVector2D>(), VertexColors, TArray<FProcMeshTangent>(), false);
 }
-
-

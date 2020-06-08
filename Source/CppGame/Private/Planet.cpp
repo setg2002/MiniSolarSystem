@@ -13,22 +13,29 @@ APlanet::APlanet()
 			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh5")
 	};
 
+	//Sets material
+	for (auto& mesh : meshes)
+	{
+		mesh->SetMaterial(0, PlanetMat);
+	}
+
+	GeneratePlanet();
+}
+
+void APlanet::GeneratePlanet()
+{
 	Initialize();
 	GenerateMesh();
+	GenerateColors();
 }
 
 void APlanet::Initialize()
 {
-	FVector directions[6] = { FVector().UpVector,
-							  FVector().DownVector,
-						   	  FVector().LeftVector,
-							  FVector().RightVector,
-							  FVector().ForwardVector,
-							  FVector().BackwardVector };
+	shapeGenerator = new ShapeGenerator(ShapeSettings);
 
 	for (int i = 0; i < 6; i++)
 	{
-		terrainFaces[i] = new TerrainFace(meshes[i], resolution, directions[i]);
+		terrainFaces[i] = new TerrainFace(shapeGenerator, meshes[i], resolution, directions[i]);
 	}
 }
 
@@ -40,6 +47,30 @@ void APlanet::GenerateMesh()
 	}
 }
 
+void APlanet::OnShapeSettingsUpdated()
+{
+	Initialize();
+	GenerateMesh();
+}
+
+void APlanet::OnColorSettingsUpdated()
+{
+	Initialize();
+	GenerateColors();
+}
+
+
+void APlanet::GenerateColors()
+{
+	if (ColorSettings != nullptr)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			terrainFaces[i]->ColorMesh(ColorSettings);
+		}
+	}
+}
+
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
 	if (PropertyChangedEvent.Property != nullptr)
@@ -47,8 +78,15 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution))
 		{
-			Initialize();
-			GenerateMesh();
+			GeneratePlanet();
+		}
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && PropertyChangedEvent.Property->IsValidLowLevel())
+		{
+			GeneratePlanet();
+		}
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ColorSettings) && PropertyChangedEvent.Property->IsValidLowLevel())
+		{
+			GeneratePlanet();
 		}
 	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);

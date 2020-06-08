@@ -10,6 +10,7 @@ ACelestialBody::ACelestialBody()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Root = CreateDefaultSubobject<USceneComponent>("Root");
+	Root->SetRelativeLocation(FVector().ZeroVector);
 	RootComponent = Root;
 }
 
