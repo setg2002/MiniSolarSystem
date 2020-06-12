@@ -9,12 +9,11 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(EditInlineNew)
 class CPPGAME_API UColorSettings : public UDataAsset
 {
 	GENERATED_BODY()
 	
-
 public:
 	UPROPERTY(EditAnywhere)
 	FColor PlanetColor;

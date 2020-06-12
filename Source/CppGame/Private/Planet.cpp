@@ -24,9 +24,12 @@ APlanet::APlanet()
 
 void APlanet::GeneratePlanet()
 {
-	Initialize();
-	GenerateMesh();
-	GenerateColors();
+	if (ShapeSettings != nullptr)
+	{
+		Initialize();
+		GenerateMesh();
+		GenerateColors();
+	}
 }
 
 void APlanet::Initialize()

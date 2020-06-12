@@ -6,6 +6,7 @@
 ShapeGenerator::ShapeGenerator(UShapeSettings* settings)
 {
 	this->Settings = settings;
+	noiseFilter = new NoiseFilter(Settings->noiseSettings);
 }
 
 ShapeGenerator::~ShapeGenerator()
@@ -16,8 +17,8 @@ FVector ShapeGenerator::CalculatePointOnPlanet(FVector PointOnUnitSphere)
 {
 	if (Settings != nullptr)
 	{
-		FVector point = PointOnUnitSphere * Settings->PlanetRadius;
-		return point;
+		float elevation = noiseFilter->Evaluate(PointOnUnitSphere);
+		return PointOnUnitSphere * Settings->PlanetRadius * (1 + elevation);
 	}
 	else
 	{

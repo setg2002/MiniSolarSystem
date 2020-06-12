@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ShapeSettings.h"
+#include "NoiseFilter.h"
 
 /**
  * 
@@ -17,4 +18,6 @@ public:
 	UShapeSettings* Settings;
 
 	FVector CalculatePointOnPlanet(FVector PointOnUnitSphere);
+
+	NoiseFilter* noiseFilter;
 };

@@ -35,9 +35,9 @@ public:
 
 	ShapeGenerator* shapeGenerator;
 
-	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Settings", EditAnywhere, Instanced, BlueprintReadWrite)
 	UColorSettings* ColorSettings;
-	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Settings", EditAnywhere, Instanced, BlueprintReadWrite)
 	UShapeSettings* ShapeSettings;
 
 	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite)
