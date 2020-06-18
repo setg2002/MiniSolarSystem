@@ -19,5 +19,5 @@ public:
 
 	FVector CalculatePointOnPlanet(FVector PointOnUnitSphere);
 
-	NoiseFilter* noiseFilter;
+	TArray<NoiseFilter*> NoiseFilters;
 };

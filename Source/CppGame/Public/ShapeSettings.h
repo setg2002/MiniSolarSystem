@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "NoiseSettings.h"
+#include "NoiseLayer.h"
 #include "ShapeSettings.generated.h"
 
 /**
@@ -20,6 +20,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	float PlanetRadius = 100;
 
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite)
-	UNoiseSettings* noiseSettings;
+	bool GetNoiseLayers();
+
+	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite, NoClear)
+	TArray<UNoiseLayer*> NoiseLayers;
 };

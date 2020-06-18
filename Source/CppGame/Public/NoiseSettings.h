@@ -30,7 +30,7 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "8"))
 	int numLayers = 1;
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", ClampMax = "5"))
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", ClampMax = "2"))
 	float Persistence = .5f;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))

@@ -24,7 +24,7 @@ APlanet::APlanet()
 
 void APlanet::GeneratePlanet()
 {
-	if (ShapeSettings != nullptr)
+	if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
 	{
 		Initialize();
 		GenerateMesh();
