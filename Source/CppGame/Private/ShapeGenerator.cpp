@@ -9,8 +9,7 @@ ShapeGenerator::ShapeGenerator(UShapeSettings* settings)
 	NoiseFilters.SetNum(Settings->NoiseLayers.Num());
 	for (int i = 0; i < Settings->NoiseLayers.Num(); i++)
 	{
-		ensure(Settings->NoiseLayers[i]->NoiseSettings);
-		NoiseFilters[i] = new NoiseFilter(Settings->NoiseLayers[i]->NoiseSettings);
+		NoiseFilters[i] = UNoiseFilterFactory::CreateNoiseFilter(Settings->NoiseLayers[i]->NoiseSettings);
 	}
 }
 

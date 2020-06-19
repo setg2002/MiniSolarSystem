@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "ShapeSettings.h"
-#include "NoiseFilter.h"
+#include "INoiseFilter.h"
+#include "NoiseFilterFactory.h"
 
 /**
  * 
@@ -19,5 +20,5 @@ public:
 
 	FVector CalculatePointOnPlanet(FVector PointOnUnitSphere);
 
-	TArray<NoiseFilter*> NoiseFilters;
+	TArray<INoiseFilter*> NoiseFilters;
 };

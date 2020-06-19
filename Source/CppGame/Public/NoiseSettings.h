@@ -4,20 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "EFilterType.h"
 #include "NoiseSettings.generated.h"
 
 /**
  * 
  */
-
-UCLASS(EditInlineNew)
-class CPPGAME_API UNoiseSettings : public UDataAsset
+/*UENUM()
+enum EFilterType
 {
-	GENERATED_BODY()
+	Simple  UMETA(DisplayName = "Simple"),
+	Ridgid  UMETA(DisplayName = "Ridgid")
+};*/
 
-public:
-	UNoiseSettings();
-	~UNoiseSettings();
+USTRUCT(BlueprintType)
+struct FSimpleNoiseSettings
+{
+	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
 	float Strength = 1;
@@ -35,4 +38,31 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
 	float MinValue;
+};
+
+USTRUCT(BlueprintType)
+struct FRidgidNoiseSettings : public FSimpleNoiseSettings
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere)
+	float WeightMultiplier = .8f;
+};
+
+UCLASS(EditInlineNew)
+class CPPGAME_API UNoiseSettings : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UNoiseSettings();
+	~UNoiseSettings();
+
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EFilterType> FilterType;
+
+	UPROPERTY(EditAnywhere)
+	FSimpleNoiseSettings SimpleNoiseSettings;
+	UPROPERTY(EditAnywhere)
+	FRidgidNoiseSettings RidgidNoiseSettings;
 };
