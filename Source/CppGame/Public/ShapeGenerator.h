@@ -6,6 +6,7 @@
 #include "ShapeSettings.h"
 #include "INoiseFilter.h"
 #include "NoiseFilterFactory.h"
+#include "MinMax.h"
 
 /**
  * 
@@ -21,4 +22,6 @@ public:
 	FVector CalculatePointOnPlanet(FVector PointOnUnitSphere);
 
 	TArray<INoiseFilter*> NoiseFilters;
+
+	MinMax* ElevationMinMax;
 };

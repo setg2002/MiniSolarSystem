@@ -13,12 +13,6 @@ APlanet::APlanet()
 			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh5")
 	};
 
-	//Sets material
-	for (auto& mesh : meshes)
-	{
-		mesh->SetMaterial(0, PlanetMat);
-	}
-
 	GeneratePlanet();
 }
 
@@ -35,19 +29,30 @@ void APlanet::GeneratePlanet()
 void APlanet::Initialize()
 {
 	shapeGenerator = new ShapeGenerator(ShapeSettings);
+	colorGenerator = new ColorGenerator(ColorSettings);
 
 	for (int i = 0; i < 6; i++)
 	{
 		terrainFaces[i] = new TerrainFace(shapeGenerator, meshes[i], resolution, directions[i]);
+
+		ColorSettings->DynamicMaterials[i] = meshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
+
+		bool renderFace = FaceRenderMask == EFaceRenderMask::All || FaceRenderMask - 1 == i;
+		meshes[i]->SetVisibility(renderFace);
 	}
 }
 
 void APlanet::GenerateMesh()
 {
-	for (auto& face : terrainFaces)
+	for (int i = 0; i < 6; i++)
 	{
-		face->ConstructMesh();
+		if (meshes[i]->IsVisibleInEditor())
+		{
+			terrainFaces[i]->ConstructMesh();
+		}
 	}
+
+	colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
 }
 
 void APlanet::OnShapeSettingsUpdated()
@@ -88,6 +93,10 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 			GeneratePlanet();
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ColorSettings) && PropertyChangedEvent.Property->IsValidLowLevel())
+		{
+			GeneratePlanet();
+		}
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask))
 		{
 			GeneratePlanet();
 		}

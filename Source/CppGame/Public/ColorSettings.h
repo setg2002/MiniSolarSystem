@@ -15,8 +15,13 @@ class CPPGAME_API UColorSettings : public UDataAsset
 	GENERATED_BODY()
 	
 public:
+	UColorSettings();
+
 	UPROPERTY(EditAnywhere)
 	FColor PlanetColor;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterial* PlanetMat;
 
+	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
 };

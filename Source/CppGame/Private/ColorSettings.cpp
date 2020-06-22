@@ -3,3 +3,7 @@
 
 #include "ColorSettings.h"
 
+UColorSettings::UColorSettings()
+{
+	DynamicMaterials.SetNum(6);
+}

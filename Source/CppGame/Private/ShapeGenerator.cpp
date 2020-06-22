@@ -11,6 +11,7 @@ ShapeGenerator::ShapeGenerator(UShapeSettings* settings)
 	{
 		NoiseFilters[i] = UNoiseFilterFactory::CreateNoiseFilter(Settings->NoiseLayers[i]->NoiseSettings);
 	}
+	ElevationMinMax = new MinMax();
 }
 
 ShapeGenerator::~ShapeGenerator()
@@ -41,7 +42,9 @@ FVector ShapeGenerator::CalculatePointOnPlanet(FVector PointOnUnitSphere)
 				elevation += NoiseFilters[i]->Evaluate(PointOnUnitSphere) * mask;
 			}
 		}
-		return PointOnUnitSphere * Settings->PlanetRadius * (1 + elevation);
+		elevation = Settings->PlanetRadius * (1 + elevation);
+		ElevationMinMax->AddValue(elevation);
+		return PointOnUnitSphere * elevation;
 	}
 	else
 	{
