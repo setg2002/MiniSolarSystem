@@ -10,7 +10,7 @@ INoiseFilter* UNoiseFilterFactory::CreateNoiseFilter(UNoiseSettings* NoiseSettin
 {
 	switch (NoiseSettings->FilterType)
 	{
-	case Simple:
+	case Smooth:
 		return new SimpleNoiseFilter(NoiseSettings->SimpleNoiseSettings);
 	case Ridgid:
 		return new RidgidNoiseFilter(NoiseSettings->RidgidNoiseSettings);

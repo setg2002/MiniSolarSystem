@@ -12,6 +12,6 @@
  UENUM()
  enum EFilterType
  {
-	 Simple  UMETA(DisplayName = "Simple"),
+	 Smooth  UMETA(DisplayName = "Simple"),
 	 Ridgid  UMETA(DisplayName = "Ridgid")
  };

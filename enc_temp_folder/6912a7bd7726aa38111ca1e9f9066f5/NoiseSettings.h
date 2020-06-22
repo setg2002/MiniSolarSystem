@@ -55,8 +55,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EFilterType> FilterType;
 
-	UPROPERTY(EditAnywhere, meta = (EditCondition = "FilterType == 0"))
+	UPROPERTY(EditAnywhere, meta = (EditCondition = FilterType = 0))
 	FSimpleNoiseSettings SimpleNoiseSettings;
-	UPROPERTY(EditAnywhere, meta = (EditCondition = "FilterType == 1"))
+	UPROPERTY(EditAnywhere, meta = (EditCondition = FilterType = 1))
 	FRidgidNoiseSettings RidgidNoiseSettings;
 };
