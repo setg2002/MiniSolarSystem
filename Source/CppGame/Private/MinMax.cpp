@@ -13,16 +13,6 @@ MinMax::~MinMax()
 {
 }
 
-float MinMax::getMin()
-{
-	return Min;
-}
-
-float MinMax::getMax()
-{
-	return Max;
-}
-
 void MinMax::AddValue(float v)
 {
 	if (v > Max)

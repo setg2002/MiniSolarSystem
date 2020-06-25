@@ -20,10 +20,10 @@ TerrainFace::~TerrainFace()
 
 void TerrainFace::ColorMesh(UColorSettings* CS)
 {
-	for (int j = 0; j < verticies.Num(); j++)
+	/*for (int j = 0; j < verticies.Num(); j++)
 	{
-		VertexColors.Add(CS->PlanetColor);
-	}
+		//VertexColors.Add(CS->PlanetColor);
+	}*/
 
 	Mesh->UpdateMeshSection(0, verticies, TArray<FVector>(), TArray<FVector2D>(), VertexColors, TArray<FProcMeshTangent>());
 }

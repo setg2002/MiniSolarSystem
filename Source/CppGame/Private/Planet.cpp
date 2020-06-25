@@ -18,6 +18,11 @@ APlanet::APlanet()
 
 void APlanet::GeneratePlanet()
 {
+	for (auto& mesh : meshes)
+	{
+		mesh->SetRelativeLocation(FVector().ZeroVector);
+	}
+
 	if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
 	{
 		Initialize();

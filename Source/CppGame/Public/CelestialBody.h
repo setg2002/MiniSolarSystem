@@ -34,6 +34,9 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	FVector initialVelocity;
 
+	UPROPERTY(EditInstanceOnly, Category = "Default")
+	float rotationRate;
+
 	UFUNCTION(BlueprintCallable)
 	void UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep);
 
@@ -42,6 +45,7 @@ public:
 
 	ACelestialGameMode* gameMode;
 
+	UPROPERTY(EditAnywhere)
 	USceneComponent* Root;
 
 

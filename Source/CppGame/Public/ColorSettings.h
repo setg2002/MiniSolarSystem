@@ -18,7 +18,7 @@ public:
 	UColorSettings();
 
 	UPROPERTY(EditAnywhere)
-	FColor PlanetColor;
+	UCurveLinearColor* PlanetColor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterial* PlanetMat;

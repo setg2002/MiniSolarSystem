@@ -10,15 +10,12 @@ ACelestialBody::ACelestialBody()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Root = CreateDefaultSubobject<USceneComponent>("Root");
-	Root->SetRelativeLocation(FVector().ZeroVector);
 	RootComponent = Root;
 }
 
-// Called when the game starts or when spawned
 void ACelestialBody::BeginPlay()
 {
 	Super::BeginPlay();
-
 	currentVelocity = initialVelocity;
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 }
@@ -42,6 +39,7 @@ void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float tim
 void ACelestialBody::UpdatePosition(float timeStep)
 {
 	this->SetActorLocation(FVector (this->GetActorLocation() += currentVelocity * timeStep));
+	RootComponent->SetRelativeRotation(FRotator(RootComponent->GetRelativeRotation().Pitch, RootComponent->GetRelativeRotation().Yaw + (rotationRate / 100), RootComponent->GetRelativeRotation().Roll));
 }
 
 // Called every frame

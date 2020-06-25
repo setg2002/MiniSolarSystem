@@ -16,8 +16,5 @@ public:
 	float Min;
 	float Max;
 
-	float getMin();
-	float getMax();
-
 	void AddValue(float v);
 };
