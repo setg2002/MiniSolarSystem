@@ -18,17 +18,25 @@ APlanet::APlanet()
 
 void APlanet::GeneratePlanet()
 {
-	for (auto& mesh : meshes)
+	if (ColorSettings)
 	{
-		mesh->SetRelativeLocation(FVector().ZeroVector);
-	}
+		for (auto& mesh : meshes)
+		{
+			mesh->SetRelativeLocation(FVector().ZeroVector);
+		}
 
-	if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
-	{
-		Initialize();
-		GenerateMesh();
-		GenerateColors();
+		if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
+		{
+			Initialize();
+			GenerateMesh();
+			GenerateColors();
+		}
 	}
+}
+
+void APlanet::ReGenerate()
+{
+	GeneratePlanet();
 }
 
 void APlanet::Initialize()
@@ -89,19 +97,19 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 	if (PropertyChangedEvent.Property != nullptr)
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution))
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution) && AutoGenerate)
 		{
 			GeneratePlanet();
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && PropertyChangedEvent.Property->IsValidLowLevel())
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && AutoGenerate)
 		{
 			GeneratePlanet();
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ColorSettings) && PropertyChangedEvent.Property->IsValidLowLevel())
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ColorSettings) && AutoGenerate)
 		{
 			GeneratePlanet();
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask))
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask) && AutoGenerate)
 		{
 			GeneratePlanet();
 		}

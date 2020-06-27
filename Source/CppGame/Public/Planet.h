@@ -40,6 +40,9 @@ class CPPGAME_API APlanet : public ACelestialBody
 public:
 	APlanet();
 
+	UPROPERTY(Category = "Settings", EditAnywhere)
+	bool AutoGenerate;
+
 	/*Mesh stuff*/
 	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite)
 	TArray<UProceduralMeshComponent*> meshes;
@@ -51,7 +54,7 @@ public:
 	UPROPERTY(Category = "Settings", EditAnywhere)
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
 
-	UPROPERTY(Category = "Settings", EditAnywhere, Instanced, BlueprintReadWrite)
+	UPROPERTY(Category = "Settings", EditInstanceOnly, BlueprintReadWrite)
 	UColorSettings* ColorSettings;
 	UPROPERTY(Category = "Settings", EditAnywhere, Instanced, BlueprintReadWrite)
 	UShapeSettings* ShapeSettings;
@@ -60,6 +63,9 @@ public:
 	int resolution = 16;
 
 	void Initialize();
+
+	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
+	void ReGenerate();
 
 	void GeneratePlanet();
 
