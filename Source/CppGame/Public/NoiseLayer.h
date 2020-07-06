@@ -10,17 +10,17 @@
 /**
  * 
  */
-UCLASS(EditInlineNew)
+UCLASS(DefaultToInstanced, EditInlineNew)
 class CPPGAME_API UNoiseLayer : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool Enabled = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool UseFirstLayerAsMask = false;
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Instanced)
 	UNoiseSettings* NoiseSettings;
 	
 };

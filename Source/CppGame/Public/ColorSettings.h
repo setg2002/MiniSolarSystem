@@ -42,7 +42,10 @@ public:
 	UColorSettings();
 
 	UPROPERTY(EditInstanceOnly)
-	UCurveLinearColor* PlanetColor;
+	UCurveLinearColor* Curve;
+
+	UPROPERTY(EditInstanceOnly)
+	UCurveLinearColorAtlas* Atlas;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	UMaterial* PlanetMat;

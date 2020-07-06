@@ -51,12 +51,12 @@ public:
 	ShapeGenerator* shapeGenerator;
 	ColorGenerator* colorGenerator;
 
-	UPROPERTY(Category = "Settings", EditAnywhere)
+	UPROPERTY(Category = "Settings", EditInstanceOnly)
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
 
-	UPROPERTY(Category = "Settings", EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	UColorSettings* ColorSettings;
-	UPROPERTY(Category = "Settings", EditAnywhere, Instanced, BlueprintReadWrite)
+	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	UShapeSettings* ShapeSettings;
 
 	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "2", ClampMax = "256"))

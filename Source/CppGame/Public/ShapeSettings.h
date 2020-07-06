@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS(EditInlineNew)
+UCLASS(DefaultToInstanced, EditInlineNew)
 class CPPGAME_API UShapeSettings : public UDataAsset
 {
 	GENERATED_BODY()

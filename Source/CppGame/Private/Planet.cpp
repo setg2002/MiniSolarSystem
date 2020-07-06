@@ -89,6 +89,7 @@ void APlanet::GenerateColors()
 		{
 			terrainFaces[i]->ColorMesh(ColorSettings);
 		}
+		colorGenerator->UpdateColors();
 	}
 }
 

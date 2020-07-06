@@ -17,5 +17,9 @@ public:
 
 	UColorSettings* ColorSettings;
 
+	const int TextureResolution = 64;
+
 	void UpdateElevation(MinMax* elevationMinMax);
+
+	void UpdateColors();
 };
