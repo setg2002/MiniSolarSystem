@@ -3,7 +3,7 @@
 
 #include "ShapeGenerator.h"
 
-ShapeGenerator::ShapeGenerator(UShapeSettings* settings)
+void ShapeGenerator::UpdateSettings(UShapeSettings* settings)
 {
 	this->Settings = settings;
 	NoiseFilters.SetNum(Settings->NoiseLayers.Num());

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "ProceduralMeshComponent.h"
 #include "ShapeGenerator.h"
+#include "ColorGenerator.h"
 #include "ColorSettings.h"
 
 /**
@@ -19,6 +20,7 @@ public:
 
 	TArray<FVector> verticies;
 	TArray<int> triangles;
+	TArray<FVector2D> uv;
 
 	UProceduralMeshComponent* Mesh;
 
@@ -33,4 +35,5 @@ public:
 
 	void ColorMesh(UColorSettings* CS);
 	void ConstructMesh();
+	void UpdateUVs(ColorGenerator* colorGenerator);
 };

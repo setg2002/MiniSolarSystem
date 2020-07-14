@@ -14,7 +14,7 @@
 class CPPGAME_API ShapeGenerator
 {
 public:
-	ShapeGenerator(UShapeSettings* settings);
+	void UpdateSettings(UShapeSettings* settings);
 	~ShapeGenerator();
 
 	UShapeSettings* Settings;

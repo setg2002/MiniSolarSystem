@@ -13,6 +13,9 @@ APlanet::APlanet()
 			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh5")
 	};
 
+	shapeGenerator = new ShapeGenerator();
+	colorGenerator = new ColorGenerator();
+
 	GeneratePlanet();
 }
 
@@ -39,10 +42,15 @@ void APlanet::ReGenerate()
 	GeneratePlanet();
 }
 
+void APlanet::ReGenerateColors()
+{
+	OnColorSettingsUpdated();
+}
+
 void APlanet::Initialize()
 {
-	shapeGenerator = new ShapeGenerator(ShapeSettings);
-	colorGenerator = new ColorGenerator(ColorSettings);
+	shapeGenerator->UpdateSettings(ShapeSettings);
+	colorGenerator->UpdateSettings(ColorSettings);
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -83,13 +91,13 @@ void APlanet::OnColorSettingsUpdated()
 
 void APlanet::GenerateColors()
 {
-	if (ColorSettings != nullptr)
+	colorGenerator->UpdateColors();
+	for (int i = 0; i < 6; i++)
 	{
-		for (int i = 0; i < 6; i++)
+		if (meshes[i]->IsVisibleInEditor())
 		{
-			terrainFaces[i]->ColorMesh(ColorSettings);
+			terrainFaces[i]->UpdateUVs(colorGenerator);
 		}
-		colorGenerator->UpdateColors();
 	}
 }
 

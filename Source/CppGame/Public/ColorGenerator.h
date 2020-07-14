@@ -12,14 +12,16 @@
 class CPPGAME_API ColorGenerator
 {
 public:
-	ColorGenerator(UColorSettings* colorSettings);
+	void UpdateSettings(UColorSettings* colorSettings);
 	~ColorGenerator();
 
 	UColorSettings* ColorSettings;
 
-	const int TextureResolution = 64;
+	const int TextureResolution = 256;
 
 	void UpdateElevation(MinMax* elevationMinMax);
+
+	float BiomePercentFromPoint(FVector PointOnUnitSphere);
 
 	void UpdateColors();
 };

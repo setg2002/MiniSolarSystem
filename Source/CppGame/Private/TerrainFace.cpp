@@ -25,7 +25,7 @@ void TerrainFace::ColorMesh(UColorSettings* CS)
 		//VertexColors.Add(CS->PlanetColor);
 	}*/
 
-	Mesh->UpdateMeshSection(0, verticies, TArray<FVector>(), TArray<FVector2D>(), VertexColors, TArray<FProcMeshTangent>());
+	Mesh->UpdateMeshSection(0, verticies, TArray<FVector>(), uv, VertexColors, TArray<FProcMeshTangent>());
 }
 
 void TerrainFace::ConstructMesh()
@@ -57,5 +57,25 @@ void TerrainFace::ConstructMesh()
 		}
 	}
 
-	Mesh->CreateMeshSection(0, verticies, triangles, TArray<FVector>(), TArray<FVector2D>(), VertexColors, TArray<FProcMeshTangent>(), false);
+	Mesh->CreateMeshSection(0, verticies, triangles, TArray<FVector>(), uv, VertexColors, TArray<FProcMeshTangent>(), false);
+}
+
+void TerrainFace::UpdateUVs(ColorGenerator* colorGenerator)
+{
+	uv.Empty();
+	uv.SetNum(resolution * resolution);
+	for (int y = 0; y < resolution; y++)
+	{
+		for (int x = 0; x < resolution; x++)
+		{
+			int i = x + y * resolution;
+			FVector2D percent = FVector2D(x, y) / (resolution - 1);
+			FVector pointOnUnitCube = -localUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
+			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
+			//UE_LOG(LogTemp, Warning, TEXT("%f"), colorGenerator->BiomePercentFromPoint(pointOnUnitSphere));
+			uv[i] = FVector2D(colorGenerator->BiomePercentFromPoint(pointOnUnitSphere), 0);
+		}
+	}
+
+	Mesh->UpdateMeshSection(0, verticies, TArray<FVector>(), uv, VertexColors, TArray<FProcMeshTangent>());
 }

@@ -16,12 +16,12 @@ class UBiome : public UDataAsset
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY(EditInstanceOnly)
+		UCurveLinearColor* Gradient;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FColor Tint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
 		float StartHeight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
-		float TimtPercent;
 };
 
 UCLASS(DefaultToInstanced, EditInlineNew)
@@ -41,16 +41,19 @@ class CPPGAME_API UColorSettings : public UDataAsset
 public:
 	UColorSettings();
 
-	UPROPERTY(EditInstanceOnly)
-	UCurveLinearColor* Curve;
-
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(Instanced)
 	UCurveLinearColorAtlas* Atlas;
+
+	UPROPERTY(EditAnywhere)
+	UCurveLinearColorAtlas* BiomeTintAtlas;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	UMaterial* PlanetMat;
 
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
+	float BiomeTintPercent;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Instanced)
 	UBiomeColorSettings* BiomeColorSettings;

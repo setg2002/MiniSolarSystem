@@ -67,6 +67,9 @@ public:
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
 	void ReGenerate();
 
+	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
+	void ReGenerateColors();
+
 	void GeneratePlanet();
 
 	void GenerateMesh();
