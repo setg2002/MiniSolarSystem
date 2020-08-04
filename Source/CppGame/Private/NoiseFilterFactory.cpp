@@ -5,8 +5,7 @@
 #include "SimpleNoiseFilter.h"
 #include "RidgidNoiseFIlter.h"
 
-
-INoiseFilter* UNoiseFilterFactory::CreateNoiseFilter(UNoiseSettings* NoiseSettings)
+INoiseFilter* NoiseFilterFactory::CreateNoiseFilter(UNoiseSettings* NoiseSettings)
 {
 	switch (NoiseSettings->FilterType)
 	{

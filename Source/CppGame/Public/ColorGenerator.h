@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "ColorSettings.h"
 #include "MinMax.h"
+#include "INoiseFilter.h"
 
 /**
  * 
@@ -16,6 +17,8 @@ public:
 	~ColorGenerator();
 
 	UColorSettings* ColorSettings;
+
+	INoiseFilter* BiomeNoiseFilter;
 
 	const int TextureResolution = 256;
 

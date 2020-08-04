@@ -9,7 +9,7 @@ void ShapeGenerator::UpdateSettings(UShapeSettings* settings)
 	NoiseFilters.SetNum(Settings->NoiseLayers.Num());
 	for (int i = 0; i < Settings->NoiseLayers.Num(); i++)
 	{
-		NoiseFilters[i] = UNoiseFilterFactory::CreateNoiseFilter(Settings->NoiseLayers[i]->NoiseSettings);
+		NoiseFilters[i] = NoiseFilterFactory::CreateNoiseFilter(Settings->NoiseLayers[i]->NoiseSettings);
 	}
 	ElevationMinMax = new MinMax();
 }

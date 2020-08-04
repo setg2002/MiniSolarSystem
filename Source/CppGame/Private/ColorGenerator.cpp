@@ -2,6 +2,7 @@
 
 
 #include "ColorGenerator.h"
+#include "NoiseFilterFactory.h"
 #include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Curves\CurveLinearColor.h"
 #include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Curves\CurveLinearColorAtlas.h"
 #include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialInstanceDynamic.h"
@@ -9,6 +10,10 @@
 void ColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 {
 	this->ColorSettings = colorSettings;
+	if (ColorSettings->BiomeColorSettings->bUsingNoise)
+	{
+		BiomeNoiseFilter = NoiseFilterFactory::CreateNoiseFilter(ColorSettings->BiomeColorSettings->Noise);
+	}
 }
 
 ColorGenerator::~ColorGenerator()
@@ -25,7 +30,11 @@ void ColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 
 float ColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
 {
-	float HeightPercent = (PointOnUnitSphere.Y + 1) / 2.f;
+	float HeightPercent = (PointOnUnitSphere.Z + 1) / 2.f;
+	if (ColorSettings->BiomeColorSettings->bUsingNoise)
+	{
+		HeightPercent += (BiomeNoiseFilter->Evaluate(PointOnUnitSphere) - ColorSettings->BiomeColorSettings->NoiseOffset) * ColorSettings->BiomeColorSettings->NoiseStrength;
+	}
 	float BiomeIndex = 0;
 	int NumBiomes = ColorSettings->BiomeColorSettings->Biomes.Num();
 
@@ -61,12 +70,14 @@ void ColorGenerator::UpdateColors()
 	ColorSettings->BiomeTintAtlas->TextureSize = ColorSettings->BiomeColorSettings->Biomes.Num();
 	ColorSettings->BiomeTintAtlas->GradientCurves.SetNum(ColorSettings->BiomeColorSettings->Biomes.Num());
 	TArray<UCurveLinearColor*> TintCurves;
+	TintCurves.SetNum(ColorSettings->BiomeColorSettings->Biomes.Num());
 	for (auto& biome : ColorSettings->BiomeColorSettings->Biomes)
 	{
 		auto Tint = NewObject<UCurveLinearColor>();
 		auto Keys = TArray<FRichCurveKey>();
 		for (int i = 0; i < 3; i++)
 		{
+			Keys.Empty();
 			switch (i)
 			{
 			case 0:
@@ -88,6 +99,7 @@ void ColorGenerator::UpdateColors()
 	ColorSettings->BiomeTintAtlas->GradientCurves.Empty();
 	ColorSettings->BiomeTintAtlas->GradientCurves = TintCurves;
 	ColorSettings->BiomeTintAtlas->UpdateTextures();
+	
 
 	for (int i = 0; i < ColorSettings->DynamicMaterials.Num(); i++)
 	{

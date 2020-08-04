@@ -23,12 +23,12 @@ class UShapeSettings;
 UENUM()
 enum EFaceRenderMask { 
 	All      UMETA(DisplayName = "All Faces"),
-	Bottom   UMETA(DisplayName = "Top"),
-	Top      UMETA(DisplayName = "Bottom"),
+	Bottom   UMETA(DisplayName = "Bottom"),
+	Top      UMETA(DisplayName = "Top"),
 	Left     UMETA(DisplayName = "Left"),
 	Right    UMETA(DisplayName = "Right"),
-	Back     UMETA(DisplayName = "Front"),
-	Front    UMETA(DisplayName = "Back")
+	Back     UMETA(DisplayName = "Back"),
+	Front    UMETA(DisplayName = "Front")
 };
 
 

@@ -72,7 +72,7 @@ void TerrainFace::UpdateUVs(ColorGenerator* colorGenerator)
 			FVector2D percent = FVector2D(x, y) / (resolution - 1);
 			FVector pointOnUnitCube = -localUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
-			//UE_LOG(LogTemp, Warning, TEXT("%f"), colorGenerator->BiomePercentFromPoint(pointOnUnitSphere));
+			//UE_LOG(LogTemp, Warning, TEXT("pointOnUnitSphere: %s, BiomePercent: %f"), *pointOnUnitSphere.ToString(), colorGenerator->BiomePercentFromPoint(pointOnUnitSphere));
 			uv[i] = FVector2D(colorGenerator->BiomePercentFromPoint(pointOnUnitSphere), 0);
 		}
 	}
