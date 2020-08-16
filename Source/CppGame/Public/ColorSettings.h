@@ -57,7 +57,7 @@ public:
 	UCurveLinearColorAtlas* BiomeTintAtlas;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	UMaterial* PlanetMat;
+	UMaterialInterface* PlanetMat;
 
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
 

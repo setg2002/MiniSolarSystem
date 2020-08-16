@@ -2,6 +2,7 @@
 
 
 #include "TerrainFace.h"
+#include "KismetProceduralMeshLibrary.h"
 
 TerrainFace::TerrainFace(ShapeGenerator* shapeGenerator, UProceduralMeshComponent* mesh, int resolution, FVector localUp)
 {
@@ -57,7 +58,7 @@ void TerrainFace::ConstructMesh()
 		}
 	}
 
-	Mesh->CreateMeshSection(0, verticies, triangles, TArray<FVector>(), uv, VertexColors, TArray<FProcMeshTangent>(), false);
+	Mesh->CreateMeshSection(0, verticies, triangles, normals, uv, VertexColors, tangents, false);
 }
 
 void TerrainFace::UpdateUVs(ColorGenerator* colorGenerator)
@@ -77,5 +78,6 @@ void TerrainFace::UpdateUVs(ColorGenerator* colorGenerator)
 		}
 	}
 
-	Mesh->UpdateMeshSection(0, verticies, TArray<FVector>(), uv, VertexColors, TArray<FProcMeshTangent>());
+	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, uv, normals, tangents);
+	Mesh->UpdateMeshSection(0, verticies, normals, uv, VertexColors, tangents);
 }

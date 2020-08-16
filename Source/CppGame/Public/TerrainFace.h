@@ -21,6 +21,8 @@ public:
 	TArray<FVector> verticies;
 	TArray<int> triangles;
 	TArray<FVector2D> uv;
+	TArray<FVector> normals;
+	TArray<FProcMeshTangent> tangents;
 
 	UProceduralMeshComponent* Mesh;
 

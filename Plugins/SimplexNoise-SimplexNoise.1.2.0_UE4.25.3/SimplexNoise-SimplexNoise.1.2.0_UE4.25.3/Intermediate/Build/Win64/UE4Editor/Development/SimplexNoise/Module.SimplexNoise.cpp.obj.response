@@ -28,7 +28,7 @@
 /we4458
 /we4459
 /wd4463
-/we4668
+/wd4668
 /wd4244
 /wd4838
 /I .
@@ -67,6 +67,7 @@
 /I Runtime\Analytics\AnalyticsET\Public
 /I Runtime\Analytics\Analytics\Public
 /I Runtime\Sockets\Public
+/I Runtime\Net\Common\Public
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\AssetRegistry
 /I Runtime\AssetRegistry\Public
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\EngineMessages
