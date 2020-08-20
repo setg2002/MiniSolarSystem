@@ -38,4 +38,5 @@ public:
 	void ColorMesh(UColorSettings* CS);
 	void ConstructMesh();
 	void UpdateUVs(ColorGenerator* colorGenerator);
+	void UpdateTangentsNormals();
 };

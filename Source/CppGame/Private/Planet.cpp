@@ -47,6 +47,14 @@ void APlanet::ReGenerateColors()
 	OnColorSettingsUpdated();
 }
 
+void APlanet::ReGenerateTangents()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		terrainFaces[i]->UpdateTangentsNormals();
+	}
+}
+
 void APlanet::Initialize()
 {
 	shapeGenerator->UpdateSettings(ShapeSettings);
@@ -54,9 +62,15 @@ void APlanet::Initialize()
 
 	for (int i = 0; i < 6; i++)
 	{
-		terrainFaces[i] = new TerrainFace(shapeGenerator, meshes[i], resolution, directions[i]);
+		if (terrainFaces[i] == nullptr)
+		{
+			terrainFaces[i] = new TerrainFace(shapeGenerator, meshes[i], resolution, directions[i]);
+		}
 
-		ColorSettings->DynamicMaterials[i] = meshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
+		if (ColorSettings->DynamicMaterials[i] == nullptr)
+		{
+			ColorSettings->DynamicMaterials[i] = meshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
+		}
 
 		bool renderFace = FaceRenderMask == EFaceRenderMask::All || FaceRenderMask - 1 == i;
 		meshes[i]->SetVisibility(renderFace);

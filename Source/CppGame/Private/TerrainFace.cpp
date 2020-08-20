@@ -26,7 +26,7 @@ void TerrainFace::ColorMesh(UColorSettings* CS)
 		//VertexColors.Add(CS->PlanetColor);
 	}*/
 
-	Mesh->UpdateMeshSection(0, verticies, TArray<FVector>(), uv, VertexColors, TArray<FProcMeshTangent>());
+	//Mesh->UpdateMeshSection(0, verticies, normals, uv, VertexColors, tangents);
 }
 
 void TerrainFace::ConstructMesh()
@@ -78,6 +78,11 @@ void TerrainFace::UpdateUVs(ColorGenerator* colorGenerator)
 		}
 	}
 
+	Mesh->UpdateMeshSection(0, verticies, normals, uv, VertexColors, tangents);
+}
+
+void TerrainFace::UpdateTangentsNormals()
+{
 	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, uv, normals, tangents);
 	Mesh->UpdateMeshSection(0, verticies, normals, uv, VertexColors, tangents);
 }
