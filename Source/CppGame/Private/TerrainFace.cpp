@@ -32,6 +32,7 @@ void TerrainFace::ColorMesh(UColorSettings* CS)
 void TerrainFace::ConstructMesh()
 {
 	int triIndex = 0;
+	uv.SetNum(resolution * resolution);
 
 	for (int y = 0; y < resolution; y++)
 	{
@@ -41,7 +42,9 @@ void TerrainFace::ConstructMesh()
 			FVector2D percent = FVector2D(x, y) / (resolution - 1);
 			FVector pointOnUnitCube = -localUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
-			verticies.EmplaceAt(i, shapeGenerator->CalculatePointOnPlanet(pointOnUnitSphere));
+			float unscaledElevation = shapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
+			verticies.EmplaceAt(i, pointOnUnitSphere * shapeGenerator->GetScaledElevation(unscaledElevation));
+			uv[i].Y = unscaledElevation;
 
 			if (x != resolution - 1 && y != resolution - 1)
 			{
@@ -63,7 +66,6 @@ void TerrainFace::ConstructMesh()
 
 void TerrainFace::UpdateUVs(ColorGenerator* colorGenerator)
 {
-	uv.Empty();
 	uv.SetNum(resolution * resolution);
 	for (int y = 0; y < resolution; y++)
 	{
@@ -74,7 +76,7 @@ void TerrainFace::UpdateUVs(ColorGenerator* colorGenerator)
 			FVector pointOnUnitCube = -localUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
 			//UE_LOG(LogTemp, Warning, TEXT("pointOnUnitSphere: %s, BiomePercent: %f"), *pointOnUnitSphere.ToString(), colorGenerator->BiomePercentFromPoint(pointOnUnitSphere));
-			uv[i] = FVector2D(colorGenerator->BiomePercentFromPoint(pointOnUnitSphere), 0);
+			uv[i].X = colorGenerator->BiomePercentFromPoint(pointOnUnitSphere);
 		}
 	}
 
@@ -83,6 +85,6 @@ void TerrainFace::UpdateUVs(ColorGenerator* colorGenerator)
 
 void TerrainFace::UpdateTangentsNormals()
 {
-	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, uv, normals, tangents);
+	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, TArray<FVector2D>(), normals, tangents);
 	Mesh->UpdateMeshSection(0, verticies, normals, uv, VertexColors, tangents);
 }

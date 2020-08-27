@@ -99,11 +99,21 @@ void ColorGenerator::UpdateColors()
 	ColorSettings->BiomeTintAtlas->GradientCurves.Empty();
 	ColorSettings->BiomeTintAtlas->GradientCurves = TintCurves;
 	ColorSettings->BiomeTintAtlas->UpdateTextures();
-	
+
+	ColorSettings->OceanAtlas->TextureSize = TextureResolution;
+	ColorSettings->OceanAtlas->GradientCurves.SetNum(TextureResolution);
+	TArray<UCurveLinearColor*> OceanCurves;
+	for (int i = 0; i < TextureResolution + 1; i++)
+	{
+		OceanCurves.Add(ColorSettings->OceanColor);
+	}
+	ColorSettings->OceanAtlas->GradientCurves = OceanCurves;
+	ColorSettings->OceanAtlas->UpdateTextures();
 
 	for (int i = 0; i < ColorSettings->DynamicMaterials.Num(); i++)
 	{
 		ColorSettings->DynamicMaterials[i]->SetTextureParameterValue(FName("_texture"), Cast<UTexture>(ColorSettings->Atlas));
+		ColorSettings->DynamicMaterials[i]->SetTextureParameterValue(FName("_oceanTexture"), Cast<UTexture>(ColorSettings->OceanAtlas));
 		ColorSettings->DynamicMaterials[i]->SetTextureParameterValue(FName("_biomeTint"), Cast<UTexture>(ColorSettings->BiomeTintAtlas));
 		ColorSettings->DynamicMaterials[i]->SetScalarParameterValue(FName("_tintPercent"), ColorSettings->BiomeTintPercent);
 	}

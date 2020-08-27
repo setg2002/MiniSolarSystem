@@ -54,7 +54,13 @@ public:
 	UCurveLinearColorAtlas* Atlas;
 
 	UPROPERTY(EditAnywhere)
+	UCurveLinearColorAtlas* OceanAtlas;
+
+	UPROPERTY(EditAnywhere)
 	UCurveLinearColorAtlas* BiomeTintAtlas;
+
+	UPROPERTY(EditAnywhere)
+	UCurveLinearColor* OceanColor;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	UMaterialInterface* PlanetMat;

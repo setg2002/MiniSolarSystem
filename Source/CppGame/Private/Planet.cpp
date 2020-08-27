@@ -120,6 +120,7 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 	if (PropertyChangedEvent.Property != nullptr)
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
+
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution) && AutoGenerate)
 		{
 			GeneratePlanet();

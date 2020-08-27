@@ -18,7 +18,7 @@ ShapeGenerator::~ShapeGenerator()
 {
 }
 
-FVector ShapeGenerator::CalculatePointOnPlanet(FVector PointOnUnitSphere)
+float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 {
 	if (Settings != nullptr)
 	{
@@ -42,13 +42,18 @@ FVector ShapeGenerator::CalculatePointOnPlanet(FVector PointOnUnitSphere)
 				elevation += NoiseFilters[i]->Evaluate(PointOnUnitSphere) * mask;
 			}
 		}
-		elevation = Settings->PlanetRadius * (1 + elevation);
 		ElevationMinMax->AddValue(elevation);
-		return PointOnUnitSphere * elevation;
+		return elevation;
 	}
 	else
 	{
-		return FVector().ZeroVector;
+		return 0;
 	}
 }
 
+float ShapeGenerator::GetScaledElevation(float unscaledElevation)
+{
+	float elevation = FMath::Max<float>(0, unscaledElevation);
+	elevation = Settings->PlanetRadius * (1 + elevation);
+	return elevation;
+}

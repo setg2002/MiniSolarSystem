@@ -19,7 +19,9 @@ public:
 
 	UShapeSettings* Settings;
 
-	FVector CalculatePointOnPlanet(FVector PointOnUnitSphere);
+	float CalculateUnscaledElevation(FVector PointOnUnitSphere);
+
+	float GetScaledElevation(float unscaledElevation);
 
 	TArray<INoiseFilter*> NoiseFilters;
 

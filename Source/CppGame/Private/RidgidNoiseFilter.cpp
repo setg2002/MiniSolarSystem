@@ -30,6 +30,6 @@ float RidgidNoiseFilter::Evaluate(FVector point)
 		amplitude *= Settings.Persistence;
 	}
 
-	noiseValue = FMath::Max<float>(0, noiseValue - Settings.MinValue);
+	noiseValue = noiseValue - Settings.MinValue;
 	return noiseValue * Settings.Strength;
 }
