@@ -26,13 +26,10 @@ public:
 
 	/*Physics Interaction*/
 	UPROPERTY(EditInstanceOnly, Category = "Default")
-	float mass;
-
-	UPROPERTY(EditInstanceOnly, Category = "Default")
-	float radius;
-	
+	int mass;
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	FVector initialVelocity;
+
 
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	float rotationRate;

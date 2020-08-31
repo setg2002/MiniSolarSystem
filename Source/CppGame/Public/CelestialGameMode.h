@@ -12,6 +12,7 @@
 
 //Forward Declarations
 class ACelestialBody;
+class APlanet;
 
 UCLASS()
 class CPPGAME_API ACelestialGameMode : public AGameModeBase
@@ -24,9 +25,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float gravitationalConstant = 100;
-
 
 protected:
 	// Called when the game starts

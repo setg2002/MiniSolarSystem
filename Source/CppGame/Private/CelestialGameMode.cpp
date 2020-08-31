@@ -3,6 +3,8 @@
 
 #include "CelestialGameMode.h"
 #include "CelestialBody.h"
+#include "Planet.h"
+#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialInstanceDynamic.h"
 #include "EngineUtils.h"
 
 
@@ -18,7 +20,6 @@ void ACelestialGameMode::BeginPlay()
 	
 	for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
 		bodies.Add(*Itr);
-		//*Itr->gameMode = *this;
 	}
 }
 
