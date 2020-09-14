@@ -24,8 +24,9 @@ void ColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 {
 	for (int i = 0; i < ColorSettings->DynamicMaterials.Num(); i++)
 	{
-		ColorSettings->DynamicMaterials[i]->SetVectorParameterValue(FName("_elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0, 0));
+		ColorSettings->DynamicMaterials[i]->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0));
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ColorSettings->DynamicMaterials[0]->VectorParameterValues[0].ParameterValue.ToString());
 }
 
 float ColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
@@ -62,7 +63,7 @@ void ColorGenerator::UpdateColors()
 		}
 	}
 	// This is stupid, but without it the loops above don't add the full number of gradients
-	BaseCurves.Add(ColorSettings->BiomeColorSettings->Biomes.Last(0)->Gradient);
+	//BaseCurves.Add(ColorSettings->BiomeColorSettings->Biomes.Last(0)->Gradient);
 
 	ColorSettings->Atlas->GradientCurves = BaseCurves;
 	ColorSettings->Atlas->UpdateTextures();

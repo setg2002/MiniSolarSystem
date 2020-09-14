@@ -2,6 +2,7 @@
 
 
 #include "Star.h"
+#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Components\SceneComponent.h"
 #include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialInstanceDynamic.h"
 #include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialParameterCollection.h"
 #include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialParameterCollectionInstance.h"
@@ -22,6 +23,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *PropertyName.ToString());
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, radius))
 		{
 			sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
@@ -56,7 +58,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 				planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
 			}
 			dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
-			planetMateralParameterCollectionInst->SetScalarParameterValue(FName("StarLuminocity"), starProperties.luminosity);
+			planetMateralParameterCollectionInst->SetScalarParameterValue(FName("StarLuminosity"), starProperties.luminosity);
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(AStar, starType))
 		{
@@ -72,6 +74,14 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 			}
 			dynamicMaterial->SetVectorParameterValue(FName("_baseColor"), starProperties.color);
 			dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
+		}
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeLocation) || PropertyName == GET_MEMBER_NAME_CHECKED(FVector, X) || PropertyName == GET_MEMBER_NAME_CHECKED(FVector, Y) || PropertyName == GET_MEMBER_NAME_CHECKED(FVector, Z))
+		{
+			if (planetMateralParameterCollectionInst == nullptr)
+			{	
+				planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
+			}
+			planetMateralParameterCollectionInst->SetVectorParameterValue(FName("SunLocation"), this->GetActorLocation());
 		}
 	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);

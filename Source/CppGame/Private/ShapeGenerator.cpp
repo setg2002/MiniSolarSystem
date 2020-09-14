@@ -32,16 +32,25 @@ float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 			{
 				elevation = firstLayerValue;
 			}
-		}
 
-		for (int i = 1; i < NoiseFilters.Num(); i++)
-		{
-			if (Settings->NoiseLayers[i]->Enabled)
+			if (NoiseFilters.Num() > 1)
 			{
-				float mask = (Settings->NoiseLayers[i]->UseFirstLayerAsMask) ? firstLayerValue : 1;
-				elevation += NoiseFilters[i]->Evaluate(PointOnUnitSphere) * mask;
+				for (int i = 1; i < NoiseFilters.Num(); i++)
+				{
+					if (Settings->NoiseLayers[i]->Enabled)
+					{
+						float mask = (Settings->NoiseLayers[i]->UseFirstLayerAsMask) ? firstLayerValue : 1;
+						float newElevation = elevation + NoiseFilters[i]->Evaluate(PointOnUnitSphere) * mask;
+						// Only use first layer noise for ocean shading
+						if (elevation + newElevation > 0)
+						{
+							elevation += newElevation;
+						}
+					}
+				}
 			}
 		}
+
 		ElevationMinMax->AddValue(elevation);
 		return elevation;
 	}

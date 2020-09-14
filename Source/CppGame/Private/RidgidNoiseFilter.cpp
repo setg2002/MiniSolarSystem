@@ -2,6 +2,7 @@
 
 
 #include "RidgidNoiseFilter.h"
+#include "G:\UnrealProjects\CppGame\Plugins\SimplexNoise-SimplexNoise.1.2.0_UE4.25.3\SimplexNoise-SimplexNoise.1.2.0_UE4.25.3\Source\SimplexNoise\Public\SimplexNoiseBPLibrary.h"
 
 RidgidNoiseFilter::RidgidNoiseFilter(FRidgidNoiseSettings settings)
 {
@@ -21,10 +22,11 @@ float RidgidNoiseFilter::Evaluate(FVector point)
 
 	for (int i = 0; i < Settings.numLayers; i++)
 	{
-		float v = 1 - FMath::Abs(FMath::PerlinNoise3D(point * frequency + Settings.Center));
+		FVector noiseVector = FVector(point * frequency + Settings.Center);
+		float v = 1 - FMath::Abs(USimplexNoiseBPLibrary::SimplexNoise3D(noiseVector.X, noiseVector.Y, noiseVector.Z));
 		v *= v;
 		v *= weight;
-		weight = FMath::Clamp<float>(v * Settings.WeightMultiplier, 0, 1);
+		weight = v * Settings.WeightMultiplier;
 		noiseValue += v * amplitude;
 		frequency *= Settings.Roughness;
 		amplitude *= Settings.Persistence;

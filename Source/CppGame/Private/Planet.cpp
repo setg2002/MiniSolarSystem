@@ -62,10 +62,7 @@ void APlanet::Initialize()
 
 	for (int i = 0; i < 6; i++)
 	{
-		if (terrainFaces[i] == nullptr)
-		{
-			terrainFaces[i] = new TerrainFace(shapeGenerator, meshes[i], resolution, directions[i]);
-		}
+		terrainFaces[i] = new TerrainFace(shapeGenerator, meshes[i], resolution, directions[i]);
 
 		if (ColorSettings->DynamicMaterials[i] == nullptr)
 		{
@@ -98,7 +95,6 @@ void APlanet::OnShapeSettingsUpdated()
 
 void APlanet::OnColorSettingsUpdated()
 {
-	Initialize();
 	GenerateColors();
 }
 
@@ -121,21 +117,25 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution) && AutoGenerate)
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution) && bAutoGenerate)
 		{
 			GeneratePlanet();
+			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && AutoGenerate)
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && bAutoGenerate)
 		{
 			GeneratePlanet();
+			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ColorSettings) && AutoGenerate)
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ColorSettings) && bAutoGenerate)
 		{
 			GeneratePlanet();
+			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask) && AutoGenerate)
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask) && bAutoGenerate)
 		{
 			GeneratePlanet();
+			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}
 	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);

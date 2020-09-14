@@ -41,7 +41,10 @@ public:
 	APlanet();
 
 	UPROPERTY(Category = "Settings", EditAnywhere)
-	bool AutoGenerate;
+	bool bAutoGenerate;
+
+	UPROPERTY(Category = "Settings", EditInstanceOnly, BlueprintReadWrite, meta = (EditCondition = "bAutoGenerate"))
+	bool bAutoGenerateTangents;
 
 	/*Mesh stuff*/
 	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite)

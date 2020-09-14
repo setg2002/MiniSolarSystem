@@ -2,6 +2,7 @@
 
 
 #include "SimpleNoiseFilter.h"
+#include "G:\UnrealProjects\CppGame\Plugins\SimplexNoise-SimplexNoise.1.2.0_UE4.25.3\SimplexNoise-SimplexNoise.1.2.0_UE4.25.3\Source\SimplexNoise\Public\SimplexNoiseBPLibrary.h"
 
 SimpleNoiseFilter::SimpleNoiseFilter(FSimpleNoiseSettings settings)
 {
@@ -20,7 +21,8 @@ float SimpleNoiseFilter::Evaluate(FVector point)
 
 	for (int i = 0; i < Settings.numLayers; i++)
 	{
-		float v = FMath::PerlinNoise3D(point * frequency + Settings.Center);
+		FVector noiseVector = FVector(point * frequency + Settings.Center);
+		float v = USimplexNoiseBPLibrary::SimplexNoise3D(noiseVector.X, noiseVector.Y, noiseVector.Z);
 		noiseValue += (v + 1) * .5f * amplitude;
 		frequency *= Settings.Roughness;
 		amplitude *= Settings.Persistence;
