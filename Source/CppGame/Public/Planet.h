@@ -43,6 +43,9 @@ public:
 	UPROPERTY(Category = "Settings", EditAnywhere)
 	bool bAutoGenerate;
 
+	UPROPERTY(Category = "Settings", EditAnywhere)
+	bool bMultithreadGeneration;
+
 	UPROPERTY(Category = "Settings", EditInstanceOnly, BlueprintReadWrite, meta = (EditCondition = "bAutoGenerate"))
 	bool bAutoGenerateTangents;
 
@@ -62,8 +65,8 @@ public:
 	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	UShapeSettings* ShapeSettings;
 
-	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "2", ClampMax = "256"))
-	int resolution = 16;
+	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "2", ClampMax = "512"))
+	int32 resolution = 16;
 
 	void Initialize();
 
@@ -75,6 +78,9 @@ public:
 
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
 	void ReGenerateTangents();
+
+	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
+	void CreateMesh();
 
 	void GeneratePlanet();
 

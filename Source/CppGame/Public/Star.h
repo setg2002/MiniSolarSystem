@@ -27,6 +27,7 @@ struct FStarProperties : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
 	int radius = 50;
 
@@ -63,10 +64,33 @@ public:
 	UMaterialInstanceDynamic* dynamicMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInstance* distStarMat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialParameterCollection* planetMateralParameterCollection;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void GenerateDistantStars();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AActor> distantStarBP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	int numDistantStars;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	int minSpawnRange = 50000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	int maxSpawnRange = 200000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FColor> possibleColors;
+
+	TArray<UMaterialInstanceDynamic*> dynamMats;
+
+	void UpdateColor();
+
 protected:
 	UMaterialParameterCollectionInstance* planetMateralParameterCollectionInst;
+
+	TArray<AActor*> distantStars;
 };

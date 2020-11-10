@@ -49,9 +49,27 @@ void APlanet::ReGenerateColors()
 
 void APlanet::ReGenerateTangents()
 {
+	if (bMultithreadGeneration)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			terrainFaces[i]->UpdateTangentsNormalsAsync();
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			terrainFaces[i]->UpdateTangentsNormals();
+		}
+	}
+}
+
+void APlanet::CreateMesh()
+{
 	for (int i = 0; i < 6; i++)
 	{
-		terrainFaces[i]->UpdateTangentsNormals();
+		terrainFaces[i]->CreateMesh();
 	}
 }
 
@@ -62,7 +80,7 @@ void APlanet::Initialize()
 
 	for (int i = 0; i < 6; i++)
 	{
-		terrainFaces[i] = new TerrainFace(shapeGenerator, meshes[i], resolution, directions[i]);
+		terrainFaces[i] = new TerrainFace(shapeGenerator, colorGenerator, meshes[i], resolution, directions[i]);
 
 		if (ColorSettings->DynamicMaterials[i] == nullptr)
 		{
@@ -76,15 +94,24 @@ void APlanet::Initialize()
 
 void APlanet::GenerateMesh()
 {
-	for (int i = 0; i < 6; i++)
+	if (bMultithreadGeneration)
 	{
-		if (meshes[i]->IsVisibleInEditor())
+		for (int i = 0; i < 6; i++)
 		{
-			terrainFaces[i]->ConstructMesh();
+			terrainFaces[i]->ConstructMeshAsync(colorGenerator);
 		}
 	}
-
-	colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
+	else 
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			if (meshes[i]->IsVisibleInEditor())
+			{
+				terrainFaces[i]->ConstructMesh(colorGenerator);
+			}
+		}
+		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
+	}
 }
 
 void APlanet::OnShapeSettingsUpdated()
@@ -106,8 +133,12 @@ void APlanet::GenerateColors()
 	{
 		if (meshes[i]->IsVisibleInEditor())
 		{
-			terrainFaces[i]->UpdateUVs(colorGenerator);
+			//terrainFaces[i]->CreateMesh();
 		}
+	}
+	if (bMultithreadGeneration)
+	{
+		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
 	}
 }
 

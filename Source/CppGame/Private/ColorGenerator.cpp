@@ -26,7 +26,6 @@ void ColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 	{
 		ColorSettings->DynamicMaterials[i]->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0));
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ColorSettings->DynamicMaterials[0]->VectorParameterValues[0].ParameterValue.ToString());
 }
 
 float ColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
