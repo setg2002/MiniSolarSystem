@@ -32,14 +32,21 @@ class UBiomeColorSettings : public UDataAsset
 public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (InlineEditConditionToggle))
 	bool bUsingNoise;
+
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Instanced, meta = (EditCondition = "bUsingNoise"))
 	UNoiseSettings* Noise;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUsingNoise"))
 	float NoiseOffset;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUsingNoise"))
 	float NoiseStrength;
+
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Instanced)
 	TArray<UBiome*> Biomes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
+	float blendAmount;
 };
 
 UCLASS(DefaultToInstanced, EditInlineNew)
@@ -49,15 +56,6 @@ class CPPGAME_API UColorSettings : public UDataAsset
 	
 public:
 	UColorSettings();
-
-	UPROPERTY(Instanced)
-	UCurveLinearColorAtlas* Atlas;
-
-	UPROPERTY(EditAnywhere)
-	UCurveLinearColorAtlas* OceanAtlas;
-
-	UPROPERTY(EditAnywhere)
-	UCurveLinearColorAtlas* BiomeTintAtlas;
 
 	UPROPERTY(EditAnywhere)
 	UCurveLinearColor* OceanColor;

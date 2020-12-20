@@ -5,21 +5,20 @@
 #include "CoreMinimal.h"
 #include "ProceduralMeshComponent.h"
 #include "KismetProceduralMeshLibrary.h"
-#include "Async/Async.h"
 #include "ShapeGenerator.h"
 #include "ColorGenerator.h"
 #include "ColorSettings.h"
+#include "Async/Async.h"
 
 /**
  * 
  */
 
-DECLARE_DELEGATE(CreateMeshDelegate);
 
 class CPPGAME_API TerrainFace
 {
 public:
-	TerrainFace(ShapeGenerator* shapeGenerator, ColorGenerator* color_Generator, UProceduralMeshComponent* mesh, int resolution, FVector localUp);
+	TerrainFace(ShapeGenerator* shape_Generator, ColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, UStaticMeshComponent* staticMesh, int32 meshNum);
 	~TerrainFace();
 
 	TArray<FVector> verticies;
@@ -28,15 +27,18 @@ public:
 	TArray<FVector> normals;
 	TArray<FProcMeshTangent> tangents;
 
-	UProceduralMeshComponent* Mesh;
+	UProceduralMeshComponent* ProcMesh;
+	UStaticMeshComponent* StaticMesh;
+
+	int32 MeshNum;
 
 	ColorGenerator* colorGenerator;
 	ShapeGenerator* shapeGenerator;
 
 	TArray<FColor> VertexColors;
 
-	int resolution;
-	FVector localUp;
+	int Resolution;
+	FVector LocalUp;
 	FVector axisA;
 	FVector axisB;
 
@@ -45,11 +47,11 @@ public:
 
 	void CalculateMesh();
 
-	void CreateMesh();
+	void CreateMesh(/*TArray<FVector> Verticies, TArray<int> Triangles, TArray<FVector2D> Uv, TArray<FVector> Normals, TArray<FProcMeshTangent> Tangents*/);
 	void UpdateTangentsNormals();
 	void UpdateTangentsNormalsAsync();
 
-	CreateMeshDelegate MeshDelegate;
+	UStaticMesh* ConvertToStaticMesh(FString ActorName);
 };
 
 //================================================================================================================
@@ -136,6 +138,8 @@ public:
 	~CalculateMeshAsyncTask()
 	{
 		AsyncTask(ENamedThreads::GameThread, [this]() { TF.CreateMesh(); });
+		AsyncTask(ENamedThreads::GameThread, [this]() { TF.UpdateTangentsNormalsAsync();});
+
 		UE_LOG(LogTemp, Log, TEXT("Terrain face task finished calculating. Destroying task."));
 	}
 

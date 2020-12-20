@@ -7,6 +7,7 @@
 
 INoiseFilter* NoiseFilterFactory::CreateNoiseFilter(UNoiseSettings* NoiseSettings)
 {
+	ensure(NoiseSettings);
 	switch (NoiseSettings->FilterType)
 	{
 	case Smooth:

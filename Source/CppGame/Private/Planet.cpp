@@ -5,27 +5,40 @@
 
 APlanet::APlanet() 
 {
-	meshes = { CreateDefaultSubobject<UProceduralMeshComponent>("Mesh"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh1"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh2"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh3"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh4"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("Mesh5")
+	StaticMeshes = { CreateDefaultSubobject<UStaticMeshComponent>("Mesh"),
+					 CreateDefaultSubobject<UStaticMeshComponent>("Mesh1"),
+					 CreateDefaultSubobject<UStaticMeshComponent>("Mesh2"),
+					 CreateDefaultSubobject<UStaticMeshComponent>("Mesh3"),
+					 CreateDefaultSubobject<UStaticMeshComponent>("Mesh4"),
+					 CreateDefaultSubobject<UStaticMeshComponent>("Mesh5")
+	};
+
+	ProcMeshes = { CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh"),
+			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh1"),
+			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh2"),
+			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh3"),
+			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh4"),
+			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh5")
 	};
 
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new ColorGenerator();
 
 	GeneratePlanet();
+
 }
 
 void APlanet::GeneratePlanet()
 {
 	if (ColorSettings)
 	{
-		for (auto& mesh : meshes)
+		for (auto& Mesh : ProcMeshes)
 		{
-			mesh->SetRelativeLocation(FVector().ZeroVector);
+			Mesh->SetRelativeLocation(FVector().ZeroVector);
+		}
+		for (auto& Mesh : StaticMeshes)
+		{
+			Mesh->SetRelativeLocation(FVector().ZeroVector);
 		}
 
 		if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
@@ -67,28 +80,28 @@ void APlanet::ReGenerateTangents()
 
 void APlanet::CreateMesh()
 {
-	for (int i = 0; i < 6; i++)
+	/*for (int i = 0; i < 6; i++)
 	{
 		terrainFaces[i]->CreateMesh();
-	}
+	}*/
 }
 
 void APlanet::Initialize()
 {
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
-
-	for (int i = 0; i < 6; i++)
+		
+	for (int32 i = 0; i < 6; i++)
 	{
-		terrainFaces[i] = new TerrainFace(shapeGenerator, colorGenerator, meshes[i], resolution, directions[i]);
+		terrainFaces[i] = new TerrainFace(shapeGenerator, colorGenerator, resolution, directions[i], ProcMeshes[i], StaticMeshes[i], i);
 
 		if (ColorSettings->DynamicMaterials[i] == nullptr)
 		{
-			ColorSettings->DynamicMaterials[i] = meshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
+			ColorSettings->DynamicMaterials[i] = ProcMeshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
 		}
 
 		bool renderFace = FaceRenderMask == EFaceRenderMask::All || FaceRenderMask - 1 == i;
-		meshes[i]->SetVisibility(renderFace);
+		ProcMeshes[i]->SetVisibility(renderFace);
 	}
 }
 
@@ -105,7 +118,7 @@ void APlanet::GenerateMesh()
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			if (meshes[i]->IsVisibleInEditor())
+			if (ProcMeshes[i]->IsVisibleInEditor())
 			{
 				terrainFaces[i]->ConstructMesh(colorGenerator);
 			}
@@ -125,22 +138,46 @@ void APlanet::OnColorSettingsUpdated()
 	GenerateColors();
 }
 
-
 void APlanet::GenerateColors()
 {
 	colorGenerator->UpdateColors();
-	for (int i = 0; i < 6; i++)
-	{
-		if (meshes[i]->IsVisibleInEditor())
-		{
-			//terrainFaces[i]->CreateMesh();
-		}
-	}
 	if (bMultithreadGeneration)
 	{
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
 	}
 }
+
+void APlanet::CalculateOrbitVelocity()
+{
+	if (OrbitingBody == this || OrbitingBody == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OrbitingBody cannot be null or itself"));
+		return;
+	}
+	else
+	{
+		//TODO Fix orbit velocity calculation
+		//UE_LOG(LogTemp, Warning, TEXT("Distance: %d"), (OrbitingBody->GetActorLocation() - this->GetActorLocation()).Size());
+		//orbitVelocity = FMath::Sqrt(((/*gameMode->gravitationalConstant*/100 * 100000) * OrbitingBody->mass) / 11110);
+		return;
+	}
+}
+
+void APlanet::SetToOrbit()
+{
+	//TODO Calculate what portion of the necessary orbit velocity should be applied to each sectopn of the initialVelocity vector
+	initialVelocity.Y = orbitVelocity;
+}
+
+void APlanet::ConvertAndSetStaticMeshes(int32 i)
+{
+	FString ActorName = this->GetName();
+
+	StaticMeshes[i]->SetStaticMesh(terrainFaces[i]->ConvertToStaticMesh(ActorName));
+	ProcMeshes[i]->ClearMeshSection(0);
+}
+
+
 
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {

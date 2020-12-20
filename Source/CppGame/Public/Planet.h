@@ -40,6 +40,32 @@ class CPPGAME_API APlanet : public ACelestialBody
 public:
 	APlanet();
 
+	/*Mesh stuff*/	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<UStaticMeshComponent*> StaticMeshes;
+	TArray<UProceduralMeshComponent*> ProcMeshes;
+
+	TerrainFace* terrainFaces[6];
+
+	ShapeGenerator* shapeGenerator;
+	ColorGenerator* colorGenerator;
+
+
+
+	UPROPERTY(Category = "Orbits", EditAnywhere)
+	ACelestialBody* OrbitingBody;
+
+	UPROPERTY(Category = "Orbits", VisibleAnywhere)
+	float orbitVelocity;
+
+	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
+	void CalculateOrbitVelocity();
+
+	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
+	void SetToOrbit();
+
+
+
 	UPROPERTY(Category = "Settings", EditAnywhere)
 	bool bAutoGenerate;
 
@@ -48,14 +74,6 @@ public:
 
 	UPROPERTY(Category = "Settings", EditInstanceOnly, BlueprintReadWrite, meta = (EditCondition = "bAutoGenerate"))
 	bool bAutoGenerateTangents;
-
-	/*Mesh stuff*/
-	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite)
-	TArray<UProceduralMeshComponent*> meshes;
-	TerrainFace* terrainFaces[6];
-
-	ShapeGenerator* shapeGenerator;
-	ColorGenerator* colorGenerator;
 
 	UPROPERTY(Category = "Settings", EditInstanceOnly)
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
@@ -91,6 +109,10 @@ public:
 	void OnShapeSettingsUpdated();
 
 	void OnColorSettingsUpdated();
+
+	// Converts procedural meshes of ProcMeshes array to static then assigns them to StaticMeshes
+	void ConvertAndSetStaticMeshes(int32 i);
+
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 

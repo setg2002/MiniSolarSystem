@@ -27,4 +27,6 @@ public:
 	float BiomePercentFromPoint(FVector PointOnUnitSphere);
 
 	void UpdateColors();
+
+	UTexture2D* CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients);
 };

@@ -33,6 +33,10 @@
 				"Win64",
 				"Android"
 			]
+		},
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
