@@ -2,10 +2,10 @@
 
 
 #include "Star.h"
-#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Components\SceneComponent.h"
-#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialInstanceDynamic.h"
-#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialParameterCollection.h"
-#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialParameterCollectionInstance.h"
+#include "Components/SceneComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 
 
 AStar::AStar()

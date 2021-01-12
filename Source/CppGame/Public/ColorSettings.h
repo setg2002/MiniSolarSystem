@@ -12,12 +12,12 @@
  */
 
 
-UCLASS(DefaultToInstanced, EditInlineNew)
+UCLASS()
 class UBiome : public UDataAsset
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditAnywhere)
 		UCurveLinearColor* Gradient;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FColor Tint;
@@ -25,7 +25,7 @@ public:
 		float StartHeight;
 };
 
-UCLASS(DefaultToInstanced, EditInlineNew)
+UCLASS()
 class UBiomeColorSettings : public UDataAsset
 {
 	GENERATED_BODY()
@@ -42,14 +42,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUsingNoise"))
 	float NoiseStrength;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Instanced)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UBiome*> Biomes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
 	float blendAmount;
 };
 
-UCLASS(DefaultToInstanced, EditInlineNew)
+UCLASS()
 class CPPGAME_API UColorSettings : public UDataAsset
 {
 	GENERATED_BODY()
@@ -60,14 +60,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCurveLinearColor* OceanColor;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* PlanetMat;
 
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
 	float BiomeTintPercent;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Instanced)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UBiomeColorSettings* BiomeColorSettings;
 };

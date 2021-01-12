@@ -18,8 +18,10 @@
 class CPPGAME_API TerrainFace
 {
 public:
-	TerrainFace(ShapeGenerator* shape_Generator, ColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, UStaticMeshComponent* staticMesh, int32 meshNum);
+	TerrainFace(ShapeGenerator* shape_Generator, ColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, int32 meshNum, AActor* owner);
 	~TerrainFace();
+
+	AActor* Owner;
 
 	TArray<FVector> verticies;
 	TArray<int> triangles;
@@ -28,7 +30,6 @@ public:
 	TArray<FProcMeshTangent> tangents;
 
 	UProceduralMeshComponent* ProcMesh;
-	UStaticMeshComponent* StaticMesh;
 
 	int32 MeshNum;
 
@@ -47,11 +48,9 @@ public:
 
 	void CalculateMesh();
 
-	void CreateMesh(/*TArray<FVector> Verticies, TArray<int> Triangles, TArray<FVector2D> Uv, TArray<FVector> Normals, TArray<FProcMeshTangent> Tangents*/);
+	void CreateMesh();
 	void UpdateTangentsNormals();
 	void UpdateTangentsNormalsAsync();
-
-	UStaticMesh* ConvertToStaticMesh(FString ActorName);
 };
 
 //================================================================================================================
@@ -137,7 +136,6 @@ public:
 
 	~CalculateMeshAsyncTask()
 	{
-		AsyncTask(ENamedThreads::GameThread, [this]() { TF.CreateMesh(); });
 		AsyncTask(ENamedThreads::GameThread, [this]() { TF.UpdateTangentsNormalsAsync();});
 
 		UE_LOG(LogTemp, Log, TEXT("Terrain face task finished calculating. Destroying task."));

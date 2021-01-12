@@ -28,7 +28,7 @@
 /we4458
 /we4459
 /wd4463
-/wd4668
+/we4668
 /wd4244
 /wd4838
 /I .
@@ -100,24 +100,18 @@
 /I Runtime\PhysicsCore\Public
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\DeveloperSettings
 /I Runtime\DeveloperSettings\Public
+/I ..\Intermediate\Build\Win64\UE4Editor\Inc\Chaos
 /I Runtime\Experimental
 /I Runtime\Experimental\Chaos\Public
 /I Runtime\Experimental\ChaosCore\Public
 /I ThirdParty\Intel
 /I Runtime\Experimental\Voronoi\Public
-/I ..\Intermediate\Build\Win64\UE4Editor\Inc\ChaosSolvers
-/I Runtime\Experimental\ChaosSolvers\Public
-/I ..\Intermediate\Build\Win64\UE4Editor\Inc\FieldSystemCore
-/I Runtime\Experimental\FieldSystem\Source
-/I Runtime\Experimental\FieldSystem\Source\FieldSystemCore\Public
-/I ..\Intermediate\Build\Win64\UE4Editor\Inc\GeometryCollectionCore
-/I Runtime\Experimental\GeometryCollectionCore\Public
-/I ..\Intermediate\Build\Win64\UE4Editor\Inc\GeometryCollectionSimulationCore
-/I Runtime\Experimental\GeometryCollectionSimulationCore\Public
 /I Runtime\SignalProcessing\Public
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\AudioExtensions
 /I Runtime\AudioExtensions\Public
 /I Runtime\AudioMixerCore\Public
+/I ..\Intermediate\Build\Win64\UE4Editor\Inc\PropertyAccess
+/I Runtime\PropertyAccess\Public
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\UnrealEd
 /I Editor
 /I Programs\UnrealLightmass\Public
@@ -211,10 +205,10 @@
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\GeometryCollectionEngine
 /I Runtime\Experimental\GeometryCollectionEngine\Public
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\FieldSystemEngine
+/I Runtime\Experimental\FieldSystem\Source
 /I Runtime\Experimental\FieldSystem\Source\FieldSystemEngine\Public
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\ChaosSolverEngine
 /I Runtime\Experimental\ChaosSolverEngine\Public
-/I Runtime\Experimental\FieldSystem\Source\FieldSystemSimulationCore\Public
 /I Developer\MeshBuilder\Public
 /I ..\Intermediate\Build\Win64\UE4Editor\Inc\MaterialShaderQualitySettings
 /I Runtime\MaterialShaderQualitySettings\Classes
@@ -259,18 +253,6 @@
 /I ThirdParty\PhysX3\PhysX_3.4\Include\common
 /I ThirdParty\PhysX3\PhysX_3.4\Include\extensions
 /I ThirdParty\PhysX3\PhysX_3.4\Include\geometry
-/I ThirdParty\PhysX3\APEX_1.4\include
-/I ThirdParty\PhysX3\APEX_1.4\include\clothing
-/I ThirdParty\PhysX3\APEX_1.4\include\nvparameterized
-/I ThirdParty\PhysX3\APEX_1.4\include\legacy
-/I ThirdParty\PhysX3\APEX_1.4\include\PhysX3
-/I ThirdParty\PhysX3\APEX_1.4\common\include
-/I ThirdParty\PhysX3\APEX_1.4\common\include\autogen
-/I ThirdParty\PhysX3\APEX_1.4\framework\include
-/I ThirdParty\PhysX3\APEX_1.4\framework\include\autogen
-/I ThirdParty\PhysX3\APEX_1.4\shared\general\RenderDebug\public
-/I ThirdParty\PhysX3\APEX_1.4\shared\general\PairFilter\include
-/I ThirdParty\PhysX3\APEX_1.4\shared\internal\include
 /I "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE"
 /I "C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.2\include\um"
 /I "C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt"

@@ -96,7 +96,6 @@ g:\uesource\engine\source\runtime\coreuobject\public\Serialization/ArchiveReplac
 g:\uesource\engine\source\runtime\coreuobject\public\Serialization/ArchiveObjectPropertyMapper.h
 g:\uesource\engine\source\runtime\coreuobject\public\Serialization/ArchiveReferenceMarker.h
 g:\uesource\engine\source\runtime\coreuobject\public\Serialization/ArchiveObjectCrc32.h
-g:\uesource\engine\source\runtime\coreuobject\public\UObject/LinkerSave.h
 g:\uesource\engine\source\runtime\coreuobject\public\Misc/NotifyHook.h
 g:\uesource\engine\source\runtime\coreuobject\public\Misc/RedirectCollector.h
 g:\uesource\engine\source\runtime\coreuobject\public\UObject/ScriptStackTracker.h
@@ -164,6 +163,14 @@ G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\SphereComponent
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Components/BoxComponent.h
 G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\BoxComponent.generated.h
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Components/AudioComponent.h
+G:\UESource\Engine\Source\Runtime\Engine\Classes\Sound/QuartzSubscription.h
+G:\UESource\Engine\Source\Runtime\AudioMixer\Public\Quartz/AudioMixerClockHandle.h
+G:\UESource\Engine\Source\Runtime\AudioMixer\Public\Quartz/QuartzSubsystem.h
+G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AudioMixer\QuartzSubsystem.generated.h
+G:\UESource\Engine\Source\Runtime\AudioMixer\Public\Quartz/QuartzMetronome.h
+G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AudioMixer\AudioMixerClockHandle.generated.h
+G:\UESource\Engine\Source\Runtime\AudioMixer\Public\Quartz/AudioMixerQuantizedCommands.h
+g:\uesource\engine\source\runtime\audiomixer\public\quartz\AudioMixerClock.h
 G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\AudioComponent.generated.h
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Camera/CameraComponent.h
 G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\CameraComponent.generated.h
@@ -201,8 +208,6 @@ G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\LocalLightCompo
 G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\PointLightComponent.generated.h
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Components/SpotLightComponent.h
 G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\SpotLightComponent.generated.h
-G:\UESource\Engine\Source\Runtime\Engine\Classes\Engine/CollisionProfile.h
-G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\CollisionProfile.generated.h
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Kismet/GameplayStatics.h
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Kismet/KismetSystemLibrary.h
 G:\UESource\Engine\Source\Runtime\CoreUObject\Public\UObject/PropertyAccessUtil.h
@@ -411,8 +416,6 @@ G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\CurveLinearColo
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Curves/CurveVector.h
 G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\CurveVector.generated.h
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Engine/CurveTable.h
-G:\UESource\Engine\Source\Runtime\Engine\Classes\Curves/SimpleCurve.h
-G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\SimpleCurve.generated.h
 G:\UESource\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\CurveTable.generated.h
 g:\uesource\engine\source\runtime\engine\public\DataTableUtils.h
 G:\UESource\Engine\Source\Runtime\Engine\Classes\Engine/DataTable.h

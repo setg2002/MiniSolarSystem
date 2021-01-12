@@ -5,9 +5,13 @@
 #include "NoiseFilterFactory.h"
 #include "AssetRegistryModule.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Curves\CurveLinearColor.h"
-#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Curves\CurveLinearColorAtlas.h"
-#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialInstanceDynamic.h"
+#include "Curves/CurveLinearColor.h"
+#include "Materials/MaterialInstanceDynamic.h"
+
+ColorGenerator::ColorGenerator(AActor* owner)
+{
+	Owner = owner;
+}
 
 void ColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 {
@@ -60,7 +64,7 @@ void ColorGenerator::UpdateColors()
 		biomeColors.Add(ColorSettings->BiomeColorSettings->Biomes[i]->Gradient);
 	}
 
-	UTexture2D* SurfaceTexture = CreateTexture(FString("PlanetTexture"), biomeColors);
+	UTexture2D* SurfaceTexture = CreateTexture(FString("TerrainTexture"), biomeColors);
 	for (int i = 0; i < ColorSettings->DynamicMaterials.Num(); i++)
 	{
 		ColorSettings->DynamicMaterials[i]->SetTextureParameterValue(FName("_texture"), SurfaceTexture);
@@ -75,8 +79,7 @@ void ColorGenerator::UpdateColors()
 
 UTexture2D* ColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
 {
-	//TODO edit TextureName to be unique per planet (e.g. PackageName = TEXT("/Game/ProceduralTextures/" + PLANET + _O/T ))
-	FString PackageName = TEXT("/Game/ProceduralTextures/" + TextureName);
+	FString PackageName = TEXT("/Game/ProceduralTextures/" + Owner->GetName() + "_" + TextureName);
 	UPackage* Package = CreatePackage(*PackageName);
 	Package->FullyLoad();
 

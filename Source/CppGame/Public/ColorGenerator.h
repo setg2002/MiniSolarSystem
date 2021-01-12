@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ColorSettings.h"
 #include "MinMax.h"
 #include "INoiseFilter.h"
+#include "ColorSettings.h"
+#include "GameFramework/Actor.h"
+
 
 /**
  * 
@@ -13,8 +15,11 @@
 class CPPGAME_API ColorGenerator
 {
 public:
+	ColorGenerator(AActor* owner);
 	void UpdateSettings(UColorSettings* colorSettings);
 	~ColorGenerator();
+
+	AActor* Owner;
 
 	UColorSettings* ColorSettings;
 

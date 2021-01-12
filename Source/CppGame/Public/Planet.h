@@ -15,10 +15,9 @@
  * 
  */
 
-//Forward Declarations
+//Forward Declarations Here
 class TerrainFace;
-class UColorSettings;
-class UShapeSettings;
+
 
 UENUM()
 enum EFaceRenderMask { 
@@ -42,52 +41,77 @@ public:
 
 	/*Mesh stuff*/	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<UStaticMeshComponent*> StaticMeshes;
+	UStaticMeshComponent* StaticMesh;
+	// Procedural meshes
 	TArray<UProceduralMeshComponent*> ProcMeshes;
 
-	TerrainFace* terrainFaces[6];
+	TerrainFace* TerrainFaces[6];
 
 	ShapeGenerator* shapeGenerator;
 	ColorGenerator* colorGenerator;
 
+	// Converts all ProcMeshes into a single static mesh that can be more easily saved to disk
+	UStaticMesh* ConvertToStaticMesh();
 
-
+	/* TODO Orbit stuff should be put in ACelestialBody instead */
+	// The CelestialBody that orbitVelocity is to be calculated for
 	UPROPERTY(Category = "Orbits", EditAnywhere)
 	ACelestialBody* OrbitingBody;
 
+	// The necessary velocity for this planet to orbit OrbitingBody
 	UPROPERTY(Category = "Orbits", VisibleAnywhere)
 	float orbitVelocity;
 
 	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
 	void CalculateOrbitVelocity();
 
+	// Sets velocity to orbitVelocity
 	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
 	void SetToOrbit();
 
+	/* Each element in the array represents the status of a TerrainFace thread. The entire array is set to false
+	in GeneratePlanet(), when terrain generation starts. ConvertAndSetStaticMesh(int32 i) then uses the array to 
+	validate that all threads have finished before creating teh static mesh from the procedural meshes.        */
+	bool ThreadsFinished[6];
 
-
+	// When true, the planet will call ReGenerate() every time a parameter is changed
 	UPROPERTY(Category = "Settings", EditAnywhere)
 	bool bAutoGenerate;
 
+	// When true, planet terrain generation wil be multithreaded
 	UPROPERTY(Category = "Settings", EditAnywhere)
 	bool bMultithreadGeneration;
 
+	// When true, tangents and normals will be generated for the planet mesh every time a parameter is changed (can only be true if bAutoGenerate is true)
 	UPROPERTY(Category = "Settings", EditInstanceOnly, BlueprintReadWrite, meta = (EditCondition = "bAutoGenerate"))
 	bool bAutoGenerateTangents;
 
+	// Not currently working
 	UPROPERTY(Category = "Settings", EditInstanceOnly)
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
 
-	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
-	UColorSettings* ColorSettings;
-	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
-	UShapeSettings* ShapeSettings;
+	UPROPERTY(Category = "Settings", EditAnywhere)
+	class UColorSettings* ColorSettings;
+	UPROPERTY(Category = "Settings", EditAnywhere)
+	class UShapeSettings* ShapeSettings;
 
+	// Desired resolution for each TerrainFace to generate
 	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "2", ClampMax = "512"))
 	int32 resolution = 16;
 
+	// Initializes TerrainFaces
 	void Initialize();
 
+	// Makes new empty data asset for given data asset
+	UDataAsset* CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass);
+
+	// Makes new blank data asset for shape and color settings if either are unassigned
+	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
+	void CreateSettingsAssets();
+
+	//TODO All of these Generate, ReGenerate, and On___Updated functions need to be sorted out
+
+	// Blueprint callable for GeneratePlanet()
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
 	void ReGenerate();
 
@@ -96,9 +120,6 @@ public:
 
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
 	void ReGenerateTangents();
-
-	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
-	void CreateMesh();
 
 	void GeneratePlanet();
 
@@ -110,9 +131,8 @@ public:
 
 	void OnColorSettingsUpdated();
 
-	// Converts procedural meshes of ProcMeshes array to static then assigns them to StaticMeshes
-	void ConvertAndSetStaticMeshes(int32 i);
-
+	// Converts procedural meshes of ProcMeshes array to static meshes then combines all of them and assigns the resulting mesh to StaticMesh
+	void ConvertAndSetStaticMesh(int32 i);
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 

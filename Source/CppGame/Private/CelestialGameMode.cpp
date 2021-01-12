@@ -5,7 +5,7 @@
 #include "CelestialBody.h"
 #include "Planet.h"
 #include "Star.h"
-#include "G:\UESource\Engine\Source\Runtime\Engine\Classes\Materials\MaterialInstanceDynamic.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "EngineUtils.h"
 
 
