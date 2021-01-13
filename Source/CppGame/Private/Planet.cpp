@@ -26,7 +26,7 @@ APlanet::APlanet()
 
 UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
 {
-	FString AssetPath = FString("/Game/DataAssets/");
+	FString AssetPath = FString("/Game/DataAssets/" + this->GetName() + "/");
 	FString AssetName = FString(TEXT("DA_")) + this->GetName() + FString(TEXT("_")) + DataAssetClass.Get()->GetName();
 	FString PackagePath = AssetPath + AssetName;
 	
@@ -49,11 +49,42 @@ void APlanet::CreateSettingsAssets()
 	if (ColorSettings == nullptr)
 	{
 		ColorSettings = Cast<UColorSettings>(CreateSettingsAsset(UColorSettings::StaticClass()));
+		ColorSettings->BiomeColorSettings = Cast<UBiomeColorSettings>(CreateSettingsAsset(UBiomeColorSettings::StaticClass()));
+		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+	}
+	else if (ColorSettings->BiomeColorSettings == nullptr)
+	{
+		ColorSettings->BiomeColorSettings = Cast<UBiomeColorSettings>(CreateSettingsAsset(UBiomeColorSettings::StaticClass()));
+		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+	}
+	else if (ColorSettings->BiomeColorSettings->Biomes == TArray<UBiome*>())
+	{
+		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+	}
+	else if (ColorSettings->BiomeColorSettings->Biomes[0] == nullptr)
+	{
+		ColorSettings->BiomeColorSettings->Biomes[0] = Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass()));
 	}
 
 	if (ShapeSettings == nullptr)
 	{
 		ShapeSettings = Cast<UShapeSettings>(CreateSettingsAsset(UShapeSettings::StaticClass()));
+		ShapeSettings->NoiseLayers.Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
+		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
+	}
+	else if (ShapeSettings->NoiseLayers == TArray<UNoiseLayer*>())
+	{
+		ShapeSettings->NoiseLayers.Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
+		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
+	}
+	else if (ShapeSettings->NoiseLayers[0] == nullptr)
+	{
+		ShapeSettings->NoiseLayers[0] = Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass()));
+		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
+	}
+	else if (ShapeSettings->NoiseLayers[0]->NoiseSettings == nullptr)
+	{
+		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
 	}
 }
 

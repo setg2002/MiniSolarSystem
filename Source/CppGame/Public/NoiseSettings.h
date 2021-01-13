@@ -43,7 +43,7 @@ struct FRidgidNoiseSettings : public FSimpleNoiseSettings
 	float WeightMultiplier = .8f;
 };
 
-UCLASS(DefaultToInstanced, EditInlineNew)
+UCLASS()
 class CPPGAME_API UNoiseSettings : public UDataAsset
 {
 	GENERATED_BODY()
@@ -52,11 +52,11 @@ public:
 	UNoiseSettings();
 	~UNoiseSettings();
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TEnumAsByte<EFilterType> FilterType;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (EditCondition = "FilterType == 0", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "FilterType == 0", EditConditionHides))
 	FSimpleNoiseSettings SimpleNoiseSettings;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (EditCondition = "FilterType == 1", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "FilterType == 1", EditConditionHides))
 	FRidgidNoiseSettings RidgidNoiseSettings;
 };

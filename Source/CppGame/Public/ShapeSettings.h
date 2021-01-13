@@ -22,6 +22,6 @@ public:
 
 	bool GetNoiseLayers();
 
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite, NoClear)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UNoiseLayer*> NoiseLayers;
 };
