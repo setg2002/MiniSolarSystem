@@ -3,7 +3,14 @@
 
 #include "Planet.h"
 #include "RawMesh.h"
+#include "EngineUtils.h"
 #include "Engine/DataAsset.h"
+#include "OrbitDebugActor.h"
+#include "TerrainFace.h"
+#include "ColorSettings.h"
+#include "ColorGenerator.h"
+#include "ShapeSettings.h"
+#include "ShapeGenerator.h"
 #include "AssetRegistryModule.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -22,6 +29,16 @@ APlanet::APlanet()
 
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new ColorGenerator(this);
+}
+
+void APlanet::OnConstruction(const FTransform & Transform)
+{
+	for (TActorIterator<AOrbitDebugActor> It(GetWorld()); It; ++It)
+	{
+		OrbitDebugActor = *It;
+	}
+
+	Super::OnConstruction(Transform);
 }
 
 UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
@@ -418,6 +435,13 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 		{
 			GeneratePlanet();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }
+		}
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, mass) || PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, initialVelocity) || PropertyName == GET_MEMBER_NAME_CHECKED(AActor, GetActorLocation()))
+		{
+			if (OrbitDebugActor)
+			{
+				OrbitDebugActor->DrawOrbits();
+			}
 		}
 	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);

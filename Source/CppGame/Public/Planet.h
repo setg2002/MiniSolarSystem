@@ -4,11 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "CelestialBody.h"
-#include "TerrainFace.h"
-#include "ColorSettings.h"
-#include "ColorGenerator.h"
-#include "ShapeSettings.h"
-#include "ShapeGenerator.h"
 #include "Planet.generated.h"
 
 /**
@@ -17,6 +12,12 @@
 
 //Forward Declarations Here
 class TerrainFace;
+class AOrbitDebugActor;
+class ShapeGenerator;
+class ColorGenerator;
+class ShapeSettings;
+class ColorSettings;
+
 
 
 UENUM()
@@ -134,9 +135,12 @@ public:
 	// Converts procedural meshes of ProcMeshes array to static meshes then combines all of them and assigns the resulting mesh to StaticMesh
 	void ConvertAndSetStaticMesh(int32 i);
 
+	virtual void OnConstruction(const FTransform & Transform) override;
+
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 protected:
+	AOrbitDebugActor* OrbitDebugActor;
 
 	const FVector directions[6] = { FVector().UpVector,
 									FVector().DownVector,
