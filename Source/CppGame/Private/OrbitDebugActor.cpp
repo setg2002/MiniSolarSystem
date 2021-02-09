@@ -31,7 +31,10 @@ void AOrbitDebugActor::BeginPlay()
 	Super::BeginPlay();
 	
 	ClearOrbits();
-	DrawOrbits();
+	if (bAutoDraw)
+	{
+		DrawOrbits();
+	}
 }
 
 // Called every frame

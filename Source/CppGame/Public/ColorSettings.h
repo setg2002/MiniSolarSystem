@@ -33,7 +33,7 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (InlineEditConditionToggle))
 	bool bUsingNoise;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Instanced, meta = (EditCondition = "bUsingNoise"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUsingNoise"))
 	UNoiseSettings* Noise;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bUsingNoise"))

@@ -6,6 +6,7 @@
 #include "AssetRegistryModule.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Curves/CurveLinearColor.h"
+#include <iostream>
 #include "Materials/MaterialInstanceDynamic.h"
 
 ColorGenerator::ColorGenerator(AActor* owner)
@@ -37,6 +38,7 @@ void ColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 float ColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
 {
 	float HeightPercent = (PointOnUnitSphere.Z + 1) / 2.f;
+	// Offset for using noise
 	if (ColorSettings->BiomeColorSettings->bUsingNoise)
 	{
 		HeightPercent += (BiomeNoiseFilter->Evaluate(PointOnUnitSphere) - ColorSettings->BiomeColorSettings->NoiseOffset) * ColorSettings->BiomeColorSettings->NoiseStrength;
@@ -49,11 +51,11 @@ float ColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
 	for (int i = 0; i < NumBiomes; i++)
 	{
 		float dst = HeightPercent - ColorSettings->BiomeColorSettings->Biomes[i]->StartHeight;
-		float weight = UKismetMathLibrary::NormalizeToRange(dst, -blendRange, blendRange);
+		float weight = FMath::Clamp<float>(UKismetMathLibrary::NormalizeToRange(dst, -blendRange, blendRange), 0, 1);
 		BiomeIndex *= (1 - weight);
 		BiomeIndex += i * weight;
 	}
-	return (float)BiomeIndex / FMath::Max<float>(1, NumBiomes - 1);
+	return (float)BiomeIndex / FMath::Max<int>(1, NumBiomes - 1);
 }
 
 void ColorGenerator::UpdateColors()
@@ -79,6 +81,8 @@ void ColorGenerator::UpdateColors()
 
 UTexture2D* ColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
 {
+	//TODO Make textures work with non power of two y sizes (number of gradients that aren't a power of two)
+
 	FString PackageName = TEXT("/Game/ProceduralTextures/" + Owner->GetName() + "_" + TextureName);
 	UPackage* Package = CreatePackage(*PackageName);
 	Package->FullyLoad();

@@ -61,43 +61,81 @@ UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
 	return NewDataAsset;
 }
 
+void APlanet::CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UDataAsset> DataAssetClass)
+{
+	FString AssetPath = FString("/Game/DataAssets/" + this->GetName() + "/");
+	OutAssetName = FString(TEXT("DA_")) + this->GetName() + FString(TEXT("_")) + DataAssetClass.Get()->GetName();
+	OutPackagePath = AssetPath + OutAssetName;
+	UObject* OuterPtr = &OutOuter;
+	OuterPtr = FindPackage(this, *OutPackagePath);
+	return;
+}
+
 void APlanet::CreateSettingsAssets()
 {
-	if (ColorSettings == nullptr)
+	FString AssetName;
+	FString PackagePath;
+	UObject* Outer = nullptr;
+
+	if (ColorSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UColorSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UColorSettings::StaticClass());
+		ColorSettings = LoadObject<UColorSettings>(Outer, *AssetName, *PackagePath);
+	}
+	else if (ColorSettings == nullptr)
 	{
 		ColorSettings = Cast<UColorSettings>(CreateSettingsAsset(UColorSettings::StaticClass()));
-		ColorSettings->BiomeColorSettings = Cast<UBiomeColorSettings>(CreateSettingsAsset(UBiomeColorSettings::StaticClass()));
-		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+	}
+
+	if (ColorSettings->BiomeColorSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiomeColorSettings::StaticClass()->GetName())))
+	{	
+		CreatePackageName(AssetName, PackagePath, *Outer, UBiomeColorSettings::StaticClass());
+		ColorSettings->BiomeColorSettings = LoadObject<UBiomeColorSettings>(Outer, *AssetName, *PackagePath);
 	}
 	else if (ColorSettings->BiomeColorSettings == nullptr)
 	{
 		ColorSettings->BiomeColorSettings = Cast<UBiomeColorSettings>(CreateSettingsAsset(UBiomeColorSettings::StaticClass()));
-		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
-	}
-	else if (ColorSettings->BiomeColorSettings->Biomes == TArray<UBiome*>())
-	{
-		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
-	}
-	else if (ColorSettings->BiomeColorSettings->Biomes[0] == nullptr)
-	{
-		ColorSettings->BiomeColorSettings->Biomes[0] = Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass()));
 	}
 
-	if (ShapeSettings == nullptr)
+	if ((ColorSettings->BiomeColorSettings->Biomes == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->Biomes[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiome::StaticClass()->GetName())))
+	{
+		ColorSettings->BiomeColorSettings->Biomes.Empty();
+		CreatePackageName(AssetName, PackagePath, *Outer, UBiome::StaticClass());
+		ColorSettings->BiomeColorSettings->Biomes.Add(LoadObject<UBiome>(Outer, *AssetName, *PackagePath));
+	}
+	else if (ColorSettings->BiomeColorSettings->Biomes == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->Biomes[0] == nullptr)
+	{
+		ColorSettings->BiomeColorSettings->Biomes.Empty();
+		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+	}
+
+
+	if (ShapeSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UShapeSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UShapeSettings::StaticClass());
+		ShapeSettings = LoadObject<UShapeSettings>(Outer, *AssetName, *PackagePath);
+	}
+	else if (ShapeSettings == nullptr)
 	{
 		ShapeSettings = Cast<UShapeSettings>(CreateSettingsAsset(UShapeSettings::StaticClass()));
-		ShapeSettings->NoiseLayers.Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
-		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
 	}
-	else if (ShapeSettings->NoiseLayers == TArray<UNoiseLayer*>())
+
+	if ((ShapeSettings->NoiseLayers == TArray<UNoiseLayer*>() || ShapeSettings->NoiseLayers[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseLayer::StaticClass()->GetName())))
 	{
-		ShapeSettings->NoiseLayers.Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
-		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
+		ShapeSettings->NoiseLayers.Empty();
+		CreatePackageName(AssetName, PackagePath, *Outer, UNoiseLayer::StaticClass());
+		ShapeSettings->NoiseLayers.Add(LoadObject<UNoiseLayer>(Outer, *AssetName, *PackagePath));
 	}
-	else if (ShapeSettings->NoiseLayers[0] == nullptr)
+	else if (ShapeSettings->NoiseLayers == TArray<UNoiseLayer*>() || ShapeSettings->NoiseLayers[0] == nullptr)
 	{
-		ShapeSettings->NoiseLayers[0] = Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass()));
-		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
+		ShapeSettings->NoiseLayers.Empty();
+		ShapeSettings->NoiseLayers.Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
+	}
+
+	if (ShapeSettings->NoiseLayers[0]->NoiseSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
+		ShapeSettings->NoiseLayers[0]->NoiseSettings = LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath);
 	}
 	else if (ShapeSettings->NoiseLayers[0]->NoiseSettings == nullptr)
 	{
@@ -210,6 +248,10 @@ void APlanet::OnColorSettingsUpdated()
 void APlanet::GenerateColors()
 {
 	colorGenerator->UpdateColors();
+
+	// Reload the texture
+	StaticMesh->GetMaterial(0)->ReloadConfig();
+
 	if (bMultithreadGeneration)
 	{
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
@@ -438,7 +480,7 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, mass) || PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, initialVelocity) || PropertyName == GET_MEMBER_NAME_CHECKED(AActor, GetActorLocation()))
 		{
-			if (OrbitDebugActor)
+			if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
 			{
 				OrbitDebugActor->DrawOrbits();
 			}
