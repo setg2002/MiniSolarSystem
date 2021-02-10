@@ -2,6 +2,7 @@
 
 
 #include "CelestialBody.h"
+#include "CelestialGameMode.h"
 
 // Sets default values
 ACelestialBody::ACelestialBody()

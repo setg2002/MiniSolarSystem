@@ -12,6 +12,7 @@
 #include "ShapeSettings.h"
 #include "ShapeGenerator.h"
 #include "AssetRegistryModule.h"
+#include "ProceduralMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 
@@ -33,6 +34,7 @@ APlanet::APlanet()
 
 void APlanet::OnConstruction(const FTransform & Transform)
 {
+	// Get orbit debug actor from world
 	for (TActorIterator<AOrbitDebugActor> It(GetWorld()); It; ++It)
 	{
 		OrbitDebugActor = *It;
@@ -206,7 +208,7 @@ void APlanet::Initialize()
 			ColorSettings->DynamicMaterials[i] = ProcMeshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
 		}
 
-		// Probably unneccesary
+		//TODO Remove (these lines are probably unneccesary)
 		bool renderFace = FaceRenderMask == EFaceRenderMask::All || FaceRenderMask - 1 == i;
 		ProcMeshes[i]->SetVisibility(renderFace);
 	}

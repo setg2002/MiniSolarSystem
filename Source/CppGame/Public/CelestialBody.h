@@ -3,8 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CelestialGameMode.h"
-#include "TerrainFace.h"
 #include "GameFramework/Actor.h"
 #include "CelestialBody.generated.h"
 
@@ -42,7 +40,6 @@ public:
 
 	ACelestialGameMode* gameMode;
 
-	UPROPERTY(EditAnywhere)
 	USceneComponent* Root;
 
 

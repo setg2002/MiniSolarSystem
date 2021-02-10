@@ -12,6 +12,7 @@
 
 //Forward Declarations Here
 class TerrainFace;
+class UProceduralMeshComponent;
 class AOrbitDebugActor;
 class ShapeGenerator;
 class ColorGenerator;
