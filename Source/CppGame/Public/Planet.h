@@ -45,7 +45,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* StaticMesh;
 	// Procedural meshes
-	TArray<UProceduralMeshComponent*> ProcMeshes;
+	TArray<UProceduralMeshComponent*> ProcMeshes; //TODO Destroy proc meshes when not in use
 
 	TerrainFace* TerrainFaces[6];
 

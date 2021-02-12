@@ -1,7 +1,7 @@
 {
-	"BuildId": "40117968-fb5f-413a-b599-db63514b1864",
+	"BuildId": "852c7a0d-a480-4107-868b-971c8adfd0c3",
 	"Modules": 
 	{
-		"SimplexNoise": "UE4Editor-SimplexNoise-9902.dll"
+		"SimplexNoise": "UE4Editor-SimplexNoise.dll"
 	}
 }

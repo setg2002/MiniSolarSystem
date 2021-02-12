@@ -22,11 +22,16 @@ class CPPGAME_API AGasGiant : public ACelestialBody
 public:
 	AGasGiant();
 
-	UPROPERTY(/*EditAnywhere, BlueprintReadWrite*/)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UGasGiantColorSettings* ColorSettings;
+
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void GenerateMaterial();
+
+	UTexture2D* CreateTexture(FString TextureName, UCurveLinearColor* Gradient);
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 };
