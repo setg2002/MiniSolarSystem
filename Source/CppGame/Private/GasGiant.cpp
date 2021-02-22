@@ -87,5 +87,11 @@ void AGasGiant::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 		{
 			ColorSettings->DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->BasePlanetMat);
 		}
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(AGasGiant, Radius))
+		{
+			this->SetActorScale3D(FVector(Radius));
+		}
 	}
+
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 }

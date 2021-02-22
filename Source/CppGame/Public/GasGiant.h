@@ -28,6 +28,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UGasGiantColorSettings* ColorSettings;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"))
+	int Radius = 1;
+
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void GenerateMaterial();
 
