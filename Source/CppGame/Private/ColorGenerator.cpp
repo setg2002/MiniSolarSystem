@@ -6,7 +6,6 @@
 #include "AssetRegistryModule.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Curves/CurveLinearColor.h"
-#include <iostream>
 #include "Materials/MaterialInstanceDynamic.h"
 
 ColorGenerator::ColorGenerator(AActor* owner)

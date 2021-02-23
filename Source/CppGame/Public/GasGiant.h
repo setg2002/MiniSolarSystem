@@ -34,6 +34,9 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void GenerateMaterial();
 
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void NewVoronoiForStorms();
+
 	UTexture2D* CreateTexture(FString TextureName, UCurveLinearColor* Gradient);
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

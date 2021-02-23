@@ -30,16 +30,23 @@ void URingSystemComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 }
 
 
+void URingSystemComponent::CreateMaterial()
+{
+	DynamicMaterial = RingMesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/RingMat_Inst.RingMat_Inst'"), NULL, LOAD_None, NULL)); //TODO Fix bad hard-coded ref?
+}
+
+
 void URingSystemComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 	
+	UE_LOG(LogTemp, Warning, TEXT("Created"));
 	RingMesh = NewObject<UStaticMeshComponent>(GetOwner(), UStaticMeshComponent::StaticClass(), "RingMesh", RF_NoFlags, nullptr, false, nullptr, GetOwner()->GetPackage());
 	RingMesh->AttachTo(GetOwner()->GetRootComponent());
 	RingMesh->RegisterComponent();
 	RingMesh->SetRelativeScale3D(GetOwner()->GetActorScale() * OuterRadius * 6);
 	RingMesh->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"), NULL, LOAD_None, NULL));
-	DynamicMaterial = RingMesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/RingMat_Inst.RingMat_Inst'"), NULL, LOAD_None, NULL)); //TODO Fix bad hard-coded ref 
+	CreateMaterial();
 	DynamicMaterial->SetScalarParameterValue("_innerRadius", InnerRadius);
 }
 
@@ -81,9 +88,9 @@ void URingSystemComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, Gradient) && Gradient != nullptr)
 		{
-			//TODO This is brokem because of some threading issue, no clue, possibly an engine bug: fix later
-			//GradientTexture = Cast<AGasGiant>(GetOwner())->CreateTexture("RingTexture", Gradient);
-			//DynamicMaterial->SetTextureParameterValueByInfo(FMaterialParameterInfo("_Gradient"), GradientTexture);
+			CreateMaterial();
+			GradientTexture = Cast<AGasGiant>(GetOwner())->CreateTexture("RingTexture", Gradient);
+			DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 		}
 	}
 }

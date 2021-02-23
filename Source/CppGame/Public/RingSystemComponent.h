@@ -22,7 +22,7 @@ public:
 
 	UMaterialInstanceDynamic* DynamicMaterial;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.001"))
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.001", ClampMax = "2"))
 	float OuterRadius = 1;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.01", ClampMax = "1"))
@@ -32,6 +32,8 @@ public:
 	UCurveLinearColor* Gradient;
 
 	UTexture2D* GradientTexture;
+
+	void CreateMaterial();
 	
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 

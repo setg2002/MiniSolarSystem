@@ -5,6 +5,7 @@
 #include "GasGiantColorSettings.h"
 #include "AssetRegistryModule.h"
 #include "Curves/CurveLinearColor.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 
 AGasGiant::AGasGiant()
@@ -76,6 +77,14 @@ UTexture2D* AGasGiant::CreateTexture(FString TextureName, UCurveLinearColor* Gra
 
 	return NewTexture;
 }
+
+
+void AGasGiant::NewVoronoiForStorms()
+{
+	GenerateMaterial();
+	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_StormTexture"), ColorSettings->MakeVoronoiTexture());
+}
+
 
 void AGasGiant::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
