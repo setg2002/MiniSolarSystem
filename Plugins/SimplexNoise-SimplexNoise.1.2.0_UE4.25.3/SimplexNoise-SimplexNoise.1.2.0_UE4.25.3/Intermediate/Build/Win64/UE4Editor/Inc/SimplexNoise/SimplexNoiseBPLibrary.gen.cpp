@@ -41,7 +41,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFCell
 {
 	FScriptStruct_SimplexNoise_StaticRegisterNativesFCell()
 	{
-		UScriptStruct::DeferCppStructOps(FName(TEXT("Cell")),new UScriptStruct::TCppStructOps<FCell>);
+		UScriptStruct::DeferCppStructOps<FCell>(FName(TEXT("Cell")));
 	}
 } ScriptStruct_SimplexNoise_StaticRegisterNativesFCell;
 	struct Z_Construct_UScriptStruct_FCell_Statics
@@ -134,7 +134,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFTriangle
 {
 	FScriptStruct_SimplexNoise_StaticRegisterNativesFTriangle()
 	{
-		UScriptStruct::DeferCppStructOps(FName(TEXT("Triangle")),new UScriptStruct::TCppStructOps<FTriangle>);
+		UScriptStruct::DeferCppStructOps<FTriangle>(FName(TEXT("Triangle")));
 	}
 } ScriptStruct_SimplexNoise_StaticRegisterNativesFTriangle;
 	struct Z_Construct_UScriptStruct_FTriangle_Statics
@@ -216,7 +216,7 @@ static struct FScriptStruct_SimplexNoise_StaticRegisterNativesFPoint
 {
 	FScriptStruct_SimplexNoise_StaticRegisterNativesFPoint()
 	{
-		UScriptStruct::DeferCppStructOps(FName(TEXT("Point")),new UScriptStruct::TCppStructOps<FPoint>);
+		UScriptStruct::DeferCppStructOps<FPoint>(FName(TEXT("Point")));
 	}
 } ScriptStruct_SimplexNoise_StaticRegisterNativesFPoint;
 	struct Z_Construct_UScriptStruct_FPoint_Statics

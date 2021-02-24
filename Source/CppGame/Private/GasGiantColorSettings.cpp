@@ -17,7 +17,7 @@ UTexture2D* UGasGiantColorSettings::MakeVoronoiTexture()
 	TArray<FVector2D> Points;
 	for (int32 i = 0; i < NumStorms; ++i)
 	{
-		Points.AddUnique(FVector2D(FMath::RandRange(100, 924), FMath::RandRange(100, 924)));
+		Points.AddUnique(FVector2D(FMath::RandRange(LowBound, HighBound), FMath::RandRange(LowBound, HighBound)));
 	}
 
 	FString TextureName = "Voronoi";

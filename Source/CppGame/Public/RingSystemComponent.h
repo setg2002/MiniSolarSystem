@@ -9,7 +9,7 @@
 class UStaticMeshComponent;
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CPPGAME_API URingSystemComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -23,10 +23,10 @@ public:
 	UMaterialInstanceDynamic* DynamicMaterial;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.001", ClampMax = "2"))
-	float OuterRadius = 1;
+	float Radius = 1;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.01", ClampMax = "1"))
-	float InnerRadius;
+	float RingWidth = 0.01f;
 
 	UPROPERTY(EditAnywhere)
 	UCurveLinearColor* Gradient;
@@ -34,6 +34,8 @@ public:
 	UTexture2D* GradientTexture;
 
 	void CreateMaterial();
+
+	void FindRingMesh();
 	
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 

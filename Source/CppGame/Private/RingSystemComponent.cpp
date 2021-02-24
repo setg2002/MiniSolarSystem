@@ -19,6 +19,7 @@ URingSystemComponent::URingSystemComponent()
 	// ...
 }
 
+
 void URingSystemComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
@@ -36,18 +37,46 @@ void URingSystemComponent::CreateMaterial()
 }
 
 
+void URingSystemComponent::FindRingMesh()
+{
+	TArray<UActorComponent*> Components = GetOwner()->GetComponentsByTag(UStaticMeshComponent::StaticClass(), FName("Ring"));
+	if (Components.IsValidIndex(0))
+	{
+		RingMesh = Cast<UStaticMeshComponent>(Components[0]);
+		RingMesh->RegisterComponent();
+		RingMesh->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
+		CreateMaterial();
+		DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
+		if (Gradient)
+		{
+			GradientTexture = Cast<AGasGiant>(GetOwner())->CreateTexture("RingTexture", Gradient);
+			DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
+		}
+	}
+	else
+	{
+		RingMesh = NewObject<UStaticMeshComponent>(GetOwner(), UStaticMeshComponent::StaticClass(), "RingMesh", RF_NoFlags, nullptr, false, nullptr, GetOwner()->GetPackage());
+		RingMesh->ComponentTags.Add(FName("Ring"));
+		GetOwner()->AddOwnedComponent(RingMesh);
+		RingMesh->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		RingMesh->RegisterComponent();
+		RingMesh->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
+		RingMesh->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"), NULL, LOAD_None, NULL));
+		CreateMaterial();
+		DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
+		if (Gradient)
+		{
+			GradientTexture = Cast<AGasGiant>(GetOwner())->CreateTexture("RingTexture", Gradient);
+			DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
+		}
+	}
+}
+
+
 void URingSystemComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
-	
-	UE_LOG(LogTemp, Warning, TEXT("Created"));
-	RingMesh = NewObject<UStaticMeshComponent>(GetOwner(), UStaticMeshComponent::StaticClass(), "RingMesh", RF_NoFlags, nullptr, false, nullptr, GetOwner()->GetPackage());
-	RingMesh->AttachTo(GetOwner()->GetRootComponent());
-	RingMesh->RegisterComponent();
-	RingMesh->SetRelativeScale3D(GetOwner()->GetActorScale() * OuterRadius * 6);
-	RingMesh->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"), NULL, LOAD_None, NULL));
-	CreateMaterial();
-	DynamicMaterial->SetScalarParameterValue("_innerRadius", InnerRadius);
+	FindRingMesh();
 }
 
 
@@ -78,16 +107,28 @@ void URingSystemComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, OuterRadius))
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, Radius))
 		{
-			RingMesh->SetRelativeScale3D(GetOwner()->GetActorScale() * OuterRadius * 6);
+			if (!RingMesh)
+			{
+				FindRingMesh();
+			}
+			RingMesh->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, InnerRadius))
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, RingWidth))
 		{
-			DynamicMaterial->SetScalarParameterValue("_innerRadius", InnerRadius);
+			if (!RingMesh)
+			{
+				FindRingMesh();
+			}
+			DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, Gradient) && Gradient != nullptr)
 		{
+			if (!RingMesh)
+			{
+				FindRingMesh();
+			}
 			CreateMaterial();
 			GradientTexture = Cast<AGasGiant>(GetOwner())->CreateTexture("RingTexture", Gradient);
 			DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);

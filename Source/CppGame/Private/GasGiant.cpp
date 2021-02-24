@@ -20,10 +20,11 @@ void AGasGiant::GenerateMaterial()
 	ensure(ColorSettings->BasePlanetMat);
 	ColorSettings->DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->BasePlanetMat);
 }
-
+#pragma optimize("", off)
 UTexture2D* AGasGiant::CreateTexture(FString TextureName, UCurveLinearColor* Gradient)
 {
 	FString PackageName = TEXT("/Game/ProceduralTextures/" + this->GetName() + "_" + TextureName);
+
 	UPackage* Package = CreatePackage(*PackageName);
 	Package->FullyLoad();
 
@@ -77,7 +78,7 @@ UTexture2D* AGasGiant::CreateTexture(FString TextureName, UCurveLinearColor* Gra
 
 	return NewTexture;
 }
-
+#pragma optimize("", on)
 
 void AGasGiant::NewVoronoiForStorms()
 {

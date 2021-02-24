@@ -21,7 +21,7 @@ void EmptyLinkFunctionForGeneratedCodeSimplexNoise_init() {}
 				nullptr,
 				0,
 				PKG_CompiledIn | 0x00000000,
-				0x70F77DA8,
+				0x9E6990C8,
 				0x6D632450,
 				METADATA_PARAMS(nullptr, 0)
 			};
