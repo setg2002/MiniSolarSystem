@@ -5,7 +5,7 @@
 #include "Planet.h"
 #include "AssetRegistryModule.h"
 
-TerrainFace::TerrainFace(ShapeGenerator* shape_Generator, ColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* procMesh, int32 meshNum, AActor* owner)
+TerrainFace::TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* procMesh, int32 meshNum, AActor* owner)
 {
 	Owner = owner;
 
@@ -24,7 +24,7 @@ TerrainFace::~TerrainFace()
 {
 }
 
-void TerrainFace::ConstructMesh(ColorGenerator* color_Generator)
+void TerrainFace::ConstructMesh(TerrestrialColorGenerator* color_Generator)
 {
 	int triIndex = 0;
 
@@ -96,7 +96,7 @@ void TerrainFace::CalculateMesh()
 	UpdateTangentsNormals();
 }
 
-void TerrainFace::ConstructMeshAsync(ColorGenerator* color_Generator)
+void TerrainFace::ConstructMeshAsync(TerrestrialColorGenerator* color_Generator)
 {
 	(new FAutoDeleteAsyncTask<CalculateMeshAsyncTask>(*this, Resolution, LocalUp, axisA, axisB, verticies, triangles, uv, shapeGenerator, colorGenerator))->StartBackgroundTask();
 }

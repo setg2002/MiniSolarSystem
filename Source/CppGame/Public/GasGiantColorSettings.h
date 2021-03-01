@@ -12,6 +12,7 @@
 
 // Forward Declarations
 class UNoiseSettings;
+class AGasGiant;
 
 
 UCLASS()
@@ -21,6 +22,10 @@ class CPPGAME_API UGasGiantColorSettings : public UDataAsset
 	
 public:
 	UGasGiantColorSettings();
+
+	void SetOwner(AGasGiant* owner);
+
+	AGasGiant* Owner;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* BasePlanetMat;
@@ -47,6 +52,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Storm Settings", AdvancedDisplay, meta = (ClampMin = "0", ClampMax = "1024"))
 	int HighBound = 924;
 
-	UFUNCTION(BlueprintCallable, CallInEditor)
-	UTexture2D* MakeVoronoiTexture();
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 };

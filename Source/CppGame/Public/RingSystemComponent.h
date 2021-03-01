@@ -7,6 +7,8 @@
 #include "RingSystemComponent.generated.h"
 
 
+class GaseousColorGenerator;
+
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CPPGAME_API URingSystemComponent : public UStaticMeshComponent
@@ -29,6 +31,8 @@ public:
 	UCurveLinearColor* Gradient;
 
 	UTexture2D* GradientTexture;
+
+	GaseousColorGenerator* ColorGenerator;
 
 
 protected:

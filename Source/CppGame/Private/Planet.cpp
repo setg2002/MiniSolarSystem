@@ -29,7 +29,7 @@ APlanet::APlanet()
 	};
 
 	shapeGenerator = new ShapeGenerator();
-	colorGenerator = new ColorGenerator(this);
+	colorGenerator = new TerrestrialColorGenerator(this);
 }
 
 void APlanet::OnConstruction(const FTransform & Transform)
@@ -50,7 +50,7 @@ UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
 	FString PackagePath = AssetPath + AssetName;
 	
 
-	UPackage *Package = CreatePackage(nullptr, *PackagePath);
+	UPackage *Package = CreatePackage(*PackagePath);
 	UDataAsset* NewDataAsset = NewObject<UDataAsset>(Package, DataAssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
 
 	FAssetRegistryModule::AssetCreated(NewDataAsset);
@@ -207,10 +207,6 @@ void APlanet::Initialize()
 		{
 			ColorSettings->DynamicMaterials[i] = ProcMeshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
 		}
-
-		//TODO Remove (these lines are probably unneccesary)
-		bool renderFace = FaceRenderMask == EFaceRenderMask::All || FaceRenderMask - 1 == i;
-		ProcMeshes[i]->SetVisibility(renderFace);
 	}
 }
 
@@ -356,14 +352,14 @@ UStaticMesh* APlanet::ConvertToStaticMesh()
 	if (RawMesh.VertexPositions.Num() > 3 && RawMesh.WedgeIndices.Num() > 3)
 	{
 		// Then find/create it.
-		UPackage* MeshPackage = CreatePackage(NULL, *PackageName);
+		UPackage* MeshPackage = CreatePackage(*PackageName);
 		check(MeshPackage);
 
 		// Create StaticMesh object
 		UStaticMesh* NewMesh = NewObject<UStaticMesh>(MeshPackage, FName(*AssetName), RF_Public | RF_Standalone);
 		NewMesh->InitResources();
 
-		NewMesh->LightingGuid = FGuid::NewGuid();
+		NewMesh->SetLightingGuid(FGuid::NewGuid());
 
 		// Add source to new StaticMesh
 		FStaticMeshSourceModel& SrcModel = NewMesh->AddSourceModel();
@@ -379,7 +375,7 @@ UStaticMesh* APlanet::ConvertToStaticMesh()
 		
 		FString NewMaterialName = FString(TEXT("M_")) + this->GetName();
 		FString MatPackageName = PathName + NewMaterialName;
-		UPackage* MaterialPackage = CreatePackage(NULL, *MatPackageName);
+		UPackage* MaterialPackage = CreatePackage(*MatPackageName);
 		check(MaterialPackage);
 		
 		UMaterialInterface* MeshMaterial = ProcMeshes[0]->GetMaterial(0); // Old material to copy data from
@@ -428,7 +424,7 @@ UStaticMesh* APlanet::ConvertToStaticMesh()
 		bool bSavedMaterial = UPackage::SavePackage(MaterialPackage, NewMaterial, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *MatPackageFileName, GError, nullptr, true, true, SAVE_NoError);
 
 		// Copy material to new mesh
-		NewMesh->StaticMaterials.Add(FStaticMaterial(NewMaterial));
+		NewMesh->SetStaticMaterials(TArray<FStaticMaterial>{ NewMaterial });
 
 		// Set the Imported version before calling the build
 		NewMesh->ImportVersion = EImportStaticMeshVersion::LastVersion;

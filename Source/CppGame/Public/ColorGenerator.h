@@ -3,21 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MinMax.h"
-#include "INoiseFilter.h"
-#include "ColorSettings.h"
-#include "GameFramework/Actor.h"
+
+class AActor;
+class MinMax;
+class UColorSettings;
+class INoiseFilter;
 
 
 /**
  * 
  */
-class CPPGAME_API ColorGenerator
+class CPPGAME_API TerrestrialColorGenerator
 {
 public:
-	ColorGenerator(AActor* owner);
+	TerrestrialColorGenerator(AActor* owner);
 	void UpdateSettings(UColorSettings* colorSettings);
-	~ColorGenerator();
+	~TerrestrialColorGenerator();
 
 	AActor* Owner;
 

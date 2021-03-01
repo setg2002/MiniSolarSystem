@@ -7,13 +7,18 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Curves/CurveLinearColor.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "MinMax.h"
+#include "INoiseFilter.h"
+#include "ColorSettings.h"
+#include "GameFramework/Actor.h"
 
-ColorGenerator::ColorGenerator(AActor* owner)
+
+TerrestrialColorGenerator::TerrestrialColorGenerator(AActor* owner)
 {
 	Owner = owner;
 }
 
-void ColorGenerator::UpdateSettings(UColorSettings* colorSettings)
+void TerrestrialColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 {
 	this->ColorSettings = colorSettings;
 	if (ColorSettings->BiomeColorSettings->bUsingNoise)
@@ -22,11 +27,11 @@ void ColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 	}
 }
 
-ColorGenerator::~ColorGenerator()
+TerrestrialColorGenerator::~TerrestrialColorGenerator()
 {
 }
 
-void ColorGenerator::UpdateElevation(MinMax* elevationMinMax)
+void TerrestrialColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 {
 	for (int i = 0; i < ColorSettings->DynamicMaterials.Num(); i++)
 	{
@@ -34,7 +39,7 @@ void ColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 	}
 }
 
-float ColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
+float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
 {
 	float HeightPercent = (PointOnUnitSphere.Z + 1) / 2.f;
 	// Offset for using noise
@@ -57,7 +62,7 @@ float ColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
 	return (float)BiomeIndex / FMath::Max<int>(1, NumBiomes - 1);
 }
 
-void ColorGenerator::UpdateColors()
+void TerrestrialColorGenerator::UpdateColors()
 {
 	TArray<UCurveLinearColor*> biomeColors;
 	for (int i = 0; i < ColorSettings->BiomeColorSettings->Biomes.Num(); i++)
@@ -78,7 +83,7 @@ void ColorGenerator::UpdateColors()
 	}
 }
 
-UTexture2D* ColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
+UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
 {
 	//TODO Make textures work with non power of two y sizes (number of gradients that aren't a power of two)
 
@@ -113,9 +118,10 @@ UTexture2D* ColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLine
 	}
 
 	// Allocate first mipmap.
-	FTexture2DMipMap* Mip = new(NewTexture->PlatformData->Mips) FTexture2DMipMap();
+	FTexture2DMipMap* Mip = new FTexture2DMipMap();
+	NewTexture->PlatformData->Mips.Add(Mip);
 	Mip->SizeX = TextureResolution;
-	Mip->SizeY = NewTexture->PlatformData->SizeY;
+	Mip->SizeY = Gradients.Num();
 
 	// Lock the texture so it can be modified
 	Mip->BulkData.Lock(LOCK_READ_WRITE);

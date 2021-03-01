@@ -4,7 +4,7 @@
 #include "RingSystemComponent.h"
 #include "UObject/UObjectGlobals.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "GasGiant.h"
+#include "GaseousColorGenerator.h"
 
 
 
@@ -14,6 +14,8 @@ URingSystemComponent::URingSystemComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+	
+	ColorGenerator = new GaseousColorGenerator(this);
 }
 
 
@@ -28,7 +30,7 @@ void URingSystemComponent::OnComponentCreated()
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 	if (Gradient)
 	{
-		GradientTexture = Cast<AGasGiant>(GetOwner())->CreateTexture("RingTexture", Gradient);
+		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 	}
 }
@@ -72,7 +74,7 @@ void URingSystemComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, Gradient) && Gradient != nullptr)
 		{
 			DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/RingMat_Inst.RingMat_Inst'"), NULL, LOAD_None, NULL)); //TODO Fix bad hard-coded ref?
-			GradientTexture = Cast<AGasGiant>(GetOwner())->CreateTexture("RingTexture", Gradient); //TODO replace this with some other texture generation method that is not connected to AGasGiant
+			GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 			DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 		}
 	}

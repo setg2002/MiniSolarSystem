@@ -18,7 +18,7 @@
 class CPPGAME_API TerrainFace
 {
 public:
-	TerrainFace(ShapeGenerator* shape_Generator, ColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, int32 meshNum, AActor* owner);
+	TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, int32 meshNum, AActor* owner);
 	~TerrainFace();
 
 	AActor* Owner;
@@ -33,7 +33,7 @@ public:
 
 	int32 MeshNum;
 
-	ColorGenerator* colorGenerator;
+	TerrestrialColorGenerator* colorGenerator;
 	ShapeGenerator* shapeGenerator;
 
 	TArray<FColor> VertexColors;
@@ -43,8 +43,8 @@ public:
 	FVector axisA;
 	FVector axisB;
 
-	void ConstructMesh(ColorGenerator* colorGenerator);
-	void ConstructMeshAsync(ColorGenerator* colorGenerator);
+	void ConstructMesh(TerrestrialColorGenerator* colorGenerator);
+	void ConstructMeshAsync(TerrestrialColorGenerator* colorGenerator);
 
 	void CalculateMesh();
 
@@ -57,7 +57,7 @@ public:
 
 namespace ThreadingCalculations
 {
-	static void CalculateMesh(int resolution, FVector localUp, FVector axisA, FVector axisB, TArray<FVector>& verticies, TArray<int>& triangles, TArray<FVector2D>& uv, ShapeGenerator* shapeGenerator, ColorGenerator* colorGenerator)
+	static void CalculateMesh(int resolution, FVector localUp, FVector axisA, FVector axisB, TArray<FVector>& verticies, TArray<int>& triangles, TArray<FVector2D>& uv, ShapeGenerator* shapeGenerator, TerrestrialColorGenerator* colorGenerator)
 	{
 		int triIndex = 0;
 
@@ -120,10 +120,10 @@ class CalculateMeshAsyncTask : public FNonAbandonableTask
 	TArray<FProcMeshTangent> tangents;
 
 	ShapeGenerator* shapeGenerator;
-	ColorGenerator* colorGenerator;
+	TerrestrialColorGenerator* colorGenerator;
 
 public:
-	CalculateMeshAsyncTask(TerrainFace& terrainFace, int Resolution, FVector LocalUp, FVector AxisA, FVector AxisB, TArray<FVector>& Verticies, TArray<int>& Triangles, TArray<FVector2D>& Uv, ShapeGenerator* shape_Generator, ColorGenerator* color_Generator)
+	CalculateMeshAsyncTask(TerrainFace& terrainFace, int Resolution, FVector LocalUp, FVector AxisA, FVector AxisB, TArray<FVector>& Verticies, TArray<int>& Triangles, TArray<FVector2D>& Uv, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator)
 		: TF(terrainFace), verticies(Verticies), triangles(Triangles), uv(Uv)
 	{
 		resolution = Resolution;

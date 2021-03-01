@@ -12,6 +12,7 @@
 
 // Forward Declarations
 class UGasGiantColorSettings;
+class GaseousColorGenerator;
 
 
 UCLASS()
@@ -37,7 +38,7 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void NewVoronoiForStorms();
 
-	UTexture2D* CreateTexture(FString TextureName, UCurveLinearColor* Gradient);
+	GaseousColorGenerator* ColorGenerator;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 };

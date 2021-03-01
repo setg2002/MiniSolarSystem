@@ -15,7 +15,7 @@ class TerrainFace;
 class UProceduralMeshComponent;
 class AOrbitDebugActor;
 class ShapeGenerator;
-class ColorGenerator;
+class TerrestrialColorGenerator;
 class ShapeSettings;
 class ColorSettings;
 
@@ -50,7 +50,7 @@ public:
 	TerrainFace* TerrainFaces[6];
 
 	ShapeGenerator* shapeGenerator;
-	ColorGenerator* colorGenerator;
+	TerrestrialColorGenerator* colorGenerator;
 
 	// Converts all ProcMeshes into a single static mesh that can be more easily saved to disk
 	UStaticMesh* ConvertToStaticMesh();
