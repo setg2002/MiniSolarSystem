@@ -3,22 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "RingSystemComponent.generated.h"
 
-class UStaticMeshComponent;
 
 
-UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class CPPGAME_API URingSystemComponent : public UActorComponent
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class CPPGAME_API URingSystemComponent : public UStaticMeshComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
 	URingSystemComponent();
-
-	UStaticMeshComponent* RingMesh;
 
 	UMaterialInstanceDynamic* DynamicMaterial;
 
@@ -33,18 +30,12 @@ public:
 
 	UTexture2D* GradientTexture;
 
-	void CreateMaterial();
-
-	void FindRingMesh();
-	
-	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
-
-	virtual void OnComponentCreated() override;
-
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	virtual void OnComponentCreated() override;
 
 public:	
 	// Called every frame
