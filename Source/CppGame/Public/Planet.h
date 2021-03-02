@@ -60,12 +60,24 @@ public:
 	UPROPERTY(Category = "Orbits", EditAnywhere)
 	ACelestialBody* OrbitingBody;
 
+	UPROPERTY(Category = "Orbits", EditAnywhere, meta = (ClampMin = "0"))
+	float m = 0.5f; //0.4586f;
+
+	UPROPERTY(Category = "Orbits", EditAnywhere, meta = (ClampMin = "0"))
+	float b = 50.5f;
+
 	// The necessary velocity for this planet to orbit OrbitingBody
 	UPROPERTY(Category = "Orbits", VisibleAnywhere)
 	float orbitVelocity;
 
+	// Sets orbitVelocity to the required magnitude to orbit OrbitingBody 
+	/* 
+		This calculation is really janky rn and is based off really approximate trendlines
+	so I would not recommend using it. It also doesn't take the gravitational constant (G) into 
+	account	and so only "works" with G = 100. 
+	*/
 	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
-	void CalculateOrbitVelocity();
+	void CalculateOrbitVelocity(); //TODO Make more reliable
 
 	// Sets velocity to orbitVelocity
 	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)

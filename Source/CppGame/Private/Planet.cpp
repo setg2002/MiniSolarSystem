@@ -13,6 +13,8 @@
 #include "ShapeGenerator.h"
 #include "AssetRegistryModule.h"
 #include "ProceduralMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 
@@ -248,7 +250,8 @@ void APlanet::GenerateColors()
 	colorGenerator->UpdateColors();
 
 	// Reload the texture
-	StaticMesh->GetMaterial(0)->ReloadConfig();
+	StaticMesh->GetMaterial(0)->LoadConfig(UMaterialInterface::StaticClass());
+	//StaticMesh->GetMaterial(0)->ReloadConfig();
 
 	if (bMultithreadGeneration)
 	{
@@ -265,17 +268,32 @@ void APlanet::CalculateOrbitVelocity()
 	}
 	else
 	{
-		//TODO Fix orbit velocity calculation
-		//UE_LOG(LogTemp, Warning, TEXT("Distance: %d"), (OrbitingBody->GetActorLocation() - this->GetActorLocation()).Size());
-		//orbitVelocity = FMath::Sqrt(((/*gameMode->gravitationalConstant*/100 * 100000) * OrbitingBody->mass) / 11110);
+		//float radius = FVector::Distance(this->GetActorLocation(), OrbitingBody->GetActorLocation());
+		//float orbitalPeriod = FMath::Sqrt(pow(radius, 3) / (100 * (OrbitingBody->mass + this->mass)));
+		orbitVelocity = (m * OrbitingBody->mass) + b + (this->mass / 2.f);
 		return;
 	}
 }
 
 void APlanet::SetToOrbit()
 {
-	//TODO Calculate what portion of the necessary orbit velocity should be applied to each sectopn of the initialVelocity vector
-	initialVelocity.Y = orbitVelocity;
+	FVector AtPlanet = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), OrbitingBody->GetActorLocation()).Vector();
+	FVector Up = StaticMesh->GetUpVector();
+	FVector Tangent = FVector().CrossProduct(AtPlanet, Up);
+
+	initialVelocity.X = Tangent.X * -orbitVelocity + OrbitingBody->initialVelocity.X;
+	initialVelocity.Y = Tangent.Y * -orbitVelocity + OrbitingBody->initialVelocity.Y;
+	initialVelocity.Z = Tangent.Z * -orbitVelocity + OrbitingBody->initialVelocity.Z;
+
+	if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
+	{
+		OrbitDebugActor->DrawOrbits();
+	}
+
+	// Debugging
+	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (AtPlanet * 50), 1, FColor::Red, 10, 1);
+	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (Up * 50), 1, FColor::Green, 10, 1);
+	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (Tangent * 50), 1, FColor::Blue, 10, 1);
 }
 
 void APlanet::ConvertAndSetStaticMesh(int32 i)
@@ -455,7 +473,7 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 	if (PropertyChangedEvent.Property != nullptr)
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
-
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *PropertyName.ToString());
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution) && bAutoGenerate)
 		{
 			GeneratePlanet();
@@ -476,7 +494,14 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 			GeneratePlanet();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, mass) || PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, initialVelocity) || PropertyName == GET_MEMBER_NAME_CHECKED(AActor, GetActorLocation()))
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, mass) || PropertyName == GET_MEMBER_NAME_CHECKED(AActor, GetActorLocation()))
+		{
+			if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
+			{
+				OrbitDebugActor->DrawOrbits();
+			}
+		}
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(FVector, Y) || PropertyName == GET_MEMBER_NAME_CHECKED(FVector, X))
 		{
 			if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
 			{
@@ -484,5 +509,6 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 			}
 		}
 	}
+
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
