@@ -66,21 +66,26 @@ void AOrbitDebugActor::CreateSplines()
 		Bodies.Add(Cast<ACelestialBody>(body));
 	}
 
+	Splines.SetNum(Bodies.Num());
+
 	for (int i = 0; i < Bodies.Num(); i++)
 	{
-		USplineComponent* NewSpline = NewObject<USplineComponent>(this, TEXT("Spline_" + i));
+		FString Name = "Spline_";
+		Name.Append(FString::FromInt(i));
+		USplineComponent* NewSpline = NewObject<USplineComponent>(this, FName(Name));
 
-		Splines.Add(NewSpline);
+		Splines[i] = NewSpline;
 		NewSpline->RegisterComponent();
 		//NewSpline->OnComponentCreated();  // Crashes the editor
 		NewSpline->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
 	}
 }
 
+//TODO This could be optimized by only redrawing the splines of bodies that have changed
 void AOrbitDebugActor::DrawOrbits()
 {
 	ClearOrbits();
-
+	
 	TArray<ACelestialBody*> Bodies;
 	TArray<AActor*> CollectedActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedActors);
@@ -150,17 +155,28 @@ void AOrbitDebugActor::DrawOrbits()
 	{
 		if (bDrawWithSplines)
 		{
-			TArray<FSplinePoint> SplinePoints;
-			for (int i = 2; i < DrawPoints[bodyIndex].Num(); i++)
+			// Add more points to the end of the spline until we reach NumSteps
+			if (Splines[bodyIndex]->GetNumberOfSplinePoints() < NumSteps)
 			{
-				SplinePoints.Add(FSplinePoint(i, DrawPoints[bodyIndex][i]));
+				for (int i = Splines[bodyIndex]->GetNumberOfSplinePoints(); i < NumSteps; i++)
+				{
+					Splines[bodyIndex]->AddPoint(FSplinePoint(i, DrawPoints[bodyIndex][i]), false);
+				}
+			}
+			// Remove points from the end of the spline until we reach NumSteps
+			else
+			{
+				while (Splines[bodyIndex]->GetNumberOfSplinePoints() > NumSteps)
+				{
+					Splines[bodyIndex]->RemoveSplinePoint(Splines[bodyIndex]->GetNumberOfSplinePoints() - 1, false);
+				}
 			}
 
-			Splines[bodyIndex]->AddPoints(SplinePoints);
 			Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
 			Splines[bodyIndex]->SetDrawDebug(true);
+			Splines[bodyIndex]->UpdateSpline();
 		}
-
+		
 		else
 		{
 			for (int i = 0; i < DrawPoints[bodyIndex].Num() - 1; i++)
@@ -212,14 +228,16 @@ VirtualBody::VirtualBody(ACelestialBody* Body)
 
 void AOrbitDebugActor::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
 	if (PropertyChangedEvent.Property != nullptr)
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
+		//TODO Is there a shorter way to rewrite this line?
 		if ((PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, NumSteps) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, TimeStep) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, bRelativeToBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, CentralBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, Width)) && bAutoDraw)
 		{
 			DrawOrbits();
 		}
 	}
-	Super::PostEditChangeProperty(PropertyChangedEvent);
 }

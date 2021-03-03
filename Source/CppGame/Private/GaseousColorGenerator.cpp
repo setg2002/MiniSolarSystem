@@ -73,13 +73,39 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 	return NewTexture;
 }
 
-UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int8 NumStorms = 25, float StormFalloff = 2.5f, int LowBound = 100, int HighBound = 924)
+UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int8 NumStorms, float StormFalloff, int LowBound, int HighBound, int TextureResolution)
 {
+	// Make sure TextureResolution is a power of 2
+	FGenericPlatformMath::FloorLog2(FMath::Max(TextureResolution, 1) * 2);
+
 	TArray<FVector2D> Points;
 	for (int32 i = 0; i < NumStorms; ++i)
 	{
 		Points.AddUnique(FVector2D(FMath::RandRange(LowBound, HighBound), FMath::RandRange(LowBound, HighBound)));
 	}
+
+	// Precalculate closest points to one another
+	TMap<FVector2D, float> StormRadii;
+	
+	for (auto& Point : Points)
+	{
+		StormRadii.Add(Point);
+	}
+	for (auto It = StormRadii.CreateConstIterator(); It; ++It)
+	{
+		float radius = 1024;
+		for (auto& Point : Points)
+		{
+			float dist = FVector2D::Distance(Point, It.Key());
+			if (Point != It.Key() && dist < radius)
+			{
+				radius = dist;
+			}
+		}
+		radius /= StormFalloff;
+		StormRadii.Emplace(It.Key(), radius);
+	}
+
 
 	FString TextureName = "Voronoi";
 	FString PackageName = TEXT("/Game/ProceduralTextures/" + Owner->GetName() + "_" + TextureName);
@@ -116,16 +142,7 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int8 NumStorms = 25, float
 			}
 
 			// Find the closest point to that other point to determine radius of storm
-			float PointDist = 1024;
-			for (auto& Point : Points)
-			{
-				float dist = FVector2D::Distance(ClosePoint, Point);
-				if (!FMath::IsNearlyEqual(dist, 0, 0.01f) && dist < PointDist)
-				{
-					PointDist = dist;
-				}
-			}
-			PointDist /= StormFalloff;
+			float PointDist = StormRadii[ClosePoint];
 
 			// How far away from the point is the currnet pixel
 			float percent = FMath::Clamp<float>(PixelDist / PointDist, 0, 1);

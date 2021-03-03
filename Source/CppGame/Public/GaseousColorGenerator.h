@@ -20,5 +20,5 @@ public:
 
 	UTexture2D* CreateTexture(FString TextureName, UCurveLinearColor* Gradient);
 
-	UTexture2D* MakeVoronoiTexture(int8 NumStorms, float StormFalloff, int LowBound, int HighBound);
+	UTexture2D* MakeVoronoiTexture(int8 NumStorms = 25, float StormFalloff = 2.5f, int LowBound = 100, int HighBound = 924, int TextureResolution = 1024);
 };
