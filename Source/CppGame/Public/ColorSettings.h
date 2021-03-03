@@ -60,7 +60,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCurveLinearColor* OceanColor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* PlanetMat;
 
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;

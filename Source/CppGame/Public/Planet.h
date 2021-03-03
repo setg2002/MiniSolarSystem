@@ -151,6 +151,8 @@ public:
 	virtual void OnConstruction(const FTransform & Transform) override;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	
+	virtual void PostEditMove(bool bFinished) override;
 
 protected:
 	AOrbitDebugActor* OrbitDebugActor;

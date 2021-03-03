@@ -5,8 +5,8 @@
 
 MinMax::MinMax()
 {
-	Min = 999999999999999999;
-	Max = -999999999999999999;
+	Min = TNumericLimits<float>::Max();
+	Max = TNumericLimits<float>::Min();
 }
 
 MinMax::~MinMax()

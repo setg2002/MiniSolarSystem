@@ -251,7 +251,7 @@ void APlanet::GenerateColors()
 
 	// Reload the texture
 	StaticMesh->GetMaterial(0)->LoadConfig(UMaterialInterface::StaticClass());
-	//StaticMesh->GetMaterial(0)->ReloadConfig();
+	//StaticMesh->GetMaterial(0)->ReloadConfig();  // Possible engine crash if material doesn't exist?
 
 	if (bMultithreadGeneration)
 	{
@@ -470,10 +470,12 @@ UStaticMesh* APlanet::ConvertToStaticMesh()
 
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
 	if (PropertyChangedEvent.Property != nullptr)
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
-		//UE_LOG(LogTemp, Warning, TEXT("%s"), *PropertyName.ToString());
+
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution) && bAutoGenerate)
 		{
 			GeneratePlanet();
@@ -481,27 +483,20 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && bAutoGenerate)
 		{
-			GeneratePlanet();
+			OnShapeSettingsUpdated();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ColorSettings) && bAutoGenerate)
 		{
-			GeneratePlanet();
+			OnColorSettingsUpdated();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask) && bAutoGenerate)
+		/*if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask) && bAutoGenerate)
 		{
 			GeneratePlanet();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }
-		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, mass) || PropertyName == GET_MEMBER_NAME_CHECKED(AActor, GetActorLocation()))
-		{
-			if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
-			{
-				OrbitDebugActor->DrawOrbits();
-			}
-		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(FVector, Y) || PropertyName == GET_MEMBER_NAME_CHECKED(FVector, X))
+		}*/
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, mass))
 		{
 			if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
 			{
@@ -509,6 +504,14 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 			}
 		}
 	}
+}
 
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+void APlanet::PostEditMove(bool bFinished)
+{
+	Super::PostEditMove(bFinished);
+
+	if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
+	{
+		OrbitDebugActor->DrawOrbits();
+	}
 }

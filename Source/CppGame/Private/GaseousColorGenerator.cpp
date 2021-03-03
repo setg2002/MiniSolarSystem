@@ -48,9 +48,10 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 	}
 
 	// Allocate first mipmap.
-	FTexture2DMipMap* Mip = new(NewTexture->PlatformData->Mips) FTexture2DMipMap();
+	FTexture2DMipMap* Mip = new FTexture2DMipMap();
+	NewTexture->PlatformData->Mips.Add(Mip);
 	Mip->SizeX = 256;
-	Mip->SizeY = NewTexture->PlatformData->SizeY;
+	Mip->SizeY = 256;
 
 	// Lock the texture so it can be modified
 	Mip->BulkData.Lock(LOCK_READ_WRITE);
@@ -139,9 +140,10 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int8 NumStorms = 25, float
 	}
 
 	// Allocate first mipmap.
-	FTexture2DMipMap* Mip = new(VoronoiTexture->PlatformData->Mips) FTexture2DMipMap();
+	FTexture2DMipMap* Mip = new FTexture2DMipMap();
+	VoronoiTexture->PlatformData->Mips.Add(Mip);
 	Mip->SizeX = 1024;
-	Mip->SizeY = VoronoiTexture->PlatformData->SizeY;
+	Mip->SizeY = 1024;
 
 	// Lock the texture so it can be modified
 	Mip->BulkData.Lock(LOCK_READ_WRITE);

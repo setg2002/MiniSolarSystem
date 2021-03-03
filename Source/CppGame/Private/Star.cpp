@@ -11,7 +11,7 @@
 AStar::AStar()
 {
 	sphere = CreateDefaultSubobject<UStaticMeshComponent>(FName("Sphere"));
-	sphere->AttachTo(RootComponent);
+	sphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
 	dynamicMaterial = sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, sphere->GetMaterial(0));
 	sphere->SetMaterial(0, dynamicMaterial);

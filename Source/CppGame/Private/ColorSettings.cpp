@@ -5,5 +5,6 @@
 
 UColorSettings::UColorSettings()
 {
+	PlanetMat = LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/PlanetMat_Inst.PlanetMat_Inst'"), NULL, LOAD_None, NULL);
 	DynamicMaterials.SetNum(6);
 }

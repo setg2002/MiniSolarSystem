@@ -73,7 +73,7 @@ void AOrbitDebugActor::CreateSplines()
 		Splines.Add(NewSpline);
 		NewSpline->RegisterComponent();
 		//NewSpline->OnComponentCreated();  // Crashes the editor
-		NewSpline->AttachTo(GetRootComponent(), NAME_None);
+		NewSpline->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
 	}
 }
 
