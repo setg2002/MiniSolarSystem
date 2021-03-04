@@ -73,7 +73,7 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 	return NewTexture;
 }
 
-UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int8 NumStorms, float StormFalloff, int LowBound, int HighBound, int TextureResolution)
+UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float StormFalloff, int LowBound, int HighBound, int TextureResolution)
 {
 	// Make sure TextureResolution is a power of 2
 	FGenericPlatformMath::FloorLog2(FMath::Max(TextureResolution, 1) * 2);

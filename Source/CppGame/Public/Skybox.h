@@ -19,6 +19,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	UTexture2D* MakeTexture();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
