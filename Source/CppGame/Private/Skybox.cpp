@@ -15,6 +15,7 @@ ASkybox::ASkybox()
 	Mesh->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"), NULL, LOAD_None, NULL));
 	Mesh->SetWorldScale3D(FVector(1000000));
 	Mesh->SetupAttachment(GetRootComponent());
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/M_SkyBox_Inst.M_SkyBox_Inst'"), NULL, LOAD_None, NULL));
 }
 
