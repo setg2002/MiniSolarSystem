@@ -84,7 +84,10 @@ void AOrbitDebugActor::CreateSplines()
 //TODO This could be optimized by only redrawing the splines of bodies that have changed
 void AOrbitDebugActor::DrawOrbits()
 {
-	ClearOrbits();
+	if (!bDrawWithSplines)
+	{
+		ClearOrbits();
+	}
 	
 	TArray<ACelestialBody*> Bodies;
 	TArray<AActor*> CollectedActors;

@@ -16,7 +16,7 @@ ASkybox::ASkybox()
 	Mesh->SetWorldScale3D(FVector(1000000));
 	Mesh->SetupAttachment(GetRootComponent());
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/M_SkyBox_Inst.M_SkyBox_Inst'"), NULL, LOAD_None, NULL));
+	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_SkyBox_Inst.M_SkyBox_Inst'"), NULL, LOAD_None, NULL));
 }
 
 // Called when the game starts or when spawned
