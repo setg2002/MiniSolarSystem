@@ -27,7 +27,7 @@ void AStar::UpdateColor()
 	dynamicMaterial->SetVectorParameterValue(FName("_baseColor"), starProperties.color);
 }
 
-void AStar::GenerateDistantStars()
+/*void AStar::GenerateDistantStars()
 {
 	if (distantStars.Num() < numDistantStars)
 	{
@@ -62,7 +62,7 @@ void AStar::GenerateDistantStars()
 			distantStars.RemoveAt(distantStars.Num() - 1, 1, true);
 		}
 	}
-}
+}*/
 
 void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
@@ -70,7 +70,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(AStar, possibleColors))
+		/*if (PropertyName == GET_MEMBER_NAME_CHECKED(AStar, possibleColors))
 		{
 			for (int i = 0; i < possibleColors.Num(); i++)
 			{
@@ -81,7 +81,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(AStar, numDistantStars))
 		{
 			GenerateDistantStars();
-		}
+		}*/
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, radius))
 		{
 			sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));

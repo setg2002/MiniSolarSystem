@@ -20,7 +20,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, CallInEditor)
-	UTexture2D* MakeTexture();
+	void/*UTexture2D*/ MakeTexture();
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,5 +31,14 @@ protected:
 
 private:
 	UMaterialInstanceDynamic* DynamicMaterial;
+
+	const TArray<FColor> possibleColors = {
+		FColor(255, 178, 178),
+		FColor(207, 238, 255),
+		FColor(255, 233, 208),
+		FColor(255, 187, 173),
+		FColor(232, 254, 255),
+		FColor(250, 239, 255)
+	};
 
 };

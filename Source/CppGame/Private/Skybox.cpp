@@ -12,7 +12,7 @@ ASkybox::ASkybox()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	Mesh->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/EngineSky/SM_SkySphere.SM_SkySphere'"), NULL, LOAD_None, NULL));
+	Mesh->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"), NULL, LOAD_None, NULL));
 	Mesh->SetWorldScale3D(FVector(1000000));
 	Mesh->SetupAttachment(GetRootComponent());
 	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/M_SkyBox_Inst.M_SkyBox_Inst'"), NULL, LOAD_None, NULL));
@@ -32,7 +32,7 @@ void ASkybox::Tick(float DeltaTime)
 
 }
 
-UTexture2D* ASkybox::MakeTexture()
+void /*UTexture2D*/ ASkybox::MakeTexture()
 {
 	int16 TextureRes = 2048;
 	int32 NumStars = 50000;
@@ -59,26 +59,26 @@ UTexture2D* ASkybox::MakeTexture()
 	SkyboxTexture->AddressX = TA_Clamp;
 	SkyboxTexture->AddressY = TA_Clamp;
 
-	int color;
 	uint8* Pixels = new uint8[TextureRes * TextureRes * 4];
 	for (int32 y = 0; y < TextureRes; y++)
 	{
 		for (int32 x = 0; x < TextureRes; x++)
 		{
+			FColor color;
 			
 			if (Points.Contains(FVector2D(x, y)))
 			{
-				color = 255;
+				color = possibleColors[FMath::RandRange(0, 5)];
 			}
 			else
 			{
-				color = 0;
+				color = FColor::Black;
 			}
 
 			int32 curPixelIndex = ((y * TextureRes) + x);
-			Pixels[4 * curPixelIndex] = color;
-			Pixels[4 * curPixelIndex + 1] = color;
-			Pixels[4 * curPixelIndex + 2] = color;
+			Pixels[4 * curPixelIndex] = color.B;
+			Pixels[4 * curPixelIndex + 1] = color.G;
+			Pixels[4 * curPixelIndex + 2] = color.R;
 			Pixels[4 * curPixelIndex + 3] = 255;
 		}
 	}
@@ -106,5 +106,5 @@ UTexture2D* ASkybox::MakeTexture()
 
 	delete[] Pixels;	// Don't forget to free the memory here
 
-	return SkyboxTexture;
+	return /*SkyboxTexture*/;
 }

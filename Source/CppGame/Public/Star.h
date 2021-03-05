@@ -63,15 +63,15 @@ public:
 
 	UMaterialInstanceDynamic* dynamicMaterial;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UMaterialInstance* distStarMat;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//UMaterialInstance* distStarMat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialParameterCollection* planetMateralParameterCollection;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
-	UFUNCTION(BlueprintCallable, CallInEditor)
+	/*UFUNCTION(BlueprintCallable, CallInEditor)
 	void GenerateDistantStars();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> distantStarBP;
@@ -85,12 +85,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FColor> possibleColors;
 
-	TArray<UMaterialInstanceDynamic*> dynamMats;
+	TArray<UMaterialInstanceDynamic*> dynamMats;*/
 
 	void UpdateColor();
 
 protected:
 	UMaterialParameterCollectionInstance* planetMateralParameterCollectionInst;
 
-	TArray<AActor*> distantStars;
+	//TArray<AActor*> distantStars;
 };
