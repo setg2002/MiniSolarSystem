@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "CelestialBody.h"
+#include "StarProperties.h"
 #include "Star.generated.h"
+
 
 /**
  * 
@@ -22,24 +24,26 @@ enum EStarType {
 	D	UMETA(DisplayName = "White Dwarf")
 };
 
-USTRUCT(BlueprintType)
+/*USTRUCT(BlueprintType)
 struct FStarProperties : public FTableRowBase 
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
+	FStarProperties(){ }
+
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"), BlueprintReadWrite)
 	int radius = 50;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"), BlueprintReadWrite)
 	int mass = 1000;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"), BlueprintReadWrite)
 	int luminosity = 50;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FColor color = FColor(128, 0, 0);
-};
+};*/
 
 UCLASS(hidecategories = ("Default"))
 class CPPGAME_API AStar : public ACelestialBody
@@ -55,7 +59,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* sphere;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FStarProperties starProperties;
 
 	UPROPERTY(EditDefaultsOnly)
