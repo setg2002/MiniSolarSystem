@@ -60,28 +60,33 @@ public:
 	UPROPERTY(Category = "Orbits", EditAnywhere)
 	ACelestialBody* OrbitingBody;
 
-	UPROPERTY(Category = "Orbits", EditAnywhere, meta = (ClampMin = "0"))
-	float m = 0.5f; //0.4586f;
-
-	UPROPERTY(Category = "Orbits", EditAnywhere, meta = (ClampMin = "0"))
-	float b = 50.5f;
-
 	// The necessary velocity for this planet to orbit OrbitingBody
 	UPROPERTY(Category = "Orbits", VisibleAnywhere)
 	float orbitVelocity;
 
 	// Sets orbitVelocity to the required magnitude to orbit OrbitingBody 
-	/* 
-		This calculation is really janky rn and is based off really approximate trendlines
-	so I would not recommend using it. It also doesn't take the gravitational constant (G) into 
-	account	and so only "works" with G = 100. 
-	*/
 	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
-	void CalculateOrbitVelocity(); //TODO Make more reliable
+	void CalculateOrbitVelocity();
 
 	// Sets velocity to orbitVelocity
 	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
 	void SetToOrbit();
+
+	// Shows/hides orbit calculation vectors
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite)
+	bool bVectorDebug;
+
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
+	int32 VectorLength = 50;
+
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
+	float VectorSize = 1;
+
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
+	int VectorThickness = 1;
+
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
+	int32 VectorDuration = 10;
 
 	/* Each element in the array represents the status of a TerrainFace thread. The entire array is set to false
 	in GeneratePlanet(), when terrain generation starts. ConvertAndSetStaticMesh(int32 i) then uses the array to 

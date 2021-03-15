@@ -268,9 +268,9 @@ void APlanet::CalculateOrbitVelocity()
 	}
 	else
 	{
-		//float radius = FVector::Distance(this->GetActorLocation(), OrbitingBody->GetActorLocation());
-		//float orbitalPeriod = FMath::Sqrt(pow(radius, 3) / (100 * (OrbitingBody->mass + this->mass)));
-		orbitVelocity = (m * OrbitingBody->mass) + b + (this->mass / 2.f);
+		//TODO Replace 100 with gravitational constant from gamemode
+		float GM = 100 * (this->mass + OrbitingBody->mass);
+		orbitVelocity = FMath::Sqrt(GM);
 		return;
 	}
 }
@@ -279,7 +279,7 @@ void APlanet::SetToOrbit()
 {
 	FVector AtPlanet = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), OrbitingBody->GetActorLocation()).Vector();
 	FVector Up = StaticMesh->GetUpVector();
-	FVector Tangent = FVector().CrossProduct(AtPlanet, Up);
+	FVector Tangent = FVector().CrossProduct(AtPlanet, Up).GetSafeNormal();
 
 	initialVelocity.X = Tangent.X * -orbitVelocity + OrbitingBody->initialVelocity.X;
 	initialVelocity.Y = Tangent.Y * -orbitVelocity + OrbitingBody->initialVelocity.Y;
@@ -291,9 +291,12 @@ void APlanet::SetToOrbit()
 	}
 
 	// Debugging
-	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (AtPlanet * 50), 1, FColor::Red, 10, 1);
-	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (Up * 50), 1, FColor::Green, 10, 1);
-	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (Tangent * 50), 1, FColor::Blue, 10, 1);
+	if (bVectorDebug)
+	{
+		UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (AtPlanet * VectorLength), VectorSize, FColor::Red, VectorDuration, VectorThickness);
+		UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (Up * VectorLength), VectorSize, FColor::Green, VectorDuration, VectorThickness);
+		UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (Tangent * VectorLength), VectorSize, FColor::Blue, VectorDuration, VectorThickness);
+	}
 }
 
 void APlanet::ConvertAndSetStaticMesh(int32 i)
