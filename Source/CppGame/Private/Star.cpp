@@ -13,6 +13,8 @@ AStar::AStar()
 	sphere = CreateDefaultSubobject<UStaticMeshComponent>(FName("Sphere"));
 	sphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
+	this->initialVelocity = FVector::ZeroVector;
+
 	dynamicMaterial = sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, sphere->GetMaterial(0));
 	sphere->SetMaterial(0, dynamicMaterial);
 }

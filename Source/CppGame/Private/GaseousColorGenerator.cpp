@@ -16,6 +16,9 @@ GaseousColorGenerator::~GaseousColorGenerator()
 
 UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLinearColor* Gradient)
 {
+	int16 sizeX = 256;
+	int16 sizeY = 1;
+
 	FString PackageName = TEXT("/Game/ProceduralTextures/" + Owner->GetName() + "_" + TextureName);
 
 	UPackage* Package = CreatePackage(*PackageName);
@@ -25,21 +28,21 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 
 	NewTexture->AddToRoot();								// This line prevents garbage collection of the texture
 	NewTexture->PlatformData = new FTexturePlatformData();	// Initialize the PlatformData
-	NewTexture->PlatformData->SizeX = 256;
-	NewTexture->PlatformData->SizeY = 256;
+	NewTexture->PlatformData->SizeX = sizeX;
+	NewTexture->PlatformData->SizeY = sizeY;
 	NewTexture->PlatformData->SetNumSlices(1);
 	NewTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
 	NewTexture->AddressX = TA_Clamp;
 	NewTexture->AddressY = TA_Clamp;
 
 	uint8* Pixels = new uint8[NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4];
-	for (int32 y = 0; y < NewTexture->PlatformData->SizeY; y++)
+	for (int32 y = 0; y < sizeY; y++)
 	{
-		for (int32 x = 0; x < 256; x++)
+		for (int32 x = 0; x < sizeX; x++)
 		{
-			float time = (float)y / 256.f;
+			float time = (float)x / 256.f;
 			FColor gradientCol = Gradient->GetLinearColorValue(time).ToFColor(true);
-			int32 curPixelIndex = ((y * 256) + x);
+			int32 curPixelIndex = ((y * sizeY) + x);
 			Pixels[4 * curPixelIndex] = gradientCol.B;
 			Pixels[4 * curPixelIndex + 1] = gradientCol.G;
 			Pixels[4 * curPixelIndex + 2] = gradientCol.R;
@@ -50,8 +53,8 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 	// Allocate first mipmap.
 	FTexture2DMipMap* Mip = new FTexture2DMipMap();
 	NewTexture->PlatformData->Mips.Add(Mip);
-	Mip->SizeX = 256;
-	Mip->SizeY = 256;
+	Mip->SizeX = sizeX;
+	Mip->SizeY = sizeY;
 
 	// Lock the texture so it can be modified
 	Mip->BulkData.Lock(LOCK_READ_WRITE);
@@ -59,7 +62,7 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 	FMemory::Memcpy(TextureData, Pixels, sizeof(uint8) * NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4);
 	Mip->BulkData.Unlock();
 
-	NewTexture->Source.Init(256, 256, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
+	NewTexture->Source.Init(sizeX, sizeY, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
 
 	NewTexture->UpdateResource();
 	Package->MarkPackageDirty();

@@ -33,10 +33,10 @@ private:
 	UMaterialInstanceDynamic* DynamicMaterial;
 
 	const TArray<FColor> possibleColors = {
-		FColor(255, 178, 178),
-		FColor(207, 238, 255),
-		FColor(255, 233, 208),
-		FColor(255, 187, 173),
+		FColor(255, 210, 210),
+		FColor(235, 247, 255),
+		FColor(255, 242, 224),
+		FColor(255, 237, 229),
 		FColor(232, 254, 255),
 		FColor(250, 239, 255)
 	};

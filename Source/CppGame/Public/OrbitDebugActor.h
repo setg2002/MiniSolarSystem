@@ -40,7 +40,7 @@ public:
 	int NumSteps = 1000;
 
 	UPROPERTY(EditAnywhere)
-	float TimeStep = 0.05f;
+	float TimeStep = 0.0833f;
 
 	UPROPERTY(EditAnywhere)
 	bool bUsePhysicsTimeStep;
