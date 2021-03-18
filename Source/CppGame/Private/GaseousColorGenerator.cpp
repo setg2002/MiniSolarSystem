@@ -123,6 +123,7 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float Sto
 	VoronoiTexture->PlatformData->SizeY = 1024;
 	VoronoiTexture->PlatformData->SetNumSlices(1);
 	VoronoiTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
+	VoronoiTexture->CompressionSettings = TextureCompressionSettings::TC_HDR;
 	VoronoiTexture->AddressX = TA_Clamp;
 	VoronoiTexture->AddressY = TA_Clamp;
 
