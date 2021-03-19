@@ -201,6 +201,20 @@ void APlanet::Initialize()
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
 		
+	/*ProcMeshes.SetNum(6);
+	for (int8 i = 0; i < 6; i++)
+	{
+		FString Name = "ProcMeshes_";
+		Name.Append(FString::FromInt(i));
+
+		ProcMeshes[i] = NewObject<UProceduralMeshComponent>(this, FName(Name));
+
+		ProcMeshes[i]->RegisterComponent();        //You must ConstructObject with a valid Outer that has world, see above	 
+		ProcMeshes[i]->SetWorldLocation(FVector::ZeroVector);
+		ProcMeshes[i]->SetWorldRotation(FRotator::ZeroRotator);
+		ProcMeshes[i]->AttachTo(GetRootComponent(), NAME_None, EAttachLocation::KeepWorldPosition);
+	}*/
+
 	for (int32 i = 0; i < 6; i++)
 	{
 		TerrainFaces[i] = new TerrainFace(shapeGenerator, colorGenerator, resolution, directions[i], ProcMeshes[i], i, this);
@@ -460,6 +474,8 @@ UStaticMesh* APlanet::ConvertToStaticMesh()
 
 		FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
 		bool bSavedMesh = UPackage::SavePackage(MeshPackage, NewMesh, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
+
+		//ProcMeshes.Empty();
 
 		for (auto& ProcMesh : ProcMeshes)
 		{
