@@ -5,14 +5,13 @@
 #include "Planet.h"
 #include "AssetRegistryModule.h"
 
-TerrainFace::TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* procMesh, int32 meshNum, AActor* owner)
+TerrainFace::TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* procMesh, AActor* owner)
 {
 	Owner = owner;
 
 	colorGenerator = color_Generator;
 	shapeGenerator = shape_Generator;
 	Resolution = resolution;
-	MeshNum = meshNum;
 	LocalUp = localUp;
 	ProcMesh = procMesh;
 
@@ -115,5 +114,5 @@ void TerrainFace::UpdateTangentsNormalsAsync()
 void TerrainFace::CreateMesh()
 {
 	ProcMesh->CreateMeshSection(0, verticies, triangles, normals, uv, VertexColors, tangents, false);
-	Cast<APlanet>(Owner)->ConvertAndSetStaticMesh(MeshNum);
+	Cast<APlanet>(Owner)->ConvertAndSetStaticMesh(ProcMesh);
 }

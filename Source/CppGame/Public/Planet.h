@@ -41,11 +41,9 @@ class CPPGAME_API APlanet : public ACelestialBody
 public:
 	APlanet();
 
-	/*Mesh stuff*/	
+	// Main mesh	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* StaticMesh;
-	// Procedural meshes
-	TArray<UProceduralMeshComponent*> ProcMeshes; //TODO Destroy proc meshes when not in use
 
 	TerrainFace* TerrainFaces[6];
 
@@ -53,7 +51,7 @@ public:
 	TerrestrialColorGenerator* colorGenerator;
 
 	// Converts all ProcMeshes into a single static mesh that can be more easily saved to disk
-	UStaticMesh* ConvertToStaticMesh();
+	UStaticMesh* ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes);
 
 	/* TODO Orbit stuff should be put in ACelestialBody instead */
 	// The CelestialBody that orbitVelocity is to be calculated for
@@ -151,7 +149,7 @@ public:
 	void OnColorSettingsUpdated();
 
 	// Converts procedural meshes of ProcMeshes array to static meshes then combines all of them and assigns the resulting mesh to StaticMesh
-	void ConvertAndSetStaticMesh(int32 i);
+	void ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh);
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 

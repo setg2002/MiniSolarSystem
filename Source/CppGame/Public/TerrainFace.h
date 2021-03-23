@@ -18,7 +18,7 @@
 class CPPGAME_API TerrainFace
 {
 public:
-	TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, int32 meshNum, AActor* owner);
+	TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, AActor* owner);
 	~TerrainFace();
 
 	AActor* Owner;
@@ -30,8 +30,6 @@ public:
 	TArray<FProcMeshTangent> tangents;
 
 	UProceduralMeshComponent* ProcMesh;
-
-	int32 MeshNum;
 
 	TerrestrialColorGenerator* colorGenerator;
 	ShapeGenerator* shapeGenerator;

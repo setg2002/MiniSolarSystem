@@ -12,6 +12,8 @@ AStar::AStar()
 {
 	sphere = CreateDefaultSubobject<UStaticMeshComponent>(FName("Sphere"));
 	sphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	sphere->CastShadow = 0;
+	sphere->bCastDynamicShadow = 0;
 
 	this->initialVelocity = FVector::ZeroVector;
 

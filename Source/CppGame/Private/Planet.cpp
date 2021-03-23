@@ -22,14 +22,6 @@ APlanet::APlanet()
 {
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 
-	ProcMeshes = { CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh1"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh2"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh3"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh4"),
-			   CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh5")
-	};
-
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new TerrestrialColorGenerator(this);
 }
@@ -152,11 +144,6 @@ void APlanet::GeneratePlanet()
 	std::fill(std::begin(ThreadsFinished), std::end(ThreadsFinished), 0);
 	if (ColorSettings)
 	{
-		for (auto& Mesh : ProcMeshes)
-		{
-			Mesh->SetRelativeLocation(FVector().ZeroVector);
-		}
-
 		StaticMesh->SetRelativeLocation(FVector().ZeroVector);
 
 		if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
@@ -200,24 +187,16 @@ void APlanet::Initialize()
 {
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
-		
-	/*ProcMeshes.SetNum(6);
+
+	TArray<UProceduralMeshComponent*> ProcMeshes;
 	for (int8 i = 0; i < 6; i++)
 	{
-		FString Name = "ProcMeshes_";
-		Name.Append(FString::FromInt(i));
-
-		ProcMeshes[i] = NewObject<UProceduralMeshComponent>(this, FName(Name));
-
-		ProcMeshes[i]->RegisterComponent();        //You must ConstructObject with a valid Outer that has world, see above	 
-		ProcMeshes[i]->SetWorldLocation(FVector::ZeroVector);
-		ProcMeshes[i]->SetWorldRotation(FRotator::ZeroRotator);
-		ProcMeshes[i]->AttachTo(GetRootComponent(), NAME_None, EAttachLocation::KeepWorldPosition);
-	}*/
+		ProcMeshes.Add(NewObject<UProceduralMeshComponent>());
+	}
 
 	for (int32 i = 0; i < 6; i++)
 	{
-		TerrainFaces[i] = new TerrainFace(shapeGenerator, colorGenerator, resolution, directions[i], ProcMeshes[i], i, this);
+		TerrainFaces[i] = new TerrainFace(shapeGenerator, colorGenerator, resolution, directions[i], ProcMeshes[i], this);
 
 		if (ColorSettings->DynamicMaterials[i] == nullptr)
 		{
@@ -239,10 +218,10 @@ void APlanet::GenerateMesh()
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			if (ProcMeshes[i]->IsVisibleInEditor())
-			{
+			//if (ProcMeshes[i]->IsVisibleInEditor())
+			//{
 				TerrainFaces[i]->CalculateMesh();
-			}
+			//}
 		}
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
 	}
@@ -313,22 +292,19 @@ void APlanet::SetToOrbit()
 	}
 }
 
-void APlanet::ConvertAndSetStaticMesh(int32 i)
+void APlanet::ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh)
 {
-	ThreadsFinished[i] = true;
-
-	for (int32 k = 0; k < 6; k++)
+	static TArray<UProceduralMeshComponent*> ProcMeshes;
+	ProcMeshes.Add(NewMesh);
+	
+	if (ProcMeshes.IsValidIndex(5))
 	{
-		if (ThreadsFinished[k] == false)
-		{
-			return;
-		}
+		StaticMesh->SetStaticMesh(ConvertToStaticMesh(ProcMeshes));
+		ProcMeshes.Empty();
 	}
-
-	StaticMesh->SetStaticMesh(ConvertToStaticMesh());
 }
 
-UStaticMesh* APlanet::ConvertToStaticMesh()
+UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes)
 {
 	FString AssetName = FString(TEXT("SM_")) + this->GetName();
 	FString PathName = FString(TEXT("/Game/PlanetMeshes/"));
@@ -474,13 +450,6 @@ UStaticMesh* APlanet::ConvertToStaticMesh()
 
 		FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
 		bool bSavedMesh = UPackage::SavePackage(MeshPackage, NewMesh, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
-		//ProcMeshes.Empty();
-
-		for (auto& ProcMesh : ProcMeshes)
-		{
-			ProcMesh->ClearMeshSection(0);
-		}
 
 		return NewMesh;
 	}

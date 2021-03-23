@@ -28,7 +28,6 @@ protected:
 
 	UStaticMeshComponent* Mesh;
 
-
 private:
 	UMaterialInstanceDynamic* DynamicMaterial;
 
