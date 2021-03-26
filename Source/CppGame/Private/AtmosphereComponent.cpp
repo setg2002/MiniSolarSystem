@@ -10,17 +10,14 @@
 
 UAtmosphereComponent::UAtmosphereComponent(/*float radius*/)
 {
+
+	CloudComponent = CreateDefaultSubobject<UCloudComponent>("Clouds");
 }
 
 
 void UAtmosphereComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
-
-	if (CloudComponent != nullptr)
-	{
-		CloudComponent->DestroyComponent();
-	}
 
 	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->PlanetRadius; //TODO Use constructor passed radius in full game
 
@@ -30,9 +27,6 @@ void UAtmosphereComponent::OnComponentCreated()
 	DynamicMaterial = nullptr;
 	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_atmosphere_proportional_Inst.M_atmosphere_proportional_Inst'"), NULL, LOAD_None, NULL));
 	DynamicMaterial->SetScalarParameterValue("planet_radius", PlanetRadius);
-
-	// Create the clouds
-	CloudComponent =  NewObject<UCloudComponent>(this, "Clouds");
 }
 
 
@@ -55,10 +49,6 @@ void UAtmosphereComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
-		/*if (PropertyName == GET_MEMBER_NAME_CHECKED(UAtmosphereComponent, PlanetRadius))
-		{
-			DynamicMaterial->SetScalarParameterValue("planet_radius", PlanetRadius);
-		}*/
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FAtmosphereProperties, Height))
 		{
 			DynamicMaterial->SetScalarParameterValue("atmo_radius", AtmosphereProperties.Height);
@@ -110,7 +100,7 @@ void UAtmosphereComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(UAtmosphereComponent, CloudHeight))
 		{
-			CloudComponent->SetRelativeScale3D(FVector(CloudHeight));
+			CloudComponent->SetRelativeScale3D(FVector(CloudHeight)); //HACK This should not be here, only the cloud component itself should control this 
 		}
 	}
 }
