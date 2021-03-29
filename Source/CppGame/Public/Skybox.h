@@ -22,6 +22,31 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void/*UTexture2D*/ MakeTexture();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D StarOffset = FVector2D(0, 0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D NoiseOffset = FVector2D(.5f, .1f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D ColorOffset = FVector2D(-.75f, .5f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"))
+	float NoiseWarpAmount = 2.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	float ColorMultiplier = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
+	float DesaturationAmount = .45f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	float Intensity = 2.f;
+
+	virtual void OnConstruction(const FTransform & Transform) override;
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -3,6 +3,7 @@
 
 #include "Skybox.h"
 #include "AssetRegistryModule.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 
 // Sets default values
@@ -18,8 +19,14 @@ ASkybox::ASkybox()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->CastShadow = 0;
 	Mesh->bCastDynamicShadow = 0;
+}
+
+
+void ASkybox::OnConstruction(const FTransform & Transform)
+{
 	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_SkyBox_Inst.M_SkyBox_Inst'"), NULL, LOAD_None, NULL));
 }
+
 
 // Called when the game starts or when spawned
 void ASkybox::BeginPlay()
@@ -28,6 +35,7 @@ void ASkybox::BeginPlay()
 	
 }
 
+
 // Called every frame
 void ASkybox::Tick(float DeltaTime)
 {
@@ -35,7 +43,8 @@ void ASkybox::Tick(float DeltaTime)
 
 }
 
-void /*UTexture2D*/ ASkybox::MakeTexture()
+// This is very slow
+void ASkybox::MakeTexture()
 {
 	int16 TextureRes = 2048;
 	int32 NumStars = 50000;
@@ -59,8 +68,8 @@ void /*UTexture2D*/ ASkybox::MakeTexture()
 	SkyboxTexture->PlatformData->SizeY = TextureRes;
 	SkyboxTexture->PlatformData->SetNumSlices(1);
 	SkyboxTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
-	SkyboxTexture->AddressX = TA_Clamp;
-	SkyboxTexture->AddressY = TA_Clamp;
+	SkyboxTexture->AddressX = TA_Wrap;
+	SkyboxTexture->AddressY = TA_Wrap;
 
 	uint8* Pixels = new uint8[TextureRes * TextureRes * 4];
 	for (int32 y = 0; y < TextureRes; y++)
@@ -109,5 +118,35 @@ void /*UTexture2D*/ ASkybox::MakeTexture()
 
 	delete[] Pixels;	// Don't forget to free the memory here
 
+	DynamicMaterial->SetTextureParameterValue("StarTexture", SkyboxTexture);
+
 	return /*SkyboxTexture*/;
+}
+
+
+void ASkybox::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (PropertyChangedEvent.Property != nullptr)
+	{
+		const FName PropertyName(PropertyChangedEvent.Property->GetName());
+
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(FVector2D, X) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(FVector2D, Y) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(ASkybox, NoiseWarpAmount) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(ASkybox, ColorMultiplier) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(ASkybox, DesaturationAmount) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(ASkybox, Intensity))
+		{
+			DynamicMaterial->SetVectorParameterValue("StarOffset", FLinearColor(StarOffset.X, StarOffset.Y, 0, 0));
+			DynamicMaterial->SetVectorParameterValue("NoiseOffset", FLinearColor(NoiseOffset.X, NoiseOffset.Y, 0, 0));
+			DynamicMaterial->SetVectorParameterValue("ColorOffset", FLinearColor(ColorOffset.X, ColorOffset.Y, 0, 0));
+			DynamicMaterial->SetScalarParameterValue("NoiseWarpAmount", NoiseWarpAmount);
+			DynamicMaterial->SetScalarParameterValue("ColorMultiplier", ColorMultiplier);
+			DynamicMaterial->SetScalarParameterValue("DesaturationAmount", DesaturationAmount);
+			DynamicMaterial->SetScalarParameterValue("Intensity", Intensity);
+
+		}
+	}
 }
