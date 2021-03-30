@@ -146,7 +146,6 @@ void ASkybox::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 			DynamicMaterial->SetScalarParameterValue("ColorMultiplier", ColorMultiplier);
 			DynamicMaterial->SetScalarParameterValue("DesaturationAmount", DesaturationAmount);
 			DynamicMaterial->SetScalarParameterValue("Intensity", Intensity);
-
 		}
 	}
 }
