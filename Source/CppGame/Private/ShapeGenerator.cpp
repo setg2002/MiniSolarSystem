@@ -2,6 +2,15 @@
 
 
 #include "ShapeGenerator.h"
+#include "ShapeSettings.h"
+#include "INoiseFilter.h"
+#include "NoiseFilterFactory.h"
+#include "MinMax.h"
+
+
+ShapeGenerator::ShapeGenerator()
+{
+}
 
 void ShapeGenerator::UpdateSettings(UShapeSettings* settings)
 {

@@ -3,17 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ShapeSettings.h"
-#include "INoiseFilter.h"
-#include "NoiseFilterFactory.h"
-#include "MinMax.h"
 
 /**
  * 
  */
+
+class MinMax;
+class INoiseFilter;
+class UShapeSettings;
+
 class CPPGAME_API ShapeGenerator
 {
 public:
+	ShapeGenerator();
 	void UpdateSettings(UShapeSettings* settings);
 	~ShapeGenerator();
 
