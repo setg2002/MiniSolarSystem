@@ -4,6 +4,8 @@
 #include "AsteroidManager.h"
 #include "AssetRegistryModule.h"
 #include "Engine\Texture2DArray.h"
+#include "Kismet/KismetMathLibrary.h"
+
 
 
 // Sets default values
@@ -87,16 +89,16 @@ UTexture2D* AAsteroidManager::CreateTexture(FString TextureName)
 		for (int32 x = 0; x < Resolution; x++)
 		{
 			// Pixel color here
-			float color = FMath::Lerp<float>(255, -256, FMath::Pow(FVector::Dist(FVector(x, y, 0), FVector(512, 512, 0)), .8f) / (Resolution * 2));
+			//float color = FMath::Lerp<float>(255, -256, FMath::Pow(FVector::Dist(FVector(x, y, 0), FVector(512, 512, 0)), e) / (Resolution * 2));
 
-			//FVector2D CurPixel = FVector2D(x, y);
-			//FVector color = PointOnSphere(CurPixel);
+			FVector2D CurUnitPixel = FVector2D(float(x) / float(Resolution), float(y) / float(Resolution));
+			FVector color = PointOnSphere(CurUnitPixel) * 255;
 
 			int32 curPixelIndex = ((y * Resolution) + x);
-			Pixels[4 * curPixelIndex] = color;
-			Pixels[4 * curPixelIndex + 1] = color;
-			Pixels[4 * curPixelIndex + 2] = color;
-			Pixels[4 * curPixelIndex + 3] = 255;
+			Pixels[4 * curPixelIndex] = color.Z;
+			Pixels[4 * curPixelIndex + 1] = color.Y;
+			Pixels[4 * curPixelIndex + 2] = color.X;
+			Pixels[4 * curPixelIndex + 3] = color == FVector::ZeroVector ? 0 : 255;
 		}
 	}
 
@@ -127,12 +129,70 @@ UTexture2D* AAsteroidManager::CreateTexture(FString TextureName)
 }
 
 
-FVector AAsteroidManager::PointOnSphere(FVector2D point)
+FVector AAsteroidManager::PointOnSphere(FVector2D pointOnUnitSquare)
 {
-	//int i = point.X + point.Y * 1024;
-	//FVector2D percent = point / (1023);
-	//FVector pointOnUnitCube = -LocalUp + (percent.X - .5f) * 2;
+	static const TArray<FVector> LocalUps = { FVector(0, 1, 0), FVector(0, 0, -1), FVector(1, 0, 0), FVector(0, 0, 1), FVector(0, -1, 0), FVector(-1, 0, 0) };
+	static const TArray<TArray<FVector2D>> Coordinates = {
+		{ FVector2D(0.375, 0),    FVector2D(0.625, 0.25) },
+		{ FVector2D(0.125, 0.25), FVector2D(0.375, 0.5) },
+		{ FVector2D(0.375, 0.25), FVector2D(0.625, 0.5) },
+		{ FVector2D(0.625, 0.25), FVector2D(0.875, 0.5) },
+		{ FVector2D(0.375, 0.5),  FVector2D(0.625, 0.75) },
+		{ FVector2D(0.375, 0.75), FVector2D(0.625, 1.f) }
+	};
+
+	// Find coresponding face 
+	int8 faceIndex = 6;
+
+	for (int8 i = 0; i < 6; i++)
+	{
+		if (IsPointWithinFace(pointOnUnitSquare, i))
+		{
+			faceIndex = i;
+			break;
+		}
+	}
+	if (faceIndex == 6) // pointOnUnitSquare is not in the UVs
+	{
+		return FVector::ZeroVector;
+	}
+	
+	//LocalUps[faceIndex] * 255/* / 2 + .5f*/;
+	return FVector(FMath::Abs(LocalUps[faceIndex].X), FMath::Abs(LocalUps[faceIndex].Y), FMath::Abs(LocalUps[faceIndex].Z));
+
+	//FVector LocalUp = LocalUps[faceIndex];
+	//FVector axisA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X);
+	//FVector axisB = FVector().CrossProduct(LocalUp, axisA);
+
+	//FVector2D percent = pointOnUnitSquare * Coordinates[faceIndex][1];
+	//return 255 * LocalUp * FMath::Lerp<float>(1, -1, FMath::Pow(FVector::Dist(FVector(percent.X, percent.Y, 0), FVector(.5, .5, 0)), e) / (FMath::Sqrt(2)));
+	
+	//FVector pointOnUnitCube = -LocalUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
 	//FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
-	return FVector::ZeroVector;
+	//return pointOnUnitCube * 255;
 }
 
+
+bool AAsteroidManager::IsPointWithinFace(FVector2D pointToTest, int8 faceToTest)
+{
+	static const TArray<TArray<FVector2D>> Coordinates = { 
+		{ FVector2D(0.375, 0),    FVector2D(0.625, 0.25) }, 
+		{ FVector2D(0.125, 0.25), FVector2D(0.375, 0.5) },
+		{ FVector2D(0.375, 0.25), FVector2D(0.625, 0.5) },
+		{ FVector2D(0.625, 0.25), FVector2D(0.875, 0.5) },
+		{ FVector2D(0.375, 0.5),  FVector2D(0.625, 0.75) },
+		{ FVector2D(0.375, 0.75), FVector2D(0.625, 1.f) }
+	};
+
+	if (pointToTest.X >= Coordinates[faceToTest][0].X &&
+		pointToTest.X <= Coordinates[faceToTest][1].X &&
+		pointToTest.Y >= Coordinates[faceToTest][0].Y &&
+		pointToTest.Y <= Coordinates[faceToTest][1].Y)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}

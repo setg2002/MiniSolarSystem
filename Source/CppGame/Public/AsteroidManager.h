@@ -18,6 +18,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"))
 	int32 NumVariants;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float e;
+
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void NewVariants();
 
@@ -35,6 +38,9 @@ private:
 
 	TArray<UTexture2D*> Heightmaps;
 
-	FVector PointOnSphere(FVector2D point);
+	FVector PointOnSphere(FVector2D pointOnUnitSquare);
+
+	// Returns true of the tested point is within the bounds of the face index i
+	bool IsPointWithinFace(FVector2D pointToTest, int8 faceToTest);
 
 };
