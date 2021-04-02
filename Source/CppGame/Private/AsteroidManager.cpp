@@ -13,24 +13,15 @@
 AAsteroidManager::AAsteroidManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
-	shapeGenerator = new ShapeGenerator();
-	AsteroidMesh = LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/StaticMeshes/Cube.Cube'"), NULL, LOAD_None, NULL);
-}
+	shapeGenerator = new ShapeGenerator();}
 
 // Called when the game starts or when spawned
 void AAsteroidManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
-}
-
-// Called every frame
-void AAsteroidManager::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 
@@ -53,26 +44,91 @@ void AAsteroidManager::NewVariants()
 	bool bSuccess = UPackage::SavePackage(Package, HeightmapsArray, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
 	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("Success") : TEXT("FAIL"));
 	//~ End making the Texture2DArray asset
-
+	
+	// Make the sphere offset texture
+	//CreateSphereTexture("AsteroidSphere");
+	
 	// Make the heightmaps
-	Heightmaps.Empty();
+	HeightmapsArray->SourceTextures.Empty();
+	HeightmapsArray->SourceTextures.SetNum(NumVariants);
 	for (int32 i = 0; i < NumVariants; i++)
 	{
 		FString Name = "Heightmap_";
 		Name.Append(FString::FromInt(i + 1));
-		Heightmaps.EmplaceAt(i, CreateTexture(Name));
+		HeightmapsArray->SourceTextures[i] = CreateHeightmapTexture(Name);
 	}
 
-	// Add the newly created heightmaps to the Texture2DArray
-	HeightmapsArray->SourceTextures = Heightmaps;
-	HeightmapsArray->ReloadConfig();
-	
+	//HeightmapsArray->ReloadConfig(UTexture2DArray::StaticClass());  // Why aren't the new heightmaps showing up?
 }
 
 
-UTexture2D* AAsteroidManager::CreateTexture(FString TextureName)
+UTexture2D* AAsteroidManager::CreateHeightmapTexture(FString TextureName)
 {
 	const int Resolution = 1024;
+
+	FString PackageName = TEXT("/Game/ProceduralTextures/Asteroids/" + GetWorld()->GetName() + "/T_" + TextureName);
+	UPackage* Package = CreatePackage(*PackageName);
+	Package->FullyLoad();
+
+	UTexture2D* NewTexture = NewObject<UTexture2D>(Package, *TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
+
+	NewTexture->AddToRoot();								// This line prevents garbage collection of the texture
+	NewTexture->PlatformData = new FTexturePlatformData();	// Initialize the PlatformData
+	NewTexture->PlatformData->SizeX = Resolution;
+	NewTexture->PlatformData->SizeY = Resolution;
+	NewTexture->PlatformData->SetNumSlices(1);
+	NewTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
+	NewTexture->AddressX = TA_Clamp;
+	NewTexture->AddressY = TA_Clamp;
+
+	float seed = FMath::FRand() * 1000;
+
+	uint8* Pixels = new uint8[NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4];
+	for (int32 y = 0; y < Resolution; y++)
+	{
+		for (int32 x = 0; x < Resolution; x++)
+		{
+			FVector2D Pixel = FVector2D(float(x), float(y));
+			float color = shapeGenerator->CalculateUnscaledElevation(FVector(Pixel, seed)) * 255;
+
+			int32 curPixelIndex = ((y * Resolution) + x);
+			Pixels[4 * curPixelIndex] = color;
+			Pixels[4 * curPixelIndex + 1] = color;
+			Pixels[4 * curPixelIndex + 2] = color;
+			Pixels[4 * curPixelIndex + 3] = 255;
+		}
+	}
+
+	// Allocate first mipmap.
+	FTexture2DMipMap* Mip = new FTexture2DMipMap();
+	NewTexture->PlatformData->Mips.Add(Mip);
+	Mip->SizeX = Resolution;
+	Mip->SizeY = Resolution;
+
+	// Lock the texture so it can be modified
+	Mip->BulkData.Lock(LOCK_READ_WRITE);
+	uint8* TextureData = (uint8*)Mip->BulkData.Realloc(NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4);
+	FMemory::Memcpy(TextureData, Pixels, sizeof(uint8) * NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4);
+	Mip->BulkData.Unlock();
+
+	NewTexture->Source.Init(Resolution, NewTexture->PlatformData->SizeY, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
+
+	NewTexture->UpdateResource();
+	Package->MarkPackageDirty();
+	FAssetRegistryModule::AssetCreated(NewTexture);
+
+	FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
+	bool bSaved = UPackage::SavePackage(Package, NewTexture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
+
+	delete[] Pixels;	// Don't forget to free the memory here
+
+	return NewTexture;
+}
+
+
+UTexture2D* AAsteroidManager::CreateSphereTexture(FString TextureName)
+{
+	const int Resolution = 1024 * 4;
 
 	FString PackageName = TEXT("/Game/ProceduralTextures/Asteroids/" + GetWorld()->GetName() + "/T_" + TextureName);
 	UPackage* Package = CreatePackage(*PackageName);
@@ -95,7 +151,7 @@ UTexture2D* AAsteroidManager::CreateTexture(FString TextureName)
 		for (int32 x = 0; x < Resolution; x++)
 		{
 			FVector2D CurUnitPixel = FVector2D(float(x) / float(Resolution), float(y) / float(Resolution));
-			FVector color = HeightAtPoint(CurUnitPixel) * 255;
+			FVector color = PointOnUnitSphere(CurUnitPixel) * 255;
 
 			int32 curPixelIndex = ((y * Resolution) + x);
 			Pixels[4 * curPixelIndex] = color.Z;
@@ -132,7 +188,7 @@ UTexture2D* AAsteroidManager::CreateTexture(FString TextureName)
 }
 
 
-FVector AAsteroidManager::HeightAtPoint(FVector2D pointOnUnitSquare)
+FVector AAsteroidManager::PointOnUnitSphere(FVector2D pointOnUnitSquare)
 {
 	static const TArray<FVector> LocalUps = { FVector(0, 1, 0), FVector(0, 0, -1), FVector(1, 0, 0), FVector(0, 0, 1), FVector(0, -1, 0), FVector(-1, 0, 0) };
 
@@ -160,38 +216,11 @@ FVector AAsteroidManager::HeightAtPoint(FVector2D pointOnUnitSquare)
 	
 	FVector pointOnUnitCube = LocalUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
 	FVector pointOnUnitSphere = pointOnUnitCube.GetUnsafeNormal();
-	return pointOnUnitSphere = FVector(
+	return pointOnUnitSphere = FVector(    // Only have do do this because Abs doesn't like to work on vectors apparently
 		FMath::Abs(pointOnUnitSphere.X - pointOnUnitCube.X),
 		FMath::Abs(pointOnUnitSphere.Y - pointOnUnitCube.Y),
 		FMath::Abs(pointOnUnitSphere.Z - pointOnUnitCube.Z)
 	);
-
-	/*
-	pointOnUnitSphere = FVector(
-		FMath::Abs(pointOnUnitSphere.X - pointOnUnitCube.X),
-		FMath::Abs(pointOnUnitSphere.Y - pointOnUnitCube.Y),
-		FMath::Abs(pointOnUnitSphere.Z - pointOnUnitCube.Z)
-	);
-	float height = shapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
-	pointOnUnitSphere = 
-		FVector(
-		pointOnUnitSphere.X + ((1 - pointOnUnitSphere.X) * height),
-		pointOnUnitSphere.Y + ((1 - pointOnUnitSphere.Y) * height),
-		pointOnUnitSphere.Z + ((1 - pointOnUnitSphere.Z) * height)
-		);
-		
-	return pointOnUnitSphere;
-	*/
-
-		/*FVector(
-		FMath::Abs(pointOnUnitSphere.X),
-		FMath::Abs(pointOnUnitSphere.Y),
-		FMath::Abs(pointOnUnitSphere.Z)
-		);*//*FVector(
-		pointOnUnitSphere.X + (pointOnUnitSphere.X * height),
-		pointOnUnitSphere.Y + (pointOnUnitSphere.Y * height),
-		pointOnUnitSphere.Z + (pointOnUnitSphere.Z * height)
-		);*/
 }
 
 
