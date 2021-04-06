@@ -26,7 +26,7 @@ void URingSystemComponent::OnComponentCreated()
 	this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
 	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"), NULL, LOAD_None, NULL));
-	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/RingMat_Inst.RingMat_Inst'"), NULL, LOAD_None, NULL)); //TODO Fix bad hard-coded ref?
+	CreateMaterial();
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 	if (Gradient)
 	{
@@ -35,6 +35,16 @@ void URingSystemComponent::OnComponentCreated()
 	}
 }
 
+void URingSystemComponent::CreateMaterial()
+{
+	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/RingMat_Inst.RingMat_Inst'"), NULL, LOAD_None, NULL));
+	/*DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
+	if (Gradient)
+	{
+		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
+		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
+	}*/
+}
 
 // Called when the game starts
 void URingSystemComponent::BeginPlay()
@@ -69,11 +79,18 @@ void URingSystemComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, RingWidth))
 		{
+			if (!DynamicMaterial)
+			{
+				CreateMaterial();
+			}
 			DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, Gradient) && Gradient != nullptr)
 		{
-			DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/RingMat_Inst.RingMat_Inst'"), NULL, LOAD_None, NULL)); //TODO Fix bad hard-coded ref?
+			if (!DynamicMaterial)
+			{
+				CreateMaterial();
+			}
 			GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 			DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 		}

@@ -19,8 +19,6 @@ public:
 	// Sets default values for this component's properties
 	URingSystemComponent();
 
-	UMaterialInstanceDynamic* DynamicMaterial;
-
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.001", ClampMax = "2"))
 	float Radius = 1;
 
@@ -30,16 +28,20 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCurveLinearColor* Gradient;
 
-	UTexture2D* GradientTexture;
-
-	GaseousColorGenerator* ColorGenerator;
-
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	virtual void OnComponentCreated() override;
+
+	void CreateMaterial();
+	
+	GaseousColorGenerator* ColorGenerator;
+
+	UMaterialInstanceDynamic* DynamicMaterial;
+
+	UTexture2D* GradientTexture;
 
 public:	
 	// Called every frame

@@ -25,6 +25,8 @@ ASkybox::ASkybox()
 void ASkybox::OnConstruction(const FTransform & Transform)
 {
 	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_SkyBox_Inst.M_SkyBox_Inst'"), NULL, LOAD_None, NULL));
+	//FString PackageName = TEXT("UTexture2D'/Game/ProceduralTextures/" + this->GetName() + "_Skybox'");
+	//DynamicMaterial->SetTextureParameterValue("StarTexture", LoadObject<UTexture2D>(NULL, *PackageName, NULL, LOAD_None, NULL));
 }
 
 

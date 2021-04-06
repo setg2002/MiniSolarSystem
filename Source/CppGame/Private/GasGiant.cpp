@@ -23,7 +23,7 @@ void AGasGiant::GenerateMaterial()
 
 void AGasGiant::NewVoronoiForStorms()
 {
-	GenerateMaterial();
+	//GenerateMaterial();
 	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_StormTexture"), ColorGenerator->MakeVoronoiTexture(ColorSettings->NumStorms, ColorSettings->StormFalloff, ColorSettings->LowBound, ColorSettings->HighBound));
 }
 
