@@ -12,6 +12,9 @@
  * 
  */
 
+class UNiagaraSystem;
+class UNiagaraComponent;
+
 UENUM()
 enum EStarType {
 	O   UMETA(DisplayName = "Blue Supergiant"),
@@ -36,7 +39,7 @@ public:
 	TEnumAsByte<EStarType> starType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* sphere;
+	UStaticMeshComponent* Sphere;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FStarProperties starProperties;
@@ -46,34 +49,26 @@ public:
 
 	UMaterialInstanceDynamic* dynamicMaterial;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//UMaterialInstance* distStarMat;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialParameterCollection* planetMateralParameterCollection;
 
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-
-	/*UFUNCTION(BlueprintCallable, CallInEditor)
-	void GenerateDistantStars();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> distantStarBP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
-	int numDistantStars;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
-	int minSpawnRange = 50000;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
-	int maxSpawnRange = 200000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FColor> possibleColors;
-
-	TArray<UMaterialInstanceDynamic*> dynamMats;*/
+	UFUNCTION(CallInEditor, BlueprintCallable, Category="Particle Debug")
+	void ReInitParticles();
 
 	void UpdateColor();
 
 protected:
 	UMaterialParameterCollectionInstance* planetMateralParameterCollectionInst;
 
-	//TArray<AActor*> distantStars;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UNiagaraComponent* ParticleComponent;
+
+	UNiagaraSystem* SolarParticleTemplate;
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	virtual void PostEditMove(bool bFinished) override;
+
+	virtual void OnConstruction(const FTransform & Transform) override;
+
 };

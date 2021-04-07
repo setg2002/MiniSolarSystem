@@ -10,7 +10,12 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"UnrealEd"
+				"UnrealEd",
+				"ProceduralMeshComponent", 
+				"SimplexNoise", 
+				"AssetTools", 
+				"RawMesh", 
+				"Niagara"
 			]
 		}
 	],

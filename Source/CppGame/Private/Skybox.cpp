@@ -19,6 +19,7 @@ ASkybox::ASkybox()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->CastShadow = 0;
 	Mesh->bCastDynamicShadow = 0;
+	RootComponent = Mesh;
 }
 
 

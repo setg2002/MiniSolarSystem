@@ -2,6 +2,9 @@
 
 
 #include "Star.h"
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialParameterCollection.h"
@@ -10,63 +13,57 @@
 
 AStar::AStar()
 {
-	sphere = CreateDefaultSubobject<UStaticMeshComponent>(FName("Sphere"));
-	sphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	sphere->CastShadow = 0;
-	sphere->bCastDynamicShadow = 0;
+	Sphere = CreateDefaultSubobject<UStaticMeshComponent>(FName("Sphere"));
+	Sphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	Sphere->CastShadow = 0;
+	Sphere->bCastDynamicShadow = 0;
 
 	this->initialVelocity = FVector::ZeroVector;
 
-	dynamicMaterial = sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, sphere->GetMaterial(0));
-	sphere->SetMaterial(0, dynamicMaterial);
+	dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
+	Sphere->SetMaterial(0, dynamicMaterial);
+
+	SolarParticleTemplate = LoadObject<UNiagaraSystem>(NULL, TEXT("NiagaraSystem'/Game/Particles/Star/SolarNiagaraSystem.SolarNiagaraSystem'"), NULL, LOAD_None, NULL);
+}
+
+void AStar::OnConstruction(const FTransform & Transform)
+{
+	Super::OnConstruction(Transform);
+
+	//TODO The system should be attached to the star
+	//TODO Sometimes multiple instances are created (possibly ReinitializeSystem() fault?), eating up lots of memory
+
+	//ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, Sphere, FName(""), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);	
+	ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolarParticleTemplate, Sphere->GetComponentLocation());
+	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
+	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+	ParticleComponent->ReinitializeSystem();
+	//ParticleComponent->Activate();
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), ParticleComponent != nullptr ? TEXT("True") : TEXT("False"));
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *ParticleComponent->GetAttachParent()->GetName());
+}
+
+void AStar::ReInitParticles()
+{
+	if (ParticleComponent) { ParticleComponent->DestroyComponent(); }
+	//ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, Sphere, NAME_None, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
+	ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolarParticleTemplate, Sphere->GetComponentLocation());
+	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
+	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+	ParticleComponent->ReinitializeSystem();
 }
 
 void AStar::UpdateColor()
 {
-	if (sphere->GetMaterial(0) != dynamicMaterial)
+	if (Sphere->GetMaterial(0) != dynamicMaterial)
 	{
-		dynamicMaterial = sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, sphere->GetMaterial(0));
-		sphere->SetMaterial(0, dynamicMaterial);
+		dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
+		Sphere->SetMaterial(0, dynamicMaterial);
 	}
 	dynamicMaterial->SetVectorParameterValue(FName("_baseColor"), starProperties.color);
+	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
+	ParticleComponent->ReinitializeSystem();
 }
-
-/*void AStar::GenerateDistantStars()
-{
-	if (distantStars.Num() < numDistantStars)
-	{
-		for (int i = distantStars.Num(); i < numDistantStars; i++)
-		{
-			FVector spawnLocation = FVector::ZeroVector;
-			float dist = FVector::Dist(spawnLocation, FVector(0, 0, 0));
-			while (dist > maxSpawnRange || dist < minSpawnRange)
-			{
-				spawnLocation.X = FMath::FRandRange(-maxSpawnRange, maxSpawnRange);
-				spawnLocation.Y = FMath::FRandRange(-maxSpawnRange, maxSpawnRange);
-				spawnLocation.Z = FMath::FRandRange(-maxSpawnRange, maxSpawnRange);
-				dist = FVector::Dist(spawnLocation, FVector(0, 0, 0));
-			}
-
-			FActorSpawnParameters spawnInfo;
-			distantStars.Add(GetWorld()->SpawnActor<AActor>(distantStarBP, spawnLocation, FRotator(0, 0, 0), spawnInfo));
-			int randColor = FMath::FRandRange(0, possibleColors.Num());
-			ensure(Cast<UMeshComponent>(distantStars.Last()->GetRootComponent()));
-			UMeshComponent* comp = Cast<UMeshComponent>(distantStars.Last()->GetRootComponent());
-			comp->SetMaterial(0, dynamMats[randColor]);
-
-			float newRadius = FMath::FRandRange(1, 20);
-			distantStars.Last()->SetActorScale3D(FVector(newRadius, newRadius, newRadius));
-		}
-	}
-	else
-	{
-		while (distantStars.Num() > numDistantStars)
-		{
-			distantStars[distantStars.Num() - 1]->Destroy();
-			distantStars.RemoveAt(distantStars.Num() - 1, 1, true);
-		}
-	}
-}*/
 
 void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
@@ -74,21 +71,11 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
-		/*if (PropertyName == GET_MEMBER_NAME_CHECKED(AStar, possibleColors))
-		{
-			for (int i = 0; i < possibleColors.Num(); i++)
-			{
-				dynamMats.EmplaceAt(i, UMaterialInstanceDynamic::Create(distStarMat, this));
-				dynamMats[i]->SetVectorParameterValue(FName("_baseColor"), possibleColors[i]);
-			}
-		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(AStar, numDistantStars))
-		{
-			GenerateDistantStars();
-		}*/
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, radius))
 		{
-			sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
+			Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
+			ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+			ParticleComponent->ReinitializeSystem();
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, mass))
 		{
@@ -96,10 +83,10 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, color))
 		{
-			if (sphere->GetMaterial(0) != dynamicMaterial)
+			if (Sphere->GetMaterial(0) != dynamicMaterial)
 			{
-				dynamicMaterial = sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, sphere->GetMaterial(0));
-				sphere->SetMaterial(0, dynamicMaterial);
+				dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
+				Sphere->SetMaterial(0, dynamicMaterial);
 			}
 			if (planetMateralParameterCollectionInst == nullptr)
 			{
@@ -109,10 +96,10 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, luminosity))
 		{
-			if (sphere->GetMaterial(0) != dynamicMaterial)
+			if (Sphere->GetMaterial(0) != dynamicMaterial)
 			{
-				dynamicMaterial = sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, sphere->GetMaterial(0));
-				sphere->SetMaterial(0, dynamicMaterial);
+				dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
+				Sphere->SetMaterial(0, dynamicMaterial);
 			}
 			if (planetMateralParameterCollectionInst == nullptr)
 			{
@@ -125,25 +112,28 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 		{
 			static const FString ContextString(TEXT("Star Type"));
 			starProperties = *(starTypeData->FindRow<FStarProperties>(FName(UEnum::GetValueAsString<EStarType>(starType.GetValue())), ContextString, true));
-			sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
+			Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
 			this->mass = starProperties.mass;
 
-			if (sphere->GetMaterial(0) != dynamicMaterial)
+			if (Sphere->GetMaterial(0) != dynamicMaterial)
 			{
-				dynamicMaterial = sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, sphere->GetMaterial(0));
-				sphere->SetMaterial(0, dynamicMaterial);
+				dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
+				Sphere->SetMaterial(0, dynamicMaterial);
 			}
 			dynamicMaterial->SetVectorParameterValue(FName("_baseColor"), starProperties.color);
 			dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
 		}
-		/*if (PropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeLocation) || PropertyName == GET_MEMBER_NAME_CHECKED(FVector, X) || PropertyName == GET_MEMBER_NAME_CHECKED(FVector, Y) || PropertyName == GET_MEMBER_NAME_CHECKED(FVector, Z))
-		{
-			if (planetMateralParameterCollectionInst == nullptr)
-			{	
-				planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
-			}
-			planetMateralParameterCollectionInst->SetVectorParameterValue(FName("SunLocation"), this->GetActorLocation());
-		}*/
 	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+void AStar::PostEditMove(bool bFinished)
+{
+	Super::PostEditMove(bFinished);
+
+	if (planetMateralParameterCollectionInst == nullptr)
+	{
+		planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
+	}
+	planetMateralParameterCollectionInst->SetVectorParameterValue(FName("SunLocation"), this->GetActorLocation());
 }
