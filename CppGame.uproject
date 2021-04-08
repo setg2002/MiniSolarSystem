@@ -12,8 +12,9 @@
 				"Engine",
 				"UnrealEd",
 				"ProceduralMeshComponent", 
+				"ProjectCleaner",
 				"SimplexNoise", 
-				"AssetTools", 
+				"AssetTools",
 				"RawMesh", 
 				"Niagara"
 			]

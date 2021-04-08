@@ -1,6 +1,9 @@
 # Visual Studio 2015 user specific files
 .vs/
 
+# Visual Studio 2015 database file
+*.VC.db
+
 # Compiled Object files
 *.slo
 *.lo
@@ -41,6 +44,7 @@
 *.VC.db
 *.VC.opendb
 
+
 # Precompiled Assets
 SourceArt/**/*.png
 SourceArt/**/*.tga
@@ -73,3 +77,6 @@ Plugins/*/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
+Content/StarterContent/*
+Content/AutomotiveMaterials/*
+# Content/_Unreal_Projects_DragRacing_Content/*

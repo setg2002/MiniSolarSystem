@@ -93,6 +93,7 @@ namespace ThreadingCalculations
 
 	static void CalculateTangents(TArray<FVector>& verticies, TArray<int>& triangles, TArray<FVector2D>& uvs, TArray<FVector>& normals, TArray<FProcMeshTangent>& tangents)
 	{
+		checkf(&verticies, TEXT("Mesh has no verticies"));
 		UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, uvs, normals, tangents);
 		return;
 	}

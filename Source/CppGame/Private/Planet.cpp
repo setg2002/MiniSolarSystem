@@ -4,13 +4,14 @@
 #include "Planet.h"
 #include "RawMesh.h"
 #include "EngineUtils.h"
-#include "Engine/DataAsset.h"
-#include "OrbitDebugActor.h"
 #include "TerrainFace.h"
+#include "AssetCleaner.h"
+#include "ShapeSettings.h"
 #include "ColorSettings.h"
 #include "ColorGenerator.h"
-#include "ShapeSettings.h"
 #include "ShapeGenerator.h"
+#include "OrbitDebugActor.h"
+#include "Engine/DataAsset.h"
 #include "AssetRegistryModule.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -153,6 +154,7 @@ void APlanet::GeneratePlanet()
 			GenerateColors();
 		}
 	}
+	AssetCleaner::CleanAll();
 }
 
 void APlanet::ReGenerate()
@@ -194,14 +196,13 @@ void APlanet::Initialize()
 		ProcMeshes.Add(NewObject<UProceduralMeshComponent>());
 	}
 
+	ColorSettings->DynamicMaterials.Empty();
+	ColorSettings->DynamicMaterials.SetNum(6);
 	for (int32 i = 0; i < 6; i++)
 	{
 		TerrainFaces[i] = new TerrainFace(shapeGenerator, colorGenerator, resolution, directions[i], ProcMeshes[i], this);
 
-		if (ColorSettings->DynamicMaterials[i] == nullptr)
-		{
-			ColorSettings->DynamicMaterials[i] = ProcMeshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
-		}
+		ColorSettings->DynamicMaterials[i] = ProcMeshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
 	}
 }
 
@@ -296,7 +297,7 @@ void APlanet::ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh)
 {
 	static TArray<UProceduralMeshComponent*> ProcMeshes;
 	ProcMeshes.Add(NewMesh);
-	
+
 	if (ProcMeshes.IsValidIndex(5))
 	{
 		StaticMesh->SetStaticMesh(ConvertToStaticMesh(ProcMeshes));
@@ -304,6 +305,7 @@ void APlanet::ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh)
 	}
 }
 
+#pragma optimize("", off)
 UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes)
 {
 	FString AssetName = FString(TEXT("SM_")) + this->GetName();
@@ -434,6 +436,8 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 		FString MatPackageFileName = FPackageName::LongPackageNameToFilename(MatPackageName, FPackageName::GetAssetPackageExtension());
 		bool bSavedMaterial = UPackage::SavePackage(MaterialPackage, NewMaterial, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *MatPackageFileName, GError, nullptr, true, true, SAVE_NoError);
 
+		ColorSettings->DynamicMaterials = { NewMaterial };
+
 		// Copy material to new mesh
 		NewMesh->SetStaticMaterials(TArray<FStaticMaterial>{ NewMaterial });
 
@@ -455,6 +459,7 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 	}
 	return nullptr;
 }
+#pragma optimize("", on)
 
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
