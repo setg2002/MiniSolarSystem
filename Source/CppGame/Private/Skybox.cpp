@@ -2,6 +2,7 @@
 
 
 #include "Skybox.h"
+#include "AssetCleaner.h"
 #include "AssetRegistryModule.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -113,7 +114,7 @@ void ASkybox::MakeTexture()
 	SkyboxTexture->Source.Init(TextureRes, TextureRes, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
 
 	SkyboxTexture->UpdateResource();
-	Package->MarkPackageDirty();
+	
 	FAssetRegistryModule::AssetCreated(SkyboxTexture);
 
 	FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
@@ -122,6 +123,9 @@ void ASkybox::MakeTexture()
 	delete[] Pixels;	// Don't forget to free the memory here
 
 	DynamicMaterial->SetTextureParameterValue("StarTexture", SkyboxTexture);
+	Package->MarkPackageDirty();
+
+	AssetCleaner::CleanDirectory(EDirectoryFilterType::Textures);
 
 	return /*SkyboxTexture*/;
 }

@@ -2,15 +2,16 @@
 
 
 #include "ColorGenerator.h"
-#include "NoiseFilterFactory.h"
-#include "AssetRegistryModule.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Curves/CurveLinearColor.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "MinMax.h"
 #include "INoiseFilter.h"
+#include "AssetCleaner.h"
 #include "ColorSettings.h"
+#include "NoiseFilterFactory.h"
+#include "AssetRegistryModule.h"
 #include "GameFramework/Actor.h"
+#include "Curves/CurveLinearColor.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 
 TerrestrialColorGenerator::TerrestrialColorGenerator(AActor* owner)
@@ -81,6 +82,8 @@ void TerrestrialColorGenerator::UpdateColors()
 	{
 		ColorSettings->DynamicMaterials[i]->SetTextureParameterValue(FName("_oceanTexture"), OceanTexture);
 	}
+
+	//AssetCleaner::CleanDirectory(EDirectoryFilterType::Textures);
 }
 
 UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)

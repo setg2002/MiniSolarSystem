@@ -2,9 +2,10 @@
 
 
 #include "GasGiant.h"
+#include "AssetCleaner.h"
 #include "GasGiantColorSettings.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "GaseousColorGenerator.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 
 AGasGiant::AGasGiant()
@@ -19,6 +20,8 @@ void AGasGiant::GenerateMaterial()
 	ensure(ColorSettings->BasePlanetMat);
 	ColorSettings->SetOwner(this);
 	ColorSettings->DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->BasePlanetMat);
+
+	AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
 }
 
 void AGasGiant::NewVoronoiForStorms()

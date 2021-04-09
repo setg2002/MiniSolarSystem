@@ -13,6 +13,7 @@
 #include "OrbitDebugActor.h"
 #include "Engine/DataAsset.h"
 #include "AssetRegistryModule.h"
+#include "UObject/PackageReload.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -82,6 +83,7 @@ void APlanet::CreateSettingsAssets()
 	else if (ColorSettings == nullptr)
 	{
 		ColorSettings = Cast<UColorSettings>(CreateSettingsAsset(UColorSettings::StaticClass()));
+		ColorSettings->GetPackage()->MarkPackageDirty();
 	}
 
 	if (ColorSettings->BiomeColorSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiomeColorSettings::StaticClass()->GetName())))
@@ -92,6 +94,7 @@ void APlanet::CreateSettingsAssets()
 	else if (ColorSettings->BiomeColorSettings == nullptr)
 	{
 		ColorSettings->BiomeColorSettings = Cast<UBiomeColorSettings>(CreateSettingsAsset(UBiomeColorSettings::StaticClass()));
+		ColorSettings->BiomeColorSettings->GetPackage()->MarkPackageDirty();
 	}
 
 	if ((ColorSettings->BiomeColorSettings->Biomes == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->Biomes[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiome::StaticClass()->GetName())))
@@ -104,6 +107,7 @@ void APlanet::CreateSettingsAssets()
 	{
 		ColorSettings->BiomeColorSettings->Biomes.Empty();
 		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+		ColorSettings->BiomeColorSettings->Biomes[0]->GetPackage()->MarkPackageDirty();
 	}
 
 
@@ -115,6 +119,7 @@ void APlanet::CreateSettingsAssets()
 	else if (ShapeSettings == nullptr)
 	{
 		ShapeSettings = Cast<UShapeSettings>(CreateSettingsAsset(UShapeSettings::StaticClass()));
+		ShapeSettings->GetPackage()->MarkPackageDirty();
 	}
 
 	if ((ShapeSettings->NoiseLayers == TArray<UNoiseLayer*>() || ShapeSettings->NoiseLayers[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseLayer::StaticClass()->GetName())))
@@ -127,6 +132,7 @@ void APlanet::CreateSettingsAssets()
 	{
 		ShapeSettings->NoiseLayers.Empty();
 		ShapeSettings->NoiseLayers.Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
+		ShapeSettings->NoiseLayers[0]->GetPackage()->MarkPackageDirty();
 	}
 
 	if (ShapeSettings->NoiseLayers[0]->NoiseSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseSettings::StaticClass()->GetName())))
@@ -137,7 +143,10 @@ void APlanet::CreateSettingsAssets()
 	else if (ShapeSettings->NoiseLayers[0]->NoiseSettings == nullptr)
 	{
 		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
+		ShapeSettings->NoiseLayers[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
 	}
+
+	AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
 }
 
 void APlanet::GeneratePlanet()
@@ -149,12 +158,25 @@ void APlanet::GeneratePlanet()
 
 		if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
 		{
-			Initialize();
-			GenerateMesh();
-			GenerateColors();
+			if (bMultithreadGeneration)
+			{
+				Initialize();
+				GenerateMesh();
+			}
+			else
+			{
+				Initialize();
+				GenerateMesh();
+				GenerateColors();
+			}
+
 		}
 	}
-	AssetCleaner::CleanAll();
+	if (!bMultithreadGeneration)
+	{
+		AssetCleaner::CleanAll();
+	}
+
 }
 
 void APlanet::ReGenerate()
@@ -250,6 +272,8 @@ void APlanet::GenerateColors()
 	if (bMultithreadGeneration)
 	{
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
+		StaticMesh->GetMaterial(0)->MarkPackageDirty();
+		AssetCleaner::CleanAll();
 	}
 }
 
@@ -305,7 +329,6 @@ void APlanet::ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh)
 	}
 }
 
-#pragma optimize("", off)
 UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes)
 {
 	FString AssetName = FString(TEXT("SM_")) + this->GetName();
@@ -389,6 +412,7 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 		FString NewMaterialName = FString(TEXT("M_")) + this->GetName();
 		FString MatPackageName = PathName + NewMaterialName;
 		UPackage* MaterialPackage = CreatePackage(*MatPackageName);
+		MaterialPackage->FullyLoad();
 		check(MaterialPackage);
 		
 		UMaterialInterface* MeshMaterial = ProcMeshes[0]->GetMaterial(0); // Old material to copy data from
@@ -433,13 +457,13 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 		FAssetRegistryModule::AssetCreated(NewMaterial);
 		NewMaterial->MarkPackageDirty();
 
-		FString MatPackageFileName = FPackageName::LongPackageNameToFilename(MatPackageName, FPackageName::GetAssetPackageExtension());
-		bool bSavedMaterial = UPackage::SavePackage(MaterialPackage, NewMaterial, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *MatPackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
 		ColorSettings->DynamicMaterials = { NewMaterial };
 
 		// Copy material to new mesh
 		NewMesh->SetStaticMaterials(TArray<FStaticMaterial>{ NewMaterial });
+
+		FString MatPackageFileName = FPackageName::LongPackageNameToFilename(MatPackageName, FPackageName::GetAssetPackageExtension());
+		bool bSavedMaterial = UPackage::SavePackage(MaterialPackage, NewMaterial, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *MatPackageFileName, GError, nullptr, true, true, SAVE_NoError);
 
 		// Set the Imported version before calling the build
 		NewMesh->ImportVersion = EImportStaticMeshVersion::LastVersion;
@@ -455,11 +479,15 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 		FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
 		bool bSavedMesh = UPackage::SavePackage(MeshPackage, NewMesh, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
 
+		if (bMultithreadGeneration)
+		{
+			GenerateColors();
+		}
+
 		return NewMesh;
 	}
 	return nullptr;
 }
-#pragma optimize("", on)
 
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {

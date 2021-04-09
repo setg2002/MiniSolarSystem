@@ -2,6 +2,7 @@
 
 
 #include "AssetCleaner.h"
+#include "FileHelpers.h"
 #include "AssetQueryManager.h"
 #include "ProjectCleanerUtility.h"
 #include "UI/SProjectCleanerBrowser.h"
@@ -76,6 +77,12 @@ void AssetCleaner::CleanDirectories(TArray<EDirectoryFilterType> DirectoriesToCl
 
 void AssetCleaner::Clean(TArray<FDirectoryPath> Directories)
 {
+	FEditorFileUtils::SaveDirtyPackages(
+		false,
+		true,
+		true
+	);
+
 	TArray<FAssetData> UnusedAssets;
 	UDirectoryFilterSettings* DirectoryFilterSettings = GetMutableDefault<UDirectoryFilterSettings>();
 	DirectoryFilterSettings->DirectoryPaths = Directories;

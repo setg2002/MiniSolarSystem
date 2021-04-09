@@ -3,6 +3,7 @@
 
 #include "GaseousColorGenerator.h"
 #include "AssetRegistryModule.h"
+#include "AssetCleaner.h"
 #include "Curves/CurveLinearColor.h"
 
 GaseousColorGenerator::GaseousColorGenerator(UObject* owner)
