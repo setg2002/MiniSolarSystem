@@ -34,7 +34,7 @@ public:
 	TerrestrialColorGenerator* colorGenerator;
 	ShapeGenerator* shapeGenerator;
 
-	TArray<FColor> VertexColors;
+	TArray<FLinearColor> VertexColors;
 
 	int Resolution;
 	FVector LocalUp;
@@ -110,7 +110,7 @@ class CalculateMeshAsyncTask : public FNonAbandonableTask
 	FVector axisA;
 	FVector axisB;
 
-	TArray<FColor> VertexColors;
+	TArray<FLinearColor> VertexColors;
 
 	TArray<FVector>& verticies;
 	TArray<int>& triangles;

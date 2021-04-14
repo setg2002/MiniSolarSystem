@@ -3,9 +3,14 @@
 
 #include "OrbitDebugActor.h"
 #include "CelestialBody.h"
-#include "Components/SplineComponent.h"
-#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
 #include "DrawDebugHelpers.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Components/SplineComponent.h"
+#include "NiagaraDataInterfaceArrayFunctionLibrary.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+
 
 // Sets default values
 AOrbitDebugActor::AOrbitDebugActor()
@@ -13,16 +18,19 @@ AOrbitDebugActor::AOrbitDebugActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	ParticleTemplate = LoadObject<UNiagaraSystem>(NULL, TEXT("NiagaraSystem'/Game/Particles/OrbitDebug/OrbitDebugEmitter_System.OrbitDebugEmitter_System'"), NULL, LOAD_None, NULL);
 }
 
 void AOrbitDebugActor::OnConstruction(const FTransform & Transform)
 {
+	Super::OnConstruction(Transform);
+
 	if (bDrawWithSplines)
 	{
 		CreateSplines();
 	}
 
-	Super::OnConstruction(Transform);
+	//ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, this->GetActorLocation());
 }
 
 // Called when the game starts or when spawned
@@ -109,6 +117,13 @@ void AOrbitDebugActor::DrawOrbits()
 	TArray<TArray<FVector>> DrawPoints;
 	DrawPoints.SetNum(VirtualBodies.Num());
 
+	/*ParticleComponents.Empty();
+	ParticleComponents.SetNum(VirtualBodies.Num());
+	for (int i = 0; i < VirtualBodies.Num(); i++)
+	{
+		ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, this->GetActorLocation());
+	}*/
+
 	int ReferenceFrameIndex = 0;
 	FVector ReferenceBodyInitialPosition = FVector::ZeroVector;
 
@@ -153,9 +168,19 @@ void AOrbitDebugActor::DrawOrbits()
 		}
 	}
 
+	//UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), DrawPoints[2]);
+	/*for (int i = 0; i < ParticleComponents.Num(); i++)
+	{
+		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[i], FName("User.Points"), DrawPoints[i]);
+		ParticleComponents[i]->SetColorParameter(FName("User.Color"), Colors[i]);
+		//ParticleComponents[i]->SetFloatParameter(FName("User.NumSteps"), float(NumSteps));
+	}*/
+	
 	// Draw paths
 	for (int bodyIndex = 0; bodyIndex < VirtualBodies.Num(); bodyIndex++)
 	{
+		
+
 		if (bDrawWithSplines)
 		{
 			// Add more points to the end of the spline until we reach NumSteps
@@ -193,6 +218,12 @@ void AOrbitDebugActor::DrawOrbits()
 
 void AOrbitDebugActor::ClearOrbits()
 {
+	/*for (int i = 0; i < ParticleComponents.Num(); i++)
+	{
+		ParticleComponents[i]->DestroyComponent();
+	}
+	ParticleComponents.Empty();*/
+
 	TArray<AActor*> CollectedActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedActors);
 	for (int bodyIndex = 0; bodyIndex < CollectedActors.Num(); bodyIndex++)

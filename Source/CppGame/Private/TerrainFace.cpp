@@ -56,7 +56,7 @@ void TerrainFace::ConstructMesh(TerrestrialColorGenerator* color_Generator)
 			}
 		}
 	}
-	ProcMesh->CreateMeshSection(0, verticies, triangles, normals, uv, VertexColors, tangents, false);
+	ProcMesh->CreateMeshSection_LinearColor(0, verticies, triangles, normals, uv, VertexColors, tangents, false);
 }
 
 void TerrainFace::CalculateMesh()
@@ -113,6 +113,6 @@ void TerrainFace::UpdateTangentsNormalsAsync()
 
 void TerrainFace::CreateMesh()
 {
-	ProcMesh->CreateMeshSection(0, verticies, triangles, normals, uv, VertexColors, tangents, false);
+	ProcMesh->CreateMeshSection_LinearColor(0, verticies, triangles, normals, uv, VertexColors, tangents, false);
 	Cast<APlanet>(Owner)->ConvertAndSetStaticMesh(ProcMesh);
 }

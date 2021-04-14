@@ -39,6 +39,18 @@ void APlanet::OnConstruction(const FTransform & Transform)
 	Super::OnConstruction(Transform);
 }
 
+void APlanet::BeginPlay()
+{
+	Super::BeginPlay();
+
+}
+
+void APlanet::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+}
+
 UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
 {
 	FString AssetPath = FString("/Game/DataAssets/" + this->GetName() + "/");
@@ -295,6 +307,12 @@ void APlanet::CalculateOrbitVelocity()
 
 void APlanet::SetToOrbit()
 {
+	if (OrbitingBody == this || OrbitingBody == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OrbitingBody cannot be null or itself"));
+		return;
+	}
+
 	FVector AtPlanet = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), OrbitingBody->GetActorLocation()).Vector();
 	FVector Up = StaticMesh->GetUpVector();
 	FVector Tangent = FVector().CrossProduct(AtPlanet, Up).GetSafeNormal();
@@ -325,7 +343,12 @@ void APlanet::ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh)
 	if (ProcMeshes.IsValidIndex(5))
 	{
 		StaticMesh->SetStaticMesh(ConvertToStaticMesh(ProcMeshes));
+		StaticMesh->MarkPackageDirty();
 		ProcMeshes.Empty();
+		if (bMultithreadGeneration)
+		{
+			GenerateColors();
+		}
 	}
 }
 
@@ -478,11 +501,6 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 
 		FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
 		bool bSavedMesh = UPackage::SavePackage(MeshPackage, NewMesh, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
-		if (bMultithreadGeneration)
-		{
-			GenerateColors();
-		}
 
 		return NewMesh;
 	}

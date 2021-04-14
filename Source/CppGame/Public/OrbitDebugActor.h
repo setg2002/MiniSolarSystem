@@ -9,6 +9,8 @@
 // Forward Declarations
 class ACelestialBody;
 class USplineComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 
 class VirtualBody
@@ -64,21 +66,27 @@ public:
 
 	void CreateSplines();
 
-	FVector CalculateAcceleration(int i, TArray<VirtualBody*> VirtualBodies);
-
 	virtual void OnConstruction(const FTransform & Transform) override;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UNiagaraSystem* ParticleTemplate;
+
+	TArray<UNiagaraComponent*> ParticleComponents;
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
 private:
 	TArray<FColor> Colors = { FColor::Red, FColor::Blue, FColor::Green, FColor::White, FColor::Magenta, FColor::Cyan };
 
+	FVector CalculateAcceleration(int i, TArray<VirtualBody*> VirtualBodies);
 };

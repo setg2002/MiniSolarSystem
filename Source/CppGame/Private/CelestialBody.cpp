@@ -39,7 +39,7 @@ void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float tim
 
 void ACelestialBody::UpdatePosition(float timeStep)
 {
-	this->SetActorLocation(FVector (this->GetActorLocation() += currentVelocity * timeStep));
+	this->SetActorLocation(FVector (this->GetActorLocation() + (currentVelocity * timeStep)));
 	RootComponent->SetRelativeRotation(FRotator(RootComponent->GetRelativeRotation().Pitch, RootComponent->GetRelativeRotation().Yaw + (rotationRate / 100), RootComponent->GetRelativeRotation().Roll));
 }
 

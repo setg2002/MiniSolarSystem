@@ -41,6 +41,9 @@ class CPPGAME_API APlanet : public ACelestialBody
 public:
 	APlanet();
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
 	// Main mesh	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* StaticMesh;
@@ -158,6 +161,8 @@ public:
 	virtual void PostEditMove(bool bFinished) override;
 
 protected:
+	virtual void BeginPlay() override;
+
 	AOrbitDebugActor* OrbitDebugActor;
 
 	void CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UDataAsset> DataAssetClass);

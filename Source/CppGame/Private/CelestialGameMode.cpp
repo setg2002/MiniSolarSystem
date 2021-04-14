@@ -3,9 +3,6 @@
 
 #include "CelestialGameMode.h"
 #include "CelestialBody.h"
-#include "Planet.h"
-#include "Star.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "EngineUtils.h"
 
 

@@ -11,11 +11,11 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"UnrealEd",
-				"ProceduralMeshComponent", 
+				"ProceduralMeshComponent",
 				"ProjectCleaner",
-				"SimplexNoise", 
+				"SimplexNoise",
 				"AssetTools",
-				"RawMesh", 
+				"RawMesh",
 				"Niagara"
 			]
 		}
