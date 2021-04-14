@@ -50,3 +50,12 @@ void ACelestialBody::Tick(float DeltaTime)
 
 }
 
+FVector ACelestialBody::GetCurrentVelocity()
+{
+	if (currentVelocity == FVector::ZeroVector)
+	{
+		return initialVelocity;
+	}
+	return currentVelocity;
+}
+

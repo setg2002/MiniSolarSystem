@@ -12,11 +12,24 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 
+AOrbitDebugActor* AOrbitDebugActor::_instance;
+
+AOrbitDebugActor* AOrbitDebugActor::Get()
+{
+	if (_instance == 0)
+	{
+		_instance = NewObject<AOrbitDebugActor>();
+	}
+	return _instance;
+}
+
 // Sets default values
 AOrbitDebugActor::AOrbitDebugActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	_instance = this;
 
 	ParticleTemplate = LoadObject<UNiagaraSystem>(NULL, TEXT("NiagaraSystem'/Game/Particles/OrbitDebug/OrbitDebugEmitter_System.OrbitDebugEmitter_System'"), NULL, LOAD_None, NULL);
 }
@@ -25,12 +38,6 @@ void AOrbitDebugActor::OnConstruction(const FTransform & Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (bDrawWithSplines)
-	{
-		CreateSplines();
-	}
-
-	//ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, this->GetActorLocation());
 }
 
 // Called when the game starts or when spawned
@@ -89,13 +96,11 @@ void AOrbitDebugActor::CreateSplines()
 	}
 }
 
+#pragma optimize("", off)
 //TODO This could be optimized by only redrawing the splines of bodies that have changed
 void AOrbitDebugActor::DrawOrbits()
 {
-	if (!bDrawWithSplines)
-	{
-		ClearOrbits();
-	}
+	ClearOrbits();
 	
 	TArray<ACelestialBody*> Bodies;
 	TArray<AActor*> CollectedActors;
@@ -106,7 +111,7 @@ void AOrbitDebugActor::DrawOrbits()
 		Bodies.Add(Cast<ACelestialBody>(body));
 	}
 
-	if (Bodies.Num() != Splines.Num() && bDrawWithSplines)
+	if (Bodies.Num() != Splines.Num() && DrawType == EDrawType::Spline)
 	{
 		CreateSplines();
 	}
@@ -117,12 +122,16 @@ void AOrbitDebugActor::DrawOrbits()
 	TArray<TArray<FVector>> DrawPoints;
 	DrawPoints.SetNum(VirtualBodies.Num());
 
-	/*ParticleComponents.Empty();
-	ParticleComponents.SetNum(VirtualBodies.Num());
-	for (int i = 0; i < VirtualBodies.Num(); i++)
+	if (DrawType == EDrawType::Ribbon)
 	{
-		ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, this->GetActorLocation());
-	}*/
+		ParticleComponents.Empty();
+		ParticleComponents.SetNum(VirtualBodies.Num());
+		for (int i = 0; i < VirtualBodies.Num(); i++)
+		{
+			ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, this->GetActorLocation());
+		}
+	}
+
 
 	int ReferenceFrameIndex = 0;
 	FVector ReferenceBodyInitialPosition = FVector::ZeroVector;
@@ -140,19 +149,32 @@ void AOrbitDebugActor::DrawOrbits()
 		}
 	}
 
-	// Simulate
-	for (int step = 0; step < NumSteps; step++)
+	// Simulate 
+	FVector ReferenceBodyPosition = (bRelativeToBody) ? VirtualBodies[ReferenceFrameIndex]->Position : FVector::ZeroVector;
+	for (int i = 0; i < VirtualBodies.Num(); i++) // Makes sure the 1st position of the orbit is at the planet's position
 	{
-		FVector ReferenceBodyPosition = (bRelativeToBody) ? VirtualBodies[ReferenceFrameIndex]->Position : FVector::ZeroVector;
+		if (bRelativeToBody)
+		{
+			DrawPoints[i][0] = VirtualBodies[i]->Position - (ReferenceBodyPosition - ReferenceBodyInitialPosition);
+		}
+		else
+		{
+			DrawPoints[i][0] = VirtualBodies[i]->Position;
+		}
+	}
+	for (int step = 1; step < NumSteps; step++)
+	{
+		ReferenceBodyPosition = (bRelativeToBody) ? VirtualBodies[ReferenceFrameIndex]->Position : FVector::ZeroVector;
+
 		// Update velocity
 		for (int i = 0; i < VirtualBodies.Num(); i++)
 		{
-			VirtualBodies[i]->Velocity += CalculateAcceleration(i, VirtualBodies) * TimeStep;
+			VirtualBodies[i]->Velocity += (CalculateAcceleration(i, VirtualBodies) * TimeStep);
 		}
 		// Update positions
 		for (int i = 0; i < VirtualBodies.Num(); i++)
 		{
-			FVector newPos = VirtualBodies[i]->Position + VirtualBodies[i]->Velocity * TimeStep;
+			FVector newPos = VirtualBodies[i]->Position + (VirtualBodies[i]->Velocity * TimeStep);
 			VirtualBodies[i]->Position = newPos;
 			if (bRelativeToBody)
 			{
@@ -167,62 +189,66 @@ void AOrbitDebugActor::DrawOrbits()
 			DrawPoints[i][step] = newPos;
 		}
 	}
-
-	//UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), DrawPoints[2]);
-	/*for (int i = 0; i < ParticleComponents.Num(); i++)
-	{
-		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[i], FName("User.Points"), DrawPoints[i]);
-		ParticleComponents[i]->SetColorParameter(FName("User.Color"), Colors[i]);
-		//ParticleComponents[i]->SetFloatParameter(FName("User.NumSteps"), float(NumSteps));
-	}*/
 	
 	// Draw paths
 	for (int bodyIndex = 0; bodyIndex < VirtualBodies.Num(); bodyIndex++)
-	{
-		
-
-		if (bDrawWithSplines)
+	{	
+		switch (DrawType)
 		{
-			// Add more points to the end of the spline until we reach NumSteps
-			if (Splines[bodyIndex]->GetNumberOfSplinePoints() < NumSteps)
+			case DebugLine:
 			{
-				for (int i = Splines[bodyIndex]->GetNumberOfSplinePoints(); i < NumSteps; i++)
+				int factor = NumSteps / 1000 < 1 ? 1 : NumSteps / 1000; // Scale down the number of lines to use as NumSteps grows over 1000 to retain framerate
+				for (int i = 0; i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, 999); i++)
 				{
-					Splines[bodyIndex]->AddPoint(FSplinePoint(i, DrawPoints[bodyIndex][i]), false);
+					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Width);
 				}
+				break;
 			}
-			// Remove points from the end of the spline until we reach NumSteps
-			else
-			{
-				while (Splines[bodyIndex]->GetNumberOfSplinePoints() > NumSteps)
+			case Spline:
+				// Add more points to the end of the spline until we reach NumSteps
+				if (Splines[bodyIndex]->GetNumberOfSplinePoints() < NumSteps)
 				{
-					Splines[bodyIndex]->RemoveSplinePoint(Splines[bodyIndex]->GetNumberOfSplinePoints() - 1, false);
+					for (int i = Splines[bodyIndex]->GetNumberOfSplinePoints(); i < NumSteps; i++)
+					{
+						Splines[bodyIndex]->AddPoint(FSplinePoint(i, DrawPoints[bodyIndex][i]), false);
+					}
 				}
-			}
+				// Remove points from the end of the spline until we reach NumSteps
+				else
+				{
+					while (Splines[bodyIndex]->GetNumberOfSplinePoints() > NumSteps)
+					{
+						Splines[bodyIndex]->RemoveSplinePoint(Splines[bodyIndex]->GetNumberOfSplinePoints() - 1, false);
+					}
+				}
 
-			Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
-			Splines[bodyIndex]->SetDrawDebug(true);
-			Splines[bodyIndex]->UpdateSpline();
-		}
-		
-		else
-		{
-			for (int i = 0; i < DrawPoints[bodyIndex].Num() - 1; i++)
+				Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
+				Splines[bodyIndex]->SetDrawDebug(true);
+				Splines[bodyIndex]->UpdateSpline();
+				break;
+
+			case Ribbon:
+				for (int i = 0; i < ParticleComponents.Num(); i++)
 				{
-					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i], DrawPoints[bodyIndex][i + 1], Colors[bodyIndex], true, 0.f, 0, Width);
+					UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[i], FName("User.Points"), DrawPoints[i]);
+					ParticleComponents[i]->SetColorParameter(FName("User.Color"), Colors[i]);
+					//ParticleComponents[i]->SetFloatParameter(FName("User.NumSteps"), float(NumSteps));
 				}
+				break;
+
+			default:
+				break;
 		}
-		
 	}
 }
-
+#pragma optimize("", on)
 void AOrbitDebugActor::ClearOrbits()
 {
-	/*for (int i = 0; i < ParticleComponents.Num(); i++)
+	for (int i = 0; i < ParticleComponents.Num(); i++)
 	{
 		ParticleComponents[i]->DestroyComponent();
 	}
-	ParticleComponents.Empty();*/
+	ParticleComponents.Empty();
 
 	TArray<AActor*> CollectedActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedActors);
@@ -256,7 +282,7 @@ FVector AOrbitDebugActor::CalculateAcceleration(int i, TArray<VirtualBody*> Virt
 VirtualBody::VirtualBody(ACelestialBody* Body)
 {
 	Position = Body->GetActorLocation();
-	Velocity = Body->initialVelocity;
+	Velocity = Body->GetCurrentVelocity();
 	Mass = Body->mass;
 }
 

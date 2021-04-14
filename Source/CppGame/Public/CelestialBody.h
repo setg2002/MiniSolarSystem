@@ -38,6 +38,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdatePosition(float timeStep);
 
+	FVector GetCurrentVelocity();
+
 	ACelestialGameMode* gameMode;
 
 	USceneComponent* Root;

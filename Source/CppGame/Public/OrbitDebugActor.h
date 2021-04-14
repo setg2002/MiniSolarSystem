@@ -12,6 +12,13 @@ class USplineComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
 
+UENUM()
+enum EDrawType
+{
+	DebugLine,
+	Spline,
+	Ribbon
+};
 
 class VirtualBody
 {
@@ -29,14 +36,13 @@ class CPPGAME_API AOrbitDebugActor : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
-	AOrbitDebugActor();
+	static AOrbitDebugActor* Get();
 
 	UPROPERTY(EditAnywhere)
 	bool bAutoDraw = true;
 
 	UPROPERTY(EditAnywhere)
-	bool bDrawWithSplines = true;
+	TEnumAsByte<EDrawType> DrawType;
 	
 	UPROPERTY(EditAnywhere)
 	int NumSteps = 1000;
@@ -86,6 +92,11 @@ public:
 
 
 private:
+	// Sets default values for this actor's properties
+	AOrbitDebugActor();
+	
+	static AOrbitDebugActor* _instance;
+
 	TArray<FColor> Colors = { FColor::Red, FColor::Blue, FColor::Green, FColor::White, FColor::Magenta, FColor::Cyan };
 
 	FVector CalculateAcceleration(int i, TArray<VirtualBody*> VirtualBodies);

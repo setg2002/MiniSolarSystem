@@ -2,6 +2,7 @@
 
 
 #include "CelestialGameMode.h"
+#include "OrbitDebugActor.h"
 #include "CelestialBody.h"
 #include "EngineUtils.h"
 
@@ -23,6 +24,8 @@ void ACelestialGameMode::BeginPlay()
 void ACelestialGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	AOrbitDebugActor::Get()->DrawOrbits();
 
 	for (int i = 0; i < bodies.Num(); i++) {
 		ACelestialBody* thisBody = bodies[i];
