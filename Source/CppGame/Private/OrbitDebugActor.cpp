@@ -2,8 +2,10 @@
 
 
 #include "OrbitDebugActor.h"
+#include "Planet.h"
 #include "CelestialBody.h"
 #include "NiagaraSystem.h"
+#include "ShapeSettings.h"
 #include "NiagaraComponent.h"
 #include "DrawDebugHelpers.h"
 #include "NiagaraFunctionLibrary.h"
@@ -12,7 +14,7 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 
-AOrbitDebugActor* AOrbitDebugActor::_instance;
+AOrbitDebugActor* AOrbitDebugActor::_instance; // Needed for singleton implementation
 
 AOrbitDebugActor* AOrbitDebugActor::Get()
 {
@@ -29,7 +31,7 @@ AOrbitDebugActor::AOrbitDebugActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	_instance = this;
+	_instance = this; //FIX Possibly redundant from Get()?
 
 	ParticleTemplate = LoadObject<UNiagaraSystem>(NULL, TEXT("NiagaraSystem'/Game/Particles/OrbitDebug/OrbitDebugEmitter_System.OrbitDebugEmitter_System'"), NULL, LOAD_None, NULL);
 }
@@ -46,10 +48,6 @@ void AOrbitDebugActor::BeginPlay()
 	Super::BeginPlay();
 	
 	ClearOrbits();
-	if (bAutoDraw)
-	{
-		DrawOrbits();
-	}
 }
 
 // Called every frame
@@ -96,8 +94,6 @@ void AOrbitDebugActor::CreateSplines()
 	}
 }
 
-#pragma optimize("", off)
-//TODO This could be optimized by only redrawing the splines of bodies that have changed
 void AOrbitDebugActor::DrawOrbits()
 {
 	ClearOrbits();
@@ -151,7 +147,7 @@ void AOrbitDebugActor::DrawOrbits()
 
 	// Simulate 
 	FVector ReferenceBodyPosition = (bRelativeToBody) ? VirtualBodies[ReferenceFrameIndex]->Position : FVector::ZeroVector;
-	for (int i = 0; i < VirtualBodies.Num(); i++) // Makes sure the 1st position of the orbit is at the planet's position
+	for (int i = 0; i < VirtualBodies.Num(); i++) // Makes sure the 1st position of the orbit is at the planet's exact position
 	{
 		if (bRelativeToBody)
 		{
@@ -197,20 +193,30 @@ void AOrbitDebugActor::DrawOrbits()
 		{
 			case DebugLine:
 			{
-				int factor = NumSteps / 1000 < 1 ? 1 : NumSteps / 1000; // Scale down the number of lines to use as NumSteps grows over 1000 to retain framerate
-				for (int i = 0; i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, 999); i++)
+				int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over Substep to retain framerate
+				for (int i = 0; i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps * 10) - 1); i++)
 				{
-					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Width);
+					APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
+					if (Width == 0 && planet != nullptr)
+					{
+						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, planet->ShapeSettings->PlanetRadius * 2);
+					}
+					else
+					{
+						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Width);
+					}
 				}
 				break;
 			}
 			case Spline:
+			{
+				int factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps;
 				// Add more points to the end of the spline until we reach NumSteps
-				if (Splines[bodyIndex]->GetNumberOfSplinePoints() < NumSteps)
+				if (Splines[bodyIndex]->GetNumberOfSplinePoints() < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1))
 				{
-					for (int i = Splines[bodyIndex]->GetNumberOfSplinePoints(); i < NumSteps; i++)
+					for (int i = Splines[bodyIndex]->GetNumberOfSplinePoints(); i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); i++)
 					{
-						Splines[bodyIndex]->AddPoint(FSplinePoint(i, DrawPoints[bodyIndex][i]), false);
+						Splines[bodyIndex]->AddPoint(FSplinePoint(i, DrawPoints[bodyIndex][i * factor]), false);
 					}
 				}
 				// Remove points from the end of the spline until we reach NumSteps
@@ -224,14 +230,30 @@ void AOrbitDebugActor::DrawOrbits()
 
 				Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
 				Splines[bodyIndex]->SetDrawDebug(true);
+				Splines[bodyIndex]->bShouldVisualizeScale = true;
+				APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
+				if (planet != nullptr)
+				{
+					Splines[bodyIndex]->ScaleVisualizationWidth = planet->ShapeSettings->PlanetRadius;
+				}
 				Splines[bodyIndex]->UpdateSpline();
 				break;
-
+			}
 			case Ribbon:
 				for (int i = 0; i < ParticleComponents.Num(); i++)
 				{
 					UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[i], FName("User.Points"), DrawPoints[i]);
 					ParticleComponents[i]->SetColorParameter(FName("User.Color"), Colors[i]);
+					
+					APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
+					if (Width == 0 && planet != nullptr)
+					{
+						ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), planet->ShapeSettings->PlanetRadius * 2);
+					}
+					else
+					{
+						ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
+					}
 					//ParticleComponents[i]->SetFloatParameter(FName("User.NumSteps"), float(NumSteps));
 				}
 				break;
@@ -241,7 +263,7 @@ void AOrbitDebugActor::DrawOrbits()
 		}
 	}
 }
-#pragma optimize("", on)
+
 void AOrbitDebugActor::ClearOrbits()
 {
 	for (int i = 0; i < ParticleComponents.Num(); i++)
@@ -295,7 +317,7 @@ void AOrbitDebugActor::PostEditChangeProperty(FPropertyChangedEvent & PropertyCh
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
 		//TODO Is there a shorter way to rewrite this line?
-		if ((PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, NumSteps) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, TimeStep) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, bRelativeToBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, CentralBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, Width)) && bAutoDraw)
+		if ((PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, DrawType) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, NumSteps) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, TimeStep) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, bRelativeToBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, CentralBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, Width)) && bAutoDraw)
 		{
 			DrawOrbits();
 		}

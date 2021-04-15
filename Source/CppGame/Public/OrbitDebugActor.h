@@ -59,8 +59,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	ACelestialBody* CentralBody;
 
+	// The width of the debug. If it is 0 (zero) then the planet's radius will be used
 	UPROPERTY(EditAnywhere)
 	float Width = 25;
+
+	UPROPERTY(EditAnywhere)
+	int RenderedSteps = 100;
 
 	UPROPERTY(EditAnywhere)
 	TArray<USplineComponent*> Splines;
@@ -69,8 +73,6 @@ public:
 	void DrawOrbits();
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void ClearOrbits();
-
-	void CreateSplines();
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 
@@ -84,6 +86,8 @@ protected:
 	UNiagaraSystem* ParticleTemplate;
 
 	TArray<UNiagaraComponent*> ParticleComponents;
+
+	void CreateSplines();
 
 
 public:	

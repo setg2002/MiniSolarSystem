@@ -24,8 +24,12 @@ void ACelestialGameMode::BeginPlay()
 void ACelestialGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	AOrbitDebugActor::Get()->DrawOrbits();
+	
+	if (AOrbitDebugActor::Get()->DrawType != EDrawType::Ribbon && AOrbitDebugActor::Get()->bAutoDraw)
+	{
+		AOrbitDebugActor::Get()->DrawOrbits();
+	}
+	
 
 	for (int i = 0; i < bodies.Num(); i++) {
 		ACelestialBody* thisBody = bodies[i];

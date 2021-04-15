@@ -36,4 +36,5 @@ protected:
 	
 	UPROPERTY(BlueprintReadWrite)
 	TArray<ACelestialBody*> bodies;
+
 };
