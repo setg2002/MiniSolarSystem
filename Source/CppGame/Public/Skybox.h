@@ -19,8 +19,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+#if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void/*UTexture2D*/ MakeTexture();
+#endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D StarOffset = FVector2D(0, 0);
@@ -45,7 +47,9 @@ public:
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 protected:
 	// Called when the game starts or when spawned

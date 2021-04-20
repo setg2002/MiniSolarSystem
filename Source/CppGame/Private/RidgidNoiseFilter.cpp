@@ -2,7 +2,7 @@
 
 
 #include "RidgidNoiseFilter.h"
-#include "G:\UnrealProjects\CppGame\Plugins\SimplexNoise\Source\SimplexNoise\Public\SimplexNoiseBPLibrary.h"
+#include "SimplexNoiseBPLibrary.h"
 
 RidgidNoiseFilter::RidgidNoiseFilter(FRidgidNoiseSettings settings)
 {

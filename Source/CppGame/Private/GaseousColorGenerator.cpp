@@ -15,6 +15,7 @@ GaseousColorGenerator::~GaseousColorGenerator()
 {
 }
 
+#if WITH_EDITOR
 UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLinearColor* Gradient)
 {
 	int16 sizeX = 256;
@@ -186,3 +187,4 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float Sto
 
 	return VoronoiTexture;
 }
+#endif

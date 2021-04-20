@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{C03939E9-4251-8BD9-EDA3-D19258403B59}",
+	"EngineAssociation": "{CD36F5E9-475F-B94B-32EE-3BAA9124CDAD}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -10,11 +10,8 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"UnrealEd",
 				"ProceduralMeshComponent",
-				"ProjectCleaner",
 				"SimplexNoise",
-				"AssetTools",
 				"RawMesh",
 				"Niagara"
 			]

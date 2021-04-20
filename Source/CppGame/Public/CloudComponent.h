@@ -22,7 +22,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
 	float CloudHeight = 1.1;
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 protected:
 	virtual void OnComponentCreated() override;

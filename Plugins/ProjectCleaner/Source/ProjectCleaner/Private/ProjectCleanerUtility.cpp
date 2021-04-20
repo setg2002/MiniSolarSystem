@@ -176,23 +176,24 @@ void ProjectCleanerUtility::FixupRedirectors()
 int32 ProjectCleanerUtility::DeleteAssets(TArray<FAssetData>& Assets)
 {
 	// first try to delete normally
-	int32 DeletedAssets = ObjectTools::DeleteAssets(Assets, false);
+	//int32 DeletedAssets = ObjectTools::DeleteAssets(Assets, false);
 
-	// if normally not working try to force delete
-	if (DeletedAssets == 0)
-	{
-		TArray<UObject*> AssetObjects;
-		AssetObjects.Reserve(Assets.Num());
+	//// if normally not working try to force delete
+	//if (DeletedAssets == 0)
+	//{
+	//	TArray<UObject*> AssetObjects;
+	//	AssetObjects.Reserve(Assets.Num());
 
-		for (const auto& Asset : Assets)
-		{
-			AssetObjects.Add(Asset.GetAsset());
-		}
+	//	for (const auto& Asset : Assets)
+	//	{
+	//		AssetObjects.Add(Asset.GetAsset());
+	//	}
 
-		DeletedAssets = ObjectTools::ForceDeleteObjects(AssetObjects, false);
-	}
+	//	DeletedAssets = ObjectTools::ForceDeleteObjects(AssetObjects, false);
+	//}
 
-	return DeletedAssets;
+	//return DeletedAssets;
+	return 0;
 }
 
 void ProjectCleanerUtility::FindNonProjectFiles(const FString& SearchPath, TArray<FString>& NonProjectFilesList)
@@ -285,12 +286,21 @@ bool ProjectCleanerUtility::UsedInSourceFiles(const TArray<FString>& AllFiles, c
 
 void ProjectCleanerUtility::SaveAllAssets()
 {
-	FEditorFileUtils::SaveDirtyPackages(
+	/*FEditorFileUtils::SaveDirtyPackages(
 		true,
 		true,
 		true,
 		false,
 		false,
 		false
-	);
+	);*/
+}
+
+void ProjectCleanerUtility::SaveAllAssetsFast()
+{
+	/*FEditorFileUtils::SaveDirtyPackages(
+		false,
+		true,
+		true
+	);*/
 }

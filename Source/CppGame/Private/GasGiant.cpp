@@ -27,10 +27,12 @@ void AGasGiant::GenerateMaterial()
 void AGasGiant::NewVoronoiForStorms()
 {
 	//GenerateMaterial();
+#if WITH_EDITOR
 	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_StormTexture"), ColorGenerator->MakeVoronoiTexture(ColorSettings->NumStorms, ColorSettings->StormFalloff, ColorSettings->LowBound, ColorSettings->HighBound));
+#endif
 }
 
-
+#if WITH_EDITOR
 void AGasGiant::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	if (PropertyChangedEvent.Property != nullptr)
@@ -45,3 +47,4 @@ void AGasGiant::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
+#endif

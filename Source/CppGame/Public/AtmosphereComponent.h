@@ -38,7 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, AdvancedDisplay)
 	float CloudHeight;
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 	virtual void DestroyComponent(bool bPromoteChildren) override;
 

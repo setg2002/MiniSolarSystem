@@ -18,7 +18,7 @@ void UGasGiantColorSettings::SetOwner(AGasGiant* owner)
 	Owner = owner;
 }
 
-
+#if WITH_EDITOR
 void UGasGiantColorSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	if (PropertyChangedEvent.Property != nullptr)
@@ -44,3 +44,4 @@ void UGasGiantColorSettings::PostEditChangeProperty(FPropertyChangedEvent& Prope
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
+#endif

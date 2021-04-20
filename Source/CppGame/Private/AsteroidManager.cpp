@@ -49,6 +49,7 @@ void AAsteroidManager::NewVariants()
 	// Make the sphere offset texture
 	//CreateSphereTexture("AsteroidSphere");
 	
+#if WITH_EDITOR
 	// Make the heightmaps
 	HeightmapsArray->SourceTextures.Empty();
 	HeightmapsArray->SourceTextures.SetNum(NumVariants);
@@ -58,11 +59,11 @@ void AAsteroidManager::NewVariants()
 		Name.Append(FString::FromInt(i + 1));
 		HeightmapsArray->SourceTextures[i] = CreateHeightmapTexture(Name);
 	}
-
+#endif
 	//HeightmapsArray->ReloadConfig(UTexture2DArray::StaticClass());  // Why aren't the new heightmaps showing up?
 }
 
-
+#if WITH_EDITOR
 UTexture2D* AAsteroidManager::CreateHeightmapTexture(FString TextureName)
 {
 	const int Resolution = 1024;
@@ -187,7 +188,7 @@ UTexture2D* AAsteroidManager::CreateSphereTexture(FString TextureName)
 
 	return NewTexture;
 }
-
+#endif
 
 FVector AAsteroidManager::PointOnUnitSphere(FVector2D pointOnUnitSquare)
 {

@@ -163,7 +163,6 @@ void APlanet::CreateSettingsAssets()
 
 void APlanet::GeneratePlanet()
 {
-	std::fill(std::begin(ThreadsFinished), std::end(ThreadsFinished), 0);
 	if (ColorSettings)
 	{
 		StaticMesh->SetRelativeLocation(FVector().ZeroVector);
@@ -275,7 +274,9 @@ void APlanet::OnColorSettingsUpdated()
 
 void APlanet::GenerateColors()
 {
+#if WITH_EDITOR
 	colorGenerator->UpdateColors();
+#endif
 
 	// Reload the texture
 	StaticMesh->GetMaterial(0)->LoadConfig(UMaterialInterface::StaticClass());
@@ -340,6 +341,7 @@ void APlanet::ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh)
 	static TArray<UProceduralMeshComponent*> ProcMeshes;
 	ProcMeshes.Add(NewMesh);
 
+#if WITH_EDITOR
 	if (ProcMeshes.IsValidIndex(5))
 	{
 		StaticMesh->SetStaticMesh(ConvertToStaticMesh(ProcMeshes));
@@ -350,8 +352,10 @@ void APlanet::ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh)
 			GenerateColors();
 		}
 	}
+#endif
 }
 
+#if WITH_EDITOR
 UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes)
 {
 	FString AssetName = FString(TEXT("SM_")) + this->GetName();
@@ -507,6 +511,7 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 	return nullptr;
 }
 
+
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -554,3 +559,4 @@ void APlanet::PostEditMove(bool bFinished)
 		OrbitDebugActor->DrawOrbits();
 	}
 }
+#endif

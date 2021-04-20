@@ -63,6 +63,7 @@ float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere
 	return (float)BiomeIndex / FMath::Max<int>(1, NumBiomes - 1);
 }
 
+#if WITH_EDITOR
 void TerrestrialColorGenerator::UpdateColors()
 {
 	TArray<UCurveLinearColor*> biomeColors;
@@ -85,6 +86,7 @@ void TerrestrialColorGenerator::UpdateColors()
 
 	//AssetCleaner::CleanDirectory(EDirectoryFilterType::Textures);
 }
+
 
 UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
 {
@@ -145,3 +147,4 @@ UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray
 
 	return NewTexture;
 }
+#endif

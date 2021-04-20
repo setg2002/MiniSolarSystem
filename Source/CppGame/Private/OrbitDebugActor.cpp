@@ -193,7 +193,7 @@ void AOrbitDebugActor::DrawOrbits()
 		{
 			case DebugLine:
 			{
-				int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over Substep to retain framerate
+				int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
 				for (int i = 0; i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps * 10) - 1); i++)
 				{
 					APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
@@ -228,14 +228,17 @@ void AOrbitDebugActor::DrawOrbits()
 					}
 				}
 
-				Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
 				Splines[bodyIndex]->SetDrawDebug(true);
+
+#if WITH_EDITOR
+				Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
 				Splines[bodyIndex]->bShouldVisualizeScale = true;
 				APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
 				if (planet != nullptr)
 				{
 					Splines[bodyIndex]->ScaleVisualizationWidth = planet->ShapeSettings->PlanetRadius;
 				}
+#endif
 				Splines[bodyIndex]->UpdateSpline();
 				break;
 			}
@@ -308,6 +311,7 @@ VirtualBody::VirtualBody(ACelestialBody* Body)
 	Mass = Body->mass;
 }
 
+#if WITH_EDITOR
 void AOrbitDebugActor::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -323,3 +327,4 @@ void AOrbitDebugActor::PostEditChangeProperty(FPropertyChangedEvent & PropertyCh
 		}
 	}
 }
+#endif

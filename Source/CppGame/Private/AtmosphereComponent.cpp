@@ -40,7 +40,7 @@ void UAtmosphereComponent::DestroyComponent(bool bPromoteChildren)
 	Super::DestroyComponent(bPromoteChildren);
 }
 
-
+#if WITH_EDITOR
 void UAtmosphereComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -104,3 +104,4 @@ void UAtmosphereComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		}
 	}
 }
+#endif

@@ -14,6 +14,7 @@
 
 class UNiagaraSystem;
 class UNiagaraComponent;
+class UDirectionalLightComponent;
 
 UENUM()
 enum EStarType {
@@ -57,17 +58,24 @@ public:
 
 	void UpdateColor();
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 	UMaterialParameterCollectionInstance* planetMateralParameterCollectionInst;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UNiagaraComponent* ParticleComponent;
 
+	UDirectionalLightComponent* Light;
+
 	UNiagaraSystem* SolarParticleTemplate;
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 	virtual void PostEditMove(bool bFinished) override;
+#endif
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 

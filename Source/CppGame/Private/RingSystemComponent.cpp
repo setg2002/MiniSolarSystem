@@ -26,13 +26,16 @@ void URingSystemComponent::OnComponentCreated()
 	this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
 	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"), NULL, LOAD_None, NULL));
+	this->bCastVolumetricTranslucentShadow = false; // Set to true for the ring to cast shadows on the planet with the side-effect that the shading of the ring itself will break
 	CreateMaterial();
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
+#if WITH_EDITOR
 	if (Gradient)
 	{
 		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 	}
+#endif
 }
 
 void URingSystemComponent::CreateMaterial()
@@ -64,7 +67,7 @@ void URingSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	// ...
 }
 
-
+#if WITH_EDITOR
 void URingSystemComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -96,3 +99,4 @@ void URingSystemComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		}
 	}
 }
+#endif

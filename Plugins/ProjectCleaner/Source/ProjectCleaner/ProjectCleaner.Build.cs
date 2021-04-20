@@ -39,7 +39,7 @@ public class ProjectCleaner : ModuleRules
 			{
 				"Projects",
 				"InputCore",
-				"UnrealEd",
+				//"UnrealEd",
 				"LevelEditor",
 				"CoreUObject",
 				"Engine",
@@ -48,7 +48,7 @@ public class ProjectCleaner : ModuleRules
 				"ContentBrowser",
 				"EditorStyle",
 				"PropertyEditor",
-				"UnrealEd",
+				/*"UnrealEd",*/
 				// ... add private dependencies that you statically link with here ...	
 			}
 		);

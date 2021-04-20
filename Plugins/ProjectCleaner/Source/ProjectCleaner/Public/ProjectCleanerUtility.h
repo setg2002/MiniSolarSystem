@@ -100,4 +100,6 @@ public:
 	 * @brief Saves all unsaved assets
 	 */
 	static void SaveAllAssets();
+
+	static void SaveAllAssetsFast();
 };

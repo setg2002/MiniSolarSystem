@@ -53,9 +53,6 @@ public:
 	ShapeGenerator* shapeGenerator;
 	TerrestrialColorGenerator* colorGenerator;
 
-	// Converts all ProcMeshes into a single static mesh that can be more easily saved to disk
-	UStaticMesh* ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes);
-
 	/* TODO Orbit stuff should be put in ACelestialBody instead */
 	// The CelestialBody that orbitVelocity is to be calculated for
 	UPROPERTY(Category = "Orbits", EditAnywhere)
@@ -88,11 +85,6 @@ public:
 
 	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
 	int32 VectorDuration = 10;
-
-	/* Each element in the array represents the status of a TerrainFace thread. The entire array is set to false
-	in GeneratePlanet(), when terrain generation starts. ConvertAndSetStaticMesh(int32 i) then uses the array to 
-	validate that all threads have finished before creating teh static mesh from the procedural meshes.        */
-	bool ThreadsFinished[6];
 
 	// When true, the planet will call ReGenerate() every time a parameter is changed
 	UPROPERTY(Category = "Settings", EditAnywhere)
@@ -156,9 +148,14 @@ public:
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 
+#if WITH_EDITOR
+	// Converts all ProcMeshes into a single static mesh that can be more easily saved to disk
+	UStaticMesh* ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes);
+
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	
 	virtual void PostEditMove(bool bFinished) override;
+#endif
 
 protected:
 	virtual void BeginPlay() override;

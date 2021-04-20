@@ -48,6 +48,7 @@ void ASkybox::Tick(float DeltaTime)
 }
 
 // This is very slow
+#if WITH_EDITOR
 void ASkybox::MakeTexture()
 {
 	int16 TextureRes = 2048;
@@ -129,8 +130,9 @@ void ASkybox::MakeTexture()
 
 	return /*SkyboxTexture*/;
 }
+#endif
 
-
+#if WITH_EDITOR
 void ASkybox::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -156,3 +158,4 @@ void ASkybox::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 		}
 	}
 }
+#endif
