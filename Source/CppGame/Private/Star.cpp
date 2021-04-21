@@ -76,6 +76,12 @@ void AStar::UpdateColor()
 	dynamicMaterial->SetVectorParameterValue(FName("_baseColor"), starProperties.color);
 	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
 	ParticleComponent->ReinitializeSystem();
+
+	Light->SetLightColor(FColor(
+		FMath::Max(starProperties.color.R, uint8(178.5f)),
+		FMath::Max(starProperties.color.G, uint8(178.5f)),
+		FMath::Max(starProperties.color.B, uint8(178.5f))
+		));
 }
 
 #if WITH_EDITOR
@@ -121,6 +127,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 			}
 			dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
 			planetMateralParameterCollectionInst->SetScalarParameterValue(FName("StarLuminosity"), starProperties.luminosity);
+			Light->SetIntensity(starProperties.luminosity / 5);
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(AStar, starType))
 		{

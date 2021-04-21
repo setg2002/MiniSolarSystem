@@ -64,7 +64,6 @@ public:
 protected:
 	UMaterialParameterCollectionInstance* planetMateralParameterCollectionInst;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UNiagaraComponent* ParticleComponent;
 
 	UDirectionalLightComponent* Light;
