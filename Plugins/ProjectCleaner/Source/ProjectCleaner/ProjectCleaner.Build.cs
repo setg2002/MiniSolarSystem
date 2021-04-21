@@ -33,13 +33,16 @@ public class ProjectCleaner : ModuleRules
 			}
 		);
 
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[] { "UnrealEd", });
+        }
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Projects",
 				"InputCore",
-				//"UnrealEd",
 				"LevelEditor",
 				"CoreUObject",
 				"Engine",
@@ -48,7 +51,6 @@ public class ProjectCleaner : ModuleRules
 				"ContentBrowser",
 				"EditorStyle",
 				"PropertyEditor",
-				/*"UnrealEd",*/
 				// ... add private dependencies that you statically link with here ...	
 			}
 		);

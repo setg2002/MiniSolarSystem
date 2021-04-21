@@ -2,9 +2,11 @@
 
 
 #include "AssetCleaner.h"
-//#include "AssetQueryManager.h"
-//#include "ProjectCleanerUtility.h"
-//#include "UI/SProjectCleanerBrowser.h"
+#if WITH_EDITOR
+#include "AssetQueryManager.h"
+#include "ProjectCleanerUtility.h"
+#include "UI/SProjectCleanerBrowser.h"
+#endif
 
 
 void AssetCleaner::CleanAll()
@@ -76,7 +78,8 @@ void AssetCleaner::CleanDirectories(TArray<EDirectoryFilterType> DirectoriesToCl
 
 void AssetCleaner::Clean(TArray<FDirectoryPath> Directories)
 {
-	/*ProjectCleanerUtility::SaveAllAssetsFast();
+#if WITH_EDITOR
+	ProjectCleanerUtility::SaveAllAssetsFast();
 
 	TArray<FAssetData> UnusedAssets;
 	UDirectoryFilterSettings* DirectoryFilterSettings = GetMutableDefault<UDirectoryFilterSettings>();
@@ -86,5 +89,6 @@ void AssetCleaner::Clean(TArray<FDirectoryPath> Directories)
 	AssetQueryManager::GetUnusedAssets(UnusedAssets, DirectoryFilterSettings, AdjacencyList);
 
 	ProjectCleanerUtility::DeleteAssets(UnusedAssets);
-	ProjectCleanerUtility::FixupRedirectors();*/
+	ProjectCleanerUtility::FixupRedirectors();
+#endif
 }

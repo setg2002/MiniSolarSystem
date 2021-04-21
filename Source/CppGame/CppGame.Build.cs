@@ -8,7 +8,12 @@ public class CppGame : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "SimplexNoise"/*, "AssetTools"*/, "RawMesh", "Niagara"/*, "ProjectCleaner"*/ });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "SimplexNoise", "RawMesh", "Niagara",  });
+
+        if (Target.bBuildEditor)
+        {
+            PublicDependencyModuleNames.AddRange(new string[] { "AssetTools", "ProjectCleaner" });
+        }
 
         PrivateDependencyModuleNames.AddRange(new string[] {  });
 
