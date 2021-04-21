@@ -26,6 +26,11 @@ AStar::AStar()
 	Sphere->SetMaterial(0, dynamicMaterial);
 
 	Light = CreateDefaultSubobject<UDirectionalLightComponent>("Light");
+	Light->SetLightColor(FColor(
+		FMath::Max(starProperties.color.R, uint8(178.5f)),
+		FMath::Max(starProperties.color.G, uint8(178.5f)),
+		FMath::Max(starProperties.color.B, uint8(178.5f))
+	));
 
 	SolarParticleTemplate = LoadObject<UNiagaraSystem>(NULL, TEXT("NiagaraSystem'/Game/Particles/Star/SolarNiagaraSystem.SolarNiagaraSystem'"), NULL, LOAD_None, NULL);
 }
@@ -35,16 +40,14 @@ void AStar::OnConstruction(const FTransform & Transform)
 	Super::OnConstruction(Transform);
 
 	//TODO The system should be attached to the star
-	//TODO Sometimes multiple instances are created (possibly ReinitializeSystem() fault?), eating up lots of memory
 
 	//ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, Sphere, FName(""), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);	
+	if (ParticleComponent) { ParticleComponent->Deactivate(); ParticleComponent->DestroyComponent(); }
 	ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolarParticleTemplate, Sphere->GetComponentLocation());
-#if !UE_BUILD_DEVELOPMENT //FIX Without this the game will not package for some reason
+//#if !UE_BUILD_DEVELOPMENT //FIX Without this the game will not package for some reason
 	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
 	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
-	ParticleComponent->ReinitializeSystem();
-	ParticleComponent->Activate();
-#endif
+//#endif
 	//UE_LOG(LogTemp, Warning, TEXT("%s"), ParticleComponent != nullptr ? TEXT("True") : TEXT("False"));
 	//UE_LOG(LogTemp, Warning, TEXT("%s"), *ParticleComponent->GetAttachParent()->GetName());
 }
@@ -75,7 +78,6 @@ void AStar::UpdateColor()
 	}
 	dynamicMaterial->SetVectorParameterValue(FName("_baseColor"), starProperties.color);
 	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
-	ParticleComponent->ReinitializeSystem();
 
 	Light->SetLightColor(FColor(
 		FMath::Max(starProperties.color.R, uint8(178.5f)),
