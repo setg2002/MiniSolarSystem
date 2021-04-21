@@ -13,7 +13,7 @@
 USTRUCT(BlueprintType)
 struct FStarProperties : public FTableRowBase
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"), BlueprintReadWrite)

@@ -39,17 +39,14 @@ void AStar::OnConstruction(const FTransform & Transform)
 {
 	Super::OnConstruction(Transform);
 
-	//TODO The system should be attached to the star
-
-	//ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, Sphere, FName(""), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);	
-	if (ParticleComponent) { ParticleComponent->Deactivate(); ParticleComponent->DestroyComponent(); }
-	ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolarParticleTemplate, Sphere->GetComponentLocation());
+	if (!ParticleComponent) 
+	{
+		ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, RootComponent, FName(""), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
 //#if !UE_BUILD_DEVELOPMENT //FIX Without this the game will not package for some reason
-	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
-	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+		ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
+		ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
 //#endif
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), ParticleComponent != nullptr ? TEXT("True") : TEXT("False"));
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), *ParticleComponent->GetAttachParent()->GetName());
+	}
 }
 
 void AStar::Tick(float DeltaTime)
@@ -62,8 +59,7 @@ void AStar::Tick(float DeltaTime)
 void AStar::ReInitParticles()
 {
 	if (ParticleComponent) { ParticleComponent->Deactivate(); ParticleComponent->DestroyComponent(); }
-	//ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, Sphere, NAME_None, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::Type::SnapToTarget, true);
-	ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), SolarParticleTemplate, Sphere->GetComponentLocation());
+	ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, RootComponent, FName(""), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
 	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
 	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
 	ParticleComponent->ReinitializeSystem();
@@ -97,7 +93,6 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 		{
 			Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
 			ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
-			ParticleComponent->ReinitializeSystem();
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, mass))
 		{
