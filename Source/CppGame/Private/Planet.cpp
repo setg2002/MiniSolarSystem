@@ -11,6 +11,7 @@
 #include "ColorGenerator.h"
 #include "ShapeGenerator.h"
 #include "OrbitDebugActor.h"
+#include "MeshDescription.h"
 #include "Engine/DataAsset.h"
 #include "AssetRegistryModule.h"
 #include "UObject/PackageReload.h"
@@ -22,7 +23,8 @@
 
 APlanet::APlanet()
 {
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	//StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("Mesh");
 
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new TerrestrialColorGenerator(this);
@@ -165,7 +167,7 @@ void APlanet::GeneratePlanet()
 {
 	if (ColorSettings)
 	{
-		StaticMesh->SetRelativeLocation(FVector().ZeroVector);
+		ProcMesh->SetRelativeLocation(FVector().ZeroVector);
 
 		if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
 		{
@@ -223,19 +225,11 @@ void APlanet::Initialize()
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
 
-	TArray<UProceduralMeshComponent*> ProcMeshes;
-	for (int8 i = 0; i < 6; i++)
-	{
-		ProcMeshes.Add(NewObject<UProceduralMeshComponent>());
-	}
-
-	ColorSettings->DynamicMaterials.Empty();
-	ColorSettings->DynamicMaterials.SetNum(6);
+	ColorSettings->DynamicMaterial = ProcMesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
 	for (int32 i = 0; i < 6; i++)
 	{
-		TerrainFaces[i] = new TerrainFace(shapeGenerator, colorGenerator, resolution, directions[i], ProcMeshes[i], this);
-
-		ColorSettings->DynamicMaterials[i] = ProcMeshes[i]->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
+		TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, resolution, directions[i], ProcMesh, this);
+		ProcMesh->SetMaterial(i, ColorSettings->DynamicMaterial);
 	}
 }
 
@@ -279,14 +273,14 @@ void APlanet::GenerateColors()
 #endif
 
 	// Reload the texture
-	StaticMesh->GetMaterial(0)->LoadConfig(UMaterialInterface::StaticClass());
-	//StaticMesh->GetMaterial(0)->ReloadConfig();  // Possible engine crash if material doesn't exist?
+	ProcMesh->GetMaterial(0)->LoadConfig(UMaterialInterface::StaticClass());
+	//ProcMesh->GetMaterial(0)->ReloadConfig();  // Possible engine crash if material doesn't exist?
 
 	if (bMultithreadGeneration)
 	{
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
-		StaticMesh->GetMaterial(0)->MarkPackageDirty();
-		AssetCleaner::CleanAll();
+		//ProcMesh->GetMaterial(0)->MarkPackageDirty();
+		//AssetCleaner::CleanAll();
 	}
 }
 
@@ -315,7 +309,7 @@ void APlanet::SetToOrbit()
 	}
 
 	FVector AtPlanet = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), OrbitingBody->GetActorLocation()).Vector();
-	FVector Up = StaticMesh->GetUpVector();
+	FVector Up = ProcMesh->GetUpVector();
 	FVector Tangent = FVector().CrossProduct(AtPlanet, Up).GetSafeNormal();
 
 	initialVelocity.X = Tangent.X * -orbitVelocity + OrbitingBody->initialVelocity.X;
@@ -336,28 +330,20 @@ void APlanet::SetToOrbit()
 	}
 }
 
-void APlanet::ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh)
+void APlanet::ConvertAndSetStaticMesh(int face)
 {
-	static TArray<UProceduralMeshComponent*> ProcMeshes;
-	ProcMeshes.Add(NewMesh);
+	static TArray<int> FinishedFaces;
+	FinishedFaces.Add(face);
 
-#if WITH_EDITOR
-	if (ProcMeshes.IsValidIndex(5))
+	if (FinishedFaces.IsValidIndex(5) && bMultithreadGeneration)
 	{
-		StaticMesh->SetStaticMesh(ConvertToStaticMesh(ProcMeshes));
-		StaticMesh->MarkPackageDirty();
-		ProcMeshes.Empty();
-		if (bMultithreadGeneration)
-		{
-			GenerateColors();
-		}
+		GenerateColors();
 	}
-#endif
 }
 
-#if WITH_EDITOR
 UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes)
 {
+#if WITH_EDITOR
 	FString AssetName = FString(TEXT("SM_")) + this->GetName();
 	FString PathName = FString(TEXT("/Game/PlanetMeshes/"));
 	FString PackageName = PathName + AssetName;
@@ -434,8 +420,8 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 		SrcModel.BuildSettings.bGenerateLightmapUVs = true;
 		SrcModel.BuildSettings.SrcLightmapIndex = 0;
 		SrcModel.BuildSettings.DstLightmapIndex = 1;
-		SrcModel.RawMeshBulkData->SaveRawMesh(RawMesh);
-		
+		//SrcModel.RawMeshBulkData->SaveRawMesh(RawMesh);
+
 		FString NewMaterialName = FString(TEXT("M_")) + this->GetName();
 		FString MatPackageName = PathName + NewMaterialName;
 		UPackage* MaterialPackage = CreatePackage(*MatPackageName);
@@ -484,7 +470,7 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 		FAssetRegistryModule::AssetCreated(NewMaterial);
 		NewMaterial->MarkPackageDirty();
 
-		ColorSettings->DynamicMaterials = { NewMaterial };
+		ColorSettings->DynamicMaterial = NewMaterial;
 
 		// Copy material to new mesh
 		NewMesh->SetStaticMaterials(TArray<FStaticMaterial>{ NewMaterial });
@@ -493,10 +479,14 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 		bool bSavedMaterial = UPackage::SavePackage(MaterialPackage, NewMaterial, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *MatPackageFileName, GError, nullptr, true, true, SAVE_NoError);
 
 		// Set the Imported version before calling the build
-		NewMesh->ImportVersion = EImportStaticMeshVersion::LastVersion;
+		//NewMesh->ImportVersion = EImportStaticMeshVersion::LastVersion;
+
+		FMeshDescription* a = SrcModel.MeshDescription.Get();
+		FStaticMeshLODResources* b = nullptr;
 
 		// Build mesh from source
-		NewMesh->Build(false);
+		//NewMesh->Build(false); // Old: Relies on AssetTools and cannot be executed at runtime
+		NewMesh->BuildFromMeshDescription(*a, *b);
 		NewMesh->PostEditChange();
 
 		// Notify asset registry of new asset
@@ -508,10 +498,11 @@ UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> Proc
 
 		return NewMesh;
 	}
+#endif
 	return nullptr;
 }
 
-
+#if WITH_EDITOR
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);

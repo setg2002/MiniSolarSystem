@@ -18,7 +18,7 @@
 class CPPGAME_API TerrainFace
 {
 public:
-	TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, AActor* owner);
+	TerrainFace(int i, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* mesh, AActor* owner);
 	~TerrainFace();
 
 	AActor* Owner;
@@ -34,8 +34,9 @@ public:
 	TerrestrialColorGenerator* colorGenerator;
 	ShapeGenerator* shapeGenerator;
 
-	TArray<FLinearColor> VertexColors;
+	TArray<FColor> VertexColors;
 
+	int MeshSection;
 	int Resolution;
 	FVector LocalUp;
 	FVector axisA;
@@ -109,8 +110,6 @@ class CalculateMeshAsyncTask : public FNonAbandonableTask
 	FVector localUp;
 	FVector axisA;
 	FVector axisB;
-
-	TArray<FLinearColor> VertexColors;
 
 	TArray<FVector>& verticies;
 	TArray<int>& triangles;

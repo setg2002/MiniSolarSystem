@@ -5,7 +5,7 @@
 #include "Planet.h"
 #include "AssetRegistryModule.h"
 
-TerrainFace::TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* procMesh, AActor* owner)
+TerrainFace::TerrainFace(int i, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* procMesh, AActor* owner)
 {
 	Owner = owner;
 
@@ -14,6 +14,7 @@ TerrainFace::TerrainFace(ShapeGenerator* shape_Generator, TerrestrialColorGenera
 	Resolution = resolution;
 	LocalUp = localUp;
 	ProcMesh = procMesh;
+	MeshSection = i;
 
 	axisA = FVector(this->LocalUp.Y, this->LocalUp.Z, this->LocalUp.X);
 	axisB = FVector().CrossProduct(this->LocalUp, axisA);
@@ -56,7 +57,7 @@ void TerrainFace::ConstructMesh(TerrestrialColorGenerator* color_Generator)
 			}
 		}
 	}
-	ProcMesh->CreateMeshSection_LinearColor(0, verticies, triangles, normals, uv, VertexColors, tangents, false);
+	ProcMesh->CreateMeshSection(MeshSection, verticies, triangles, normals, uv, VertexColors, tangents, false);
 }
 
 void TerrainFace::CalculateMesh()
@@ -97,13 +98,14 @@ void TerrainFace::CalculateMesh()
 
 void TerrainFace::ConstructMeshAsync(TerrestrialColorGenerator* color_Generator)
 {
-	(new FAutoDeleteAsyncTask<CalculateMeshAsyncTask>(*this, Resolution, LocalUp, axisA, axisB, verticies, triangles, uv, shapeGenerator, colorGenerator))->StartBackgroundTask();
+	AsyncTask(ENamedThreads::AnyThread, [this]() { CalculateMesh(); });
+	//(new FAutoDeleteAsyncTask<CalculateMeshAsyncTask>(*this, Resolution, LocalUp, axisA, axisB, verticies, triangles, uv, shapeGenerator, colorGenerator))->StartBackgroundTask();
 }
 
 void TerrainFace::UpdateTangentsNormals()
 {
 	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(verticies, triangles, uv, normals, tangents);
-	CreateMesh();
+	AsyncTask(ENamedThreads::GameThread, [this]() { CreateMesh(); }); 
 }
 
 void TerrainFace::UpdateTangentsNormalsAsync()
@@ -113,6 +115,6 @@ void TerrainFace::UpdateTangentsNormalsAsync()
 
 void TerrainFace::CreateMesh()
 {
-	ProcMesh->CreateMeshSection_LinearColor(0, verticies, triangles, normals, uv, VertexColors, tangents, false);
-	Cast<APlanet>(Owner)->ConvertAndSetStaticMesh(ProcMesh);
+	ProcMesh->CreateMeshSection(MeshSection, verticies, triangles, normals, uv, VertexColors, tangents, false);
+	Cast<APlanet>(Owner)->ConvertAndSetStaticMesh(MeshSection);
 }

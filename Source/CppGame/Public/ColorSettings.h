@@ -62,7 +62,7 @@ public:
 
 	UMaterialInterface* PlanetMat;
 
-	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
+	UMaterialInstanceDynamic* DynamicMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))
 	float BiomeTintPercent;

@@ -42,10 +42,10 @@ void AStar::OnConstruction(const FTransform & Transform)
 	if (!ParticleComponent) 
 	{
 		ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, RootComponent, FName(""), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
-//#if !UE_BUILD_DEVELOPMENT //FIX Without this the game will not package for some reason
+#if !UE_BUILD_DEVELOPMENT //FIX Without this the game will not package for some reason
 		ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
 		ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
-//#endif
+#endif
 	}
 }
 

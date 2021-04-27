@@ -3,6 +3,7 @@
 
 #include "ColorGenerator.h"
 #include "MinMax.h"
+#include "CoreMinimal.h"
 #include "INoiseFilter.h"
 #include "AssetCleaner.h"
 #include "ColorSettings.h"
@@ -34,10 +35,7 @@ TerrestrialColorGenerator::~TerrestrialColorGenerator()
 
 void TerrestrialColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 {
-	for (int i = 0; i < ColorSettings->DynamicMaterials.Num(); i++)
-	{
-		ColorSettings->DynamicMaterials[i]->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0));
-	}
+	ColorSettings->DynamicMaterial->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0));
 }
 
 float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
@@ -73,17 +71,11 @@ void TerrestrialColorGenerator::UpdateColors()
 	}
 
 	UTexture2D* SurfaceTexture = CreateTexture(FString("TerrainTexture"), biomeColors);
-	for (int i = 0; i < ColorSettings->DynamicMaterials.Num(); i++)
-	{
-		ColorSettings->DynamicMaterials[i]->SetTextureParameterValue(FName("_texture"), SurfaceTexture);
-	}
+	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_texture"), SurfaceTexture);
 
 	UTexture2D* OceanTexture = CreateTexture(FString("OceanTexture"), TArray<UCurveLinearColor*>() = { ColorSettings->OceanColor });
-	for (int i = 0; i < ColorSettings->DynamicMaterials.Num(); i++)
-	{
-		ColorSettings->DynamicMaterials[i]->SetTextureParameterValue(FName("_oceanTexture"), OceanTexture);
-	}
-
+	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_oceanTexture"), OceanTexture);
+	
 	//AssetCleaner::CleanDirectory(EDirectoryFilterType::Textures);
 }
 

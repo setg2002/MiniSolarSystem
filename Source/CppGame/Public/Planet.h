@@ -45,8 +45,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Main mesh	
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//UStaticMeshComponent* StaticMesh;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* StaticMesh;
+	UProceduralMeshComponent* ProcMesh;
 
 	TerrainFace* TerrainFaces[6];
 
@@ -144,14 +147,14 @@ public:
 	void OnColorSettingsUpdated();
 
 	// Converts procedural meshes of ProcMeshes array to static meshes then combines all of them and assigns the resulting mesh to StaticMesh
-	void ConvertAndSetStaticMesh(UProceduralMeshComponent* NewMesh);
+	void ConvertAndSetStaticMesh(int face);
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 
-#if WITH_EDITOR
 	// Converts all ProcMeshes into a single static mesh that can be more easily saved to disk
 	UStaticMesh* ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes);
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	
 	virtual void PostEditMove(bool bFinished) override;
