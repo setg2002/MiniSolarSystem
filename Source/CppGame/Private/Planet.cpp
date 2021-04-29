@@ -24,7 +24,7 @@
 APlanet::APlanet()
 {
 	//StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("Mesh");
+	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
 
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new TerrestrialColorGenerator(this);
@@ -51,6 +51,11 @@ void APlanet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+}
+
+void APlanet::ResetPosition()
+{
+	ProcMesh->SetRelativeLocation(FVector::ZeroVector);
 }
 
 UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
@@ -225,7 +230,7 @@ void APlanet::Initialize()
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
 
-	ColorSettings->DynamicMaterial = ProcMesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->PlanetMat);
+	ColorSettings->DynamicMaterial = UMaterialInstanceDynamic::Create(ColorSettings->PlanetMat, this);
 	for (int32 i = 0; i < 6; i++)
 	{
 		TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, resolution, directions[i], ProcMesh, this);
@@ -246,10 +251,14 @@ void APlanet::GenerateMesh()
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			//if (ProcMeshes[i]->IsVisibleInEditor())
-			//{
+			if (FaceRenderMask == i || FaceRenderMask == EFaceRenderMask::All)
+			{
 				TerrainFaces[i]->CalculateMesh();
-			//}
+			}
+			else
+			{
+				ProcMesh->ClearMeshSection(i);
+			}
 		}
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
 	}
@@ -268,18 +277,15 @@ void APlanet::OnColorSettingsUpdated()
 
 void APlanet::GenerateColors()
 {
-#if WITH_EDITOR
 	colorGenerator->UpdateColors();
-#endif
 
 	// Reload the texture
-	ProcMesh->GetMaterial(0)->LoadConfig(UMaterialInterface::StaticClass());
+	ProcMesh->GetMaterial(0)->LoadConfig();
 	//ProcMesh->GetMaterial(0)->ReloadConfig();  // Possible engine crash if material doesn't exist?
 
 	if (bMultithreadGeneration)
 	{
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
-		//ProcMesh->GetMaterial(0)->MarkPackageDirty();
 		//AssetCleaner::CleanAll();
 	}
 }
@@ -330,176 +336,15 @@ void APlanet::SetToOrbit()
 	}
 }
 
-void APlanet::ConvertAndSetStaticMesh(int face)
+void APlanet::ReconveneTerrainFaceThreads(int FaceNum)
 {
 	static TArray<int> FinishedFaces;
-	FinishedFaces.Add(face);
+	FinishedFaces.Add(FaceNum);
 
 	if (FinishedFaces.IsValidIndex(5) && bMultithreadGeneration)
 	{
 		GenerateColors();
 	}
-}
-
-UStaticMesh* APlanet::ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes)
-{
-#if WITH_EDITOR
-	FString AssetName = FString(TEXT("SM_")) + this->GetName();
-	FString PathName = FString(TEXT("/Game/PlanetMeshes/"));
-	FString PackageName = PathName + AssetName;
-
-	// Raw mesh data we are filling in
-	FRawMesh RawMesh;
-
-	int32 VertexBase = 0;
-
-	for (auto& ProcMeshComp : ProcMeshes)
-	{
-		FProcMeshSection* ProcSection = ProcMeshComp->GetProcMeshSection(0);
-
-		// Copy verts
-		for (FProcMeshVertex& Vert : ProcSection->ProcVertexBuffer)
-		{
-			RawMesh.VertexPositions.Add(Vert.Position);
-		}
-
-		// Copy 'wedge' info
-		int32 NumIndices = ProcSection->ProcIndexBuffer.Num();
-		for (int32 IndexIdx = 0; IndexIdx < NumIndices; IndexIdx++)
-		{
-			int32 Index = ProcSection->ProcIndexBuffer[IndexIdx];
-
-			RawMesh.WedgeIndices.Add(Index + VertexBase);
-
-			FProcMeshVertex& ProcVertex = ProcSection->ProcVertexBuffer[Index];
-
-			FVector TangentX = ProcVertex.Tangent.TangentX;
-			FVector TangentZ = ProcVertex.Normal;
-			FVector TangentY = (TangentX ^ TangentZ).GetSafeNormal() * (ProcVertex.Tangent.bFlipTangentY ? -1.f : 1.f);
-
-			RawMesh.WedgeTangentX.Add(TangentX);
-			RawMesh.WedgeTangentY.Add(TangentY);
-			RawMesh.WedgeTangentZ.Add(TangentZ);
-
-			RawMesh.WedgeTexCoords[0].Add(ProcVertex.UV0);
-			RawMesh.WedgeColors.Add(ProcVertex.Color);
-		}
-
-		// copy face info
-		int32 NumTris = NumIndices / 3;
-		for (int32 TriIdx = 0; TriIdx < NumTris; TriIdx++)
-		{
-			RawMesh.FaceMaterialIndices.Add(0);
-			RawMesh.FaceSmoothingMasks.Add(0); // Assume this is ignored as bRecomputeNormals is false
-		}
-
-		// Update offset for creating one big index/vertex buffer
-		VertexBase += ProcSection->ProcVertexBuffer.Num();
-	}
-
-	// If we got some valid data.
-	if (RawMesh.VertexPositions.Num() > 3 && RawMesh.WedgeIndices.Num() > 3)
-	{
-		// Then find/create it.
-		UPackage* MeshPackage = CreatePackage(*PackageName);
-		check(MeshPackage);
-
-		// Create StaticMesh object
-		UStaticMesh* NewMesh = NewObject<UStaticMesh>(MeshPackage, FName(*AssetName), RF_Public | RF_Standalone);
-		NewMesh->InitResources();
-
-		NewMesh->SetLightingGuid(FGuid::NewGuid());
-
-		// Add source to new StaticMesh
-		FStaticMeshSourceModel& SrcModel = NewMesh->AddSourceModel();
-		SrcModel.BuildSettings.bRecomputeNormals = false;
-		SrcModel.BuildSettings.bRecomputeTangents = false;
-		SrcModel.BuildSettings.bRemoveDegenerates = false;
-		SrcModel.BuildSettings.bUseHighPrecisionTangentBasis = false;
-		SrcModel.BuildSettings.bUseFullPrecisionUVs = false;
-		SrcModel.BuildSettings.bGenerateLightmapUVs = true;
-		SrcModel.BuildSettings.SrcLightmapIndex = 0;
-		SrcModel.BuildSettings.DstLightmapIndex = 1;
-		//SrcModel.RawMeshBulkData->SaveRawMesh(RawMesh);
-
-		FString NewMaterialName = FString(TEXT("M_")) + this->GetName();
-		FString MatPackageName = PathName + NewMaterialName;
-		UPackage* MaterialPackage = CreatePackage(*MatPackageName);
-		MaterialPackage->FullyLoad();
-		check(MaterialPackage);
-		
-		UMaterialInterface* MeshMaterial = ProcMeshes[0]->GetMaterial(0); // Old material to copy data from
-		UMaterialInstanceDynamic* NewMaterial = NewObject<UMaterialInstanceDynamic>(MaterialPackage, FName(*NewMaterialName), RF_Public | RF_Standalone); // New material to fill in
-
-		NewMaterial->Parent = ColorSettings->PlanetMat;
-
-		TArray<FGuid> Guids;
-
-		// Copy all texture parameters
-		TArray<FMaterialParameterInfo> TextureParameters;
-		MeshMaterial->GetAllTextureParameterInfo(TextureParameters, Guids);
-		for (auto& Parameter : TextureParameters)
-		{
-			UTexture* Texture;
-			MeshMaterial->GetTextureParameterValue(FHashedMaterialParameterInfo(Parameter), Texture);
-			NewMaterial->SetTextureParameterValueByInfo(Parameter, Texture);
-		}
-
-		// Copy all scalar parameters
-		TArray<FMaterialParameterInfo> ScalarParameters;
-		MeshMaterial->GetAllScalarParameterInfo(ScalarParameters, Guids);
-		for (auto& Parameter : ScalarParameters)
-		{
-			float ScalarValue;
-			MeshMaterial->GetScalarParameterValue(FHashedMaterialParameterInfo(Parameter), ScalarValue);
-			NewMaterial->SetScalarParameterValueByInfo(Parameter, ScalarValue);
-		}
-
-		// Copy all vector parameters
-		TArray<FMaterialParameterInfo> VectorParameters;
-		MeshMaterial->GetAllVectorParameterInfo(VectorParameters, Guids);
-		for (auto& Parameter : VectorParameters)
-		{
-			FLinearColor VectorValue;
-			MeshMaterial->GetVectorParameterValue(FHashedMaterialParameterInfo(Parameter), VectorValue);
-			NewMaterial->SetVectorParameterValueByInfo(Parameter, VectorValue);
-		}
-
-		NewMaterial->ReloadConfig(); // Reloads the material to apply changes
-
-		FAssetRegistryModule::AssetCreated(NewMaterial);
-		NewMaterial->MarkPackageDirty();
-
-		ColorSettings->DynamicMaterial = NewMaterial;
-
-		// Copy material to new mesh
-		NewMesh->SetStaticMaterials(TArray<FStaticMaterial>{ NewMaterial });
-
-		FString MatPackageFileName = FPackageName::LongPackageNameToFilename(MatPackageName, FPackageName::GetAssetPackageExtension());
-		bool bSavedMaterial = UPackage::SavePackage(MaterialPackage, NewMaterial, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *MatPackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
-		// Set the Imported version before calling the build
-		//NewMesh->ImportVersion = EImportStaticMeshVersion::LastVersion;
-
-		FMeshDescription* a = SrcModel.MeshDescription.Get();
-		FStaticMeshLODResources* b = nullptr;
-
-		// Build mesh from source
-		//NewMesh->Build(false); // Old: Relies on AssetTools and cannot be executed at runtime
-		NewMesh->BuildFromMeshDescription(*a, *b);
-		NewMesh->PostEditChange();
-
-		// Notify asset registry of new asset
-		FAssetRegistryModule::AssetCreated(NewMesh);
-		NewMesh->MarkPackageDirty();
-
-		FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
-		bool bSavedMesh = UPackage::SavePackage(MeshPackage, NewMesh, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
-		return NewMesh;
-	}
-#endif
-	return nullptr;
 }
 
 #if WITH_EDITOR

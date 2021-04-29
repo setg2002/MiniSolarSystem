@@ -15,32 +15,19 @@ GaseousColorGenerator::~GaseousColorGenerator()
 {
 }
 
-#if WITH_EDITOR
 UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLinearColor* Gradient)
 {
-	int16 sizeX = 256;
-	int16 sizeY = 1;
+	const int16 sizeX = 256;
+	const int16 sizeY = 1;
 
-	FString PackageName = TEXT("/Game/ProceduralTextures/" + Owner->GetName() + "_" + TextureName);
+	UTexture2D* DynamicTexture = UTexture2D::CreateTransient(sizeX, sizeY, EPixelFormat::PF_B8G8R8A8);
 
-	UPackage* Package = CreatePackage(*PackageName);
-	Package->FullyLoad();
+	DynamicTexture->UpdateResource();
 
-	UTexture2D* NewTexture = NewObject<UTexture2D>(Package, *TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
-
-	NewTexture->AddToRoot();								// This line prevents garbage collection of the texture
-	NewTexture->PlatformData = new FTexturePlatformData();	// Initialize the PlatformData
-	NewTexture->PlatformData->SizeX = sizeX;
-	NewTexture->PlatformData->SizeY = sizeY;
-	NewTexture->PlatformData->SetNumSlices(1);
-	NewTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
-	NewTexture->AddressX = TA_Clamp;
-	NewTexture->AddressY = TA_Clamp;
-
-	uint8* Pixels = new uint8[NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4];
-	for (int32 y = 0; y < sizeY; y++)
+	uint8* Pixels = new uint8[sizeX * sizeY * 4];
+	for (int16 y = 0; y < sizeY; y++)
 	{
-		for (int32 x = 0; x < sizeX; x++)
+		for (int16 x = 0; x < sizeX; x++)
 		{
 			float time = (float)x / 256.f;
 			FColor gradientCol = Gradient->GetLinearColorValue(time).ToFColor(true);
@@ -52,30 +39,23 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 		}
 	}
 
-	// Allocate first mipmap.
-	FTexture2DMipMap* Mip = new FTexture2DMipMap();
-	NewTexture->PlatformData->Mips.Add(Mip);
-	Mip->SizeX = sizeX;
-	Mip->SizeY = sizeY;
+	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D;
+	Region->DestX = 0;
+	Region->DestY = 0;
+	Region->SrcX = 0;
+	Region->SrcY = 0;
+	Region->Width = sizeX;
+	Region->Height = sizeY;
 
-	// Lock the texture so it can be modified
-	Mip->BulkData.Lock(LOCK_READ_WRITE);
-	uint8* TextureData = (uint8*)Mip->BulkData.Realloc(NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4);
-	FMemory::Memcpy(TextureData, Pixels, sizeof(uint8) * NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4);
-	Mip->BulkData.Unlock();
+	TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> DataCleanupFunc =
+		[](uint8* SrcData, const FUpdateTextureRegion2D* Regions) {
+		delete[] SrcData;
+		delete[] Regions;
+	};
 
-	NewTexture->Source.Init(sizeX, sizeY, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
+	DynamicTexture->UpdateTextureRegions(0, 1, Region, sizeX * 4, 4, Pixels);
 
-	NewTexture->UpdateResource();
-	Package->MarkPackageDirty();
-	FAssetRegistryModule::AssetCreated(NewTexture);
-
-	FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
-	bool bSaved = UPackage::SavePackage(Package, NewTexture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
-	delete[] Pixels;	// Don't forget to free the memory here
-
-	return NewTexture;
+	return DynamicTexture;
 }
 
 UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float StormFalloff, int LowBound, int HighBound, int TextureResolution)
@@ -111,28 +91,14 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float Sto
 		StormRadii.Emplace(It.Key(), radius);
 	}
 
+	UTexture2D* DynamicTexture = UTexture2D::CreateTransient(TextureResolution, TextureResolution, EPixelFormat::PF_B8G8R8A8);
 
-	FString TextureName = "Voronoi";
-	FString PackageName = TEXT("/Game/ProceduralTextures/" + Owner->GetName() + "_" + TextureName);
-	UPackage* Package = CreatePackage(*PackageName);
-	Package->FullyLoad();
+	DynamicTexture->UpdateResource();
 
-	UTexture2D* VoronoiTexture = NewObject<UTexture2D>(Package, *TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
-
-	VoronoiTexture->AddToRoot();								// This line prevents garbage collection of the texture
-	VoronoiTexture->PlatformData = new FTexturePlatformData();	// Initialize the PlatformData
-	VoronoiTexture->PlatformData->SizeX = 1024;
-	VoronoiTexture->PlatformData->SizeY = 1024;
-	VoronoiTexture->PlatformData->SetNumSlices(1);
-	VoronoiTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
-	VoronoiTexture->CompressionSettings = TextureCompressionSettings::TC_HDR;
-	VoronoiTexture->AddressX = TA_Clamp;
-	VoronoiTexture->AddressY = TA_Clamp;
-
-	uint8* Pixels = new uint8[VoronoiTexture->PlatformData->SizeX * VoronoiTexture->PlatformData->SizeY * 4];
-	for (int32 y = 0; y < VoronoiTexture->PlatformData->SizeY; y++)
+	uint8* Pixels = new uint8[TextureResolution * TextureResolution * 4];
+	for (int32 y = 0; y < TextureResolution; y++)
 	{
-		for (int32 x = 0; x < 1024; x++)
+		for (int32 x = 0; x < TextureResolution; x++)
 		{
 			// Find the closest point to the current pixel
 			float PixelDist = 1024;
@@ -162,29 +128,21 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float Sto
 		}
 	}
 
-	// Allocate first mipmap.
-	FTexture2DMipMap* Mip = new FTexture2DMipMap();
-	VoronoiTexture->PlatformData->Mips.Add(Mip);
-	Mip->SizeX = 1024;
-	Mip->SizeY = 1024;
+	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D;
+	Region->DestX = 0;
+	Region->DestY = 0;
+	Region->SrcX = 0;
+	Region->SrcY = 0;
+	Region->Width = TextureResolution;
+	Region->Height = TextureResolution;
 
-	// Lock the texture so it can be modified
-	Mip->BulkData.Lock(LOCK_READ_WRITE);
-	uint8* TextureData = (uint8*)Mip->BulkData.Realloc(VoronoiTexture->PlatformData->SizeX * VoronoiTexture->PlatformData->SizeY * 4);
-	FMemory::Memcpy(TextureData, Pixels, sizeof(uint8) * VoronoiTexture->PlatformData->SizeX * VoronoiTexture->PlatformData->SizeY * 4);
-	Mip->BulkData.Unlock();
+	TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> DataCleanupFunc =
+		[](uint8* SrcData, const FUpdateTextureRegion2D* Regions) {
+		delete[] SrcData;
+		delete[] Regions;
+	};
 
-	VoronoiTexture->Source.Init(1024, 1024, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
+	DynamicTexture->UpdateTextureRegions(0, 1, Region, TextureResolution * 4, 4, Pixels);
 
-	VoronoiTexture->UpdateResource();
-	Package->MarkPackageDirty();
-	FAssetRegistryModule::AssetCreated(VoronoiTexture);
-
-	FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
-	bool bSaved = UPackage::SavePackage(Package, VoronoiTexture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
-	delete[] Pixels;	// Don't forget to free the memory here
-
-	return VoronoiTexture;
+	return DynamicTexture;
 }
-#endif

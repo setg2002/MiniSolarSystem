@@ -2,8 +2,13 @@
 
 
 #include "TerrainFace.h"
+#include "KismetProceduralMeshLibrary.h"
+#include "ProceduralMeshComponent.h"
+#include "ShapeGenerator.h"
+#include "ColorGenerator.h"
+#include "ColorSettings.h"
 #include "Planet.h"
-#include "AssetRegistryModule.h"
+
 
 TerrainFace::TerrainFace(int i, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int resolution, FVector localUp, UProceduralMeshComponent* procMesh, AActor* owner)
 {
@@ -75,7 +80,8 @@ void TerrainFace::CalculateMesh()
 			FVector pointOnUnitCube = -LocalUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
 			float unscaledElevation = shapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
-			verticies.EmplaceAt(i, pointOnUnitSphere * shapeGenerator->GetScaledElevation(unscaledElevation));
+			float scaledElevation = shapeGenerator->GetScaledElevation(unscaledElevation);
+			verticies.EmplaceAt(i, pointOnUnitSphere * scaledElevation);
 			uv[i].X = colorGenerator->BiomePercentFromPoint(pointOnUnitSphere);
 			uv[i].Y = unscaledElevation;
 
@@ -99,7 +105,6 @@ void TerrainFace::CalculateMesh()
 void TerrainFace::ConstructMeshAsync(TerrestrialColorGenerator* color_Generator)
 {
 	AsyncTask(ENamedThreads::AnyThread, [this]() { CalculateMesh(); });
-	//(new FAutoDeleteAsyncTask<CalculateMeshAsyncTask>(*this, Resolution, LocalUp, axisA, axisB, verticies, triangles, uv, shapeGenerator, colorGenerator))->StartBackgroundTask();
 }
 
 void TerrainFace::UpdateTangentsNormals()
@@ -110,11 +115,11 @@ void TerrainFace::UpdateTangentsNormals()
 
 void TerrainFace::UpdateTangentsNormalsAsync()
 {
-	(new FAutoDeleteAsyncTask<CalculateTangentsAsyncTask>(*this, verticies, triangles, uv, normals, tangents))->StartBackgroundTask();
+	AsyncTask(ENamedThreads::AnyThread, [this]() { UpdateTangentsNormals(); });
 }
 
 void TerrainFace::CreateMesh()
 {
 	ProcMesh->CreateMeshSection(MeshSection, verticies, triangles, normals, uv, VertexColors, tangents, false);
-	Cast<APlanet>(Owner)->ConvertAndSetStaticMesh(MeshSection);
+	Cast<APlanet>(Owner)->ReconveneTerrainFaceThreads(MeshSection);
 }

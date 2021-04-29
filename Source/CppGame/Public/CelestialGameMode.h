@@ -29,6 +29,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float gravitationalConstant = 100;
 
+	
+	// ======= Runtime Console Commands =======
+
+	UFUNCTION(Exec)
+	void ReGenAll();
+
+	UFUNCTION(Exec)
+	void ReGen(FString Planet);
+
+	UFUNCTION(Exec)
+	void tp(FString toPlanet);
+
+	// ======= End ConsoleCommands =======
 
 protected:
 	// Called when the game starts

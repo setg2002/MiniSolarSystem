@@ -8,7 +8,6 @@
 #include "AssetCleaner.h"
 #include "ColorSettings.h"
 #include "NoiseFilterFactory.h"
-#include "AssetRegistryModule.h"
 #include "GameFramework/Actor.h"
 #include "Curves/CurveLinearColor.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -61,10 +60,11 @@ float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere
 	return (float)BiomeIndex / FMath::Max<int>(1, NumBiomes - 1);
 }
 
-#if WITH_EDITOR
+
 void TerrestrialColorGenerator::UpdateColors()
 {
 	TArray<UCurveLinearColor*> biomeColors;
+	ensure(ColorSettings);
 	for (int i = 0; i < ColorSettings->BiomeColorSettings->Biomes.Num(); i++)
 	{
 		biomeColors.Add(ColorSettings->BiomeColorSettings->Biomes[i]->Gradient);
@@ -82,61 +82,41 @@ void TerrestrialColorGenerator::UpdateColors()
 
 UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
 {
-	//TODO Make textures work with non power of two y sizes (number of gradients that aren't a power of two)
+	UTexture2D* DynamicTexture = UTexture2D::CreateTransient(TextureResolution, Gradients.Num(), EPixelFormat::PF_B8G8R8A8);
+	
+	DynamicTexture->UpdateResource();
 
-	FString PackageName = TEXT("/Game/ProceduralTextures/" + Owner->GetName() + "_" + TextureName);
-	UPackage* Package = CreatePackage(*PackageName);
-	Package->FullyLoad();
-
-	UTexture2D* NewTexture = NewObject<UTexture2D>(Package, *TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
-
-	NewTexture->AddToRoot();								// This line prevents garbage collection of the texture
-	NewTexture->PlatformData = new FTexturePlatformData();	// Initialize the PlatformData
-	NewTexture->PlatformData->SizeX = TextureResolution;
-	NewTexture->PlatformData->SizeY = Gradients.Num();
-	NewTexture->PlatformData->SetNumSlices(1);
-	NewTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
-	NewTexture->AddressX = TA_Clamp;
-	NewTexture->AddressY = TA_Clamp;
-
-	uint8* Pixels = new uint8[NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4];
-	for (int32 y = 0; y < NewTexture->PlatformData->SizeY; y++)
+	uint8* Pixels = new uint8[TextureResolution * Gradients.Num() * 4];
+	for (int32 y = 0; y < Gradients.Num(); y++)
 	{
 		for (int32 x = 0; x < TextureResolution; x++)
 		{
 			float time = (float)x / 256.f;
 			FColor gradientCol = Gradients[y]->GetLinearColorValue(time).ToFColor(true);
 			int32 curPixelIndex = ((y * TextureResolution) + x);
-			Pixels[4 * curPixelIndex] = gradientCol.B;
+			Pixels[4 * curPixelIndex    ] = gradientCol.B;
 			Pixels[4 * curPixelIndex + 1] = gradientCol.G;
 			Pixels[4 * curPixelIndex + 2] = gradientCol.R;
 			Pixels[4 * curPixelIndex + 3] = gradientCol.A;
 		}
 	}
 
-	// Allocate first mipmap.
-	FTexture2DMipMap* Mip = new FTexture2DMipMap();
-	NewTexture->PlatformData->Mips.Add(Mip);
-	Mip->SizeX = TextureResolution;
-	Mip->SizeY = Gradients.Num();
+	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D;
+	Region->DestX = 0;
+	Region->DestY = 0;
+	Region->SrcX  = 0;
+	Region->SrcY  = 0;
+	Region->Width = TextureResolution;
+	Region->Height = Gradients.Num();
 
-	// Lock the texture so it can be modified
-	Mip->BulkData.Lock(LOCK_READ_WRITE);
-	uint8* TextureData = (uint8*)Mip->BulkData.Realloc(NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4);
-	FMemory::Memcpy(TextureData, Pixels, sizeof(uint8) * NewTexture->PlatformData->SizeX * NewTexture->PlatformData->SizeY * 4);
-	Mip->BulkData.Unlock();
+	TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> DataCleanupFunc =
+		[](uint8* SrcData, const FUpdateTextureRegion2D* Regions) {
+		delete[] SrcData;
+		delete[] Regions;
+	};
 
-	NewTexture->Source.Init(TextureResolution, NewTexture->PlatformData->SizeY, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
+	DynamicTexture->UpdateTextureRegions(0, 1, Region, TextureResolution * 4, 4, Pixels);
 
-	NewTexture->UpdateResource();
-	Package->MarkPackageDirty();
-	FAssetRegistryModule::AssetCreated(NewTexture);
-
-	FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
-	bool bSaved = UPackage::SavePackage(Package, NewTexture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
-	delete[] Pixels;	// Don't forget to free the memory here
-
-	return NewTexture;
+	return DynamicTexture;
 }
-#endif
+

@@ -22,6 +22,7 @@ void UAtmosphereComponent::OnComponentCreated()
 	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->PlanetRadius; //TODO Use constructor passed radius in full game
 
 	this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	this->SetRelativeLocation(FVector::ZeroVector);
 	this->SetRelativeScale3D(FVector(PlanetRadius * 0.0125f));
 	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/StaticMeshes/Atmosphere_mesh.Atmosphere_mesh'"), NULL, LOAD_None, NULL));
 	DynamicMaterial = nullptr;

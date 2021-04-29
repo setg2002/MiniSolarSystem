@@ -47,9 +47,9 @@ void ASkybox::Tick(float DeltaTime)
 
 }
 
+
 // This is very slow
-#if WITH_EDITOR
-void ASkybox::MakeTexture()
+UTexture2D* ASkybox::MakeTexture()
 {
 	int16 TextureRes = 2048;
 	int32 NumStars = 50000;
@@ -60,21 +60,9 @@ void ASkybox::MakeTexture()
 		Points.AddUnique(FVector2D(FMath::RandRange(0, TextureRes), FMath::RandRange(0, TextureRes)));
 	}
 
-	FString TextureName = "Skybox";
-	FString PackageName = TEXT("/Game/ProceduralTextures/" + this->GetName() + "_" + TextureName);
-	UPackage* Package = CreatePackage(*PackageName);
-	Package->FullyLoad();
+	UTexture2D* DynamicTexture = UTexture2D::CreateTransient(TextureRes, TextureRes, EPixelFormat::PF_B8G8R8A8);
 
-	UTexture2D* SkyboxTexture = NewObject<UTexture2D>(Package, *TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
-
-	SkyboxTexture->AddToRoot();								// This line prevents garbage collection of the texture
-	SkyboxTexture->PlatformData = new FTexturePlatformData();	// Initialize the PlatformData
-	SkyboxTexture->PlatformData->SizeX = TextureRes;
-	SkyboxTexture->PlatformData->SizeY = TextureRes;
-	SkyboxTexture->PlatformData->SetNumSlices(1);
-	SkyboxTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
-	SkyboxTexture->AddressX = TA_Wrap;
-	SkyboxTexture->AddressY = TA_Wrap;
+	DynamicTexture->UpdateResource();
 
 	uint8* Pixels = new uint8[TextureRes * TextureRes * 4];
 	for (int32 y = 0; y < TextureRes; y++)
@@ -100,37 +88,25 @@ void ASkybox::MakeTexture()
 		}
 	}
 
-	// Allocate first mipmap.
-	FTexture2DMipMap* Mip = new FTexture2DMipMap();
-	SkyboxTexture->PlatformData->Mips.Add(Mip);
-	Mip->SizeX = TextureRes;
-	Mip->SizeY = TextureRes;
+	FUpdateTextureRegion2D* Region = new FUpdateTextureRegion2D;
+	Region->DestX = 0;
+	Region->DestY = 0;
+	Region->SrcX = 0;
+	Region->SrcY = 0;
+	Region->Width = TextureRes;
+	Region->Height = TextureRes;
 
-	// Lock the texture so it can be modified
-	Mip->BulkData.Lock(LOCK_READ_WRITE);
-	uint8* TextureData = (uint8*)Mip->BulkData.Realloc(TextureRes * TextureRes * 4);
-	FMemory::Memcpy(TextureData, Pixels, sizeof(uint8) * TextureRes * TextureRes * 4);
-	Mip->BulkData.Unlock();
+	TFunction<void(uint8* SrcData, const FUpdateTextureRegion2D* Regions)> DataCleanupFunc =
+		[](uint8* SrcData, const FUpdateTextureRegion2D* Regions) {
+		delete[] SrcData;
+		delete[] Regions;
+	};
 
-	SkyboxTexture->Source.Init(TextureRes, TextureRes, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
+	DynamicTexture->UpdateTextureRegions(0, 1, Region, TextureRes * 4, 4, Pixels);
 
-	SkyboxTexture->UpdateResource();
-	
-	FAssetRegistryModule::AssetCreated(SkyboxTexture);
-
-	FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
-	bool bSaved = UPackage::SavePackage(Package, SkyboxTexture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
-
-	delete[] Pixels;	// Don't forget to free the memory here
-
-	DynamicMaterial->SetTextureParameterValue("StarTexture", SkyboxTexture);
-	Package->MarkPackageDirty();
-
-	AssetCleaner::CleanDirectory(EDirectoryFilterType::Textures);
-
-	return /*SkyboxTexture*/;
+	return DynamicTexture;
 }
-#endif
+
 
 #if WITH_EDITOR
 void ASkybox::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)

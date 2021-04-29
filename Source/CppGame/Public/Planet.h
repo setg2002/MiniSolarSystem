@@ -41,6 +41,8 @@ class CPPGAME_API APlanet : public ACelestialBody
 public:
 	APlanet();
 
+	void ResetPosition();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -101,7 +103,7 @@ public:
 	UPROPERTY(Category = "Settings", EditInstanceOnly, BlueprintReadWrite, meta = (EditCondition = "bAutoGenerate"))
 	bool bAutoGenerateTangents;
 
-	// Not currently working
+	// Renders only the selected face
 	UPROPERTY(Category = "Settings", EditInstanceOnly)
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
 
@@ -146,13 +148,10 @@ public:
 
 	void OnColorSettingsUpdated();
 
-	// Converts procedural meshes of ProcMeshes array to static meshes then combines all of them and assigns the resulting mesh to StaticMesh
-	void ConvertAndSetStaticMesh(int face);
+	// Executes remaining funcetions necessary to complete planet generation once all terrain face threads are finished
+	void ReconveneTerrainFaceThreads(int FaceNum);
 
 	virtual void OnConstruction(const FTransform & Transform) override;
-
-	// Converts all ProcMeshes into a single static mesh that can be more easily saved to disk
-	UStaticMesh* ConvertToStaticMesh(TArray<UProceduralMeshComponent*> ProcMeshes);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
