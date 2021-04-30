@@ -47,9 +47,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Main mesh	
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//UStaticMeshComponent* StaticMesh;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UProceduralMeshComponent* ProcMesh;
 
@@ -127,6 +124,9 @@ public:
 	void CreateSettingsAssets();
 
 	//TODO All of these Generate, ReGenerate, and On___Updated functions need to be sorted out
+
+	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
+	void ClearMeshSections();
 
 	// Blueprint callable for GeneratePlanet()
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)

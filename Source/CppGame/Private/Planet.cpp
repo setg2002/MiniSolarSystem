@@ -197,6 +197,14 @@ void APlanet::GeneratePlanet()
 
 }
 
+void APlanet::ClearMeshSections()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		ProcMesh->ClearMeshSection(i);
+	}
+}
+
 void APlanet::ReGenerate()
 {
 	GeneratePlanet();
@@ -251,7 +259,7 @@ void APlanet::GenerateMesh()
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			if (FaceRenderMask == i || FaceRenderMask == EFaceRenderMask::All)
+			if ((int)FaceRenderMask - 1 == i || FaceRenderMask == EFaceRenderMask::All)
 			{
 				TerrainFaces[i]->CalculateMesh();
 			}

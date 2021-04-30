@@ -34,13 +34,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-#if WITH_EDITOR
 	// Uses noise from shapeGenerator to generate a heightmap to be used as world displacement in the material
 	UTexture2D* CreateHeightmapTexture(FString TextureName);
 
 	// Creates a texture that represents the offset to apply to a cube to make it a sphere (quad-sphere style)
 	UTexture2D* CreateSphereTexture(FString TextureName);
-#endif
 
 	ShapeGenerator* shapeGenerator;
 
