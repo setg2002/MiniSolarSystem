@@ -84,7 +84,7 @@ UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray
 {
 	UTexture2D* DynamicTexture = UTexture2D::CreateTransient(TextureResolution, Gradients.Num(), EPixelFormat::PF_B8G8R8A8);
 	
-	DynamicTexture->UpdateResource();
+	DynamicTexture->UpdateResource(); // Absence of this line (or moving it to after UpdateTextureRegions()) will result in a corrupt looking texture, pretty cool
 
 	uint8* Pixels = new uint8[TextureResolution * Gradients.Num() * 4];
 	for (int32 y = 0; y < Gradients.Num(); y++)
