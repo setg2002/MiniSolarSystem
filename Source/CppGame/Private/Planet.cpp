@@ -5,7 +5,6 @@
 #include "RawMesh.h"
 #include "EngineUtils.h"
 #include "TerrainFace.h"
-#include "AssetCleaner.h"
 #include "ShapeSettings.h"
 #include "ColorSettings.h"
 #include "ColorGenerator.h"
@@ -165,7 +164,7 @@ void APlanet::CreateSettingsAssets()
 		ShapeSettings->NoiseLayers[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
 	}
 
-	AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
+	//AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
 }
 
 void APlanet::GeneratePlanet()
@@ -192,7 +191,7 @@ void APlanet::GeneratePlanet()
 	}
 	if (!bMultithreadGeneration)
 	{
-		AssetCleaner::CleanAll();
+		//AssetCleaner::CleanAll();
 	}
 
 }

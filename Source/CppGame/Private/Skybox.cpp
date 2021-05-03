@@ -2,7 +2,6 @@
 
 
 #include "Skybox.h"
-#include "AssetCleaner.h"
 #include "AssetRegistryModule.h"
 #include "Materials/MaterialInstanceDynamic.h"
 

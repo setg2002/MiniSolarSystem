@@ -5,7 +5,6 @@
 #include "MinMax.h"
 #include "CoreMinimal.h"
 #include "INoiseFilter.h"
-#include "AssetCleaner.h"
 #include "ColorSettings.h"
 #include "NoiseFilterFactory.h"
 #include "GameFramework/Actor.h"

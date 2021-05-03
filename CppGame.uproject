@@ -63,6 +63,10 @@
 		{
 			"Name": "Volumetrics",
 			"Enabled": true
+		},
+		{
+			"Name": "ProjectCleaner",
+			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [

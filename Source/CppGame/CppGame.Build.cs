@@ -10,11 +10,6 @@ public class CppGame : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "SimplexNoise", "RawMesh", "Niagara", });
 
-        if (Target.bBuildEditor)
-        {
-            PublicDependencyModuleNames.AddRange(new string[] { "AssetTools", "ProjectCleaner" });
-        }
-
         PrivateDependencyModuleNames.AddRange(new string[] {  });
 
         //MinFilesUsingPrecompiledHeaderOverride = 1;
