@@ -35,5 +35,4 @@ public:
 	void UpdateColors();
 
 	UTexture2D* CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients);
-
 };
