@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "GameVersion.h"
 #include "CelestialGameMode.generated.h"
 
 /**
@@ -12,6 +11,7 @@
  */
 
 //Forward Declarations
+class ICelestialObject;
 class ACelestialBody;
 class APlanet;
 class AStar;
@@ -51,18 +51,5 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<ACelestialBody*> bodies;
 
-
-
-	UFUNCTION(BlueprintCallable)
-		FORCEINLINE FString GetGameVersionString() const
-	{
-		return FString(GAME_VERSION_STRING);
-	}
-
-	UFUNCTION(BlueprintCallable)
-		FORCEINLINE FString GetGameVersionStringShort() const
-	{
-		return FString(GAME_VERSION_STRING_SHORT);
-	}
-
+	TArray<ICelestialObject*> celestialObjects;
 };

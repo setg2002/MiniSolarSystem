@@ -35,7 +35,6 @@ void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float tim
 			this->currentVelocity += acceleration * timeStep;
 		}
 	}
-
 }
 
 void ACelestialBody::UpdatePosition(float timeStep)

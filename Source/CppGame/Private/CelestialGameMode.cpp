@@ -2,8 +2,9 @@
 
 
 #include "CelestialGameMode.h"
-//#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 #include "OrbitDebugActor.h"
+#include "CelestialObject.h"
 #include "CelestialBody.h"
 #include "EngineUtils.h"
 #include "Planet.h"
@@ -21,6 +22,14 @@ void ACelestialGameMode::BeginPlay()
 	for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
 		bodies.Add(*Itr);
 	}
+
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsWithInterface(GWorld, UCelestialObject::StaticClass(), Actors);
+	for (auto& actor : Actors)
+	{
+		const auto &Interface = Cast<ICelestialObject>(actor);
+		celestialObjects.Add(Interface);
+	}
 }
 
 void ACelestialGameMode::Tick(float DeltaTime)
@@ -33,11 +42,11 @@ void ACelestialGameMode::Tick(float DeltaTime)
 	}
 	
 
-	for (int i = 0; i < bodies.Num(); i++) {
-		ACelestialBody* thisBody = bodies[i];
+	for (int i = 0; i < celestialObjects.Num(); i++) {
+		ICelestialObject* thisObject = celestialObjects[i];
 
-		thisBody->UpdateVelocity(bodies, DeltaTime);
-		thisBody->UpdatePosition(DeltaTime);
+		thisObject->UpdateVelocity(bodies, DeltaTime);
+		thisObject->UpdatePosition(DeltaTime);
 	}
 }
 
