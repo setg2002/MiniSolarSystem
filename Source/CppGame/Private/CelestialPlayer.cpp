@@ -2,6 +2,7 @@
 
 
 #include "CelestialPlayer.h"
+#include "CelestialBody.h"
 #include "CelestialGameMode.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -26,7 +27,10 @@ void ACelestialPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdatePosition(DeltaTime);
+	if (Controller)
+	{
+			UpdatePosition(DeltaTime);
+	}
 }
 
 
@@ -41,6 +45,8 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAxis("RotationX", this, &ACelestialPlayer::RotationX);
 	PlayerInputComponent->BindAxis("RotationY", this, &ACelestialPlayer::RotationY);
+
+	PlayerInputComponent->BindAction("SwitchPerspective", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchPerspective);
 }
 
 
@@ -59,7 +65,6 @@ void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float t
 			this->currentVelocity += acceleration * timeStep;
 		}
 	}
-
 }
 
 void ACelestialPlayer::UpdatePosition(float timeStep)
@@ -70,15 +75,30 @@ void ACelestialPlayer::UpdatePosition(float timeStep)
 
 void ACelestialPlayer::MoveForward(float AxisValue)
 {
-	currentVelocity += (GetController()->GetControlRotation().Vector() * AxisValue);
+	if (Controller)
+	{
+		currentVelocity += (Controller->GetControlRotation().Vector() * AxisValue);
+	}
 }
 
 void ACelestialPlayer::MoveRight(float AxisValue)
 {
-	currentVelocity += (UKismetMathLibrary::GetRightVector(GetController()->GetControlRotation()) * AxisValue);
+	if (Controller)
+	{
+		currentVelocity += (UKismetMathLibrary::GetRightVector(Controller->GetControlRotation()) * AxisValue);
+	}
 }
 
 void ACelestialPlayer::MoveUp(float AxisValue)
 {
-	currentVelocity += (UKismetMathLibrary::GetUpVector(GetController()->GetControlRotation()) * AxisValue);
+	if (Controller)
+	{
+		currentVelocity += (UKismetMathLibrary::GetUpVector(Controller->GetControlRotation()) * AxisValue);
+	}
+}
+
+
+void ACelestialPlayer::SwitchPerspective()
+{
+	gameMode->SetPerspective(0);
 }

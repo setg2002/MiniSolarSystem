@@ -13,6 +13,7 @@
 //Forward Declarations
 class ICelestialObject;
 class ACelestialBody;
+class UUserWidget;
 class APlanet;
 class AStar;
 
@@ -30,6 +31,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float gravitationalConstant = 100;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> OverviewWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> CelestialWidgetClass;
+
+	/* Sets the player perspective to the one desired
+	* @param perspective 0 is overview, 1 is celestial */
+	void SetPerspective(uint8 perspective);
 	
 	// ======= Runtime Console Commands =======
 
@@ -52,4 +62,11 @@ protected:
 	TArray<ACelestialBody*> bodies;
 
 	TArray<ICelestialObject*> celestialObjects;
+
+	UUserWidget* OverviewWidget;
+	UUserWidget* CelestialWidget;
+
+	uint8 currentPerspective;
+
+	APlayerController* PC;
 };

@@ -55,5 +55,7 @@ private:
 		AddControllerPitchInput(AxisValue);
 	}
 
+	void SwitchPerspective();
+
 	ACelestialGameMode* gameMode;
 };
