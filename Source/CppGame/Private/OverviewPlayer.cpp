@@ -3,6 +3,9 @@
 
 #include "OverviewPlayer.h"
 #include "CelestialGameMode.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+
 
 // Sets default values
 AOverviewPlayer::AOverviewPlayer()
@@ -10,6 +13,16 @@ AOverviewPlayer::AOverviewPlayer()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Root = CreateDefaultSubobject<USceneComponent>("Root");
+	RootComponent = Root;
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
+	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->TargetArmLength = 50000;
+	SpringArm->bDoCollisionTest = 0;
+
+	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	Camera->SetupAttachment(SpringArm);
 }
 
 // Called when the game starts or when spawned
@@ -34,7 +47,10 @@ void AOverviewPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	PlayerInputComponent->BindAction("SwitchPerspective", EInputEvent::IE_Released, this, &AOverviewPlayer::SwitchPerspective);
 
-	PlayerInputComponent->BindAxis("MoveRight", this, &AOverviewPlayer::MoveRight);
+	PlayerInputComponent->BindAxis("Overview_RotationX", this, &AOverviewPlayer::RotateX);
+	PlayerInputComponent->BindAxis("Overview_RotationY", this, &AOverviewPlayer::RotateY);
+	PlayerInputComponent->BindAxis("Zoom", this, &AOverviewPlayer::Zoom);
+
 }
 
 void AOverviewPlayer::SwitchPerspective()
@@ -42,3 +58,12 @@ void AOverviewPlayer::SwitchPerspective()
 	gameMode->SetPerspective(1);
 }
 
+void AOverviewPlayer::RotateY(float AxisValue)
+{
+	SpringArm->AddLocalRotation(FRotator(AxisValue, 0, 0));
+}
+
+void AOverviewPlayer::Zoom(float AxisValue)
+{
+	SpringArm->TargetArmLength += (AxisValue * 150);
+}

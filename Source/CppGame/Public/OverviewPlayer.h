@@ -6,7 +6,9 @@
 #include "GameFramework/Pawn.h"
 #include "OverviewPlayer.generated.h"
 
+class USpringArmComponent;
 class ACelestialGameMode;
+class UCameraComponent;
 
 UCLASS()
 class CPPGAME_API AOverviewPlayer : public APawn
@@ -21,6 +23,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	USceneComponent* Root;
+
+	USpringArmComponent* SpringArm;
+
+	UCameraComponent* Camera;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -31,11 +39,13 @@ public:
 private:
 	void SwitchPerspective();
 
-	void MoveRight(float AxisValue)
+	void RotateX(float AxisValue)
 	{
-		RootComponent->AddLocalRotation(FQuat(0, 0, -AxisValue, 0));
+		RootComponent->AddLocalRotation(FRotator(0, AxisValue, 0));
 	}
+	void RotateY(float AxisValue);
 
+	void Zoom(float AxisValue);
 
 	ACelestialGameMode* gameMode;
 };
