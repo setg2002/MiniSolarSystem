@@ -63,7 +63,9 @@ protected:
 
 	TArray<ICelestialObject*> celestialObjects;
 
+	UPROPERTY() // Prevents garbage collection
 	UUserWidget* OverviewWidget;
+	UPROPERTY()
 	UUserWidget* CelestialWidget;
 
 	uint8 currentPerspective;

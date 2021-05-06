@@ -19,14 +19,20 @@ public:
 	// Sets default values for this pawn's properties
 	AOverviewPlayer();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "2000"))
+	int Speed = 150;
+
+	FVector GetCameraLocation();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* Root;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USpringArmComponent* SpringArm;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* Camera;
 
 public:	
@@ -39,13 +45,25 @@ public:
 private:
 	void SwitchPerspective();
 
+	void MoveForward(float AxisValue);
+	void MoveRight(float AxisValue);
+	void MoveUp(float AxisValue);
+
 	void RotateX(float AxisValue)
 	{
-		RootComponent->AddLocalRotation(FRotator(0, AxisValue, 0));
+		this->AddActorWorldRotation(FRotator(0, AxisValue, 0));
 	}
 	void RotateY(float AxisValue);
 
 	void Zoom(float AxisValue);
+
+	void ChangeSpeed(float AxisValue)
+	{
+		if (Speed + AxisValue * 50 > 1 && Speed + AxisValue * 50 <= 2000)
+		{
+			Speed += AxisValue * 50;
+		}
+	}
 
 	ACelestialGameMode* gameMode;
 };

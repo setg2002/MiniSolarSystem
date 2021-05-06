@@ -3,6 +3,8 @@
 
 #include "Star.h"
 #include "NiagaraSystem.h"
+#include "OverviewPlayer.h"
+#include "CelestialPlayer.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -57,7 +59,16 @@ void AStar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation()));
+	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+
+	if (Cast<ACelestialPlayer>(PlayerPawn))
+	{
+		Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerPawn->GetActorLocation()));
+	}
+	else if (Cast<AOverviewPlayer>(PlayerPawn))
+	{
+		Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Cast<AOverviewPlayer>(PlayerPawn)->GetCameraLocation()));
+	}
 }
 
 void AStar::ReInitParticles()
