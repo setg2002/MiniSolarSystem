@@ -17,7 +17,7 @@ class CPPGAME_API UShapeSettings : public UDataAsset
 	
 public:
 	//Radius in cm
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float PlanetRadius = 100;
 
 	bool GetNoiseLayers();

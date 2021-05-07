@@ -49,7 +49,7 @@ public:
 	UFUNCTION(Exec)
 	void ReGen(FString Planet);
 
-	UFUNCTION(Exec)
+	UFUNCTION(Exec, BlueprintCallable)
 	void tp(FString toPlanet);
 
 	// ======= End ConsoleCommands =======

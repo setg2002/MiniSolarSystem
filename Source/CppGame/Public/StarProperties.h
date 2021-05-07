@@ -16,13 +16,13 @@ struct FStarProperties : public FTableRowBase
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"), BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"), BlueprintReadWrite)
 	int radius = 50;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"), BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"), BlueprintReadWrite)
 	int mass = 1000;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"), BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"), BlueprintReadWrite)
 	int luminosity = 50;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

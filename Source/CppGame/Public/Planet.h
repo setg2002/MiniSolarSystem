@@ -104,9 +104,9 @@ public:
 	UPROPERTY(Category = "Settings", EditInstanceOnly)
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
 
-	UPROPERTY(Category = "Settings", EditAnywhere)
+	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	class UColorSettings* ColorSettings;
-	UPROPERTY(Category = "Settings", EditAnywhere)
+	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	class UShapeSettings* ShapeSettings;
 
 	// Desired resolution for each TerrainFace to generate
