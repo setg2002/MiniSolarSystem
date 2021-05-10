@@ -12,12 +12,12 @@
  */
 
 
-UCLASS()
+UCLASS(BlueprintType)
 class UBiome : public UDataAsset
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		UCurveLinearColor* Gradient;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FColor Tint;
@@ -62,6 +62,7 @@ public:
 
 	UMaterialInterface* PlanetMat;
 
+	UPROPERTY(BlueprintReadOnly)
 	UMaterialInstanceDynamic* DynamicMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "1"))

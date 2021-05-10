@@ -9,7 +9,7 @@
 /**
  * 
  */
- UENUM()
+ UENUM(BlueprintType)
  enum EFilterType
  {
 	 Smooth  UMETA(DisplayName = "Simple"),

@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class CPPGAME_API UNoiseLayer : public UDataAsset
 {
 	GENERATED_BODY()

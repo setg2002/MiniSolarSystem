@@ -16,21 +16,21 @@ struct FSimpleNoiseSettings
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float Strength = 1;
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float BaseRoughness = 1;
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float Roughness = 2;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Center;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "8"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "8"))
 	int numLayers = 1;
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", ClampMax = "2"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "2"))
 	float Persistence = .5f;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float MinValue;
 };
 
@@ -39,7 +39,7 @@ struct FRidgidNoiseSettings : public FSimpleNoiseSettings
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float WeightMultiplier = .8f;
 };
 
