@@ -43,7 +43,7 @@ struct FRidgidNoiseSettings : public FSimpleNoiseSettings
 	float WeightMultiplier = .8f;
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class CPPGAME_API UNoiseSettings : public UDataAsset
 {
 	GENERATED_BODY()
