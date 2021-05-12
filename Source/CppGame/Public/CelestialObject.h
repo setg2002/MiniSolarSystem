@@ -9,7 +9,7 @@
 class ACelestialBody;
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, Blueprintable)
+UINTERFACE(MinimalAPI, BlueprintType)
 class UCelestialObject : public UInterface
 {
 	GENERATED_BODY()
@@ -25,22 +25,16 @@ class CPPGAME_API ICelestialObject
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION()
-	virtual void UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep)
-	{
-
-	}
+	virtual void UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep) { }
 
 	UFUNCTION()
-	virtual void UpdatePosition(float timeStep)
-	{
-
-	}
+	virtual void UpdatePosition(float timeStep) { }
 
 	UFUNCTION()
-	virtual FVector GetCurrentVelocity()
-	{
-		return currentVelocity;
-	}
+	virtual FVector GetCurrentVelocity() const { return currentVelocity; }
+
+	UFUNCTION()
+	virtual int GetMass() const { return 0; }
 
 protected:
 	FVector currentVelocity;

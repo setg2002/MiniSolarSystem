@@ -32,14 +32,17 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	float rotationRate;
 
+	UFUNCTION(BlueprintCallable)
+	virtual int GetMass() const override;
+
 	UFUNCTION()
 	virtual void UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep) override;
 
 	UFUNCTION()
 	virtual void UpdatePosition(float timeStep) override;
 
-	UFUNCTION()
-	virtual FVector GetCurrentVelocity() override;
+	UFUNCTION(BlueprintCallable)
+	virtual FVector GetCurrentVelocity() const override;
 
 	ACelestialGameMode* gameMode;
 

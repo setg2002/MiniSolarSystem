@@ -71,4 +71,7 @@ protected:
 	uint8 currentPerspective;
 
 	APlayerController* PC;
+
+public:
+	TArray<ACelestialBody*> GetBodies() { return bodies; }
 };

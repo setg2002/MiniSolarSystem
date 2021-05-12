@@ -19,11 +19,17 @@ public:
 	// Sets default values for this pawn's properties
 	ACelestialPlayer();
 
+	UFUNCTION(BlueprintCallable)
+	virtual int GetMass() const override;
+
 	UFUNCTION()
 	virtual void UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep) override;
 
 	UFUNCTION()
 	virtual void UpdatePosition(float timeStep) override;
+
+	UFUNCTION(BlueprintCallable)
+	virtual FVector GetCurrentVelocity() const override;
 
 	// Returns the throttle value
 	UFUNCTION(BlueprintCallable)
@@ -38,6 +44,9 @@ public:
 		return bIgnoreGravity;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	ACelestialBody* GetLargestForce();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -46,6 +55,8 @@ protected:
 	bool bIgnoreGravity = false;
 
 	const int mass = 10;
+
+	const int MaxSpeed = 9999;
 
 public:	
 	// Called every frame
@@ -74,6 +85,13 @@ private:
 			IntendedRotation += FRotator(-AxisValue, 0, 0);
 		}
 	}
+	void RotationZ(float AxisValue)
+	{
+		if (Controller)
+		{
+			IntendedRotation += FRotator(0, 0, AxisValue);
+		}
+	}
 
 	void SwitchPerspective();
 
@@ -93,5 +111,9 @@ private:
 		}
 	}
 
+	void LimitVelocity();
+
 	ACelestialGameMode* gameMode;
+
+	TMap<ACelestialBody*, float> ForcePerBody;
 };

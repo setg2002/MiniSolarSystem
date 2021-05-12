@@ -20,6 +20,11 @@ void ACelestialPlayer::BeginPlay()
 	Super::BeginPlay();
 	
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
+
+	for (auto& body : gameMode->GetBodies())
+	{
+		ForcePerBody.Add(body, 0);
+	}
 }
 
 // Called every frame
@@ -33,9 +38,30 @@ void ACelestialPlayer::Tick(float DeltaTime)
 
 		// Camera Rotation Lag
 		Controller->SetControlRotation(FMath::Lerp<FRotator>(Controller->GetControlRotation(), IntendedRotation, DeltaTime * RotationSpeed));
+	
+		LimitVelocity();
 	}
 }
 
+FVector ACelestialPlayer::GetCurrentVelocity() const
+{
+	return currentVelocity;
+}
+
+int ACelestialPlayer::GetMass() const { return mass; }
+
+ACelestialBody* ACelestialPlayer::GetLargestForce()
+{
+	// Sorts the map from high to low based on values
+	ForcePerBody.ValueSort([](const float A, const float B) {
+		return A > B; });
+
+	for (auto& Pair : ForcePerBody)
+	{
+		return Pair.Key;
+	}
+	return nullptr;
+}
 
 // Called to bind functionality to input
 void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -48,6 +74,7 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAxis("RotationX", this, &ACelestialPlayer::RotationX);
 	PlayerInputComponent->BindAxis("RotationY", this, &ACelestialPlayer::RotationY);
+	//PlayerInputComponent->BindAxis("RotationZ", this, &ACelestialPlayer::RotationZ);
 
 	PlayerInputComponent->BindAxis("ChangeSpeed", this, &ACelestialPlayer::ChangeThrottle);
 
@@ -55,6 +82,10 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("IgnoreGravity", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchIgnoreGravity);
 }
 
+void ACelestialPlayer::LimitVelocity()
+{
+	currentVelocity = UKismetMathLibrary::ClampVectorSize(currentVelocity, 0, MaxSpeed);
+}
 
 void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep)
 {
@@ -66,9 +97,11 @@ void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float t
 
 			float sqrDst = (otherBody->GetActorLocation() - this->GetActorLocation()).Size();
 			FVector forceDir = (otherBody->GetActorLocation() - this->GetActorLocation()).GetSafeNormal();
-			FVector force = forceDir * gameMode->gravitationalConstant * mass * otherBody->mass / sqrDst;
+			FVector force = forceDir * gameMode->gravitationalConstant * mass * otherBody->GetMass() / sqrDst;
 			FVector acceleration = force / mass;
 			this->currentVelocity += acceleration * timeStep;
+
+			ForcePerBody[otherBody] = force.Size();
 		}
 	}
 }
