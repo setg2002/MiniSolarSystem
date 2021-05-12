@@ -1,4 +1,4 @@
-// This is a copyright notice
+// Copyright Soren Gilbertson
 
 
 #include "CelestialPlayer.h"
@@ -29,7 +29,10 @@ void ACelestialPlayer::Tick(float DeltaTime)
 
 	if (Controller)
 	{
-			UpdatePosition(DeltaTime);
+		UpdatePosition(DeltaTime);
+
+		// Camera Rotation Lag
+		Controller->SetControlRotation(FMath::Lerp<FRotator>(Controller->GetControlRotation(), IntendedRotation, DeltaTime * RotationSpeed));
 	}
 }
 
@@ -46,13 +49,16 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("RotationX", this, &ACelestialPlayer::RotationX);
 	PlayerInputComponent->BindAxis("RotationY", this, &ACelestialPlayer::RotationY);
 
+	PlayerInputComponent->BindAxis("ChangeSpeed", this, &ACelestialPlayer::ChangeThrottle);
+
 	PlayerInputComponent->BindAction("SwitchPerspective", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchPerspective);
+	PlayerInputComponent->BindAction("IgnoreGravity", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchIgnoreGravity);
 }
 
 
 void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep)
 {
-	if (!bDampInertia)
+	if (!bIgnoreGravity)
 	{
 		for (int i = 0; i < allBodies.Num(); i++)
 		{
@@ -77,7 +83,7 @@ void ACelestialPlayer::MoveForward(float AxisValue)
 {
 	if (Controller)
 	{
-		currentVelocity += (Controller->GetControlRotation().Vector() * AxisValue);
+		currentVelocity += (Controller->GetControlRotation().Vector() * AxisValue * Throttle);
 	}
 }
 
@@ -85,7 +91,7 @@ void ACelestialPlayer::MoveRight(float AxisValue)
 {
 	if (Controller)
 	{
-		currentVelocity += (UKismetMathLibrary::GetRightVector(Controller->GetControlRotation()) * AxisValue);
+		currentVelocity += (UKismetMathLibrary::GetRightVector(Controller->GetControlRotation()) * AxisValue * Throttle);
 	}
 }
 
@@ -93,7 +99,7 @@ void ACelestialPlayer::MoveUp(float AxisValue)
 {
 	if (Controller)
 	{
-		currentVelocity += (UKismetMathLibrary::GetUpVector(Controller->GetControlRotation()) * AxisValue);
+		currentVelocity += (UKismetMathLibrary::GetUpVector(Controller->GetControlRotation()) * AxisValue * Throttle);
 	}
 }
 

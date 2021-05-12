@@ -1,4 +1,4 @@
-// This is a copyright notice
+// Copyright Soren Gilbertson
 
 
 #include "INoiseFilter.h"

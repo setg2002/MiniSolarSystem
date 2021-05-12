@@ -1,4 +1,4 @@
-// This is a copyright notice
+// Copyright Soren Gilbertson
 
 
 #include "CelestialGameMode.h"
@@ -24,8 +24,8 @@ void ACelestialGameMode::BeginPlay()
 	Super::BeginPlay();
 	
 	// Make widgets
-	OverviewWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);		// Create widget
-	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);		// Create widget
+	OverviewWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
+	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
 
 	PC = GetWorld()->GetFirstPlayerController();
 

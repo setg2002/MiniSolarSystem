@@ -1,4 +1,4 @@
-// This is a copyright notice
+// Copyright Soren Gilbertson
 
 
 #include "OverviewPlayer.h"
@@ -42,38 +42,41 @@ void AOverviewPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Mouse drag rotation w/ left click
-	if (Controller && GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::LeftMouseButton)))
+	if (Controller)
 	{
-		float speedMultiplier = 3.f;
-		float dX;
-		float dY;
-		GetWorld()->GetFirstPlayerController()->GetInputMouseDelta(dX, dY);
+		// Mouse drag rotation w/ left click
+		if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::LeftMouseButton)))
+		{
+			float speedMultiplier = 3.f;
+			float dX;
+			float dY;
+			GetWorld()->GetFirstPlayerController()->GetInputMouseDelta(dX, dY);
 
-		SpringArm->AddLocalRotation(FRotator(speedMultiplier * dY, 0, 0));
-		this->AddActorWorldRotation(FRotator(0, speedMultiplier * dX, 0));
-	}
+			SpringArm->AddLocalRotation(FRotator(speedMultiplier * dY, 0, 0));
+			this->AddActorWorldRotation(FRotator(0, speedMultiplier * dX, 0));
+		}
 
-	// Mouse drag pan w/ middle click
-	if (Controller && GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::MiddleMouseButton)))
-	{
-		float speedMultiplier = 100.f;
-		float dX;
-		float dY;
-		GetWorld()->GetFirstPlayerController()->GetInputMouseDelta(dX, dY);
+		// Mouse drag pan w/ middle click
+		if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::MiddleMouseButton)))
+		{
+			float speedMultiplier = 100.f;
+			float dX;
+			float dY;
+			GetWorld()->GetFirstPlayerController()->GetInputMouseDelta(dX, dY);
 
-		this->SetActorLocation(this->GetActorLocation() + (speedMultiplier * dX * Camera->GetRightVector()) + (speedMultiplier * dY * Camera->GetUpVector()));
-	}
+			this->SetActorLocation(this->GetActorLocation() + (speedMultiplier * dX * Camera->GetRightVector()) + (speedMultiplier * dY * Camera->GetUpVector()));
+		}
 
-	// Mouse drag movememt w/ right click
-	if (Controller && GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::RightMouseButton)))
-	{
-		float speedMultiplier = 100.f;
-		float dX;
-		float dY;
-		GetWorld()->GetFirstPlayerController()->GetInputMouseDelta(dX, dY);
+		// Mouse drag movememt w/ right click
+		if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::RightMouseButton)))
+		{
+			float speedMultiplier = 100.f;
+			float dX;
+			float dY;
+			GetWorld()->GetFirstPlayerController()->GetInputMouseDelta(dX, dY);
 
-		this->SetActorLocation(this->GetActorLocation() + (Root->GetForwardVector() * (dY * Speed)) + (Root->GetRightVector() * (dX * Speed)));
+			this->SetActorLocation(this->GetActorLocation() + (Root->GetForwardVector() * (dY * Speed)) + (Root->GetRightVector() * (dX * Speed)));
+		}
 	}
 }
 

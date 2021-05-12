@@ -1,4 +1,4 @@
-// This is a copyright notice
+// Copyright Soren Gilbertson
 
 #pragma once
 
@@ -25,12 +25,25 @@ public:
 	UFUNCTION()
 	virtual void UpdatePosition(float timeStep) override;
 
+	// Returns the throttle value
+	UFUNCTION(BlueprintCallable)
+	float GetThrottle()
+	{
+		return Throttle;
+	}
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIgnoreGravity()
+	{
+		return bIgnoreGravity;
+	}
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bDampInertia = false;
+	UPROPERTY(EditAnywhere)
+	bool bIgnoreGravity = false;
 
 	const int mass = 10;
 
@@ -46,16 +59,39 @@ private:
 	void MoveRight(float AxisValue);
 	void MoveUp(float AxisValue);
 
+	FRotator IntendedRotation;
 	void RotationX(float AxisValue)
 	{
-		AddControllerYawInput(AxisValue);
+		if (Controller)
+		{
+			IntendedRotation += FRotator(0, AxisValue, 0);
+		}
 	}
 	void RotationY(float AxisValue)
 	{
-		AddControllerPitchInput(AxisValue);
+		if (Controller)
+		{
+			IntendedRotation += FRotator(-AxisValue, 0, 0);
+		}
 	}
 
 	void SwitchPerspective();
+
+	void SwitchIgnoreGravity()
+	{
+		bIgnoreGravity = !bIgnoreGravity;
+	}
+
+	int RotationSpeed = 10;
+	float Throttle = 1;
+
+	void ChangeThrottle(float AxisValue)
+	{
+		if (Throttle + AxisValue / 10.f > 0.09f && Throttle + AxisValue / 10.f <= 5)
+		{
+			Throttle += AxisValue / 10.f;
+		}
+	}
 
 	ACelestialGameMode* gameMode;
 };
