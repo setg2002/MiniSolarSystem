@@ -24,10 +24,15 @@ void ACelestialGameMode::BeginPlay()
 	Super::BeginPlay();
 	
 	// Make widgets
-	OverviewWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
 	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
+	OverviewWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
 
 	PC = GetWorld()->GetFirstPlayerController();
+
+	CelestialPlayer = Cast<ACelestialPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass()));
+	OverviewPlayer = Cast<AOverviewPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOverviewPlayer::StaticClass()));
+
+	CelestialPlayer->SetWidget(CelestialWidget);
 
 	SetPerspective(1);
 
@@ -74,7 +79,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 	{
 	case 0: // Overview mode
 	{
-		PC->Possess(Cast<APawn>(UGameplayStatics::GetActorOfClass(GetWorld(), AOverviewPlayer::StaticClass())));
+		PC->Possess(OverviewPlayer);
 		CelestialWidget->RemoveFromViewport();
 		OverviewWidget->AddToViewport(0);
 		PC->SetInputMode(FInputModeGameAndUI());
@@ -92,7 +97,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 	}
 	case 1: // Celestial mode
 	{
-		PC->Possess(Cast<APawn>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass())));
+		PC->Possess(CelestialPlayer);
 		OverviewWidget->RemoveFromViewport();
 		CelestialWidget->AddToViewport(0);
 		PC->SetInputMode(FInputModeGameOnly());

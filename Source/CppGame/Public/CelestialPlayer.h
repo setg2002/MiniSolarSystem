@@ -9,6 +9,7 @@
 
 
 class ACelestialGameMode;
+class UCameraComponent;
 
 UCLASS()
 class CPPGAME_API ACelestialPlayer : public APawn, public ICelestialObject
@@ -18,6 +19,9 @@ class CPPGAME_API ACelestialPlayer : public APawn, public ICelestialObject
 public:
 	// Sets default values for this pawn's properties
 	ACelestialPlayer();
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bFocusPlanet = false;
 
 	UFUNCTION(BlueprintCallable)
 	virtual int GetMass() const override;
@@ -47,6 +51,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* GetLargestForce();
 
+	UFUNCTION(BlueprintCallable)
+	ACelestialBody* LookingAtPlanet();
+
+	void SetWidget(UUserWidget* Highlight) { Widget = Highlight; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -58,6 +67,11 @@ protected:
 
 	const int MaxSpeed = 9999;
 
+	UUserWidget* Widget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCameraComponent* Camera;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -66,6 +80,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> PlanetHighlightClass;
+
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
 	void MoveUp(float AxisValue);
@@ -98,6 +115,11 @@ private:
 	void SwitchIgnoreGravity()
 	{
 		bIgnoreGravity = !bIgnoreGravity;
+	}
+
+	void SwitchFocusPlanet()
+	{
+		bFocusPlanet = !bFocusPlanet;
 	}
 
 	int RotationSpeed = 10;

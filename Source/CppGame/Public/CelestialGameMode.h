@@ -12,6 +12,8 @@
 
 //Forward Declarations
 class ICelestialObject;
+class ACelestialPlayer;
+class AOverviewPlayer;
 class ACelestialBody;
 class UUserWidget;
 class APlanet;
@@ -71,6 +73,9 @@ protected:
 	uint8 currentPerspective;
 
 	APlayerController* PC;
+
+	ACelestialPlayer* CelestialPlayer;
+	AOverviewPlayer* OverviewPlayer;
 
 public:
 	TArray<ACelestialBody*> GetBodies() { return bodies; }

@@ -4,7 +4,10 @@
 #include "CelestialPlayer.h"
 #include "CelestialBody.h"
 #include "CelestialGameMode.h"
+#include "Blueprint\UserWidget.h"
+#include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 ACelestialPlayer::ACelestialPlayer()
@@ -12,6 +15,8 @@ ACelestialPlayer::ACelestialPlayer()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	Camera->bUsePawnControlRotation = true;
 }
 
 // Called when the game starts or when spawned
@@ -63,6 +68,38 @@ ACelestialBody* ACelestialPlayer::GetLargestForce()
 	return nullptr;
 }
 
+ACelestialBody* ACelestialPlayer::LookingAtPlanet()
+{
+	static int AcceptanceAngle = 20;
+
+	ACelestialBody* ClosestBody = nullptr;
+	float dist = TNumericLimits<float>::Max();
+	
+	// Angle calculation from https://answers.unrealengine.com/questions/232851/computing-angle-between-forward-and-actor.html
+
+	FVector playerLoc = this->GetActorLocation();
+	FVector playerForwardDir = Controller->GetControlRotation().Vector();    // or any other way you want to get this - in any case, it's that actor's "forward" vector.
+	FVector playerRightDir = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);    // or any other way you want to get this - in any case, it's that actor's "right" vector based on its forward vector
+	
+	for (auto& Body : gameMode->GetBodies())
+	{
+		FVector objectLoc = Body->GetActorLocation();
+
+		// Calculate angles
+		float dx = FVector::DotProduct((objectLoc - playerLoc), playerForwardDir);
+		float dy = FVector::DotProduct((objectLoc - playerLoc), playerRightDir);
+		// Convert to degrees and subtract orthogonal diff
+		float angle = FMath::RadiansToDegrees(atan2(dx, dy)) - 90.0f;
+		if ((angle < AcceptanceAngle && angle > -AcceptanceAngle) && (GetActorLocation() - Body->GetActorLocation()).Size() < dist)
+		{
+			ClosestBody = Body;
+			dist = (GetActorLocation() - Body->GetActorLocation()).Size();
+		}
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), ClosestBody == nullptr ? TEXT("True") : TEXT("False"));
+	return ClosestBody;
+}
+
 // Called to bind functionality to input
 void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -80,6 +117,8 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("SwitchPerspective", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchPerspective);
 	PlayerInputComponent->BindAction("IgnoreGravity", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchIgnoreGravity);
+	PlayerInputComponent->BindAction("FocusPlanet", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchFocusPlanet);
+
 }
 
 void ACelestialPlayer::LimitVelocity()
