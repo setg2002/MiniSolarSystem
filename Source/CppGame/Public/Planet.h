@@ -162,8 +162,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	AOrbitDebugActor* OrbitDebugActor;
-
 	void CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UDataAsset> DataAssetClass);
 
 	const FVector directions[6] = { FVector().UpVector,

@@ -31,13 +31,8 @@ APlanet::APlanet()
 
 void APlanet::OnConstruction(const FTransform & Transform)
 {
-	// Get orbit debug actor from world
-	for (TActorIterator<AOrbitDebugActor> It(GetWorld()); It; ++It)
-	{
-		OrbitDebugActor = *It;
-	}
-
 	Super::OnConstruction(Transform);
+
 }
 
 void APlanet::BeginPlay()
@@ -307,7 +302,7 @@ void APlanet::CalculateOrbitVelocity()
 	else
 	{
 		//TODO Replace 100 with gravitational constant from gamemode
-		float GM = 100 * (this->mass + OrbitingBody->mass);
+		float GM = 100 * (this->mass + OrbitingBody->GetMass());
 		orbitVelocity = FMath::Sqrt(GM);
 		return;
 	}
@@ -329,9 +324,9 @@ void APlanet::SetToOrbit()
 	initialVelocity.Y = Tangent.Y * -orbitVelocity + OrbitingBody->initialVelocity.Y;
 	initialVelocity.Z = Tangent.Z * -orbitVelocity + OrbitingBody->initialVelocity.Z;
 
-	if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
+	if (AOrbitDebugActor::Get()->bAutoDraw)
 	{
-		OrbitDebugActor->DrawOrbits();
+		AOrbitDebugActor::Get()->DrawOrbits();
 	}
 
 	// Debugging
@@ -383,11 +378,11 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 			GeneratePlanet();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}*/
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, mass))
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(ACelestialBody, GetMass()))
 		{
-			if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
+			if (AOrbitDebugActor::Get()->bAutoDraw)
 			{
-				OrbitDebugActor->DrawOrbits();
+				AOrbitDebugActor::Get()->DrawOrbits();
 			}
 		}
 	}
@@ -397,9 +392,9 @@ void APlanet::PostEditMove(bool bFinished)
 {
 	Super::PostEditMove(bFinished);
 
-	if (OrbitDebugActor && OrbitDebugActor->bAutoDraw)
+	if (AOrbitDebugActor::Get()->bAutoDraw)
 	{
-		OrbitDebugActor->DrawOrbits();
+		AOrbitDebugActor::Get()->DrawOrbits();
 	}
 }
 #endif

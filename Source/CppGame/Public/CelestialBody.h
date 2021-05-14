@@ -23,14 +23,17 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditInstanceOnly, Category = "Default")
-	int mass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Name;
 
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	FVector initialVelocity;
 
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	float rotationRate;
+
+	UFUNCTION(BlueprintCallable)
+	int SetMass(int newMass);
 
 	UFUNCTION(BlueprintCallable)
 	virtual int GetMass() const override;
@@ -44,12 +47,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetCurrentVelocity() const override;
 
-	ACelestialGameMode* gameMode;
-
 	USceneComponent* Root;
 
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditInstanceOnly, Category = "Default")
+	int mass;
+
+	ACelestialGameMode* gameMode;
 };

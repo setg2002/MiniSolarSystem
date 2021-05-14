@@ -56,6 +56,15 @@ public:
 	UFUNCTION(CallInEditor, BlueprintCallable, Category="Particle Debug")
 	void ReInitParticles();
 
+	UFUNCTION(BlueprintCallable)
+	void SetRadius(int NewRadius);
+	
+	UFUNCTION(BlueprintCallable)
+	void SetLuminosity(int NewLuminosity);
+
+	UFUNCTION(BlueprintCallable)
+	void SetColor(FColor NewColor);
+
 	void UpdateColor();
 
 	// Called when the game starts

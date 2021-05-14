@@ -2,6 +2,7 @@
 
 
 #include "CelestialBody.h"
+#include "OrbitDebugActor.h"
 #include "CelestialGameMode.h"
 
 // Sets default values
@@ -12,6 +13,11 @@ ACelestialBody::ACelestialBody()
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 	//RootComponent = Root;
+
+	if (Name == NAME_None)
+	{
+		Name = FName(this->GetName());
+	}
 }
 
 void ACelestialBody::BeginPlay()
@@ -19,6 +25,18 @@ void ACelestialBody::BeginPlay()
 	Super::BeginPlay();
 	currentVelocity = initialVelocity;
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
+}
+
+int ACelestialBody::SetMass(int newMass)
+{
+	mass = newMass; 
+
+	if (AOrbitDebugActor::Get()->bAutoDraw)
+	{
+		AOrbitDebugActor::Get()->DrawOrbits();
+	}
+
+	return mass;
 }
 
 int ACelestialBody::GetMass() const { return mass; }

@@ -308,7 +308,7 @@ VirtualBody::VirtualBody(ACelestialBody* Body)
 {
 	Position = Body->GetActorLocation();
 	Velocity = Body->GetCurrentVelocity();
-	Mass = Body->mass;
+	Mass = Body->GetMass();
 }
 
 #if WITH_EDITOR

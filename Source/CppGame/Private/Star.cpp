@@ -71,6 +71,38 @@ void AStar::Tick(float DeltaTime)
 	}
 }
 
+void AStar::SetRadius(int NewRadius)
+{
+	starProperties.radius = NewRadius;
+	Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
+	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+}
+
+void AStar::SetLuminosity(int NewLuminosity)
+{
+	starProperties.luminosity = NewLuminosity;
+
+	if (Sphere->GetMaterial(0) != dynamicMaterial)
+	{
+		dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
+		Sphere->SetMaterial(0, dynamicMaterial);
+	}
+	if (planetMateralParameterCollectionInst == nullptr)
+	{
+		planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
+	}
+
+	dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
+	planetMateralParameterCollectionInst->SetScalarParameterValue(FName("StarLuminosity"), starProperties.luminosity);
+	Light->SetIntensity(starProperties.luminosity / 5);
+}
+
+void AStar::SetColor(FColor NewColor)
+{
+	starProperties.color = NewColor;
+	UpdateColor();
+}
+
 void AStar::ReInitParticles()
 {
 	if (ParticleComponent) { ParticleComponent->Deactivate(); ParticleComponent->DestroyComponent(); }
