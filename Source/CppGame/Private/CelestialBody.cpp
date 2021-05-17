@@ -79,3 +79,14 @@ FVector ACelestialBody::GetCurrentVelocity() const
 	return currentVelocity;
 }
 
+void ACelestialBody::SetCurrentVelocity(float NewVelocity)
+{
+	FVector NormalizedVelocity = GetCurrentVelocity().GetSafeNormal();
+	currentVelocity = NormalizedVelocity * NewVelocity;
+	AOrbitDebugActor::Get()->DrawOrbits();
+}
+
+void ACelestialBody::SetCurrentVelocity(FVector NewVelocity)
+{
+	currentVelocity = NewVelocity;
+}

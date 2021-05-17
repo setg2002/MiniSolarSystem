@@ -47,6 +47,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetCurrentVelocity() const override;
 
+	UFUNCTION(BlueprintCallable)
+	void SetCurrentVelocity(float NewVelocity);
+	UFUNCTION(BlueprintCallable)
+	void SetCurrentVelocity(FVector NewVelocity);
+
 	USceneComponent* Root;
 
 
