@@ -29,7 +29,7 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "Default")
 	FVector initialVelocity;
 
-	UPROPERTY(EditInstanceOnly, Category = "Default")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Default")
 	float rotationRate;
 
 	UFUNCTION(BlueprintCallable)

@@ -253,7 +253,7 @@ void APlanet::GenerateMesh()
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			if ((int)FaceRenderMask - 1 == i || FaceRenderMask == EFaceRenderMask::All)
+			if ((int)FaceRenderMask - 1 == i || FaceRenderMask == EFaceRenderMask::NoMask)
 			{
 				TerrainFaces[i]->CalculateMesh();
 			}

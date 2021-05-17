@@ -23,7 +23,7 @@ class ColorSettings;
 
 UENUM()
 enum EFaceRenderMask { 
-	All      UMETA(DisplayName = "All Faces"),
+	NoMask   UMETA(DisplayName = "All Faces"),
 	Bottom   UMETA(DisplayName = "Bottom"),
 	Top      UMETA(DisplayName = "Top"),
 	Left     UMETA(DisplayName = "Left"),
