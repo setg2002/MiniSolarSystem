@@ -13,12 +13,10 @@ class AActor;
 class CPPGAME_API GaseousColorGenerator
 {
 public:
-	GaseousColorGenerator(UObject* owner);
+	GaseousColorGenerator();
 	~GaseousColorGenerator();
 
-	UObject* Owner;
+	static UTexture2D* CreateTexture(FString TextureName, UCurveLinearColor* Gradient);
 
-	UTexture2D* CreateTexture(FString TextureName, UCurveLinearColor* Gradient);
-
-	UTexture2D* MakeVoronoiTexture(int16 NumStorms = 25, float StormFalloff = 2.5f, int LowBound = 100, int HighBound = 924, int TextureResolution = 1024);
+	static UTexture2D* MakeVoronoiTexture(int16 NumStorms = 25, float StormFalloff = 2.5f, int LowBound = 100, int HighBound = 924, int TextureResolution = 1024);
 };

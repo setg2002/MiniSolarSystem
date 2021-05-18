@@ -10,12 +10,38 @@
 
 UGasGiantColorSettings::UGasGiantColorSettings()
 {
+	BasePlanetMat = LoadObject<UMaterialInterface>(NULL, TEXT("UMaterialInterface'/Game/MaterialStuff/Instances/M_GasGiant_Inst.M_GasGiant_Inst'"), NULL, LOAD_None, NULL);
 }
 
-
-void UGasGiantColorSettings::SetOwner(AGasGiant* owner)
+void UGasGiantColorSettings::GenerateMaterial()
 {
-	Owner = owner;
+	ensure(BasePlanetMat);
+	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, BasePlanetMat);
+	DynamicMaterial->SetTextureParameterValue("_Texture", GaseousColorGenerator::CreateTexture("GasTexture", Gradient));
+
+	//AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
+}
+
+void UGasGiantColorSettings::NewVoronoiForStorms()
+{
+	if (DynamicMaterial == nullptr)
+	{
+		GenerateMaterial();
+	}
+	UTexture* NewTexture = GaseousColorGenerator::MakeVoronoiTexture(NumStorms, StormFalloff, LowBound, HighBound);
+	DynamicMaterial->SetTextureParameterValue("_StormTexture", NewTexture);
+}
+
+void UGasGiantColorSettings::SetNumStorms(int NewNumStorms)
+{
+	NumStorms = NewNumStorms;
+	NewVoronoiForStorms();
+}
+
+void UGasGiantColorSettings::SetStormFalloff(float NewStormFalloff)
+{
+	StormFalloff = NewStormFalloff;
+	NewVoronoiForStorms();
 }
 
 #if WITH_EDITOR
@@ -27,17 +53,17 @@ void UGasGiantColorSettings::PostEditChangeProperty(FPropertyChangedEvent& Prope
 
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(UGasGiantColorSettings, BasePlanetMat))
 		{
-			if (Owner)
+			if (Mesh)
 			{
-				Owner->GenerateMaterial();
+				GenerateMaterial();
 			}
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(UGasGiantColorSettings, Gradient) && Gradient != nullptr)
 		{
-			if (Owner)
+			if (Mesh)
 			{
-				Owner->GenerateMaterial();
-				DynamicMaterial->SetTextureParameterValue(FName("_Texture"), Owner->ColorGenerator->CreateTexture("GasTexture", Gradient));
+				GenerateMaterial();
+				DynamicMaterial->SetTextureParameterValue(FName("_Texture"), GaseousColorGenerator::CreateTexture("GasTexture", Gradient));
 			}
 		}
 	}

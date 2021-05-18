@@ -11,22 +11,20 @@ AGasGiant::AGasGiant()
 {
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	Mesh->SetupAttachment(GetRootComponent());
-	ColorGenerator = new GaseousColorGenerator(this);
+	ColorGenerator = new GaseousColorGenerator();
 }
 
-void AGasGiant::GenerateMaterial()
+void AGasGiant::BeginPlay()
 {
-	ensure(ColorSettings->BasePlanetMat);
-	ColorSettings->SetOwner(this);
-	ColorSettings->DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, ColorSettings->BasePlanetMat);
-
-	//AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
+	Super::BeginPlay();
+	
+	ColorSettings->SetMesh(Mesh);
 }
 
-void AGasGiant::NewVoronoiForStorms()
+void AGasGiant::SetRadius(int NewRadius)
 {
-	//GenerateMaterial();
-	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_StormTexture"), ColorGenerator->MakeVoronoiTexture(ColorSettings->NumStorms, ColorSettings->StormFalloff, ColorSettings->LowBound, ColorSettings->HighBound));
+	Radius = NewRadius;
+	this->SetActorScale3D(FVector(Radius));
 }
 
 #if WITH_EDITOR

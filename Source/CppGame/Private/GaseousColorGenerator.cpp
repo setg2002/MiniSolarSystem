@@ -5,9 +5,8 @@
 #include "AssetRegistryModule.h"
 #include "Curves/CurveLinearColor.h"
 
-GaseousColorGenerator::GaseousColorGenerator(UObject* owner)
+GaseousColorGenerator::GaseousColorGenerator()
 {
-	Owner = owner;
 }
 
 GaseousColorGenerator::~GaseousColorGenerator()

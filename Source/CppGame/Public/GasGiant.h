@@ -29,18 +29,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UGasGiantColorSettings* ColorSettings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"))
-	int Radius = 1;
-
-	UFUNCTION(BlueprintCallable, CallInEditor)
-	void GenerateMaterial();
-
-	UFUNCTION(BlueprintCallable, CallInEditor)
-	void NewVoronoiForStorms();
+	UFUNCTION(BlueprintCallable)
+	int GetRadius() const { return Radius; }
+	UFUNCTION(BlueprintCallable)
+	void SetRadius(int NewRadius);
 
 	GaseousColorGenerator* ColorGenerator;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
+
+private:
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
+	int Radius = 1;
+
+	virtual void BeginPlay() override;
 };

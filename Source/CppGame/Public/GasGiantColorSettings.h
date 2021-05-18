@@ -10,10 +10,6 @@
  * 
  */
 
-// Forward Declarations
-class UNoiseSettings;
-class AGasGiant;
-
 
 UCLASS()
 class CPPGAME_API UGasGiantColorSettings : public UDataAsset
@@ -23,37 +19,51 @@ class CPPGAME_API UGasGiantColorSettings : public UDataAsset
 public:
 	UGasGiantColorSettings();
 
-	void SetOwner(AGasGiant* owner);
+	void SetMesh(UStaticMeshComponent* mesh) { Mesh = mesh; }
 
-	AGasGiant* Owner;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* BasePlanetMat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveLinearColor* Gradient;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UNoiseSettings* Noise;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UMaterialInstanceDynamic* DynamicMaterial;
 
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void GenerateMaterial();
+
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void NewVoronoiForStorms();
+
 	// Voronoi Settings \\
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Storm Settings", meta = (ClampMin = "0"))
-	int NumStorms = 25;
+	UFUNCTION(BlueprintCallable)
+	int GetNumStorms() const { return NumStorms; }
+	UFUNCTION(BlueprintCallable)
+	void SetNumStorms(int NewNumStorms);
+	
+	UFUNCTION(BlueprintCallable)
+	float GetStormFalloff() const { return StormFalloff; }
+	UFUNCTION(BlueprintCallable)
+	void SetStormFalloff(float NewStormFalloff);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Storm Settings", meta = (ClampMin = "0"))
-	float StormFalloff = 2.5f;
+	//UPROPERTY(EditAnywhere, Category = "Storm Settings", AdvancedDisplay, meta = (ClampMin = "0", ClampMax = "1024"))
+	const int LowBound = 100;
 
-	UPROPERTY(EditAnywhere, Category = "Storm Settings", AdvancedDisplay, meta = (ClampMin = "0", ClampMax = "1024"))
-	int LowBound = 100;
-
-	UPROPERTY(EditAnywhere, Category = "Storm Settings", AdvancedDisplay, meta = (ClampMin = "0", ClampMax = "1024"))
-	int HighBound = 924;
+	//UPROPERTY(EditAnywhere, Category = "Storm Settings", AdvancedDisplay, meta = (ClampMin = "0", ClampMax = "1024"))
+	const int HighBound = 924;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
+
+private:
+	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
+	int NumStorms = 25;
+
+	UPROPERTY(EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
+	float StormFalloff = 2.5f;
 };
