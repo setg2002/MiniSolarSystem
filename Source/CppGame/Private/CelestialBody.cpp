@@ -79,7 +79,7 @@ FVector ACelestialBody::GetCurrentVelocity() const
 	return currentVelocity;
 }
 
-void ACelestialBody::SetCurrentVelocity(float NewVelocity)
+void ACelestialBody::ScaleCurrentVelocity(float NewVelocity)
 {
 	FVector NormalizedVelocity = GetCurrentVelocity().GetSafeNormal();
 	currentVelocity = NormalizedVelocity * NewVelocity;

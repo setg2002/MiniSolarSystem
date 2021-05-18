@@ -47,8 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetCurrentVelocity() const override;
 
+	// Sets the magnitude of the current velocity to NewVelocity without changing direction
 	UFUNCTION(BlueprintCallable)
-	void SetCurrentVelocity(float NewVelocity);
+	void ScaleCurrentVelocity(float NewVelocity);
 	UFUNCTION(BlueprintCallable)
 	void SetCurrentVelocity(FVector NewVelocity);
 
