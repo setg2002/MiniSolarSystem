@@ -48,12 +48,22 @@ class CPPGAME_API UNoiseSettings : public UDataAsset
 {
 	GENERATED_BODY()
 
+	DECLARE_DELEGATE(FNoiseSettingsChanged);
+
+private:
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EFilterType> FilterType;
+
 public:
 	UNoiseSettings();
 	~UNoiseSettings();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<EFilterType> FilterType;
+	FNoiseSettingsChanged OnNoiseSettingsChanged;
+
+	UFUNCTION(BlueprintCallable)
+	TEnumAsByte<EFilterType> GetFilterType() const { return FilterType; }
+	UFUNCTION(BlueprintCallable)
+	void SetFilterType(EFilterType NewFilterType);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "FilterType == 0", EditConditionHides))
 	FSimpleNoiseSettings SimpleNoiseSettings;

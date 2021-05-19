@@ -39,6 +39,12 @@ void APlanet::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ShapeSettings->OnShapeSettingsChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
+	for (auto& NoiseLayer : ShapeSettings->NoiseLayers)
+	{
+		NoiseLayer->OnNoiseLayerChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
+		NoiseLayer->NoiseSettings->OnNoiseSettingsChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
+	}
 }
 
 void APlanet::Tick(float DeltaTime)
@@ -268,13 +274,19 @@ void APlanet::GenerateMesh()
 
 void APlanet::OnShapeSettingsUpdated()
 {
-	Initialize();
-	GenerateMesh();
+	if (bAutoGenerate)
+	{
+		Initialize();
+		GenerateMesh();
+	}
 }
 
 void APlanet::OnColorSettingsUpdated()
 {
-	GenerateColors();
+	if (bAutoGenerate)
+	{
+		GenerateColors();
+	}
 }
 
 void APlanet::GenerateColors()

@@ -15,11 +15,27 @@ class CPPGAME_API UNoiseLayer : public UDataAsset
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	DECLARE_DELEGATE(FNoiseLayerChanged);
+
+private:
+	UPROPERTY(EditAnywhere)
 	bool Enabled = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	bool UseFirstLayerAsMask = false;
+
+public:
+	FNoiseLayerChanged OnNoiseLayerChanged;
+
+	UFUNCTION(BlueprintCallable)
+	bool GetEnabled() const { return Enabled; }
+	UFUNCTION(BlueprintCallable)
+	void SetEnabled(bool NewEnabled);
+
+	UFUNCTION(BlueprintCallable)
+	bool GetFirstLayerAsMask() const { return UseFirstLayerAsMask; }
+	UFUNCTION(BlueprintCallable)
+	void SetFirstLayerAsMask(bool NewFirstLayerAsMask);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UNoiseSettings* NoiseSettings;
 	

@@ -2,6 +2,7 @@
 
 
 #include "ShapeSettings.h"
+#include "Planet.h"
 
 bool UShapeSettings::GetNoiseLayers()
 {
@@ -14,4 +15,10 @@ bool UShapeSettings::GetNoiseLayers()
 		}
 	}
 	return exists;
+}
+
+void UShapeSettings::SetRadius(float NewRadius)
+{
+	PlanetRadius = NewRadius;
+	OnShapeSettingsChanged.ExecuteIfBound();
 }

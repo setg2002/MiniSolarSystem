@@ -16,8 +16,8 @@ class UProceduralMeshComponent;
 class AOrbitDebugActor;
 class ShapeGenerator;
 class TerrestrialColorGenerator;
-class ShapeSettings;
-class ColorSettings;
+class UShapeSettings;
+class UColorSettings;
 
 
 
@@ -105,9 +105,9 @@ public:
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
 
 	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
-	class UColorSettings* ColorSettings;
+	UColorSettings* ColorSettings;
 	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
-	class UShapeSettings* ShapeSettings;
+	UShapeSettings* ShapeSettings;
 
 	// Desired resolution for each TerrainFace to generate
 	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "2", ClampMax = "512"))
@@ -144,8 +144,9 @@ public:
 
 	void GenerateColors();
 
+	UFUNCTION(BlueprintCallable)
 	void OnShapeSettingsUpdated();
-
+	UFUNCTION(BlueprintCallable)
 	void OnColorSettingsUpdated();
 
 	// Executes remaining funcetions necessary to complete planet generation once all terrain face threads are finished

@@ -37,7 +37,7 @@ float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 		if (NoiseFilters.Num() > 0)
 		{
 			firstLayerValue = NoiseFilters[0]->Evaluate(PointOnUnitSphere);
-			if (Settings->NoiseLayers[0]->Enabled)
+			if (Settings->NoiseLayers[0]->GetEnabled())
 			{
 				elevation = firstLayerValue;
 			}
@@ -46,9 +46,9 @@ float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 			{
 				for (int i = 1; i < NoiseFilters.Num(); i++)
 				{
-					if (Settings->NoiseLayers[i]->Enabled)
+					if (Settings->NoiseLayers[i]->GetEnabled())
 					{
-						float mask = (Settings->NoiseLayers[i]->UseFirstLayerAsMask) ? firstLayerValue : 1;
+						float mask = (Settings->NoiseLayers[i]->GetFirstLayerAsMask()) ? firstLayerValue : 1;
 						float newElevation = elevation + NoiseFilters[i]->Evaluate(PointOnUnitSphere) * mask;
 						// Only use first layer noise for ocean shading
 						if (elevation + newElevation > 0)
@@ -72,6 +72,6 @@ float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 float ShapeGenerator::GetScaledElevation(float unscaledElevation)
 {
 	float elevation = FMath::Max<float>(0, unscaledElevation);
-	elevation = Settings->PlanetRadius * (1 + elevation);
+	elevation = Settings->GetRadius() * (1 + elevation);
 	return elevation;
 }

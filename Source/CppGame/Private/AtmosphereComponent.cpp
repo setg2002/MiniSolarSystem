@@ -19,7 +19,7 @@ void UAtmosphereComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->PlanetRadius; //TODO Use constructor passed radius in full game
+	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->GetRadius(); //TODO Use constructor passed radius in full game
 
 	this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	this->SetRelativeLocation(FVector::ZeroVector);

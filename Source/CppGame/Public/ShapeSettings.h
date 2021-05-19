@@ -14,13 +14,23 @@ UCLASS()
 class CPPGAME_API UShapeSettings : public UDataAsset
 {
 	GENERATED_BODY()
-	
-public:
-	//Radius in cm
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	DECLARE_DELEGATE(FShapeSettingsChanged);
+
+private:
+	// Planet radius in cm
+	UPROPERTY(EditAnywhere)
 	float PlanetRadius = 100;
 
+public:
 	bool GetNoiseLayers();
+
+	FShapeSettingsChanged OnShapeSettingsChanged;
+
+	UFUNCTION(BlueprintCallable)
+	float GetRadius() const { return PlanetRadius; }
+	UFUNCTION(BlueprintCallable)
+	void SetRadius(float NewRadius);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UNoiseLayer*> NoiseLayers;

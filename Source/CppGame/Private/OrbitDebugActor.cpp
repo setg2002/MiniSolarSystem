@@ -199,7 +199,7 @@ void AOrbitDebugActor::DrawOrbits()
 					APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
 					if (Width == 0 && planet != nullptr)
 					{
-						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, planet->ShapeSettings->PlanetRadius * 2);
+						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, planet->ShapeSettings->GetRadius() * 2);
 					}
 					else
 					{
@@ -236,7 +236,7 @@ void AOrbitDebugActor::DrawOrbits()
 				APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
 				if (planet != nullptr)
 				{
-					Splines[bodyIndex]->ScaleVisualizationWidth = planet->ShapeSettings->PlanetRadius;
+					Splines[bodyIndex]->ScaleVisualizationWidth = planet->ShapeSettings->GetRadius();
 				}
 #endif
 				Splines[bodyIndex]->UpdateSpline();
@@ -251,7 +251,7 @@ void AOrbitDebugActor::DrawOrbits()
 					APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
 					if (Width == 0 && planet != nullptr)
 					{
-						ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), planet->ShapeSettings->PlanetRadius * 2);
+						ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), planet->ShapeSettings->GetRadius() * 2);
 					}
 					else
 					{
