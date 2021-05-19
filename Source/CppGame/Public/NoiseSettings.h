@@ -54,6 +54,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EFilterType> FilterType;
 
+	UPROPERTY(EditAnywhere, meta = (EditCondition = "FilterType == 0", EditConditionHides))
+	FSimpleNoiseSettings SimpleNoiseSettings;
+	UPROPERTY(EditAnywhere, meta = (EditCondition = "FilterType == 1", EditConditionHides))
+	FRidgidNoiseSettings RidgidNoiseSettings;
+
 public:
 	UNoiseSettings();
 	~UNoiseSettings();
@@ -65,8 +70,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetFilterType(EFilterType NewFilterType);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "FilterType == 0", EditConditionHides))
-	FSimpleNoiseSettings SimpleNoiseSettings;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "FilterType == 1", EditConditionHides))
-	FRidgidNoiseSettings RidgidNoiseSettings;
+	UFUNCTION(BlueprintCallable)
+	FSimpleNoiseSettings GetSimpleNoiseSettings() const { return SimpleNoiseSettings; }
+	UFUNCTION(BlueprintCallable)
+	FRidgidNoiseSettings GetRidgidNoiseSettings() const { return RidgidNoiseSettings; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetSimpleNoiseSettings(FSimpleNoiseSettings NewSettings);
+	UFUNCTION(BlueprintCallable)
+	void SetRidgidNoiseSettings(FRidgidNoiseSettings NewSettings);
 };
