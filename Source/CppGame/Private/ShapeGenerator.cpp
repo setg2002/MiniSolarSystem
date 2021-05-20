@@ -15,10 +15,10 @@ ShapeGenerator::ShapeGenerator()
 void ShapeGenerator::UpdateSettings(UShapeSettings* settings)
 {
 	this->Settings = settings;
-	NoiseFilters.SetNum(Settings->NoiseLayers.Num());
-	for (int i = 0; i < Settings->NoiseLayers.Num(); i++)
+	NoiseFilters.SetNum(Settings->GetNoiseLayers().Num());
+	for (int i = 0; i < Settings->GetNoiseLayers().Num(); i++)
 	{
-		NoiseFilters[i] = NoiseFilterFactory::CreateNoiseFilter(Settings->NoiseLayers[i]->NoiseSettings);
+		NoiseFilters[i] = NoiseFilterFactory::CreateNoiseFilter(Settings->GetNoiseLayers()[i]->NoiseSettings);
 	}
 	ElevationMinMax = new MinMax();
 }
@@ -37,7 +37,7 @@ float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 		if (NoiseFilters.Num() > 0)
 		{
 			firstLayerValue = NoiseFilters[0]->Evaluate(PointOnUnitSphere);
-			if (Settings->NoiseLayers[0]->GetEnabled())
+			if (Settings->GetNoiseLayers()[0]->GetEnabled())
 			{
 				elevation = firstLayerValue;
 			}
@@ -46,9 +46,9 @@ float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 			{
 				for (int i = 1; i < NoiseFilters.Num(); i++)
 				{
-					if (Settings->NoiseLayers[i]->GetEnabled())
+					if (Settings->GetNoiseLayers()[i]->GetEnabled())
 					{
-						float mask = (Settings->NoiseLayers[i]->GetFirstLayerAsMask()) ? firstLayerValue : 1;
+						float mask = (Settings->GetNoiseLayers()[i]->GetFirstLayerAsMask()) ? firstLayerValue : 1;
 						float newElevation = elevation + NoiseFilters[i]->Evaluate(PointOnUnitSphere) * mask;
 						// Only use first layer noise for ocean shading
 						if (elevation + newElevation > 0)

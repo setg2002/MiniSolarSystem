@@ -45,10 +45,10 @@ public:
 	
 	// ======= Runtime Console Commands =======
 
-	UFUNCTION(Exec)
+	UFUNCTION(Exec, BlueprintCallable)
 	void ReGenAll();
 
-	UFUNCTION(Exec)
+	UFUNCTION(Exec, BlueprintCallable)
 	void ReGen(FString Planet);
 
 	UFUNCTION(Exec, BlueprintCallable)

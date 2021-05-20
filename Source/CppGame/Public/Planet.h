@@ -117,6 +117,7 @@ public:
 	void Initialize();
 
 	// Makes new empty data asset for given data asset
+	UFUNCTION(BlueprintCallable)
 	UDataAsset* CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass);
 
 	// Makes new blank data asset for shape and color settings if either are unassigned
@@ -153,6 +154,9 @@ public:
 	void ReconveneTerrainFaceThreads(int FaceNum);
 
 	virtual void OnConstruction(const FTransform & Transform) override;
+
+	UFUNCTION(BlueprintCallable)
+	void BindDelegates();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

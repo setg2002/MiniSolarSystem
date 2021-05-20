@@ -11,6 +11,7 @@
 #include "ShapeGenerator.h"
 #include "OrbitDebugActor.h"
 #include "MeshDescription.h"
+#include "Misc/PackageName.h"
 #include "Engine/DataAsset.h"
 #include "AssetRegistryModule.h"
 #include "UObject/PackageReload.h"
@@ -39,8 +40,13 @@ void APlanet::BeginPlay()
 {
 	Super::BeginPlay();
 
+	BindDelegates();
+}
+
+void APlanet::BindDelegates()
+{
 	ShapeSettings->OnShapeSettingsChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
-	for (auto& NoiseLayer : ShapeSettings->NoiseLayers)
+	for (auto& NoiseLayer : ShapeSettings->GetNoiseLayers())
 	{
 		NoiseLayer->OnNoiseLayerChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
 		NoiseLayer->NoiseSettings->OnNoiseSettingsChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
@@ -60,10 +66,20 @@ void APlanet::ResetPosition()
 
 UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
 {
-	FString AssetPath = FString("/Game/DataAssets/" + this->GetName() + "/");
-	FString AssetName = FString(TEXT("DA_")) + this->GetName() + FString(TEXT("_")) + DataAssetClass.Get()->GetName();
+	FString AssetPath = FString("/Game/DataAssets/" + this->Name.ToString() + "/");
+	FString AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + DataAssetClass.Get()->GetName() + "_0";
 	FString PackagePath = AssetPath + AssetName;
 	
+	int AssetNum = 0;
+	bool PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
+	while (PackageExists)
+	{
+		AssetNum++;
+		AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + DataAssetClass.Get()->GetName() + "_" + FString::FromInt(AssetNum);
+		PackagePath = AssetPath + AssetName;
+
+		PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
+	}
 
 	UPackage *Package = CreatePackage(*PackagePath);
 	UDataAsset* NewDataAsset = NewObject<UDataAsset>(Package, DataAssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
@@ -141,28 +157,28 @@ void APlanet::CreateSettingsAssets()
 		ShapeSettings->GetPackage()->MarkPackageDirty();
 	}
 
-	if ((ShapeSettings->NoiseLayers == TArray<UNoiseLayer*>() || ShapeSettings->NoiseLayers[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseLayer::StaticClass()->GetName())))
+	if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseLayer::StaticClass()->GetName())))
 	{
-		ShapeSettings->NoiseLayers.Empty();
+		ShapeSettings->GetNoiseLayers().Empty();
 		CreatePackageName(AssetName, PackagePath, *Outer, UNoiseLayer::StaticClass());
-		ShapeSettings->NoiseLayers.Add(LoadObject<UNoiseLayer>(Outer, *AssetName, *PackagePath));
+		ShapeSettings->GetNoiseLayers().Add(LoadObject<UNoiseLayer>(Outer, *AssetName, *PackagePath));
 	}
-	else if (ShapeSettings->NoiseLayers == TArray<UNoiseLayer*>() || ShapeSettings->NoiseLayers[0] == nullptr)
+	else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
 	{
-		ShapeSettings->NoiseLayers.Empty();
-		ShapeSettings->NoiseLayers.Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
-		ShapeSettings->NoiseLayers[0]->GetPackage()->MarkPackageDirty();
+		ShapeSettings->GetNoiseLayers().Empty();
+		ShapeSettings->GetNoiseLayers().Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
+		ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
 	}
 
-	if (ShapeSettings->NoiseLayers[0]->NoiseSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseSettings::StaticClass()->GetName())))
+	if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseSettings::StaticClass()->GetName())))
 	{
 		CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
-		ShapeSettings->NoiseLayers[0]->NoiseSettings = LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath);
+		ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath);
 	}
-	else if (ShapeSettings->NoiseLayers[0]->NoiseSettings == nullptr)
+	else if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr)
 	{
-		ShapeSettings->NoiseLayers[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
-		ShapeSettings->NoiseLayers[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
+		ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
+		ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
 	}
 
 	//AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
@@ -174,7 +190,7 @@ void APlanet::GeneratePlanet()
 	{
 		ProcMesh->SetRelativeLocation(FVector().ZeroVector);
 
-		if (ShapeSettings != nullptr && ShapeSettings->GetNoiseLayers())
+		if (ShapeSettings != nullptr && ShapeSettings->IsNoiseLayers())
 		{
 			if (bMultithreadGeneration)
 			{

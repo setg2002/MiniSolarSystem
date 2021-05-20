@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class CPPGAME_API UShapeSettings : public UDataAsset
 {
 	GENERATED_BODY()
@@ -22,8 +22,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	float PlanetRadius = 100;
 
+	UPROPERTY(EditAnywhere)
+	TArray<UNoiseLayer*> NoiseLayers;
+
 public:
-	bool GetNoiseLayers();
+	bool IsNoiseLayers();
 
 	FShapeSettingsChanged OnShapeSettingsChanged;
 
@@ -32,6 +35,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetRadius(float NewRadius);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<UNoiseLayer*> NoiseLayers;
+	UFUNCTION(BlueprintCallable)
+	TArray<UNoiseLayer*> GetNoiseLayers() const { return NoiseLayers; }
+	UFUNCTION(BlueprintCallable)
+	void AddNoiseLayer(UNoiseLayer* NewNoiseLayer);
+	UFUNCTION(BlueprintCallable)
+	void RemoveNoiseLayer(int32 index);
 };
