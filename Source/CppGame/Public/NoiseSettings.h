@@ -48,7 +48,7 @@ class CPPGAME_API UNoiseSettings : public UDataAsset
 {
 	GENERATED_BODY()
 
-	DECLARE_DELEGATE(FNoiseSettingsChanged);
+	DECLARE_MULTICAST_DELEGATE(FNoiseSettingsChanged);
 
 private:
 	UPROPERTY(EditAnywhere)

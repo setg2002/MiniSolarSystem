@@ -45,11 +45,22 @@ void APlanet::BeginPlay()
 
 void APlanet::BindDelegates()
 {
-	ShapeSettings->OnShapeSettingsChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
+	ShapeSettings->OnShapeSettingsChanged.AddUFunction(this, "OnShapeSettingsUpdated");
 	for (auto& NoiseLayer : ShapeSettings->GetNoiseLayers())
 	{
-		NoiseLayer->OnNoiseLayerChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
-		NoiseLayer->NoiseSettings->OnNoiseSettingsChanged.BindUObject(this, &APlanet::OnShapeSettingsUpdated);
+		NoiseLayer->OnNoiseLayerChanged.AddUFunction(this, "OnShapeSettingsUpdated");
+		NoiseLayer->NoiseSettings->OnNoiseSettingsChanged.AddUFunction(this, "OnShapeSettingsUpdated");
+	}
+
+	ColorSettings->OnColorSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
+	ColorSettings->BiomeColorSettings->OnBiomeColorSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
+	if (ColorSettings->BiomeColorSettings->GetUsingNoise())
+	{
+		ColorSettings->BiomeColorSettings->GetNoise()->OnNoiseSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
+	}
+	for (auto& Biome : ColorSettings->BiomeColorSettings->GetBiomes())
+	{
+		Biome->OnBiomeChanged.AddUFunction(this, "OnColorSettingsUpdated");
 	}
 }
 
@@ -132,17 +143,17 @@ void APlanet::CreateSettingsAssets()
 		ColorSettings->BiomeColorSettings->GetPackage()->MarkPackageDirty();
 	}
 
-	if ((ColorSettings->BiomeColorSettings->Biomes == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->Biomes[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiome::StaticClass()->GetName())))
+	if ((ColorSettings->BiomeColorSettings->GetBiomes() == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->GetBiomes()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiome::StaticClass()->GetName())))
 	{
-		ColorSettings->BiomeColorSettings->Biomes.Empty();
+		ColorSettings->BiomeColorSettings->GetBiomes().Empty();
 		CreatePackageName(AssetName, PackagePath, *Outer, UBiome::StaticClass());
-		ColorSettings->BiomeColorSettings->Biomes.Add(LoadObject<UBiome>(Outer, *AssetName, *PackagePath));
+		ColorSettings->BiomeColorSettings->GetBiomes().Add(LoadObject<UBiome>(Outer, *AssetName, *PackagePath));
 	}
-	else if (ColorSettings->BiomeColorSettings->Biomes == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->Biomes[0] == nullptr)
+	else if (ColorSettings->BiomeColorSettings->GetBiomes() == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->GetBiomes()[0] == nullptr)
 	{
-		ColorSettings->BiomeColorSettings->Biomes.Empty();
-		ColorSettings->BiomeColorSettings->Biomes.Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
-		ColorSettings->BiomeColorSettings->Biomes[0]->GetPackage()->MarkPackageDirty();
+		ColorSettings->BiomeColorSettings->GetBiomes().Empty();
+		ColorSettings->BiomeColorSettings->GetBiomes().Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+		ColorSettings->BiomeColorSettings->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
 	}
 
 
@@ -301,6 +312,10 @@ void APlanet::OnColorSettingsUpdated()
 {
 	if (bAutoGenerate)
 	{
+		for (int i = 0; i < 6; i++)
+		{
+			TerrainFaces[i]->UpdateBiomePercents();
+		}
 		GenerateColors();
 	}
 }

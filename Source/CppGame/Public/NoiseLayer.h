@@ -15,7 +15,7 @@ class CPPGAME_API UNoiseLayer : public UDataAsset
 {
 	GENERATED_BODY()
 
-	DECLARE_DELEGATE(FNoiseLayerChanged);
+	DECLARE_MULTICAST_DELEGATE(FNoiseLayerChanged);
 
 private:
 	UPROPERTY(EditAnywhere)

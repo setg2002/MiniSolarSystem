@@ -15,7 +15,7 @@ class CPPGAME_API UShapeSettings : public UDataAsset
 {
 	GENERATED_BODY()
 
-	DECLARE_DELEGATE(FShapeSettingsChanged);
+	DECLARE_MULTICAST_DELEGATE(FShapeSettingsChanged);
 
 private:
 	// Planet radius in cm

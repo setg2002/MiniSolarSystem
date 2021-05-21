@@ -48,7 +48,12 @@ public:
 
 	void CalculateMesh();
 
+	void UpdateBiomePercents();
+
 	void CreateMesh();
 	void UpdateTangentsNormals();
 	void UpdateTangentsNormalsAsync();
+
+private:
+	TArray<FVector> PointsOnUnitSphere;
 };

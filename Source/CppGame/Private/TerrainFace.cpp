@@ -69,6 +69,9 @@ void TerrainFace::CalculateMesh()
 {
 	int triIndex = 0;
 
+	PointsOnUnitSphere.Empty();
+	PointsOnUnitSphere.SetNum(Resolution * Resolution);
+
 	uv.Empty();
 	uv.SetNum(Resolution * Resolution);
 	for (int y = 0; y < Resolution; y++)
@@ -79,6 +82,7 @@ void TerrainFace::CalculateMesh()
 			FVector2D percent = FVector2D(x, y) / (Resolution - 1);
 			FVector pointOnUnitCube = -LocalUp + (percent.X - .5f) * 2 * axisA + (percent.Y - .5f) * 2 * axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
+			PointsOnUnitSphere[i] = pointOnUnitSphere;
 			float unscaledElevation = shapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
 			float scaledElevation = shapeGenerator->GetScaledElevation(unscaledElevation);
 			verticies.EmplaceAt(i, pointOnUnitSphere * scaledElevation);
@@ -100,6 +104,20 @@ void TerrainFace::CalculateMesh()
 		}
 	}
 	UpdateTangentsNormals();
+}
+
+void TerrainFace::UpdateBiomePercents()
+{
+	for (int y = 0; y < Resolution; y++)
+	{
+		for (int x = 0; x < Resolution; x++)
+		{
+			int i = x + y * Resolution;
+
+			uv[i].X = colorGenerator->BiomePercentFromPoint(PointsOnUnitSphere[i]);
+		}
+	}
+	ProcMesh->CreateMeshSection(MeshSection, verticies, triangles, normals, uv, VertexColors, tangents, false);
 }
 
 void TerrainFace::ConstructMeshAsync(TerrestrialColorGenerator* color_Generator)

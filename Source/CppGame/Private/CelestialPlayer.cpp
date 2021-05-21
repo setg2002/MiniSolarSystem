@@ -17,6 +17,7 @@ ACelestialPlayer::ACelestialPlayer()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	Camera->bUsePawnControlRotation = true;
+	RootComponent = Camera;
 }
 
 // Called when the game starts or when spawned
