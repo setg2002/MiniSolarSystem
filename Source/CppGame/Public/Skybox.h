@@ -18,10 +18,10 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+#if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, CallInEditor)
-	UTexture2D* MakeTexture();
-
+	void MakeTexture();
+#endif
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D StarOffset = FVector2D(0, 0);
 

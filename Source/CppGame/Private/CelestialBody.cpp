@@ -27,6 +27,11 @@ void ACelestialBody::BeginPlay()
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 }
 
+void ACelestialBody::RequestDestroyComponent(UActorComponent* ComponentToDestroy)
+{
+	ComponentToDestroy->DestroyComponent();
+}
+
 int ACelestialBody::SetMass(int newMass)
 {
 	mass = newMass; 

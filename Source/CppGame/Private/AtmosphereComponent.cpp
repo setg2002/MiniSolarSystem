@@ -8,10 +8,77 @@
 #include "Materials/MaterialInstanceDynamic.h"
 
 
-UAtmosphereComponent::UAtmosphereComponent(/*float radius*/)
+UAtmosphereComponent::UAtmosphereComponent()
 {
-
 	CloudComponent = CreateDefaultSubobject<UCloudComponent>("Clouds");
+}
+
+
+void UAtmosphereComponent::SetClouds(bool NewClouds)
+{
+	bClouds = NewClouds;
+	CloudComponent->SetVisibility(bClouds);
+}
+
+void UAtmosphereComponent::SetCloudHeight(float NewCloudHeight)
+{
+	CloudHeight = NewCloudHeight;
+	CloudComponent->SetRelativeScale3D(FVector(CloudHeight));
+}
+
+
+void UAtmosphereComponent::SetHeight(float NewHeight)
+{
+	AtmosphereProperties.Height = NewHeight;
+	DynamicMaterial->SetScalarParameterValue("atmo_radius", AtmosphereProperties.Height);
+}
+
+void UAtmosphereComponent::SetDensity(float NewDensity)
+{
+	AtmosphereProperties.Density = NewDensity;
+	DynamicMaterial->SetScalarParameterValue("density_multiplier", AtmosphereProperties.Density);
+}
+
+void UAtmosphereComponent::SetG(float NewG)
+{
+	AtmosphereProperties.g = NewG;
+	DynamicMaterial->SetScalarParameterValue("g", AtmosphereProperties.g);
+}
+
+void UAtmosphereComponent::SetIntensity(float NewIntensity)
+{
+	AtmosphereProperties.Intensity = NewIntensity;
+	DynamicMaterial->SetScalarParameterValue("Intensity", AtmosphereProperties.Intensity);
+}
+
+void UAtmosphereComponent::SetMieHeightScale(float NewMieHeightScale)
+{
+	AtmosphereProperties.MieHeightScale = NewMieHeightScale;
+	DynamicMaterial->SetScalarParameterValue("mie_height_scale", AtmosphereProperties.MieHeightScale);
+}
+
+void UAtmosphereComponent::SetOpacityMultiplier(float NewOpacityMultiplier)
+{
+	AtmosphereProperties.OpacityMultiplier = NewOpacityMultiplier;
+	DynamicMaterial->SetScalarParameterValue("opacity_multiplier", AtmosphereProperties.OpacityMultiplier);
+}
+
+void UAtmosphereComponent::SetAmbient(FLinearColor NewAmbient)
+{
+	AtmosphereProperties.Ambient = NewAmbient;
+	DynamicMaterial->SetVectorParameterValue("beta_ambient", AtmosphereProperties.Ambient);
+}
+
+void UAtmosphereComponent::SetMie(FLinearColor NewMie)
+{
+	AtmosphereProperties.Mie = NewMie;
+	DynamicMaterial->SetVectorParameterValue("beta_mie", AtmosphereProperties.Mie);
+}
+
+void UAtmosphereComponent::SetRay(FLinearColor NewRay)
+{
+	AtmosphereProperties.Ray = NewRay;
+	DynamicMaterial->SetVectorParameterValue("beta_ray", AtmosphereProperties.Ray);
 }
 
 
@@ -19,8 +86,8 @@ void UAtmosphereComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->GetRadius(); //TODO Use constructor passed radius in full game
-
+#if WITH_EDITOR
+	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->GetRadius();
 	this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	this->SetRelativeLocation(FVector::ZeroVector);
 	this->SetRelativeScale3D(FVector(PlanetRadius * 0.0125f));
@@ -28,6 +95,8 @@ void UAtmosphereComponent::OnComponentCreated()
 	DynamicMaterial = nullptr;
 	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_atmosphere_proportional_Inst.M_atmosphere_proportional_Inst'"), NULL, LOAD_None, NULL));
 	DynamicMaterial->SetScalarParameterValue("planet_radius", PlanetRadius);
+	SetHeight(PlanetRadius + 25);
+#endif
 }
 
 
@@ -39,6 +108,26 @@ void UAtmosphereComponent::DestroyComponent(bool bPromoteChildren)
 	}
 
 	Super::DestroyComponent(bPromoteChildren);
+}
+
+void UAtmosphereComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_atmosphere_proportional_Inst.M_atmosphere_proportional_Inst'"), NULL, LOAD_None, NULL));
+	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->GetRadius();
+	this->SetRelativeScale3D(FVector(PlanetRadius * 0.0125f));
+	
+	DynamicMaterial->SetScalarParameterValue("planet_radius", PlanetRadius);
+	DynamicMaterial->SetScalarParameterValue("atmo_radius", AtmosphereProperties.Height);
+	DynamicMaterial->SetScalarParameterValue("density_multiplier", AtmosphereProperties.Density);
+	DynamicMaterial->SetScalarParameterValue("g", AtmosphereProperties.g);
+	DynamicMaterial->SetScalarParameterValue("Intensity", AtmosphereProperties.Intensity);
+	DynamicMaterial->SetScalarParameterValue("mie_height_scale", AtmosphereProperties.MieHeightScale);
+	DynamicMaterial->SetScalarParameterValue("opacity_multiplier", AtmosphereProperties.OpacityMultiplier);
+	DynamicMaterial->SetVectorParameterValue("beta_ambient", AtmosphereProperties.Ambient);
+	DynamicMaterial->SetVectorParameterValue("beta_mie", AtmosphereProperties.Mie);
+	SetHeight(PlanetRadius + 25);
 }
 
 #if WITH_EDITOR

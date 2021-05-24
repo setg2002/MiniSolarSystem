@@ -19,6 +19,7 @@ public:
 	// Sets default values for this component's properties
 	URingSystemComponent();
 
+private:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.001", ClampMax = "2"))
 	float Radius = 1;
 
@@ -28,6 +29,21 @@ public:
 	UPROPERTY(EditAnywhere)
 	UCurveLinearColor* Gradient;
 
+	UMaterialInstanceDynamic* DynamicMaterial;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	float GetRadius() const { return Radius; }
+	UFUNCTION(BlueprintCallable)
+	void SetRadius(float NewRadius);
+
+	UFUNCTION(BlueprintCallable)
+	float GetWidth() const { return RingWidth; }
+	UFUNCTION(BlueprintCallable)
+	void SetWidth(float NewWidth);
+
+	UFUNCTION(BlueprintCallable)
+	UMaterialInstanceDynamic* GetDynamicMaterial() const { return DynamicMaterial; }
 
 protected:
 	// Called when the game starts
@@ -35,11 +51,10 @@ protected:
 
 	virtual void OnComponentCreated() override;
 
+	UFUNCTION(BlueprintCallable, CallInEditor)
 	void CreateMaterial();
 	
 	GaseousColorGenerator* ColorGenerator;
-
-	UMaterialInstanceDynamic* DynamicMaterial;
 
 	UTexture2D* GradientTexture;
 

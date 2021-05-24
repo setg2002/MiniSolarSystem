@@ -23,7 +23,7 @@ void URingSystemComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-	this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	//this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
 	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"), NULL, LOAD_None, NULL));
 	this->bCastVolumetricTranslucentShadow = false; // Set to true for the ring to cast shadows on the planet with the side-effect that the shading of the ring itself will break
@@ -40,13 +40,25 @@ void URingSystemComponent::OnComponentCreated()
 
 void URingSystemComponent::CreateMaterial()
 {
-	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/RingMat_Inst.RingMat_Inst'"), NULL, LOAD_None, NULL));
+	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_Ring_Inst.M_Ring_Inst'"), NULL, LOAD_None, NULL));
 	/*DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 	if (Gradient)
 	{
 		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 	}*/
+}
+
+void URingSystemComponent::SetRadius(float NewRadius)
+{
+	Radius = NewRadius;
+	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
+}
+
+void URingSystemComponent::SetWidth(float NewWidth)
+{
+	RingWidth = NewWidth;
+	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 }
 
 // Called when the game starts

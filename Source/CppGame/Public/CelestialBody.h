@@ -33,6 +33,9 @@ public:
 	float rotationRate;
 
 	UFUNCTION(BlueprintCallable)
+	void RequestDestroyComponent(UActorComponent* ComponentToDestroy);
+
+	UFUNCTION(BlueprintCallable)
 	int SetMass(int newMass);
 
 	UFUNCTION(BlueprintCallable)

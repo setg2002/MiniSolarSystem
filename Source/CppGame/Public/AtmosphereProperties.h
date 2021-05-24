@@ -25,7 +25,7 @@ public:
 	float MieHeightScale = 0.25f;
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
 	float OpacityMultiplier = 1;
-	
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
 	int8 Steps_i = 16;
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
