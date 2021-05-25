@@ -69,8 +69,7 @@ protected:
 
 	UUserWidget* Widget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCameraComponent* Camera;
+	//UCameraComponent* Camera; //NOTE: Making components into UPROPERTY() makes them NULL at runtime
 
 public:	
 	// Called every frame
@@ -80,6 +79,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	//UStaticMeshComponent* Mesh;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> PlanetHighlightClass;
 
@@ -87,28 +88,10 @@ private:
 	void MoveRight(float AxisValue);
 	void MoveUp(float AxisValue);
 
-	FRotator IntendedRotation;
-	void RotationX(float AxisValue)
-	{
-		if (Controller)
-		{
-			IntendedRotation += FRotator(0, AxisValue, 0);
-		}
-	}
-	void RotationY(float AxisValue)
-	{
-		if (Controller)
-		{
-			IntendedRotation += FRotator(-AxisValue, 0, 0);
-		}
-	}
-	void RotationZ(float AxisValue)
-	{
-		if (Controller)
-		{
-			IntendedRotation += FRotator(0, 0, AxisValue);
-		}
-	}
+	FVector IntendedRotation;
+	void RotationX(float AxisValue);
+	void RotationY(float AxisValue);
+	void RotationZ(float AxisValue);
 
 	void SwitchPerspective();
 
@@ -121,8 +104,11 @@ private:
 	{
 		bFocusPlanet = !bFocusPlanet;
 	}
-
+	
+	UPROPERTY(EditAnywhere)
 	int RotationSpeed = 10;
+	UPROPERTY(EditAnywhere)
+	int ThrustForce = 10;
 	float Throttle = 1;
 
 	void ChangeThrottle(float AxisValue)

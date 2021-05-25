@@ -7,7 +7,9 @@
 #include "Blueprint\UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/SceneComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+
 
 // Sets default values
 ACelestialPlayer::ACelestialPlayer()
@@ -15,9 +17,15 @@ ACelestialPlayer::ACelestialPlayer()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
-	Camera->bUsePawnControlRotation = true;
-	RootComponent = Camera;
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	//Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	//Mesh->SetupAttachment(RootComponent);
+	//Mesh->SetSimulatePhysics(true);
+	//Mesh->SetEnableGravity(false);
+	//Mesh->SetMassOverrideInKg(NAME_None, mass);
+
+	//Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	//Camera->SetupAttachment(Mesh);
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +33,8 @@ void ACelestialPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	IntendedRotation = this->GetActorForwardVector();
+
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 
 	for (auto& body : gameMode->GetBodies())
@@ -43,7 +53,10 @@ void ACelestialPlayer::Tick(float DeltaTime)
 		UpdatePosition(DeltaTime);
 
 		// Camera Rotation Lag
-		Controller->SetControlRotation(FMath::Lerp<FRotator>(Controller->GetControlRotation(), IntendedRotation, DeltaTime * RotationSpeed));
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *IntendedRotation.ToString());
+		//this->SetActorRotation(FRotator(IntendedRotation.Rotation().Pitch, IntendedRotation.Rotation().Yaw, this->GetActorRotation().Roll));
+		//this->SetActorRotation(FMath::Lerp<FRotator>(this->GetActorRotation(), IntendedRotation.Rotation(), DeltaTime * RotationSpeed));
+		//Controller->SetControlRotation(FMath::Lerp<FRotator>(Controller->GetControlRotation(), IntendedRotation, DeltaTime * RotationSpeed));
 	
 		LimitVelocity();
 	}
@@ -79,8 +92,8 @@ ACelestialBody* ACelestialPlayer::LookingAtPlanet()
 	// Angle calculation from https://answers.unrealengine.com/questions/232851/computing-angle-between-forward-and-actor.html
 
 	FVector playerLoc = this->GetActorLocation();
-	FVector playerForwardDir = Controller->GetControlRotation().Vector();    // or any other way you want to get this - in any case, it's that actor's "forward" vector.
-	FVector playerRightDir = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);    // or any other way you want to get this - in any case, it's that actor's "right" vector based on its forward vector
+	FVector playerForwardDir = this->GetActorRotation().Vector();
+	FVector playerRightDir = FRotationMatrix(this->GetActorRotation()).GetScaledAxis(EAxis::Y);
 	
 	for (auto& Body : gameMode->GetBodies())
 	{
@@ -112,7 +125,7 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAxis("RotationX", this, &ACelestialPlayer::RotationX);
 	PlayerInputComponent->BindAxis("RotationY", this, &ACelestialPlayer::RotationY);
-	//PlayerInputComponent->BindAxis("RotationZ", this, &ACelestialPlayer::RotationZ);
+	PlayerInputComponent->BindAxis("RotationZ", this, &ACelestialPlayer::RotationZ);
 
 	PlayerInputComponent->BindAxis("ChangeSpeed", this, &ACelestialPlayer::ChangeThrottle);
 
@@ -152,11 +165,47 @@ void ACelestialPlayer::UpdatePosition(float timeStep)
 }
 
 
+void ACelestialPlayer::RotationX(float AxisValue)
+{
+	if (Controller)
+	{
+		//Mesh->AddTorqueInDegrees(this->GetActorUpVector() * (AxisValue * ThrustForce), NAME_None, true);
+		//IntendedRotation += this->GetActorRightVector().GetSafeNormal() * (AxisValue);
+		//IntendedRotation += FRotator(0, AxisValue, 0);
+		//IntendedRotation += AxisValue * (this->GetActorUpVector().Rotation());
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *this->GetActorUpVector().ToString());
+	}
+}
+
+void ACelestialPlayer::RotationY(float AxisValue)
+{
+	if (Controller)
+	{
+		//Mesh->AddTorqueInDegrees(this->GetActorRightVector() * (-AxisValue * ThrustForce), NAME_None, true);
+		//IntendedRotation += this->GetActorUpVector().GetSafeNormal() * (-AxisValue);
+		//IntendedRotation += FRotator(-AxisValue, 0, 0);
+		//IntendedRotation += AxisValue * (this->GetActorRightVector().Rotation());
+	}
+}
+
+void ACelestialPlayer::RotationZ(float AxisValue)
+{
+	if (Controller)
+	{
+		//IntendedRotation += UKismetMathLibrary::MakeRotFromX(this->GetActorForwardVector()) * AxisValue;
+		//IntendedRotation += FRotator(0, 0, AxisValue);
+		//IntendedRotation += AxisValue * (this->GetActorForwardVector().Rotation());
+		//this->AddActorWorldRotation(this->GetActorUpVector().RotateAngleAxis(0.001f, this->GetActorForwardVector()).Rotation() * (AxisValue / 1000));
+		//this->AddActorWorldRotation(FRotator(0, 0, AxisValue).RotateVector(this->GetActorUpVector()).Rotation() * AxisValue);
+	}
+}
+
+
 void ACelestialPlayer::MoveForward(float AxisValue)
 {
 	if (Controller)
 	{
-		currentVelocity += (Controller->GetControlRotation().Vector() * AxisValue * Throttle);
+		currentVelocity += (this->GetActorRotation().Vector() * AxisValue * Throttle);
 	}
 }
 
@@ -164,7 +213,7 @@ void ACelestialPlayer::MoveRight(float AxisValue)
 {
 	if (Controller)
 	{
-		currentVelocity += (UKismetMathLibrary::GetRightVector(Controller->GetControlRotation()) * AxisValue * Throttle);
+		currentVelocity += (UKismetMathLibrary::GetRightVector(this->GetActorRotation()) * AxisValue * Throttle);
 	}
 }
 
@@ -172,7 +221,7 @@ void ACelestialPlayer::MoveUp(float AxisValue)
 {
 	if (Controller)
 	{
-		currentVelocity += (UKismetMathLibrary::GetUpVector(Controller->GetControlRotation()) * AxisValue * Throttle);
+		currentVelocity += (UKismetMathLibrary::GetUpVector(this->GetActorRotation()) * AxisValue * Throttle);
 	}
 }
 
