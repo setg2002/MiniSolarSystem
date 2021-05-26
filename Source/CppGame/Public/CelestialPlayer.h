@@ -10,6 +10,7 @@
 
 class ACelestialGameMode;
 class UCameraComponent;
+class UBoxComponent;
 
 UCLASS()
 class CPPGAME_API ACelestialPlayer : public APawn, public ICelestialObject
@@ -69,7 +70,14 @@ protected:
 
 	UUserWidget* Widget;
 
-	//UCameraComponent* Camera; //NOTE: Making components into UPROPERTY() makes them NULL at runtime
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UBoxComponent* Collider;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UCameraComponent* Camera; //NOTE: Making components into UPROPERTY() makes them NULL at runtime
 
 public:	
 	// Called every frame
@@ -79,8 +87,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	//UStaticMeshComponent* Mesh;
-
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> PlanetHighlightClass;
 
@@ -88,7 +94,6 @@ private:
 	void MoveRight(float AxisValue);
 	void MoveUp(float AxisValue);
 
-	FVector IntendedRotation;
 	void RotationX(float AxisValue);
 	void RotationY(float AxisValue);
 	void RotationZ(float AxisValue);
@@ -106,9 +111,7 @@ private:
 	}
 	
 	UPROPERTY(EditAnywhere)
-	int RotationSpeed = 10;
-	UPROPERTY(EditAnywhere)
-	int ThrustForce = 10;
+	int RotationForce = 100;
 	float Throttle = 1;
 
 	void ChangeThrottle(float AxisValue)

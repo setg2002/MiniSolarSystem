@@ -6,6 +6,7 @@
 #include "CelestialGameMode.h"
 #include "Blueprint\UserWidget.h"
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -17,23 +18,25 @@ ACelestialPlayer::ACelestialPlayer()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	//Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	//Mesh->SetupAttachment(RootComponent);
-	//Mesh->SetSimulatePhysics(true);
-	//Mesh->SetEnableGravity(false);
-	//Mesh->SetMassOverrideInKg(NAME_None, mass);
+	RootComponent = Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("RootCollider"));
+	Collider->InitBoxExtent(FVector::ZeroVector);
+	Collider->SetSimulatePhysics(true);
+	Collider->SetAngularDamping(1);
+	Collider->SetEnableGravity(false);
+	Collider->SetMassOverrideInKg(NAME_None, mass);
+	Collider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	//Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
-	//Camera->SetupAttachment(Mesh);
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetupAttachment(Collider);
+
+	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	Camera->SetupAttachment(Collider);
 }
 
 // Called when the game starts or when spawned
 void ACelestialPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	IntendedRotation = this->GetActorForwardVector();
 
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 
@@ -51,12 +54,6 @@ void ACelestialPlayer::Tick(float DeltaTime)
 	if (Controller)
 	{
 		UpdatePosition(DeltaTime);
-
-		// Camera Rotation Lag
-		//UE_LOG(LogTemp, Warning, TEXT("%s"), *IntendedRotation.ToString());
-		//this->SetActorRotation(FRotator(IntendedRotation.Rotation().Pitch, IntendedRotation.Rotation().Yaw, this->GetActorRotation().Roll));
-		//this->SetActorRotation(FMath::Lerp<FRotator>(this->GetActorRotation(), IntendedRotation.Rotation(), DeltaTime * RotationSpeed));
-		//Controller->SetControlRotation(FMath::Lerp<FRotator>(Controller->GetControlRotation(), IntendedRotation, DeltaTime * RotationSpeed));
 	
 		LimitVelocity();
 	}
@@ -169,11 +166,7 @@ void ACelestialPlayer::RotationX(float AxisValue)
 {
 	if (Controller)
 	{
-		//Mesh->AddTorqueInDegrees(this->GetActorUpVector() * (AxisValue * ThrustForce), NAME_None, true);
-		//IntendedRotation += this->GetActorRightVector().GetSafeNormal() * (AxisValue);
-		//IntendedRotation += FRotator(0, AxisValue, 0);
-		//IntendedRotation += AxisValue * (this->GetActorUpVector().Rotation());
-		//UE_LOG(LogTemp, Warning, TEXT("%s"), *this->GetActorUpVector().ToString());
+		Collider->AddTorqueInDegrees(this->GetActorUpVector() * (AxisValue * RotationForce), NAME_None, true);
 	}
 }
 
@@ -181,10 +174,7 @@ void ACelestialPlayer::RotationY(float AxisValue)
 {
 	if (Controller)
 	{
-		//Mesh->AddTorqueInDegrees(this->GetActorRightVector() * (-AxisValue * ThrustForce), NAME_None, true);
-		//IntendedRotation += this->GetActorUpVector().GetSafeNormal() * (-AxisValue);
-		//IntendedRotation += FRotator(-AxisValue, 0, 0);
-		//IntendedRotation += AxisValue * (this->GetActorRightVector().Rotation());
+		Collider->AddTorqueInDegrees(this->GetActorRightVector() * (AxisValue * RotationForce), NAME_None, true);
 	}
 }
 
@@ -192,11 +182,7 @@ void ACelestialPlayer::RotationZ(float AxisValue)
 {
 	if (Controller)
 	{
-		//IntendedRotation += UKismetMathLibrary::MakeRotFromX(this->GetActorForwardVector()) * AxisValue;
-		//IntendedRotation += FRotator(0, 0, AxisValue);
-		//IntendedRotation += AxisValue * (this->GetActorForwardVector().Rotation());
-		//this->AddActorWorldRotation(this->GetActorUpVector().RotateAngleAxis(0.001f, this->GetActorForwardVector()).Rotation() * (AxisValue / 1000));
-		//this->AddActorWorldRotation(FRotator(0, 0, AxisValue).RotateVector(this->GetActorUpVector()).Rotation() * AxisValue);
+		Collider->AddTorqueInDegrees(this->GetActorForwardVector() * (-AxisValue * RotationForce), NAME_None, true);
 	}
 }
 
