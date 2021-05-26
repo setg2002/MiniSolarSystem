@@ -37,9 +37,16 @@ UCLASS()
 class CPPGAME_API APlanet : public ACelestialBody
 {
 	GENERATED_BODY()
+
+	DECLARE_DELEGATE_OneParam(FPlanetGenerated, FName)
 	
 public:
 	APlanet();
+
+	FPlanetGenerated OnPlanetGenerated;
+
+	// True when the planet is already generating
+	bool bGenerating;
 
 	void ResetPosition();
 

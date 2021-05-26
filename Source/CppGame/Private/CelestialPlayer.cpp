@@ -23,7 +23,6 @@ ACelestialPlayer::ACelestialPlayer()
 	Collider->SetSimulatePhysics(true);
 	Collider->SetAngularDamping(1);
 	Collider->SetEnableGravity(false);
-	Collider->SetMassOverrideInKg(NAME_None, mass);
 	Collider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -38,6 +37,7 @@ void ACelestialPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Collider->SetMassOverrideInKg(NAME_None, mass);
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 
 	for (auto& body : gameMode->GetBodies())

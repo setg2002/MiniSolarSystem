@@ -56,6 +56,15 @@ public:
 
 	// ======= End ConsoleCommands =======
 
+	// For Loading
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FName> TerrestrialPlanets;
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FName> GeneratedPlanets;
+
+	UFUNCTION()
+	void NewGeneratedPlanet(FName PlanetName);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

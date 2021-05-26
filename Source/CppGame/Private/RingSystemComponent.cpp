@@ -29,13 +29,11 @@ void URingSystemComponent::OnComponentCreated()
 	this->bCastVolumetricTranslucentShadow = false; // Set to true for the ring to cast shadows on the planet with the side-effect that the shading of the ring itself will break
 	CreateMaterial();
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
-#if WITH_EDITOR
 	if (Gradient)
 	{
 		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 	}
-#endif
 }
 
 void URingSystemComponent::CreateMaterial()
@@ -66,8 +64,9 @@ void URingSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	CreateMaterial();
+	GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
+	DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 }
 
 

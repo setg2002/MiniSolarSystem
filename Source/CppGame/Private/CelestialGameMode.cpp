@@ -22,12 +22,14 @@ ACelestialGameMode::ACelestialGameMode()
 void ACelestialGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	PC = GetWorld()->GetFirstPlayerController();
 	
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
+
 	// Make widgets
 	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
 	OverviewWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
-
-	PC = GetWorld()->GetFirstPlayerController();
 
 	CelestialPlayer = Cast<ACelestialPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass()));
 	OverviewPlayer = Cast<AOverviewPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOverviewPlayer::StaticClass()));
@@ -39,7 +41,16 @@ void ACelestialGameMode::BeginPlay()
 	// Gets all ACelestialBodies and adds them to bodies
 	for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
 		bodies.Add(*Itr);
+
+		APlanet* Planet = Cast<APlanet>(*Itr);
+		if (Planet)
+		{
+			TerrestrialPlanets.Add(Planet->Name);
+			Planet->OnPlanetGenerated.BindUFunction(this, "NewGeneratedPlanet");
+		}
 	}
+
+	ReGen(TerrestrialPlanets[0].ToString());
 
 	// Gets all actors that implement ICelestialObject and adds them to celestialObjects
 	TArray<AActor*> Actors;
@@ -68,6 +79,30 @@ void ACelestialGameMode::Tick(float DeltaTime)
 			thisObject->UpdateVelocity(bodies, DeltaTime);
 			thisObject->UpdatePosition(DeltaTime);
 		}
+	}
+
+}
+
+/*TArray<FName>*/void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)
+{
+	if (!GeneratedPlanets.Contains(PlanetName))
+	{
+		GeneratedPlanets.Add(PlanetName);
+	}
+
+	if (GeneratedPlanets == TerrestrialPlanets)
+	{
+		GeneratedPlanets.Empty();
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		return;
+	}
+	else
+	{
+		if (TerrestrialPlanets.Num() > TerrestrialPlanets.Find(PlanetName) + 1)
+		{
+			ReGen(TerrestrialPlanets[TerrestrialPlanets.Find(PlanetName) + 1].ToString());
+		}
+		return;
 	}
 
 }

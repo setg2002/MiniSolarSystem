@@ -41,6 +41,7 @@ void APlanet::BeginPlay()
 	Super::BeginPlay();
 
 	BindDelegates();
+	bGenerating = false;
 }
 
 void APlanet::BindDelegates()
@@ -197,31 +198,35 @@ void APlanet::CreateSettingsAssets()
 
 void APlanet::GeneratePlanet()
 {
-	if (ColorSettings)
+	if (bGenerating == false)
 	{
-		ProcMesh->SetRelativeLocation(FVector().ZeroVector);
-
-		if (ShapeSettings != nullptr && ShapeSettings->IsNoiseLayers())
+		bGenerating = true;
+		UE_LOG(LogTemp, Warning, TEXT("%s started generating"), *Name.ToString());
+		if (ColorSettings)
 		{
-			if (bMultithreadGeneration)
-			{
-				Initialize();
-				GenerateMesh();
-			}
-			else
-			{
-				Initialize();
-				GenerateMesh();
-				GenerateColors();
-			}
+			ProcMesh->SetRelativeLocation(FVector().ZeroVector);
 
+			if (ShapeSettings != nullptr && ShapeSettings->IsNoiseLayers())
+			{
+				if (bMultithreadGeneration)
+				{
+					Initialize();
+					GenerateMesh();
+				}
+				else
+				{
+					Initialize();
+					GenerateMesh();
+					GenerateColors();
+				}
+
+			}
+		}
+		if (!bMultithreadGeneration)
+		{
+			//AssetCleaner::CleanAll();
 		}
 	}
-	if (!bMultithreadGeneration)
-	{
-		//AssetCleaner::CleanAll();
-	}
-
 }
 
 void APlanet::ClearMeshSections()
@@ -331,8 +336,13 @@ void APlanet::GenerateColors()
 	if (bMultithreadGeneration)
 	{
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
+		
 		//AssetCleaner::CleanAll();
 	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("%s finished generating"), *Name.ToString());
+	bGenerating = false;
+	OnPlanetGenerated.ExecuteIfBound(this->Name);
 }
 
 void APlanet::CalculateOrbitVelocity()
