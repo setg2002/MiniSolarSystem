@@ -86,17 +86,6 @@ void UAtmosphereComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-#if WITH_EDITOR
-	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->GetRadius();
-	this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	this->SetRelativeLocation(FVector::ZeroVector);
-	this->SetRelativeScale3D(FVector(PlanetRadius * 0.0125f));
-	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/StaticMeshes/Atmosphere_mesh.Atmosphere_mesh'"), NULL, LOAD_None, NULL));
-	DynamicMaterial = nullptr;
-	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_atmosphere_proportional_Inst.M_atmosphere_proportional_Inst'"), NULL, LOAD_None, NULL));
-	DynamicMaterial->SetScalarParameterValue("planet_radius", PlanetRadius);
-	SetHeight(PlanetRadius + 25);
-#endif
 }
 
 
@@ -116,6 +105,7 @@ void UAtmosphereComponent::BeginPlay()
 
 	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_atmosphere_proportional_Inst.M_atmosphere_proportional_Inst'"), NULL, LOAD_None, NULL));
 	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->GetRadius();
+	this->SetRelativeLocation(FVector::ZeroVector);
 	this->SetRelativeScale3D(FVector(PlanetRadius * 0.0125f));
 	
 	DynamicMaterial->SetScalarParameterValue("planet_radius", PlanetRadius);

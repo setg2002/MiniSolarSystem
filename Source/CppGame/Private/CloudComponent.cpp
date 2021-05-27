@@ -12,6 +12,12 @@ void UCloudComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
+}
+
+void UCloudComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
 	this->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/StaticMeshes/UVSphere.UVSphere'"), NULL, LOAD_None, NULL));
 	this->bCastVolumetricTranslucentShadow = false;

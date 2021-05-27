@@ -39,12 +39,12 @@ void URingSystemComponent::OnComponentCreated()
 void URingSystemComponent::CreateMaterial()
 {
 	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_Ring_Inst.M_Ring_Inst'"), NULL, LOAD_None, NULL));
-	/*DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
+	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 	if (Gradient)
 	{
 		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
-	}*/
+	}
 }
 
 void URingSystemComponent::SetRadius(float NewRadius)
@@ -65,8 +65,6 @@ void URingSystemComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CreateMaterial();
-	GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
-	DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 }
 
 

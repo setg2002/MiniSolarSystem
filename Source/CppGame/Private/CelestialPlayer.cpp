@@ -6,6 +6,7 @@
 #include "CelestialGameMode.h"
 #include "Blueprint\UserWidget.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
@@ -68,6 +69,11 @@ int ACelestialPlayer::GetMass() const { return mass; }
 
 ACelestialBody* ACelestialPlayer::GetLargestForce()
 {
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		return nullptr;
+	}
+
 	// Sorts the map from high to low based on values
 	ForcePerBody.ValueSort([](const float A, const float B) {
 		return A > B; });
@@ -151,7 +157,14 @@ void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float t
 			FVector acceleration = force / mass;
 			this->currentVelocity += acceleration * timeStep;
 
-			ForcePerBody[otherBody] = force.Size();
+			if (ForcePerBody.Find(otherBody) != nullptr)
+			{
+				ForcePerBody[otherBody] = force.Size();
+			}
+			else
+			{
+				ForcePerBody.Add(otherBody, force.Size());
+			}
 		}
 	}
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OrbitDebugActor.h"
 #include "GameFramework/GameModeBase.h"
 #include "CelestialGameMode.generated.h"
 
@@ -53,6 +54,9 @@ public:
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void tp(FString toPlanet);
+
+	UFUNCTION(Exec, BlueprintCallable)
+	void SetOrbitDebugMethod(EDrawType DrawType);
 
 	// ======= End ConsoleCommands =======
 

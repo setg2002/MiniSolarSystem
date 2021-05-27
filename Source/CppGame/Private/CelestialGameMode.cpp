@@ -4,7 +4,6 @@
 #include "CelestialGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
-#include "OrbitDebugActor.h"
 #include "CelestialObject.h"
 #include "CelestialPlayer.h"
 #include "OverviewPlayer.h"
@@ -71,6 +70,11 @@ void ACelestialGameMode::Tick(float DeltaTime)
 		AOrbitDebugActor::Get()->DrawOrbits();
 	}*/
 	
+	if (UGameplayStatics::IsGamePaused(GetWorld()))
+	{
+		return;
+	}
+
 	if (currentPerspective == 1)
 	{
 		for (int i = 0; i < celestialObjects.Num(); i++) {
@@ -186,3 +190,12 @@ void ACelestialGameMode::tp(FString toPlanet)
 	}
 }
 
+void ACelestialGameMode::SetOrbitDebugMethod(EDrawType DrawType)
+{
+	AOrbitDebugActor::Get()->DrawType = DrawType;
+
+	if (currentPerspective == 0)
+	{
+		AOrbitDebugActor::Get()->DrawOrbits();
+	}
+}

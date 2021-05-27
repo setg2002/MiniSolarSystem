@@ -29,4 +29,6 @@ public:
 protected:
 	virtual void OnComponentCreated() override;
 
+	virtual void BeginPlay() override;
+
 };
