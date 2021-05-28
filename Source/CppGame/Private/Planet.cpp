@@ -41,7 +41,7 @@ void APlanet::BeginPlay()
 	Super::BeginPlay();
 
 	BindDelegates();
-	bGenerating = false;
+	//bGenerating = false;
 }
 
 void APlanet::BindDelegates()
@@ -393,7 +393,6 @@ void APlanet::SetToOrbit()
 
 void APlanet::ReconveneTerrainFaceThreads(int FaceNum)
 {
-	static TArray<int> FinishedFaces;
 	FinishedFaces.Add(FaceNum);
 
 	if (FinishedFaces.IsValidIndex(5) && bMultithreadGeneration)

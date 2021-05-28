@@ -21,6 +21,8 @@ ACelestialGameMode::ACelestialGameMode()
 void ACelestialGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	b = true;
 
 	PC = GetWorld()->GetFirstPlayerController();
 	
@@ -89,26 +91,24 @@ void ACelestialGameMode::Tick(float DeltaTime)
 
 /*TArray<FName>*/void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)
 {
-	if (!GeneratedPlanets.Contains(PlanetName))
+	if (b)
 	{
-		GeneratedPlanets.Add(PlanetName);
-	}
-
-	if (GeneratedPlanets == TerrestrialPlanets)
-	{
-		GeneratedPlanets.Empty();
-		UGameplayStatics::SetGamePaused(GetWorld(), false);
-		return;
-	}
-	else
-	{
-		if (TerrestrialPlanets.Num() > TerrestrialPlanets.Find(PlanetName) + 1)
+		if (!GeneratedPlanets.Contains(PlanetName))
 		{
-			ReGen(TerrestrialPlanets[TerrestrialPlanets.Find(PlanetName) + 1].ToString());
-		}
-		return;
-	}
+			GeneratedPlanets.Add(PlanetName);
 
+			if (GeneratedPlanets == TerrestrialPlanets)
+			{
+				b = false;
+				UGameplayStatics::SetGamePaused(GetWorld(), false);
+				return;
+			}
+			else if (TerrestrialPlanets.Num() > TerrestrialPlanets.Find(PlanetName) + 1)
+			{
+				ReGen(TerrestrialPlanets[TerrestrialPlanets.Find(PlanetName) + 1].ToString());
+			}
+		}
+	}
 }
 
 void ACelestialGameMode::SetPerspective(uint8 perspective)
@@ -173,6 +173,7 @@ void ACelestialGameMode::ReGen(FString Planet)
 	for (TActorIterator<APlanet> Itr(GetWorld()); Itr; ++Itr) {
 		if (Cast<AActor>(*Itr)->GetName() == Planet)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("ReGen on: %s"), *Planet);
 			Cast<APlanet>(*Itr)->GeneratePlanet();
 			Cast<APlanet>(*Itr)->ResetPosition();
 		}

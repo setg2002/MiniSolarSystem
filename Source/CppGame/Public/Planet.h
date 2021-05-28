@@ -182,4 +182,7 @@ protected:
 									FVector().RightVector,
 									FVector().ForwardVector,
 									FVector().BackwardVector };
+
+private:
+	TArray<int> FinishedFaces;
 };

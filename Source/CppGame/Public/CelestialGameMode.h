@@ -92,4 +92,7 @@ protected:
 
 public:
 	TArray<ACelestialBody*> GetBodies() { return bodies; }
+
+private:
+	bool b = true;
 };
