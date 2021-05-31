@@ -4,11 +4,12 @@
 #include "CelestialGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
+#include "NiagaraComponent.h"
 #include "CelestialObject.h"
 #include "CelestialPlayer.h"
 #include "OverviewPlayer.h"
 #include "CelestialBody.h"
-#include "NiagaraComponent.h"
+#include "NiagaraActor.h"
 #include "EngineUtils.h"
 #include "Planet.h"
 
@@ -127,10 +128,10 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		AOrbitDebugActor::Get()->DrawOrbits();
 
 		TArray<AActor*> NiagaraSystems;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), UNiagaraComponent::StaticClass(), NiagaraSystems);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
 		for (auto& System : NiagaraSystems)
 		{
-			Cast<UNiagaraComponent>(System)->SetPaused(true);
+			Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetPaused(true);
 		}
 		break;
 	}
@@ -145,10 +146,10 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		AOrbitDebugActor::Get()->ClearOrbits();
 
 		TArray<AActor*> NiagaraSystems;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), UNiagaraComponent::StaticClass(), NiagaraSystems);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
 		for (auto& System : NiagaraSystems)
 		{
-			Cast<UNiagaraComponent>(System)->SetPaused(true);
+			Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetPaused(false);
 		}
 		break;
 	}
