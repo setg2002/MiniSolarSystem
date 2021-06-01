@@ -58,6 +58,9 @@ public:
 	UFUNCTION(Exec, BlueprintCallable)
 	void SetOrbitDebugMethod(EDrawType DrawType);
 
+	UFUNCTION(Exec, BlueprintCallable)
+	void SetTerrainResolution(FString Planet, int32 resolution);
+
 	// ======= End ConsoleCommands =======
 
 	// For Loading

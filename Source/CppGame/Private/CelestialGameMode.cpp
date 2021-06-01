@@ -201,3 +201,15 @@ void ACelestialGameMode::SetOrbitDebugMethod(EDrawType DrawType)
 		AOrbitDebugActor::Get()->DrawOrbits();
 	}
 }
+
+void ACelestialGameMode::SetTerrainResolution(FString Planet, int32 resolution)
+{
+	for (TActorIterator<APlanet> Itr(GetWorld()); Itr; ++Itr) {
+		if (Cast<AActor>(*Itr)->GetName() == Planet)
+		{
+			Cast<APlanet>(*Itr)->resolution = resolution;
+			Cast<APlanet>(*Itr)->GeneratePlanet();
+			return;
+		}
+	}
+}
