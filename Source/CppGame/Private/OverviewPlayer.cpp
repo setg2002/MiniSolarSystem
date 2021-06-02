@@ -57,7 +57,7 @@ void AOverviewPlayer::Tick(float DeltaTime)
 		}
 
 		// Mouse drag pan w/ middle click
-		if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::MiddleMouseButton)))
+		if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::MiddleMouseButton)) && bCanPan)
 		{
 			float speedMultiplier = 100.f;
 			float dX;

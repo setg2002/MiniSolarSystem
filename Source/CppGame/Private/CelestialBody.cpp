@@ -68,6 +68,12 @@ void ACelestialBody::UpdatePosition(float timeStep)
 	RootComponent->SetRelativeRotation(FRotator(RootComponent->GetRelativeRotation().Pitch, RootComponent->GetRelativeRotation().Yaw + (rotationRate / 100), RootComponent->GetRelativeRotation().Roll));
 }
 
+void ACelestialBody::SetLocation(FVector NewLocation)
+{
+	this->SetActorLocation(NewLocation);
+	AOrbitDebugActor::Get()->DrawOrbits();
+}
+
 // Called every frame
 void ACelestialBody::Tick(float DeltaTime)
 {

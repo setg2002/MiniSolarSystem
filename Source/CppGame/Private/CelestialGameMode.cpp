@@ -68,11 +68,6 @@ void ACelestialGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	/*if (AOrbitDebugActor::Get()->DrawType != EDrawType::Ribbon && AOrbitDebugActor::Get()->bAutoDraw)
-	{
-		AOrbitDebugActor::Get()->DrawOrbits();
-	}*/
-	
 	if (UGameplayStatics::IsGamePaused(GetWorld()))
 	{
 		return;
@@ -88,6 +83,25 @@ void ACelestialGameMode::Tick(float DeltaTime)
 		}
 	}
 
+	// Set the gravity location of asteroid Niagara systems to the location of the most massive body
+	ACelestialBody* LargestBody = nullptr;
+	for (auto& Body : bodies)
+	{
+		if (LargestBody == nullptr)
+		{
+			LargestBody = Body;
+		}
+		else if (Body->GetMass() > LargestBody->GetMass())
+		{
+			LargestBody = Body;
+		}
+	}
+	TArray<AActor*> NiagaraSystems;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
+	for (auto& System : NiagaraSystems)
+	{
+		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetNiagaraVariableVec3("GravityPos", LargestBody->GetActorLocation());
+	}
 }
 
 /*TArray<FName>*/void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)

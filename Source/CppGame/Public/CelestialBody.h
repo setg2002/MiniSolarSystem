@@ -50,6 +50,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetCurrentVelocity() const override;
 
+	// Sets the location of the body and re-draws orbits
+	UFUNCTION(BlueprintCallable)
+	void SetLocation(FVector NewLocation);
+
 	// Sets the magnitude of the current velocity to NewVelocity without changing direction
 	UFUNCTION(BlueprintCallable)
 	void ScaleCurrentVelocity(float NewVelocity);
