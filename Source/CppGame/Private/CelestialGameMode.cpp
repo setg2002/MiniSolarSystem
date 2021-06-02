@@ -175,6 +175,16 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 
 // ======= Runtime Console Commands ======================================================
 
+void ACelestialGameMode::OrbitDebug()
+{
+	if (currentPerspective != 0)
+	{
+		SetPerspective(0);
+	}
+
+	CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OrbitDebugWidgetClass)->AddToViewport(0);
+}
+
 void ACelestialGameMode::ReGenAll()
 {
 	for (TActorIterator<APlanet> Itr(GetWorld()); Itr; ++Itr) {
@@ -203,16 +213,6 @@ void ACelestialGameMode::tp(FString toPlanet)
 		{
 			GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(planet->GetActorLocation());
 		}
-	}
-}
-
-void ACelestialGameMode::SetOrbitDebugMethod(EDrawType DrawType)
-{
-	AOrbitDebugActor::Get()->DrawType = DrawType;
-
-	if (currentPerspective == 0)
-	{
-		AOrbitDebugActor::Get()->DrawOrbits();
 	}
 }
 

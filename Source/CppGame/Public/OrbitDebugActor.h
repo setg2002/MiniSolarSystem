@@ -35,23 +35,15 @@ class CPPGAME_API AOrbitDebugActor : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	static AOrbitDebugActor* Get();
-
-	UPROPERTY(EditAnywhere)
-	bool bAutoDraw = true;
-
+private:
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EDrawType> DrawType;
-	
+
 	UPROPERTY(EditAnywhere)
-	int NumSteps = 1000;
+	int32 NumSteps = 1000;
 
 	UPROPERTY(EditAnywhere)
 	float TimeStep = 0.0833f;
-
-	UPROPERTY(EditAnywhere)
-	bool bUsePhysicsTimeStep;
 
 	UPROPERTY(EditAnywhere)
 	bool bRelativeToBody;
@@ -64,7 +56,52 @@ public:
 	float Width = 25;
 
 	UPROPERTY(EditAnywhere)
-	int RenderedSteps = 100;
+	int32 RenderedSteps = 100;
+
+public:	
+	UFUNCTION(BlueprintCallable)
+	static AOrbitDebugActor* Get();
+
+	UFUNCTION(BlueprintCallable)
+	TEnumAsByte<EDrawType> GetDrawType() const { return DrawType; }
+	UFUNCTION(BlueprintCallable)
+	void SetDrawType(TEnumAsByte<EDrawType> NewDrawType);
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetNumSteps() const { return NumSteps; }
+	UFUNCTION(BlueprintCallable)
+	void SetNumSteps(int32 NewNumSteps);
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetRenderedSteps() const { return RenderedSteps; }
+	UFUNCTION(BlueprintCallable)
+	void SetRenderedSteps(int32 NewRenderedSteps);
+
+	UFUNCTION(BlueprintCallable)
+	float GetTimeStep() const { return TimeStep; }
+	UFUNCTION(BlueprintCallable)
+	void SetTimeStep(float NewTimeStep);
+
+	UFUNCTION(BlueprintCallable)
+	float GetWidth() const { return Width; }
+	UFUNCTION(BlueprintCallable)
+	void SetWidth(float NewWidth);
+
+	UFUNCTION(BlueprintCallable)
+	bool GetRelativeToBody() const { return bRelativeToBody; }
+	UFUNCTION(BlueprintCallable)
+	void SetRelativeToBody(bool NewRelativeToBody);
+
+	UFUNCTION(BlueprintCallable)
+	ACelestialBody* GetRelativeBody() const { return CentralBody; }
+	UFUNCTION(BlueprintCallable)
+	void SetRelativeBody(ACelestialBody* NewRelativeBody);
+
+	UPROPERTY(EditAnywhere)
+	bool bAutoDraw = true;
+
+	UPROPERTY(EditAnywhere)
+	bool bUsePhysicsTimeStep;
 
 	UPROPERTY(EditAnywhere)
 	TArray<USplineComponent*> Splines;

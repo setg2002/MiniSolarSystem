@@ -311,6 +311,50 @@ VirtualBody::VirtualBody(ACelestialBody* Body)
 	Mass = Body->GetMass();
 }
 
+
+void AOrbitDebugActor::SetDrawType(TEnumAsByte<EDrawType> NewDrawType)
+{
+	DrawType = NewDrawType;
+	DrawOrbits();
+}
+
+void AOrbitDebugActor::SetNumSteps(int32 NewNumSteps)
+{
+	NumSteps = NewNumSteps;
+	DrawOrbits();
+}
+
+void AOrbitDebugActor::SetRenderedSteps(int32 NewRenderedSteps)
+{
+	RenderedSteps = NewRenderedSteps;
+	DrawOrbits();
+}
+
+void AOrbitDebugActor::SetTimeStep(float NewTimeStep)
+{
+	TimeStep = NewTimeStep;
+	DrawOrbits();
+}
+
+void AOrbitDebugActor::SetWidth(float NewWidth)
+{
+	Width = NewWidth;
+	DrawOrbits();
+}
+
+void AOrbitDebugActor::SetRelativeToBody(bool NewRelativeToBody)
+{
+	bRelativeToBody = NewRelativeToBody;
+	DrawOrbits();
+}
+
+void AOrbitDebugActor::SetRelativeBody(ACelestialBody* NewRelativeBody)
+{
+	CentralBody = NewRelativeBody;
+	DrawOrbits();
+}
+
+
 #if WITH_EDITOR
 void AOrbitDebugActor::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {

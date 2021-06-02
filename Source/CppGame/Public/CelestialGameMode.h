@@ -40,11 +40,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> CelestialWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> OrbitDebugWidgetClass;
+
 	/* Sets the player perspective to the one desired
 	* @param perspective 0 is overview, 1 is celestial */
 	void SetPerspective(uint8 perspective);
 	
 	// ======= Runtime Console Commands =======
+
+	UFUNCTION(Exec, BlueprintCallable)
+	void OrbitDebug();
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void ReGenAll();
@@ -54,9 +60,6 @@ public:
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void tp(FString toPlanet);
-
-	UFUNCTION(Exec, BlueprintCallable)
-	void SetOrbitDebugMethod(EDrawType DrawType);
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void SetTerrainResolution(FString Planet, int32 resolution);
