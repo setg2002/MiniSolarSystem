@@ -9,7 +9,7 @@
 class ACelestialBody;
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, BlueprintType)
+UINTERFACE(MinimalAPI)
 class UCelestialObject : public UInterface
 {
 	GENERATED_BODY()

@@ -6,7 +6,7 @@
 	"VersionName" : "1.2.0",
 	"CreatedBy" : "DevDad", 
 	"CreatedByURL" : "https://art-and-code.com/",
-	"EngineVersion":"CD36F5E9-475F-B94B-32EE-3BAA9124CDAD",
+	"EngineAssociation":"{CD36F5E9-475F-B94B-32EE-3BAA9124CDAD}",
 	"Description" : "SimplexNoise Blueprint Library to use in Unreal Engine 4",
 	"Category" : "ArtAndCodeSuite.SimplexNoise",
 	"EnabledByDefault" : true,

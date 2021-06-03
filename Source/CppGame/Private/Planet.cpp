@@ -337,10 +337,13 @@ void APlanet::GenerateColors()
 	{
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
 		
+		if (bGenerating)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s finished generating"), *Name.ToString());
+		}
 		//AssetCleaner::CleanAll();
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("%s finished generating"), *Name.ToString());
 	bGenerating = false;
 	OnPlanetGenerated.ExecuteIfBound(this->Name);
 }
