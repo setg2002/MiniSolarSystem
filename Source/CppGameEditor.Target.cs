@@ -32,7 +32,7 @@ public class CppGameEditorTarget : TargetRules
             GBFInfo.IsReadOnly = false;
 
             string GAME_BUILD_Text = File.ReadAllText(GAME_BUILD_FILE);
-            int GAME_BUILD_Number = int.Parse(GAME_BUILD_Text);
+            int GAME_BUILD_Number = int.Parse(GAME_BUILD_Text.Split('.')[3]);
             int NewNumber = GAME_BUILD_Number + 1;
             string GAME_VERSION_Text = File.ReadAllText(GAME_VERSION_FILE);
 
@@ -43,10 +43,26 @@ public class CppGameEditorTarget : TargetRules
 
                 using (var sr = new StreamReader(GAME_VERSION_FILE))
                 {
+                    string FullBuildNumber = "";
+
                     for (int i = 1; i < TotalLinesInGameVersionFile; i++)
                     {
+                        string line = sr.ReadLine();
+
+                        if (line.Contains("#define GAME_MAJOR_VERSION"))
+                        {
+                            FullBuildNumber += line.Split(' ')[2].ToString() + ".";
+                        }
+                        else if (line.Contains("#define GAME_MINOR_VERSION"))
+                        {
+                            FullBuildNumber += line.Split(' ')[2].ToString() + ".";
+                        }
+                        else if (line.Contains("#define GAME_PATCH_VERSION"))
+                        {
+                            FullBuildNumber += line.Split(' ')[2].ToString() + ".";
+                        }
                         // If the line contains #define GAME_BUILD_NUMBER
-                        if (sr.ReadLine().Contains(BUILD_NUMBER_TEXT))
+                        else if (line.Contains(BUILD_NUMBER_TEXT))
                         {
                             // Optional: Write an output to Visual Studio Output
                             System.Console.WriteLine("New build number generated: " + NewNumber.ToString());
@@ -55,7 +71,8 @@ public class CppGameEditorTarget : TargetRules
                             GameVersionFileLines.RemoveAt(LINE_NUMBER_TO_REPLACE);
                             GameVersionFileLines.Insert(LINE_NUMBER_TO_REPLACE, (BUILD_NUMBER_TEXT + " " + NewNumber));
                             File.WriteAllLines(GAME_VERSION_FILE, GameVersionFileLines);
-                            File.WriteAllText(GAME_BUILD_FILE, NewNumber.ToString());
+                            FullBuildNumber += line.Split(' ')[2].ToString();
+                            File.WriteAllText(GAME_BUILD_FILE, FullBuildNumber);
                             break;
                         }
                     }
