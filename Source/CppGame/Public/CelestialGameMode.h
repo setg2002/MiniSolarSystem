@@ -47,7 +47,18 @@ public:
 	* @param perspective 0 is overview, 1 is celestial */
 	void SetPerspective(uint8 perspective);
 	
+	void LoadGame();
+
 	// ======= Runtime Console Commands =======
+
+	UFUNCTION(Exec, BlueprintCallable)
+	void DeleteSave();
+
+	UFUNCTION(Exec, BlueprintCallable)
+	void SaveAndQuit();
+
+	UFUNCTION(Exec, BlueprintCallable)
+	void Save();
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void OrbitDebug();

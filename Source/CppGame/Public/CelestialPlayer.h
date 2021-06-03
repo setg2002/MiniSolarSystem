@@ -42,18 +42,22 @@ public:
 	{
 		return Throttle;
 	}
+	void SetThrottle(float NewThrottle) { Throttle = NewThrottle; }
 
 	UFUNCTION(BlueprintCallable)
 	bool GetIgnoreGravity()
 	{
 		return bIgnoreGravity;
 	}
+	void SetIgnoreGravity(bool NewIgnoreGravity) { bIgnoreGravity = NewIgnoreGravity; }
 
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* GetLargestForce();
 
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* LookingAtPlanet();
+
+	void SetCurrentVelocity(FVector NewVelocity);
 
 	void SetWidget(UUserWidget* Highlight) { Widget = Highlight; }
 

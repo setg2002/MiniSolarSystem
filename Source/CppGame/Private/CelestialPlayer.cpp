@@ -65,6 +65,11 @@ FVector ACelestialPlayer::GetCurrentVelocity() const
 	return currentVelocity;
 }
 
+void ACelestialPlayer::SetCurrentVelocity(FVector NewVelocity)
+{
+	currentVelocity = NewVelocity;
+}
+
 int ACelestialPlayer::GetMass() const { return mass; }
 
 ACelestialBody* ACelestialPlayer::GetLargestForce()

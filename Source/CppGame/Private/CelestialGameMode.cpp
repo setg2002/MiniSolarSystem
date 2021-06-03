@@ -4,6 +4,7 @@
 #include "CelestialGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
+#include "CelestialSaveGame.h"
 #include "NiagaraComponent.h"
 #include "CelestialObject.h"
 #include "CelestialPlayer.h"
@@ -52,8 +53,6 @@ void ACelestialGameMode::BeginPlay()
 		}
 	}
 
-	ReGen(TerrestrialPlanets[0].ToString());
-
 	// Gets all actors that implement ICelestialObject and adds them to celestialObjects
 	TArray<AActor*> Actors;
 	UGameplayStatics::GetAllActorsWithInterface(GWorld, UCelestialObject::StaticClass(), Actors);
@@ -62,6 +61,8 @@ void ACelestialGameMode::BeginPlay()
 		const auto &Interface = Cast<ICelestialObject>(actor);
 		celestialObjects.Add(Interface);
 	}
+
+	LoadGame();
 }
 
 void ACelestialGameMode::Tick(float DeltaTime)
@@ -172,8 +173,89 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 	}
 }
 
+void ACelestialGameMode::LoadGame()
+{
+	// Retrieve and cast the USaveGame object to UMySaveGame.
+	if (UCelestialSaveGame* LoadedGame = Cast<UCelestialSaveGame>(UGameplayStatics::LoadGameFromSlot("Test", 0)))
+	{
+		// The operation was successful, so LoadedGame now contains the data we saved earlier.
+		UE_LOG(LogTemp, Warning, TEXT("LOADED"));
+
+		for (auto& Object : celestialObjects)
+		{
+			if (Cast<ACelestialBody>(Object))
+			{
+				ACelestialBody* Body = Cast<ACelestialBody>(Object);
+				Body->SetActorLocation(*LoadedGame->CelestialLocations.Find(Body));
+				Body->SetCurrentVelocity(*LoadedGame->CelestialVelocities.Find(Body));
+			}
+		}
+		CelestialPlayer->SetActorLocation(LoadedGame->PlayerLocation);
+		CelestialPlayer->SetCurrentVelocity(LoadedGame->PlayerVelocity);
+		CelestialPlayer->SetActorRotation(LoadedGame->PlayerRotation);
+		CelestialPlayer->SetIgnoreGravity(LoadedGame->IgnoreGravity);
+		CelestialPlayer->SetThrottle(LoadedGame->Throttle);
+	}
+	//else
+	//{
+		ReGen(TerrestrialPlanets[0].ToString());
+	//}
+}
+
 
 // ======= Runtime Console Commands ======================================================
+
+void ACelestialGameMode::DeleteSave()
+{
+	UGameplayStatics::DeleteGameInSlot("Test", 0);
+}
+
+void ACelestialGameMode::SaveAndQuit()
+{
+	Save();
+	FGenericPlatformMisc::RequestExit(false);
+}
+
+void ACelestialGameMode::Save()
+{
+	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
+	{
+		// Set data on the savegame object.
+		for (auto& Object : celestialObjects)
+		{
+			if (Cast<ACelestialBody>(Object))
+			{
+				ACelestialBody* Body = Cast<ACelestialBody>(Object);
+				SaveGameInstance->CelestialLocations.Add(Body, Body->GetActorLocation());
+				SaveGameInstance->CelestialVelocities.Add(Body, Body->GetCurrentVelocity());
+			}
+		}
+		SaveGameInstance->PlayerLocation = CelestialPlayer->GetActorLocation();
+		SaveGameInstance->PlayerVelocity = CelestialPlayer->GetCurrentVelocity();
+		SaveGameInstance->PlayerRotation = CelestialPlayer->GetActorRotation();
+		SaveGameInstance->IgnoreGravity = CelestialPlayer->GetIgnoreGravity();
+		SaveGameInstance->Throttle = CelestialPlayer->GetThrottle();
+
+
+		// Save the data immediately.
+		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Test", 0))
+		{
+			// Save succeeded.
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString::Printf(TEXT("Save Succedded")));
+			}
+		}
+		else
+		{
+			// Save failed.
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Save Failed")));
+			}
+		}
+	}
+}
 
 void ACelestialGameMode::OrbitDebug()
 {
