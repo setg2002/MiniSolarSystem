@@ -20,13 +20,15 @@ public:
 	AOverviewPlayer();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "2000"))
-	int Speed = 150;
+	int32 Speed = 150;
 
 	// When true, celestial playert can use mmb to pan camera. Set to false when moving planets.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanPan = true;
 
 	FVector GetCameraLocation();
+
+	USpringArmComponent* GetSpringArm() const { return SpringArm; }
 
 protected:
 	// Called when the game starts or when spawned

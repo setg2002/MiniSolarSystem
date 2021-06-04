@@ -4,6 +4,11 @@
 #include "ShapeSettings.h"
 #include "Planet.h"
 
+FPrimaryAssetId UShapeSettings::GetPrimaryAssetId() const
+{
+	return FPrimaryAssetId(FPrimaryAssetType("ShapeSettings"), FName(this->GetName()));
+}
+
 bool UShapeSettings::IsNoiseLayers()
 {
 	bool exists = true;

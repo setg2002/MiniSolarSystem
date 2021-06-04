@@ -95,6 +95,8 @@ protected:
 
 	TArray<ICelestialObject*> celestialObjects;
 
+	ACelestialBody* GetBodyByName(FString Name);
+
 	UPROPERTY() // Prevents garbage collection
 	UUserWidget* OverviewWidget;
 	UPROPERTY()
@@ -111,5 +113,5 @@ public:
 	TArray<ACelestialBody*> GetBodies() { return bodies; }
 
 private:
-	bool b = true;
+	bool b = true; // dumb
 };

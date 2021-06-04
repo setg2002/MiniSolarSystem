@@ -129,7 +129,7 @@ void AOverviewPlayer::MoveRight(float AxisValue)
 
 void AOverviewPlayer::MoveUp(float AxisValue)
 {
-	this->AddActorLocalOffset(FVector::UpVector * (AxisValue * Speed));
+	this->SetActorLocation(this->GetActorLocation() + (FVector::UpVector * (AxisValue * Speed)));
 }
 
 FVector AOverviewPlayer::GetCameraLocation()

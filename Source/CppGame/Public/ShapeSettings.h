@@ -11,7 +11,7 @@
  * 
  */
 UCLASS(BlueprintType)
-class CPPGAME_API UShapeSettings : public UDataAsset
+class CPPGAME_API UShapeSettings : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
@@ -26,6 +26,8 @@ private:
 	TArray<UNoiseLayer*> NoiseLayers;
 
 public:
+	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
+
 	bool IsNoiseLayers();
 
 	FShapeSettingsChanged OnShapeSettingsChanged;

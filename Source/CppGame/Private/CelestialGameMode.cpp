@@ -2,8 +2,10 @@
 
 
 #include "CelestialGameMode.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
+#include "AssetRegistryModule.h"
 #include "CelestialSaveGame.h"
 #include "NiagaraComponent.h"
 #include "CelestialObject.h"
@@ -39,8 +41,6 @@ void ACelestialGameMode::BeginPlay()
 
 	CelestialPlayer->SetWidget(CelestialWidget);
 
-	SetPerspective(1);
-
 	// Gets all ACelestialBodies and adds them to bodies
 	for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
 		bodies.Add(*Itr);
@@ -63,6 +63,8 @@ void ACelestialGameMode::BeginPlay()
 	}
 
 	LoadGame();
+
+	SetPerspective(1);
 }
 
 void ACelestialGameMode::Tick(float DeltaTime)
@@ -105,7 +107,7 @@ void ACelestialGameMode::Tick(float DeltaTime)
 	}
 }
 
-/*TArray<FName>*/void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)
+void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)
 {
 	if (b)
 	{
@@ -173,6 +175,18 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 	}
 }
 
+ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
+{
+	for (auto& body : bodies)
+	{
+		if (body->GetName() == Name)
+		{
+			return body;
+		}
+	}
+	return nullptr;
+}
+
 void ACelestialGameMode::LoadGame()
 {
 	// Retrieve and cast the USaveGame object to UMySaveGame.
@@ -195,6 +209,21 @@ void ACelestialGameMode::LoadGame()
 		CelestialPlayer->SetActorRotation(LoadedGame->PlayerRotation);
 		CelestialPlayer->SetIgnoreGravity(LoadedGame->IgnoreGravity);
 		CelestialPlayer->SetThrottle(LoadedGame->Throttle);
+
+		OverviewPlayer->Speed = LoadedGame->Speed;
+		OverviewPlayer->SetActorRotation(LoadedGame->OverviewRotation);
+		OverviewPlayer->SetActorLocation(LoadedGame->OverviewLocation);
+		OverviewPlayer->GetSpringArm()->TargetArmLength = LoadedGame->TargetArmLength;
+		OverviewPlayer->GetSpringArm()->SetRelativeRotation(LoadedGame->SpringArmRotation);
+
+		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
+		ODA->SetDrawType(LoadedGame->DrawType);
+		ODA->SetNumSteps(LoadedGame->NumSteps);
+		ODA->SetTimeStep(LoadedGame->TimeStep);
+		ODA->SetRelativeToBody(LoadedGame->bRelativeToBody);
+		ODA->SetRelativeBody(LoadedGame->CentralBody);
+		ODA->SetWidth(LoadedGame->Width);
+		ODA->SetRenderedSteps(LoadedGame->RenderedSteps);
 	}
 	//else
 	//{
@@ -236,6 +265,21 @@ void ACelestialGameMode::Save()
 		SaveGameInstance->IgnoreGravity = CelestialPlayer->GetIgnoreGravity();
 		SaveGameInstance->Throttle = CelestialPlayer->GetThrottle();
 
+		SaveGameInstance->Speed = OverviewPlayer->Speed;
+		SaveGameInstance->OverviewRotation = OverviewPlayer->GetActorRotation();
+		SaveGameInstance->OverviewLocation = OverviewPlayer->GetActorLocation();
+		SaveGameInstance->TargetArmLength = OverviewPlayer->GetSpringArm()->TargetArmLength;
+		SaveGameInstance->SpringArmRotation = OverviewPlayer->GetSpringArm()->GetRelativeRotation();
+
+		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
+		SaveGameInstance->DrawType = ODA->GetDrawType();
+		SaveGameInstance->NumSteps = ODA->GetNumSteps();
+		SaveGameInstance->TimeStep = ODA->GetTimeStep();
+		SaveGameInstance->bRelativeToBody = ODA->GetRelativeToBody();
+		SaveGameInstance->CentralBody = ODA->GetRelativeBody();
+		SaveGameInstance->Width = ODA->GetWidth();
+		SaveGameInstance->RenderedSteps = ODA->GetRenderedSteps();
+
 
 		// Save the data immediately.
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Test", 0))
@@ -243,6 +287,22 @@ void ACelestialGameMode::Save()
 			// Save succeeded.
 			if (GEngine)
 			{
+				FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+				TArray<FAssetData> AssetData;
+				const UClass* Class = UDataAsset::StaticClass();
+				AssetRegistryModule.Get().GetAssetsByClass(Class->GetFName(), AssetData);
+				for (auto& Asset : AssetData)
+				{
+					FStringOutputDevice outputDevice;
+					UPackage::SavePackage(
+						Asset.GetPackage(), 
+						nullptr, 
+						EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, 
+						*Asset.GetPackage()->FileName.ToString(), 
+						&outputDevice
+					);
+				}
+
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString::Printf(TEXT("Save Succedded")));
 			}
 		}
@@ -277,35 +337,18 @@ void ACelestialGameMode::ReGenAll()
 
 void ACelestialGameMode::ReGen(FString Planet)
 {
-	for (TActorIterator<APlanet> Itr(GetWorld()); Itr; ++Itr) {
-		if (Cast<AActor>(*Itr)->GetName() == Planet)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ReGen on: %s"), *Planet);
-			Cast<APlanet>(*Itr)->GeneratePlanet();
-			Cast<APlanet>(*Itr)->ResetPosition();
-		}
-	}
+	UE_LOG(LogTemp, Warning, TEXT("ReGen on: %s"), *Planet);
+	Cast<APlanet>(GetBodyByName(Planet))->GeneratePlanet();
+	Cast<APlanet>(GetBodyByName(Planet))->ResetPosition();
 }
 
 void ACelestialGameMode::tp(FString toPlanet)
 {
-	for (auto& planet : bodies)
-	{
-		if (planet->GetName() == toPlanet)
-		{
-			GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(planet->GetActorLocation());
-		}
-	}
+	GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(GetBodyByName(toPlanet)->GetActorLocation());
 }
 
 void ACelestialGameMode::SetTerrainResolution(FString Planet, int32 resolution)
 {
-	for (TActorIterator<APlanet> Itr(GetWorld()); Itr; ++Itr) {
-		if (Cast<AActor>(*Itr)->GetName() == Planet)
-		{
-			Cast<APlanet>(*Itr)->resolution = resolution;
-			Cast<APlanet>(*Itr)->GeneratePlanet();
-			return;
-		}
-	}
+	Cast<APlanet>(GetBodyByName(Planet))->resolution = resolution;
+	Cast<APlanet>(GetBodyByName(Planet))->GeneratePlanet();
 }
