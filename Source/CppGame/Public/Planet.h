@@ -125,7 +125,7 @@ public:
 
 	// Makes new empty data asset for given data asset
 	UFUNCTION(BlueprintCallable)
-	UDataAsset* CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass);
+	UObject* CreateSettingsAsset(TSubclassOf<UObject> AssetClass);
 
 	// Makes new blank data asset for shape and color settings if either are unassigned
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)

@@ -3,15 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
 #include "NoiseSettings.h"
 #include "NoiseLayer.generated.h"
 
 /**
  * 
  */
+
+USTRUCT(BlueprintType)
+struct FNoiseLayer_
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	bool Enabled = true;
+	UPROPERTY(EditAnywhere)
+	bool UseFirstLayerAsMask = false;
+
+};
+
 UCLASS(BlueprintType)
-class CPPGAME_API UNoiseLayer : public UDataAsset
+class CPPGAME_API UNoiseLayer : public UObject
 {
 	GENERATED_BODY()
 
@@ -19,20 +32,25 @@ class CPPGAME_API UNoiseLayer : public UDataAsset
 
 private:
 	UPROPERTY(EditAnywhere)
-	bool Enabled = true;
-	UPROPERTY(EditAnywhere)
-	bool UseFirstLayerAsMask = false;
+	FNoiseLayer_ NoiseLayer;
 
 public:
 	FNoiseLayerChanged OnNoiseLayerChanged;
 
+	FNoiseLayer_ GetStruct() const { return NoiseLayer; }
+	bool SetStruct(FNoiseLayer_ NewStruct)
+	{
+		NoiseLayer = NewStruct;
+		return true;
+	}
+
 	UFUNCTION(BlueprintCallable)
-	bool GetEnabled() const { return Enabled; }
+	bool GetEnabled() const { return NoiseLayer.Enabled; }
 	UFUNCTION(BlueprintCallable)
 	void SetEnabled(bool NewEnabled);
 
 	UFUNCTION(BlueprintCallable)
-	bool GetFirstLayerAsMask() const { return UseFirstLayerAsMask; }
+	bool GetFirstLayerAsMask() const { return NoiseLayer.UseFirstLayerAsMask; }
 	UFUNCTION(BlueprintCallable)
 	void SetFirstLayerAsMask(bool NewFirstLayerAsMask);
 

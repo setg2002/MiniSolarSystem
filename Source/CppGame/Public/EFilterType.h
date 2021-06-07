@@ -12,6 +12,6 @@
  UENUM(BlueprintType)
  enum EFilterType
  {
-	 Smooth  UMETA(DisplayName = "Simple"),
-	 Ridgid  UMETA(DisplayName = "Ridgid")
+	 Smooth UMETA(DisplayName = "Simple"),
+	 Ridgid UMETA(DisplayName = "Ridgid")
  };

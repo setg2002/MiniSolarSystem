@@ -2,19 +2,16 @@
 
 
 #include "ShapeSettings.h"
+#include "NoiseLayer.h"
 #include "Planet.h"
 
-FPrimaryAssetId UShapeSettings::GetPrimaryAssetId() const
-{
-	return FPrimaryAssetId(FPrimaryAssetType("ShapeSettings"), FName(this->GetName()));
-}
 
 bool UShapeSettings::IsNoiseLayers()
 {
 	bool exists = true;
-	for (int i = 0; i < NoiseLayers.Num(); i++)
+	for (int i = 0; i < ShapeSettings.NoiseLayers.Num(); i++)
 	{
-		if (NoiseLayers[i]->NoiseSettings == nullptr)
+		if (ShapeSettings.NoiseLayers[i]->NoiseSettings == nullptr)
 		{
 			exists = false;
 		}
@@ -24,18 +21,18 @@ bool UShapeSettings::IsNoiseLayers()
 
 void UShapeSettings::SetRadius(float NewRadius)
 {
-	PlanetRadius = NewRadius;
+	ShapeSettings.PlanetRadius = NewRadius;
 	OnShapeSettingsChanged.Broadcast();
 }
 
 void UShapeSettings::AddNoiseLayer(UNoiseLayer* NewNoiseLayer)
 {
-	NoiseLayers.Add(NewNoiseLayer);
+	ShapeSettings.NoiseLayers.Add(NewNoiseLayer);
 	OnShapeSettingsChanged.Broadcast();
 }
 
 void UShapeSettings::RemoveNoiseLayer(int32 index)
 {
-	NoiseLayers.RemoveAt(index);
+	ShapeSettings.NoiseLayers.RemoveAt(index);
 	OnShapeSettingsChanged.Broadcast();
 }

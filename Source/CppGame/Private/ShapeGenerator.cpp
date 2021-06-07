@@ -2,9 +2,10 @@
 
 
 #include "ShapeGenerator.h"
+#include "NoiseFilterFactory.h"
 #include "ShapeSettings.h"
 #include "INoiseFilter.h"
-#include "NoiseFilterFactory.h"
+#include "NoiseLayer.h"
 #include "MinMax.h"
 
 

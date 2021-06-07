@@ -5,12 +5,12 @@
 
 void UNoiseLayer::SetEnabled(bool NewEnabled)
 {
-	Enabled = NewEnabled;
+	NoiseLayer.Enabled = NewEnabled;
 	OnNoiseLayerChanged.Broadcast();
 }
 
 void UNoiseLayer::SetFirstLayerAsMask(bool NewFirstLayerAsMask)
 {
-	UseFirstLayerAsMask = NewFirstLayerAsMask;
+	NoiseLayer.UseFirstLayerAsMask = NewFirstLayerAsMask;
 	OnNoiseLayerChanged.Broadcast();
 }

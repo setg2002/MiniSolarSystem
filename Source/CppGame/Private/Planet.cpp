@@ -4,6 +4,7 @@
 #include "Planet.h"
 #include "RawMesh.h"
 #include "EngineUtils.h"
+#include "NoiseLayer.h"
 #include "TerrainFace.h"
 #include "ShapeSettings.h"
 #include "ColorSettings.h"
@@ -76,10 +77,10 @@ void APlanet::ResetPosition()
 	ProcMesh->SetRelativeLocation(FVector::ZeroVector);
 }
 
-UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
+UObject* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 {
 	FString AssetPath = FString("/Game/DataAssets/" + this->Name.ToString() + "/");
-	FString AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + DataAssetClass.Get()->GetName() + "_0";
+	FString AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
 	FString PackagePath = AssetPath + AssetName;
 	
 	int AssetNum = 0;
@@ -87,23 +88,23 @@ UDataAsset* APlanet::CreateSettingsAsset(TSubclassOf<UDataAsset> DataAssetClass)
 	while (PackageExists)
 	{
 		AssetNum++;
-		AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + DataAssetClass.Get()->GetName() + "_" + FString::FromInt(AssetNum);
+		AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_" + FString::FromInt(AssetNum);
 		PackagePath = AssetPath + AssetName;
 
 		PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
 	}
 
 	UPackage *Package = CreatePackage(*PackagePath);
-	UDataAsset* NewDataAsset = NewObject<UDataAsset>(Package, DataAssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+	UDataAsset* NewAsset = NewObject<UDataAsset>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
 
-	FAssetRegistryModule::AssetCreated(NewDataAsset);
-	NewDataAsset->MarkPackageDirty();
+	FAssetRegistryModule::AssetCreated(NewAsset);
+	NewAsset->MarkPackageDirty();
 
 	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
-	bool bSuccess = UPackage::SavePackage(Package, NewDataAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	bool bSuccess = UPackage::SavePackage(Package, NewAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
 	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
 
-	return NewDataAsset;
+	return NewAsset;
 }
 
 void APlanet::CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UDataAsset> DataAssetClass)
@@ -267,6 +268,7 @@ void APlanet::ReGenerateTangents()
 
 void APlanet::Initialize()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *ShapeSettings->GetNoiseLayers()[0]->GetName());
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
 

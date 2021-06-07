@@ -13,18 +13,18 @@ UNoiseSettings::~UNoiseSettings()
 
 void UNoiseSettings::SetFilterType(EFilterType NewFilterType)
 {
-	FilterType = NewFilterType;
+	NoiseSettings.FilterType = NewFilterType;
 	OnNoiseSettingsChanged.Broadcast();
 }
 
 void UNoiseSettings::SetSimpleNoiseSettings(FSimpleNoiseSettings NewSettings)
 {
-	SimpleNoiseSettings = NewSettings;
+	NoiseSettings.SimpleNoiseSettings = NewSettings;
 	OnNoiseSettingsChanged.Broadcast();
 }
 
 void UNoiseSettings::SetRidgidNoiseSettings(FRidgidNoiseSettings NewSettings)
 {
-	RidgidNoiseSettings = NewSettings;
+	NoiseSettings.RidgidNoiseSettings = NewSettings;
 	OnNoiseSettingsChanged.Broadcast();
 }

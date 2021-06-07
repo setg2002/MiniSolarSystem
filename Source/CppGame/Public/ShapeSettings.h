@@ -3,21 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
-#include "NoiseLayer.h"
 #include "ShapeSettings.generated.h"
+
+class UNoiseLayer;
 
 /**
  * 
  */
-UCLASS(BlueprintType)
-class CPPGAME_API UShapeSettings : public UPrimaryDataAsset
+
+USTRUCT(BlueprintType)
+struct FShapeSettings_
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE(FShapeSettingsChanged);
-
-private:
+public:
 	// Planet radius in cm
 	UPROPERTY(EditAnywhere)
 	float PlanetRadius = 100;
@@ -25,22 +24,41 @@ private:
 	UPROPERTY(EditAnywhere)
 	TArray<UNoiseLayer*> NoiseLayers;
 
-public:
-	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
+};
 
+UCLASS(BlueprintType)
+class CPPGAME_API UShapeSettings : public UObject
+{
+	GENERATED_BODY()
+
+	DECLARE_MULTICAST_DELEGATE(FShapeSettingsChanged);
+
+private:
+	UPROPERTY(EditAnywhere)
+	FShapeSettings_ ShapeSettings;
+
+public:
 	bool IsNoiseLayers();
 
 	FShapeSettingsChanged OnShapeSettingsChanged;
 
+	FShapeSettings_ GetStruct() const { return ShapeSettings; }
+	bool SetStruct (FShapeSettings_ NewStruct)
+	{
+		ShapeSettings = NewStruct;
+		return true;
+	}
+
 	UFUNCTION(BlueprintCallable)
-	float GetRadius() const { return PlanetRadius; }
+	float GetRadius() const { return ShapeSettings.PlanetRadius; }
 	UFUNCTION(BlueprintCallable)
 	void SetRadius(float NewRadius);
 
 	UFUNCTION(BlueprintCallable)
-	TArray<UNoiseLayer*> GetNoiseLayers() const { return NoiseLayers; }
+	TArray<UNoiseLayer*> GetNoiseLayers() const { return ShapeSettings.NoiseLayers; }
 	UFUNCTION(BlueprintCallable)
 	void AddNoiseLayer(UNoiseLayer* NewNoiseLayer);
 	UFUNCTION(BlueprintCallable)
 	void RemoveNoiseLayer(int32 index);
+
 };

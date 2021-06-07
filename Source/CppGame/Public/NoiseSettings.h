@@ -43,14 +43,12 @@ struct FRidgidNoiseSettings : public FSimpleNoiseSettings
 	float WeightMultiplier = .8f;
 };
 
-UCLASS(BlueprintType)
-class CPPGAME_API UNoiseSettings : public UDataAsset
+USTRUCT(BlueprintType)
+struct FNoiseSettings_
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE(FNoiseSettingsChanged);
-
-private:
+public:
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EFilterType> FilterType;
 
@@ -59,21 +57,41 @@ private:
 	UPROPERTY(EditAnywhere, meta = (EditCondition = "FilterType == 1", EditConditionHides))
 	FRidgidNoiseSettings RidgidNoiseSettings;
 
+};
+
+UCLASS(BlueprintType)
+class CPPGAME_API UNoiseSettings : public UObject
+{
+	GENERATED_BODY()
+
+	DECLARE_MULTICAST_DELEGATE(FNoiseSettingsChanged);
+
+private:
+	UPROPERTY(EditAnywhere)
+	FNoiseSettings_ NoiseSettings;
+
 public:
+	FNoiseSettings_ GetStruct() const { return NoiseSettings; }
+	bool SetStruct(FNoiseSettings_ NewStruct)
+	{
+		NoiseSettings = NewStruct;
+		return true;
+	}
+
 	UNoiseSettings();
 	~UNoiseSettings();
 
 	FNoiseSettingsChanged OnNoiseSettingsChanged;
 
 	UFUNCTION(BlueprintCallable)
-	TEnumAsByte<EFilterType> GetFilterType() const { return FilterType; }
+	TEnumAsByte<EFilterType> GetFilterType() const { return NoiseSettings.FilterType; }
 	UFUNCTION(BlueprintCallable)
 	void SetFilterType(EFilterType NewFilterType);
 
 	UFUNCTION(BlueprintCallable)
-	FSimpleNoiseSettings GetSimpleNoiseSettings() const { return SimpleNoiseSettings; }
+	FSimpleNoiseSettings GetSimpleNoiseSettings() const { return NoiseSettings.SimpleNoiseSettings; }
 	UFUNCTION(BlueprintCallable)
-	FRidgidNoiseSettings GetRidgidNoiseSettings() const { return RidgidNoiseSettings; }
+	FRidgidNoiseSettings GetRidgidNoiseSettings() const { return NoiseSettings.RidgidNoiseSettings; }
 
 	UFUNCTION(BlueprintCallable)
 	void SetSimpleNoiseSettings(FSimpleNoiseSettings NewSettings);

@@ -3,6 +3,7 @@
 
 #include "CelestialGameMode.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "SaveDataBlueprintFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "AssetRegistryModule.h"
@@ -11,10 +12,14 @@
 #include "CelestialObject.h"
 #include "CelestialPlayer.h"
 #include "OverviewPlayer.h"
+#include "ShapeSettings.h"
 #include "CelestialBody.h"
+#include "NoiseSettings.h"
 #include "NiagaraActor.h"
 #include "EngineUtils.h"
+#include "NoiseLayer.h"
 #include "Planet.h"
+#include "Star.h"
 
 
 ACelestialGameMode::ACelestialGameMode()
@@ -52,6 +57,7 @@ void ACelestialGameMode::BeginPlay()
 			Planet->OnPlanetGenerated.BindUFunction(this, "NewGeneratedPlanet");
 		}
 	}
+	TerrestrialPlanets.Sort([](const FName& a, const FName& b) { return a < b; });
 
 	// Gets all actors that implement ICelestialObject and adds them to celestialObjects
 	TArray<AActor*> Actors;
@@ -111,20 +117,18 @@ void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)
 {
 	if (b)
 	{
-		if (!GeneratedPlanets.Contains(PlanetName))
-		{
-			GeneratedPlanets.Add(PlanetName);
+		GeneratedPlanets.AddUnique(PlanetName);
 
-			if (GeneratedPlanets == TerrestrialPlanets)
-			{
-				b = false;
-				UGameplayStatics::SetGamePaused(GetWorld(), false);
-				return;
-			}
-			else if (TerrestrialPlanets.Num() > TerrestrialPlanets.Find(PlanetName) + 1)
-			{
-				ReGen(TerrestrialPlanets[TerrestrialPlanets.Find(PlanetName) + 1].ToString());
-			}
+		GeneratedPlanets.Sort([](const FName& a, const FName& b) { return a < b; });
+		if (GeneratedPlanets == TerrestrialPlanets)
+		{
+			b = false;
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
+			return;
+		}
+		else if (TerrestrialPlanets.Num() > TerrestrialPlanets.Find(PlanetName) + 1)
+		{
+			ReGen(TerrestrialPlanets[TerrestrialPlanets.Find(PlanetName) + 1].ToString());
 		}
 	}
 }
@@ -202,6 +206,44 @@ void ACelestialGameMode::LoadGame()
 				ACelestialBody* Body = Cast<ACelestialBody>(Object);
 				Body->SetActorLocation(*LoadedGame->CelestialLocations.Find(Body));
 				Body->SetCurrentVelocity(*LoadedGame->CelestialVelocities.Find(Body));
+
+				if (Cast<APlanet>(Object))
+				{
+					APlanet* Planet = Cast<APlanet>(Object);
+					FShapeSettings_ LoadedShapeSettings;
+					if (USaveDataBlueprintFunctionLibrary::LoadStruct<FShapeSettings_>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_ShapeSettings"), LoadedShapeSettings))
+					{
+						Planet->ShapeSettings->SetStruct(LoadedShapeSettings);
+						for (int32 i = 0; i < Planet->ShapeSettings->GetNoiseLayers().Num(); i++)
+						{
+							FNoiseLayer_ LoadedNoiseLayer;
+							if (USaveDataBlueprintFunctionLibrary::LoadStruct<FNoiseLayer_>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_NoiseLayer" + FString::FromInt(i)), LoadedNoiseLayer))
+							{
+								Planet->ShapeSettings->GetNoiseLayers()[i]->SetStruct(LoadedNoiseLayer);
+								FNoiseSettings_ LoadedNoiseSettings;
+								if (USaveDataBlueprintFunctionLibrary::LoadStruct<FNoiseSettings_>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_NoiseSettings" + FString::FromInt(i)), LoadedNoiseSettings))
+								{
+									Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->SetStruct(LoadedNoiseSettings);
+									FSimpleNoiseSettings LoadedSimpleSettings;
+									FRidgidNoiseSettings LoadedRidgidSettings;
+									if (USaveDataBlueprintFunctionLibrary::LoadStruct<FSimpleNoiseSettings>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_" + Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetName() + "_SimpleSettings"), LoadedSimpleSettings) &&
+										USaveDataBlueprintFunctionLibrary::LoadStruct<FRidgidNoiseSettings>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_" + Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetName() + "_RidgidSettings"), LoadedRidgidSettings))
+									{
+										Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->SetSimpleNoiseSettings(LoadedSimpleSettings);
+										Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->SetRidgidNoiseSettings(LoadedRidgidSettings);
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (Cast<AStar>(Object))
+				{
+					AStar* Star = Cast<AStar>(Object);
+					FStarProperties LoadedStarProperties;
+					USaveDataBlueprintFunctionLibrary::LoadStruct<FStarProperties>(TEXT("/Game/Json/" + Star->Name.ToString() + "_StarProperties"), LoadedStarProperties);
+					Star->starProperties = LoadedStarProperties;
+				}
 			}
 		}
 		CelestialPlayer->SetActorLocation(LoadedGame->PlayerLocation);
@@ -257,6 +299,24 @@ void ACelestialGameMode::Save()
 				ACelestialBody* Body = Cast<ACelestialBody>(Object);
 				SaveGameInstance->CelestialLocations.Add(Body, Body->GetActorLocation());
 				SaveGameInstance->CelestialVelocities.Add(Body, Body->GetCurrentVelocity());
+
+				if (Cast<APlanet>(Object))
+				{
+					APlanet* Planet = Cast<APlanet>(Object);
+					USaveDataBlueprintFunctionLibrary::SaveStruct<FShapeSettings_>(Planet->ShapeSettings->GetStruct(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_ShapeSettings"));
+					for (int32 i = 0; i < Planet->ShapeSettings->GetNoiseLayers().Num(); i++)
+					{
+						USaveDataBlueprintFunctionLibrary::SaveStruct<FNoiseLayer_>(Planet->ShapeSettings->GetNoiseLayers()[i]->GetStruct(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_NoiseLayer" + FString::FromInt(i)));
+						USaveDataBlueprintFunctionLibrary::SaveStruct<FNoiseSettings_>(Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetStruct(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_NoiseSettings" + FString::FromInt(i)));
+						USaveDataBlueprintFunctionLibrary::SaveStruct<FSimpleNoiseSettings>(Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetSimpleNoiseSettings(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_" + Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetName() + "_SimpleSettings"));
+						USaveDataBlueprintFunctionLibrary::SaveStruct<FRidgidNoiseSettings>(Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetRidgidNoiseSettings(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_" + Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetName() + "_RidgidSettings"));
+					}
+				}
+				else if (Cast<AStar>(Object))
+				{
+					AStar* Star = Cast<AStar>(Object);
+					USaveDataBlueprintFunctionLibrary::SaveStruct<FStarProperties>(Star->starProperties, TEXT("/Game/Json/" + Star->Name.ToString() + "_StarProperties"));
+				}
 			}
 		}
 		SaveGameInstance->PlayerLocation = CelestialPlayer->GetActorLocation();
@@ -287,21 +347,6 @@ void ACelestialGameMode::Save()
 			// Save succeeded.
 			if (GEngine)
 			{
-				FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-				TArray<FAssetData> AssetData;
-				const UClass* Class = UDataAsset::StaticClass();
-				AssetRegistryModule.Get().GetAssetsByClass(Class->GetFName(), AssetData);
-				for (auto& Asset : AssetData)
-				{
-					FStringOutputDevice outputDevice;
-					UPackage::SavePackage(
-						Asset.GetPackage(), 
-						nullptr, 
-						EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, 
-						*Asset.GetPackage()->FileName.ToString(), 
-						&outputDevice
-					);
-				}
 
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString::Printf(TEXT("Save Succedded")));
 			}
