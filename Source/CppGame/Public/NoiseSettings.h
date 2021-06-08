@@ -16,21 +16,21 @@ struct FSimpleNoiseSettings
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float Strength = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float BaseRoughness = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float Roughness = 2;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	FVector Center;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "8"))
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "8"))
 	int numLayers = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "2"))
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "2"))
 	float Persistence = .5f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float MinValue;
 };
 
@@ -39,7 +39,7 @@ struct FRidgidNoiseSettings : public FSimpleNoiseSettings
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	float WeightMultiplier = .8f;
 };
 
@@ -49,12 +49,12 @@ struct FNoiseSettings_
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	TEnumAsByte<EFilterType> FilterType;
 
-	UPROPERTY(EditAnywhere, meta = (EditCondition = "FilterType == 0", EditConditionHides))
+	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "FilterType == 0", EditConditionHides))
 	FSimpleNoiseSettings SimpleNoiseSettings;
-	UPROPERTY(EditAnywhere, meta = (EditCondition = "FilterType == 1", EditConditionHides))
+	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "FilterType == 1", EditConditionHides))
 	FRidgidNoiseSettings RidgidNoiseSettings;
 
 };
@@ -67,7 +67,7 @@ class CPPGAME_API UNoiseSettings : public UObject
 	DECLARE_MULTICAST_DELEGATE(FNoiseSettingsChanged);
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	FNoiseSettings_ NoiseSettings;
 
 public:

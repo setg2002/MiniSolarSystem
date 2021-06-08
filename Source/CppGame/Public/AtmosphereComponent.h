@@ -12,7 +12,7 @@
  */
 
 
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS(NonTransient, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CPPGAME_API UAtmosphereComponent : public UStaticMeshComponent
 {
 	GENERATED_BODY()

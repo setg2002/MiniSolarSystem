@@ -16,9 +16,9 @@ struct FNoiseLayer_
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	bool Enabled = true;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	bool UseFirstLayerAsMask = false;
 
 };
@@ -31,7 +31,7 @@ class CPPGAME_API UNoiseLayer : public UObject
 	DECLARE_MULTICAST_DELEGATE(FNoiseLayerChanged);
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	FNoiseLayer_ NoiseLayer;
 
 public:
@@ -54,7 +54,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetFirstLayerAsMask(bool NewFirstLayerAsMask);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UNoiseSettings* NoiseSettings;
 	
 };

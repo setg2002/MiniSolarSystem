@@ -24,7 +24,7 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* BasePlanetMat;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UCurveLinearColor* Gradient;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -61,9 +61,9 @@ public:
 private:
 	UStaticMeshComponent* Mesh;
 
-	UPROPERTY(EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
+	UPROPERTY(SaveGame, EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
 	int NumStorms = 25;
 
-	UPROPERTY(EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
+	UPROPERTY(SaveGame, EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
 	float StormFalloff = 2.5f;
 };

@@ -44,7 +44,7 @@ public:
 	APlanet();
 
 	FPlanetGenerated OnPlanetGenerated;
-
+	
 	// True when the planet is already generating
 	bool bGenerating;
 
@@ -54,7 +54,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Main mesh	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UProceduralMeshComponent* ProcMesh;
 
 	TerrainFace* TerrainFaces[6];
@@ -64,11 +64,11 @@ public:
 
 	/* TODO Orbit stuff should be put in ACelestialBody instead */
 	// The CelestialBody that orbitVelocity is to be calculated for
-	UPROPERTY(Category = "Orbits", EditAnywhere)
+	UPROPERTY(SaveGame, Category = "Orbits", EditAnywhere)
 	ACelestialBody* OrbitingBody;
 
 	// The necessary velocity for this planet to orbit OrbitingBody
-	UPROPERTY(Category = "Orbits", VisibleAnywhere)
+	UPROPERTY(SaveGame, Category = "Orbits", VisibleAnywhere)
 	float orbitVelocity;
 
 	// Sets orbitVelocity to the required magnitude to orbit OrbitingBody 
@@ -96,11 +96,11 @@ public:
 	int32 VectorDuration = 10;
 
 	// When true, the planet will call ReGenerate() every time a parameter is changed
-	UPROPERTY(Category = "Settings", EditAnywhere)
+	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere)
 	bool bAutoGenerate;
 
 	// When true, planet terrain generation wil be multithreaded
-	UPROPERTY(Category = "Settings", EditAnywhere)
+	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere)
 	bool bMultithreadGeneration;
 
 	// When true, tangents and normals will be generated for the planet mesh every time a parameter is changed (can only be true if bAutoGenerate is true)
@@ -111,13 +111,13 @@ public:
 	UPROPERTY(Category = "Settings", EditInstanceOnly)
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
 
-	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	UColorSettings* ColorSettings;
-	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	UShapeSettings* ShapeSettings;
 
 	// Desired resolution for each TerrainFace to generate
-	UPROPERTY(Category = "Mesh", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "2", ClampMax = "512"))
+	UPROPERTY(SaveGame, Category = "Mesh", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "2", ClampMax = "512"))
 	int32 resolution = 16;
 
 	// Initializes TerrainFaces

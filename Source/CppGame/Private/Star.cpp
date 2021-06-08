@@ -71,6 +71,15 @@ void AStar::Tick(float DeltaTime)
 	}
 }
 
+bool AStar::SetStarProperties(FStarProperties NewProperties)
+{
+	starProperties = NewProperties;
+	SetRadius(starProperties.radius);
+	SetLuminosity(starProperties.luminosity);
+	UpdateColor();
+	return true;
+}
+
 void AStar::SetRadius(int NewRadius)
 {
 	starProperties.radius = NewRadius;

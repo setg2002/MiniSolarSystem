@@ -101,3 +101,12 @@ void ACelestialBody::SetCurrentVelocity(FVector NewVelocity)
 {
 	currentVelocity = NewVelocity;
 }
+
+UStaticMeshComponent* ACelestialBody::AddCelestialComponent(TSubclassOf<UStaticMeshComponent> NewComponentClass)
+{
+	UStaticMeshComponent* NewComp = NewObject<UStaticMeshComponent>(this, *NewComponentClass, FName(TEXT("" + this->Name.ToString() + NewComponentClass.Get()->GetFName().ToString())), EObjectFlags::RF_Public);
+	this->AddInstanceComponent(NewComp);
+	NewComp->RegisterComponent();
+	NewComp->AttachTo(this->RootComponent);
+	return NewComp;
+}

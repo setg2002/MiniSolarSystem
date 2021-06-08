@@ -1,9 +1,12 @@
 // Copyright Soren Gilbertson
 
-
+//TODO Remove unneccesary includes
 #include "CelestialGameMode.h"
+#include "Serialization/NameAsStringProxyArchive.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "SaveDataBlueprintFunctionLibrary.h"
+#include "Serialization/ObjectWriter.h"
+#include "Serialization/ObjectReader.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "AssetRegistryModule.h"
@@ -20,6 +23,15 @@
 #include "NoiseLayer.h"
 #include "Planet.h"
 #include "Star.h"
+
+struct FCelestialSaveGameArchive : public FNameAsStringProxyArchive
+{
+	FCelestialSaveGameArchive(FArchive& InInnerArchive)
+		: FNameAsStringProxyArchive(InInnerArchive)
+	{
+		ArIsSaveGame = true;
+	}
+};
 
 
 ACelestialGameMode::ACelestialGameMode()
@@ -190,7 +202,7 @@ ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 	}
 	return nullptr;
 }
-
+#pragma optimize("", off)
 void ACelestialGameMode::LoadGame()
 {
 	// Retrieve and cast the USaveGame object to UMySaveGame.
@@ -204,73 +216,35 @@ void ACelestialGameMode::LoadGame()
 			if (Cast<ACelestialBody>(Object))
 			{
 				ACelestialBody* Body = Cast<ACelestialBody>(Object);
-				Body->SetActorLocation(*LoadedGame->CelestialLocations.Find(Body));
-				Body->SetCurrentVelocity(*LoadedGame->CelestialVelocities.Find(Body));
 
-				if (Cast<APlanet>(Object))
+				for (auto& data : LoadedGame->CelestialBodyData)
 				{
-					APlanet* Planet = Cast<APlanet>(Object);
-					FShapeSettings_ LoadedShapeSettings;
-					if (USaveDataBlueprintFunctionLibrary::LoadStruct<FShapeSettings_>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_ShapeSettings"), LoadedShapeSettings))
+					if (data.Name == Body->Name)
 					{
-						Planet->ShapeSettings->SetStruct(LoadedShapeSettings);
-						for (int32 i = 0; i < Planet->ShapeSettings->GetNoiseLayers().Num(); i++)
-						{
-							FNoiseLayer_ LoadedNoiseLayer;
-							if (USaveDataBlueprintFunctionLibrary::LoadStruct<FNoiseLayer_>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_NoiseLayer" + FString::FromInt(i)), LoadedNoiseLayer))
-							{
-								Planet->ShapeSettings->GetNoiseLayers()[i]->SetStruct(LoadedNoiseLayer);
-								FNoiseSettings_ LoadedNoiseSettings;
-								if (USaveDataBlueprintFunctionLibrary::LoadStruct<FNoiseSettings_>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_NoiseSettings" + FString::FromInt(i)), LoadedNoiseSettings))
-								{
-									Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->SetStruct(LoadedNoiseSettings);
-									FSimpleNoiseSettings LoadedSimpleSettings;
-									FRidgidNoiseSettings LoadedRidgidSettings;
-									if (USaveDataBlueprintFunctionLibrary::LoadStruct<FSimpleNoiseSettings>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_" + Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetName() + "_SimpleSettings"), LoadedSimpleSettings) &&
-										USaveDataBlueprintFunctionLibrary::LoadStruct<FRidgidNoiseSettings>(TEXT("/Game/Json/" + Planet->Name.ToString() + "_" + Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetName() + "_RidgidSettings"), LoadedRidgidSettings))
-									{
-										Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->SetSimpleNoiseSettings(LoadedSimpleSettings);
-										Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->SetRidgidNoiseSettings(LoadedRidgidSettings);
-									}
-								}
-							}
-						}
+						Body->SetActorTransform(data.Transform);
+						FObjectReader ObjectReader(Body, data.ActorData);
+						FCelestialSaveGameArchive Ar(ObjectReader);
+						Body->Serialize(Ar);
+						break;
 					}
-				}
-				else if (Cast<AStar>(Object))
-				{
-					AStar* Star = Cast<AStar>(Object);
-					FStarProperties LoadedStarProperties;
-					USaveDataBlueprintFunctionLibrary::LoadStruct<FStarProperties>(TEXT("/Game/Json/" + Star->Name.ToString() + "_StarProperties"), LoadedStarProperties);
-					Star->starProperties = LoadedStarProperties;
 				}
 			}
 		}
-		CelestialPlayer->SetActorLocation(LoadedGame->PlayerLocation);
-		CelestialPlayer->SetCurrentVelocity(LoadedGame->PlayerVelocity);
-		CelestialPlayer->SetActorRotation(LoadedGame->PlayerRotation);
-		CelestialPlayer->SetIgnoreGravity(LoadedGame->IgnoreGravity);
-		CelestialPlayer->SetThrottle(LoadedGame->Throttle);
 
-		OverviewPlayer->Speed = LoadedGame->Speed;
-		OverviewPlayer->SetActorRotation(LoadedGame->OverviewRotation);
-		OverviewPlayer->SetActorLocation(LoadedGame->OverviewLocation);
-		OverviewPlayer->GetSpringArm()->TargetArmLength = LoadedGame->TargetArmLength;
-		OverviewPlayer->GetSpringArm()->SetRelativeRotation(LoadedGame->SpringArmRotation);
+		CelestialPlayer = LoadedGame->CelestialPlayerData;
+		OverviewPlayer = LoadedGame->OverviewPlayerData;
 
 		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-		ODA->SetDrawType(LoadedGame->DrawType);
-		ODA->SetNumSteps(LoadedGame->NumSteps);
-		ODA->SetTimeStep(LoadedGame->TimeStep);
-		ODA->SetRelativeToBody(LoadedGame->bRelativeToBody);
-		ODA->SetRelativeBody(LoadedGame->CentralBody);
-		ODA->SetWidth(LoadedGame->Width);
-		ODA->SetRenderedSteps(LoadedGame->RenderedSteps);
+		ODA = LoadedGame->OrbitVisualizationData;
+
+		UGameplayStatics::SetGamePaused(GetWorld(), false); // TEMP FIX
 	}
-	//else
-	//{
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NOT LOADED"));
+
 		ReGen(TerrestrialPlanets[0].ToString());
-	//}
+	}
 }
 
 
@@ -292,54 +266,32 @@ void ACelestialGameMode::Save()
 	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
 	{
 		// Set data on the savegame object.
-		for (auto& Object : celestialObjects)
+		for (int32 i = 0; i < celestialObjects.Num(); i++/*auto& Object : celestialObjects*/)
 		{
+			auto Object = celestialObjects[i];
 			if (Cast<ACelestialBody>(Object))
 			{
+				SaveGameInstance->CelestialBodyData.Add(FActorRecord());
 				ACelestialBody* Body = Cast<ACelestialBody>(Object);
-				SaveGameInstance->CelestialLocations.Add(Body, Body->GetActorLocation());
-				SaveGameInstance->CelestialVelocities.Add(Body, Body->GetCurrentVelocity());
 
-				if (Cast<APlanet>(Object))
-				{
-					APlanet* Planet = Cast<APlanet>(Object);
-					USaveDataBlueprintFunctionLibrary::SaveStruct<FShapeSettings_>(Planet->ShapeSettings->GetStruct(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_ShapeSettings"));
-					for (int32 i = 0; i < Planet->ShapeSettings->GetNoiseLayers().Num(); i++)
-					{
-						USaveDataBlueprintFunctionLibrary::SaveStruct<FNoiseLayer_>(Planet->ShapeSettings->GetNoiseLayers()[i]->GetStruct(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_NoiseLayer" + FString::FromInt(i)));
-						USaveDataBlueprintFunctionLibrary::SaveStruct<FNoiseSettings_>(Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetStruct(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_NoiseSettings" + FString::FromInt(i)));
-						USaveDataBlueprintFunctionLibrary::SaveStruct<FSimpleNoiseSettings>(Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetSimpleNoiseSettings(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_" + Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetName() + "_SimpleSettings"));
-						USaveDataBlueprintFunctionLibrary::SaveStruct<FRidgidNoiseSettings>(Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetRidgidNoiseSettings(), TEXT("/Game/Json/" + Planet->Name.ToString() + "_" + Planet->ShapeSettings->GetNoiseLayers()[i]->NoiseSettings->GetName() + "_RidgidSettings"));
-					}
-				}
-				else if (Cast<AStar>(Object))
-				{
-					AStar* Star = Cast<AStar>(Object);
-					USaveDataBlueprintFunctionLibrary::SaveStruct<FStarProperties>(Star->starProperties, TEXT("/Game/Json/" + Star->Name.ToString() + "_StarProperties"));
-				}
+				SaveGameInstance->CelestialBodyData[i].Class = Body->GetClass();
+				SaveGameInstance->CelestialBodyData[i].Transform = Body->GetTransform();
+				SaveGameInstance->CelestialBodyData[i].Name = Body->Name;
+
+				FObjectWriter ObjectWriter(SaveGameInstance->CelestialBodyData[i].ActorData);
+
+				// use a wrapper archive that converts FNames and UObject*'s to strings that can be read back in
+				FCelestialSaveGameArchive Ar(ObjectWriter);
+
+				// serialize the object
+				Body->Serialize(Ar);
 			}
 		}
-		SaveGameInstance->PlayerLocation = CelestialPlayer->GetActorLocation();
-		SaveGameInstance->PlayerVelocity = CelestialPlayer->GetCurrentVelocity();
-		SaveGameInstance->PlayerRotation = CelestialPlayer->GetActorRotation();
-		SaveGameInstance->IgnoreGravity = CelestialPlayer->GetIgnoreGravity();
-		SaveGameInstance->Throttle = CelestialPlayer->GetThrottle();
-
-		SaveGameInstance->Speed = OverviewPlayer->Speed;
-		SaveGameInstance->OverviewRotation = OverviewPlayer->GetActorRotation();
-		SaveGameInstance->OverviewLocation = OverviewPlayer->GetActorLocation();
-		SaveGameInstance->TargetArmLength = OverviewPlayer->GetSpringArm()->TargetArmLength;
-		SaveGameInstance->SpringArmRotation = OverviewPlayer->GetSpringArm()->GetRelativeRotation();
+		SaveGameInstance->CelestialPlayerData = CelestialPlayer;
+		SaveGameInstance->OverviewPlayerData = OverviewPlayer;
 
 		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-		SaveGameInstance->DrawType = ODA->GetDrawType();
-		SaveGameInstance->NumSteps = ODA->GetNumSteps();
-		SaveGameInstance->TimeStep = ODA->GetTimeStep();
-		SaveGameInstance->bRelativeToBody = ODA->GetRelativeToBody();
-		SaveGameInstance->CentralBody = ODA->GetRelativeBody();
-		SaveGameInstance->Width = ODA->GetWidth();
-		SaveGameInstance->RenderedSteps = ODA->GetRenderedSteps();
-
+		SaveGameInstance->OrbitVisualizationData = ODA;
 
 		// Save the data immediately.
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Test", 0))
@@ -361,7 +313,7 @@ void ACelestialGameMode::Save()
 		}
 	}
 }
-
+#pragma optimize("", on)
 void ACelestialGameMode::OrbitDebug()
 {
 	if (currentPerspective != 0)

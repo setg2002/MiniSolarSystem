@@ -26,7 +26,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UGasGiantColorSettings* ColorSettings;
 
 	UFUNCTION(BlueprintCallable)
@@ -41,7 +41,7 @@ public:
 #endif
 
 private:
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
+	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "1"))
 	int Radius = 1;
 
 	virtual void BeginPlay() override;

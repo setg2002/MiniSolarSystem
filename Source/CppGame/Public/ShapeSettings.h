@@ -18,10 +18,10 @@ struct FShapeSettings_
 
 public:
 	// Planet radius in cm
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	float PlanetRadius = 100;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	TArray<UNoiseLayer*> NoiseLayers;
 
 };
@@ -34,7 +34,7 @@ class CPPGAME_API UShapeSettings : public UObject
 	DECLARE_MULTICAST_DELEGATE(FShapeSettingsChanged);
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	FShapeSettings_ ShapeSettings;
 
 public:

@@ -42,8 +42,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Sphere;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	FStarProperties starProperties;
+	bool SetStarProperties(FStarProperties NewProperties);
 
 	UPROPERTY(EditDefaultsOnly)
 	UDataTable* starTypeData;

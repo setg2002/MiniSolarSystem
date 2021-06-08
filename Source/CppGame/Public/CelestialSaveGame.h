@@ -9,6 +9,25 @@
 /**
  * 
  */
+USTRUCT()
+struct FActorRecord
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(SaveGame)
+	UClass* Class;
+
+	UPROPERTY(SaveGame)
+	FTransform Transform;
+
+	UPROPERTY(SaveGame)
+	FName Name;
+
+	UPROPERTY(SaveGame)
+	TArray<uint8> ActorData;
+};
+
+
 UCLASS()
 class CPPGAME_API UCelestialSaveGame : public USaveGame
 {
@@ -18,56 +37,17 @@ public:
 	UCelestialSaveGame();
 
 	UPROPERTY(VisibleAnywhere)
-	TMap<class ACelestialBody*, FVector> CelestialLocations;
+	TMap<FName, class ACelestialBody*> CelestialBodies;
+
+	TArray<FActorRecord> CelestialBodyData;
 
 	UPROPERTY(VisibleAnywhere)
-	TMap<class ACelestialBody*, FVector> CelestialVelocities;
-
-
-	// ----- Celestial Player Data ----- \\
+	class ACelestialPlayer* CelestialPlayerData;
 
 	UPROPERTY(VisibleAnywhere)
-	FVector PlayerLocation;
-	UPROPERTY(VisibleAnywhere)
-	FVector PlayerVelocity;
-	UPROPERTY(VisibleAnywhere)
-	FRotator PlayerRotation;
+	class AOverviewPlayer* OverviewPlayerData;
 
 	UPROPERTY(VisibleAnywhere)
-	bool IgnoreGravity;
-	UPROPERTY(VisibleAnywhere)
-	float Throttle;
-
-
-	// ----- Overview Player Data ----- \\
-
-	UPROPERTY(VisibleAnywhere)
-	int32 Speed;
-	UPROPERTY(VisibleAnywhere)
-	FRotator OverviewRotation;
-	UPROPERTY(VisibleAnywhere)
-	FVector OverviewLocation;
-	UPROPERTY(VisibleAnywhere)
-	float TargetArmLength;
-	UPROPERTY(VisibleAnywhere)
-	FRotator SpringArmRotation;
-
-
-	// ----- Orbit Visualization Data ----- \\
-
-	UPROPERTY(VisibleAnywhere)
-	TEnumAsByte<enum EDrawType> DrawType;
-	UPROPERTY(VisibleAnywhere)
-	int32 NumSteps;
-	UPROPERTY(VisibleAnywhere)
-	float TimeStep;
-	UPROPERTY(VisibleAnywhere)
-	bool bRelativeToBody;
-	UPROPERTY(VisibleAnywhere)
-	class ACelestialBody* CentralBody;
-	UPROPERTY(VisibleAnywhere)
-	float Width;
-	UPROPERTY(VisibleAnywhere)
-	int32 RenderedSteps;
+	class AOrbitDebugActor* OrbitVisualizationData;
 
 };

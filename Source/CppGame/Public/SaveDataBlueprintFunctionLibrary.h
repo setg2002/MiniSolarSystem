@@ -47,5 +47,31 @@ public:
 
 		return false;
 	}
+
+	// Converts struct to FString
+	template <typename StructClass>
+	UFUNCTION(BlueprintCallable, Category = "Save")
+	static bool SaveStruct_String(const StructClass& Struct)
+	{
+		FString JsonString;
+		if (FJsonObjectConverter::UStructToJsonObjectString(Struct, JsonString))
+		{
+			return true;
+		}
+		return false;
+	};
+
+	// Load a Json string to struct
+	template <typename StructClass>
+	UFUNCTION(BlueprintCallable, Category = "Save")
+	static bool LoadStruct_String(const FString& String, StructClass& OutStruct)
+	{
+		FString JsonString;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(JsonString, &OutStruct, 0, 0))
+		{
+			return true;
+		}
+		return false;
+	}
 	
 };
