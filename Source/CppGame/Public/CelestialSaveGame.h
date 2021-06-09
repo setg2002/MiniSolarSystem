@@ -25,6 +25,14 @@ struct FActorRecord
 
 	UPROPERTY(SaveGame)
 	TArray<uint8> ActorData;
+
+	// Default Values
+	FActorRecord()
+	{
+		Class = nullptr;
+		Transform = FTransform();
+		Name = NAME_None;
+	}
 };
 
 
@@ -37,17 +45,9 @@ public:
 	UCelestialSaveGame();
 
 	UPROPERTY(VisibleAnywhere)
-	TMap<FName, class ACelestialBody*> CelestialBodies;
-
 	TArray<FActorRecord> CelestialBodyData;
 
 	UPROPERTY(VisibleAnywhere)
-	class ACelestialPlayer* CelestialPlayerData;
-
-	UPROPERTY(VisibleAnywhere)
-	class AOverviewPlayer* OverviewPlayerData;
-
-	UPROPERTY(VisibleAnywhere)
-	class AOrbitDebugActor* OrbitVisualizationData;
+	FActorRecord OrbitVisualizationData;
 
 };

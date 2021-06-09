@@ -18,13 +18,13 @@ class CPPGAME_API UAtmosphereComponent : public UStaticMeshComponent
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	FAtmosphereProperties AtmosphereProperties;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	bool bClouds = true;
 
-	UPROPERTY(EditAnywhere, AdvancedDisplay)
+	UPROPERTY(SaveGame, EditAnywhere, AdvancedDisplay)
 	float CloudHeight;
 
 public:

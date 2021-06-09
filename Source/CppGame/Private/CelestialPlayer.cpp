@@ -60,11 +60,6 @@ void ACelestialPlayer::Tick(float DeltaTime)
 	}
 }
 
-FVector ACelestialPlayer::GetCurrentVelocity() const
-{
-	return currentVelocity;
-}
-
 void ACelestialPlayer::SetCurrentVelocity(FVector NewVelocity)
 {
 	currentVelocity = NewVelocity;

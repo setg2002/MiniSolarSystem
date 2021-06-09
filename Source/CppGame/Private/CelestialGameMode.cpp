@@ -2,11 +2,9 @@
 
 //TODO Remove unneccesary includes
 #include "CelestialGameMode.h"
-#include "Serialization/NameAsStringProxyArchive.h"
+#include "Serialization\ObjectAndNameAsStringProxyArchive.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "SaveDataBlueprintFunctionLibrary.h"
-#include "Serialization/ObjectWriter.h"
-#include "Serialization/ObjectReader.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "AssetRegistryModule.h"
@@ -24,10 +22,10 @@
 #include "Planet.h"
 #include "Star.h"
 
-struct FCelestialSaveGameArchive : public FNameAsStringProxyArchive
+struct FCelestialSaveGameArchive : public FObjectAndNameAsStringProxyArchive
 {
 	FCelestialSaveGameArchive(FArchive& InInnerArchive)
-		: FNameAsStringProxyArchive(InInnerArchive)
+		: FObjectAndNameAsStringProxyArchive(InInnerArchive, false)
 	{
 		ArIsSaveGame = true;
 	}
@@ -69,7 +67,7 @@ void ACelestialGameMode::BeginPlay()
 			Planet->OnPlanetGenerated.BindUFunction(this, "NewGeneratedPlanet");
 		}
 	}
-	TerrestrialPlanets.Sort([](const FName& a, const FName& b) { return a < b; });
+	TerrestrialPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
 
 	// Gets all actors that implement ICelestialObject and adds them to celestialObjects
 	TArray<AActor*> Actors;
@@ -131,7 +129,7 @@ void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)
 	{
 		GeneratedPlanets.AddUnique(PlanetName);
 
-		GeneratedPlanets.Sort([](const FName& a, const FName& b) { return a < b; });
+		GeneratedPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
 		if (GeneratedPlanets == TerrestrialPlanets)
 		{
 			b = false;
@@ -206,7 +204,7 @@ ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 void ACelestialGameMode::LoadGame()
 {
 	// Retrieve and cast the USaveGame object to UMySaveGame.
-	if (UCelestialSaveGame* LoadedGame = Cast<UCelestialSaveGame>(UGameplayStatics::LoadGameFromSlot("Test", 0)))
+	if (UCelestialSaveGame* LoadedGame = Cast<UCelestialSaveGame>(UGameplayStatics::LoadGameFromSlot("Save", 0)))
 	{
 		// The operation was successful, so LoadedGame now contains the data we saved earlier.
 		UE_LOG(LogTemp, Warning, TEXT("LOADED"));
@@ -216,28 +214,28 @@ void ACelestialGameMode::LoadGame()
 			if (Cast<ACelestialBody>(Object))
 			{
 				ACelestialBody* Body = Cast<ACelestialBody>(Object);
-
+				UE_LOG(LogTemp, Warning, TEXT("Loading Data For: %s"), *Body->Name.ToString());
 				for (auto& data : LoadedGame->CelestialBodyData)
 				{
 					if (data.Name == Body->Name)
 					{
 						Body->SetActorTransform(data.Transform);
-						FObjectReader ObjectReader(Body, data.ActorData);
-						FCelestialSaveGameArchive Ar(ObjectReader);
+						FMemoryReader MemoryReader(data.ActorData);
+						FCelestialSaveGameArchive Ar(MemoryReader);
 						Body->Serialize(Ar);
+						UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *Body->Name.ToString());
 						break;
 					}
 				}
 			}
 		}
 
-		CelestialPlayer = LoadedGame->CelestialPlayerData;
-		OverviewPlayer = LoadedGame->OverviewPlayerData;
-
 		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-		ODA = LoadedGame->OrbitVisualizationData;
+		FMemoryReader MemoryReader(LoadedGame->OrbitVisualizationData.ActorData);
+		FCelestialSaveGameArchive Ar(MemoryReader);
+		ODA->Serialize(Ar);
 
-		UGameplayStatics::SetGamePaused(GetWorld(), false); // TEMP FIX
+		ReGen(TerrestrialPlanets[0].ToString());
 	}
 	else
 	{
@@ -252,7 +250,7 @@ void ACelestialGameMode::LoadGame()
 
 void ACelestialGameMode::DeleteSave()
 {
-	UGameplayStatics::DeleteGameInSlot("Test", 0);
+	UGameplayStatics::DeleteGameInSlot("Save", 0);
 }
 
 void ACelestialGameMode::SaveAndQuit()
@@ -261,46 +259,48 @@ void ACelestialGameMode::SaveAndQuit()
 	FGenericPlatformMisc::RequestExit(false);
 }
 
+void ACelestialGameMode::SaveAndQuitToMenu()
+{
+	Save();
+	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+}
+
 void ACelestialGameMode::Save()
 {
 	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
 	{
 		// Set data on the savegame object.
-		for (int32 i = 0; i < celestialObjects.Num(); i++/*auto& Object : celestialObjects*/)
+
+		SaveGameInstance->CelestialBodyData.SetNum(bodies.Num());
+		for (int32 i = 0; i < bodies.Num(); i++)
 		{
-			auto Object = celestialObjects[i];
-			if (Cast<ACelestialBody>(Object))
-			{
-				SaveGameInstance->CelestialBodyData.Add(FActorRecord());
-				ACelestialBody* Body = Cast<ACelestialBody>(Object);
+			ACelestialBody* Body = bodies[i];
 
-				SaveGameInstance->CelestialBodyData[i].Class = Body->GetClass();
-				SaveGameInstance->CelestialBodyData[i].Transform = Body->GetTransform();
-				SaveGameInstance->CelestialBodyData[i].Name = Body->Name;
+			SaveGameInstance->CelestialBodyData[i].Class = Body->GetClass();
+			SaveGameInstance->CelestialBodyData[i].Transform = Body->GetTransform();
+			SaveGameInstance->CelestialBodyData[i].Name = Body->Name;
 
-				FObjectWriter ObjectWriter(SaveGameInstance->CelestialBodyData[i].ActorData);
+			FMemoryWriter MemoryWriter(SaveGameInstance->CelestialBodyData[i].ActorData);
 
-				// use a wrapper archive that converts FNames and UObject*'s to strings that can be read back in
-				FCelestialSaveGameArchive Ar(ObjectWriter);
+			// Use a wrapper archive that converts FNames and UObject*'s to strings that can be read back in
+			FCelestialSaveGameArchive Ar(MemoryWriter);
 
-				// serialize the object
-				Body->Serialize(Ar);
-			}
+			// Serialize the object
+			Body->Serialize(Ar);
 		}
-		SaveGameInstance->CelestialPlayerData = CelestialPlayer;
-		SaveGameInstance->OverviewPlayerData = OverviewPlayer;
 
 		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-		SaveGameInstance->OrbitVisualizationData = ODA;
+		FMemoryWriter MemoryWriter(SaveGameInstance->OrbitVisualizationData.ActorData);
+		FCelestialSaveGameArchive Ar(MemoryWriter);
+		ODA->Serialize(Ar);
 
 		// Save the data immediately.
-		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Test", 0))
+		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Save", 0))
 		{
 			// Save succeeded.
 			if (GEngine)
 			{
-
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString::Printf(TEXT("Save Succedded")));
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Save Succedded")));
 			}
 		}
 		else
@@ -308,7 +308,7 @@ void ACelestialGameMode::Save()
 			// Save failed.
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Save Failed")));
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT("Save Failed")));
 			}
 		}
 	}

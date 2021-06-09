@@ -56,6 +56,9 @@ public:
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void SaveAndQuit();
+	
+	UFUNCTION(Exec, BlueprintCallable)
+	void SaveAndQuitToMenu();
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void Save();

@@ -39,23 +39,23 @@ private:
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EDrawType> DrawType;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	int32 NumSteps = 1000;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	float TimeStep = 0.0833f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	bool bRelativeToBody;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	ACelestialBody* CentralBody;
 
 	// The width of the debug. If it is 0 (zero) then the planet's radius will be used
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	float Width = 25;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	int32 RenderedSteps = 100;
 
 public:	
@@ -100,7 +100,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bAutoDraw = true;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	bool bUsePhysicsTimeStep;
 
 	UPROPERTY(EditAnywhere)

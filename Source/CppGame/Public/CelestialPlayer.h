@@ -34,7 +34,7 @@ public:
 	virtual void UpdatePosition(float timeStep) override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual FVector GetCurrentVelocity() const override;
+	virtual FVector GetCurrentVelocity() const override { return currentVelocity; }
 
 	// Returns the throttle value
 	UFUNCTION(BlueprintCallable)
@@ -45,10 +45,7 @@ public:
 	void SetThrottle(float NewThrottle) { Throttle = NewThrottle; }
 
 	UFUNCTION(BlueprintCallable)
-	bool GetIgnoreGravity()
-	{
-		return bIgnoreGravity;
-	}
+	bool GetIgnoreGravity() const { return bIgnoreGravity; }
 	void SetIgnoreGravity(bool NewIgnoreGravity) { bIgnoreGravity = NewIgnoreGravity; }
 
 	UFUNCTION(BlueprintCallable)
@@ -64,6 +61,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(SaveGame)
+	FVector currentVelocity;
 
 	UPROPERTY(EditAnywhere)
 	bool bIgnoreGravity = false;

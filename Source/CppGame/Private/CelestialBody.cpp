@@ -107,6 +107,6 @@ UStaticMeshComponent* ACelestialBody::AddCelestialComponent(TSubclassOf<UStaticM
 	UStaticMeshComponent* NewComp = NewObject<UStaticMeshComponent>(this, *NewComponentClass, FName(TEXT("" + this->Name.ToString() + NewComponentClass.Get()->GetFName().ToString())), EObjectFlags::RF_Public);
 	this->AddInstanceComponent(NewComp);
 	NewComp->RegisterComponent();
-	NewComp->AttachTo(this->RootComponent);
+	NewComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	return NewComp;
 }

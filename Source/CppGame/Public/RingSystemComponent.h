@@ -20,13 +20,13 @@ public:
 	URingSystemComponent();
 
 private:
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.001", ClampMax = "2"))
+	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0.001", ClampMax = "2"))
 	float Radius = 1;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.01", ClampMax = "1"))
+	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0.01", ClampMax = "1"))
 	float RingWidth = 0.01f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(SaveGame, EditAnywhere)
 	UCurveLinearColor* Gradient;
 
 	UMaterialInstanceDynamic* DynamicMaterial;

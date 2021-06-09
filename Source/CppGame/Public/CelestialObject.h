@@ -31,11 +31,8 @@ public:
 	virtual void UpdatePosition(float timeStep) { }
 
 	UFUNCTION()
-	virtual FVector GetCurrentVelocity() const { return currentVelocity; }
+	virtual FVector GetCurrentVelocity() const { return FVector::ZeroVector; }
 
 	UFUNCTION()
 	virtual int GetMass() const { return 0; }
-
-protected:
-	FVector currentVelocity;
 };
