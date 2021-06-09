@@ -113,7 +113,7 @@ ACelestialBody* ACelestialPlayer::LookingAtPlanet()
 			dist = (GetActorLocation() - Body->GetActorLocation()).Size();
 		}
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), ClosestBody == nullptr ? TEXT("True") : TEXT("False"));
+
 	return ClosestBody;
 }
 

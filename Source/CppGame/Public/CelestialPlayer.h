@@ -21,7 +21,7 @@ public:
 	// Sets default values for this pawn's properties
 	ACelestialPlayer();
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(SaveGame, BlueprintReadWrite)
 	bool bFocusPlanet = false;
 
 	UFUNCTION(BlueprintCallable)
@@ -44,9 +44,8 @@ public:
 	}
 	void SetThrottle(float NewThrottle) { Throttle = NewThrottle; }
 
-	UFUNCTION(BlueprintCallable)
-	bool GetIgnoreGravity() const { return bIgnoreGravity; }
-	void SetIgnoreGravity(bool NewIgnoreGravity) { bIgnoreGravity = NewIgnoreGravity; }
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
+	bool bIgnoreGravity;
 
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* GetLargestForce();
@@ -65,9 +64,7 @@ protected:
 	UPROPERTY(SaveGame)
 	FVector currentVelocity;
 
-	UPROPERTY(EditAnywhere)
-	bool bIgnoreGravity = false;
-
+	//UPROPERTY(SaveGame)
 	const int mass = 10;
 
 	const int MaxSpeed = 9999;
@@ -116,6 +113,7 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	int RotationForce = 100;
+	UPROPERTY(SaveGame)
 	float Throttle = 1;
 
 	void ChangeThrottle(float AxisValue)

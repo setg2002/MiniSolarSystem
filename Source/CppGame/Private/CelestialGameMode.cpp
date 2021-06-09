@@ -200,7 +200,7 @@ ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 	}
 	return nullptr;
 }
-#pragma optimize("", off)
+
 void ACelestialGameMode::LoadGame()
 {
 	// Retrieve and cast the USaveGame object to UMySaveGame.
@@ -208,32 +208,43 @@ void ACelestialGameMode::LoadGame()
 	{
 		// The operation was successful, so LoadedGame now contains the data we saved earlier.
 		UE_LOG(LogTemp, Warning, TEXT("LOADED"));
-
-		for (auto& Object : celestialObjects)
+		// Restore Celestial Body Data
+		for (auto& Body : bodies)
 		{
-			if (Cast<ACelestialBody>(Object))
+			UE_LOG(LogTemp, Warning, TEXT("Loading Data For: %s"), *Body->Name.ToString());
+			for (auto& data : LoadedGame->CelestialBodyData)
 			{
-				ACelestialBody* Body = Cast<ACelestialBody>(Object);
-				UE_LOG(LogTemp, Warning, TEXT("Loading Data For: %s"), *Body->Name.ToString());
-				for (auto& data : LoadedGame->CelestialBodyData)
+				if (data.Name == Body->Name)
 				{
-					if (data.Name == Body->Name)
-					{
-						Body->SetActorTransform(data.Transform);
-						FMemoryReader MemoryReader(data.ActorData);
-						FCelestialSaveGameArchive Ar(MemoryReader);
-						Body->Serialize(Ar);
-						UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *Body->Name.ToString());
-						break;
-					}
+					Body->SetActorTransform(data.Transform);
+					FMemoryReader MemoryReader(data.ActorData);
+					FCelestialSaveGameArchive Ar(MemoryReader);
+					Body->Serialize(Ar);
+					UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *Body->Name.ToString());
+					break;
 				}
 			}
 		}
 
+		// Restore Celestial Player Data
+		CelestialPlayer->SetActorTransform(LoadedGame->CelestialPlayerData.Transform);
+		FMemoryReader CelMemoryReader(LoadedGame->CelestialPlayerData.ActorData);
+		FCelestialSaveGameArchive CelAr(CelMemoryReader);
+		CelestialPlayer->Serialize(CelAr);
+
+		// Restore Overview Player Data
+		OverviewPlayer->SetActorTransform(LoadedGame->OverviewPlayerData.Transform);
+		FMemoryReader OrvwMemoryReader(LoadedGame->OverviewPlayerData.ActorData);
+		FCelestialSaveGameArchive OrvwAr(OrvwMemoryReader);
+		OverviewPlayer->Serialize(OrvwAr);
+		OverviewPlayer->GetSpringArm()->TargetArmLength = LoadedGame->OverviewArmLength;
+		OverviewPlayer->GetSpringArm()->SetRelativeRotation(LoadedGame->OverviewCameraRotation);
+
+		// Restore Orbit Visualization Data
 		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-		FMemoryReader MemoryReader(LoadedGame->OrbitVisualizationData.ActorData);
-		FCelestialSaveGameArchive Ar(MemoryReader);
-		ODA->Serialize(Ar);
+		FMemoryReader ODAMemoryReader(LoadedGame->OrbitVisualizationData.ActorData);
+		FCelestialSaveGameArchive ODAAr(ODAMemoryReader);
+		ODA->Serialize(ODAAr);
 
 		ReGen(TerrestrialPlanets[0].ToString());
 	}
@@ -271,6 +282,7 @@ void ACelestialGameMode::Save()
 	{
 		// Set data on the savegame object.
 
+		// Save Celestial Body Data
 		SaveGameInstance->CelestialBodyData.SetNum(bodies.Num());
 		for (int32 i = 0; i < bodies.Num(); i++)
 		{
@@ -289,10 +301,30 @@ void ACelestialGameMode::Save()
 			Body->Serialize(Ar);
 		}
 
+		// Save Celestial Player Data
+		SaveGameInstance->CelestialPlayerData.Class = CelestialPlayer->GetClass();
+		SaveGameInstance->CelestialPlayerData.Transform = CelestialPlayer->GetTransform();
+		SaveGameInstance->CelestialPlayerData.Name = FName("CelestialPlayer");
+		FMemoryWriter CelMemoryWriter(SaveGameInstance->CelestialPlayerData.ActorData);
+		FCelestialSaveGameArchive CelAr(CelMemoryWriter);
+		CelestialPlayer->Serialize(CelAr);
+
+		// Save Overview Player Data
+		SaveGameInstance->OverviewPlayerData.Class = OverviewPlayer->GetClass();
+		SaveGameInstance->OverviewPlayerData.Transform = OverviewPlayer->GetTransform();
+		SaveGameInstance->OverviewPlayerData.Name = FName("OverviewPlayer");
+		FMemoryWriter OrvwMemoryWriter(SaveGameInstance->OverviewPlayerData.ActorData);
+		FCelestialSaveGameArchive OrvwAr(OrvwMemoryWriter);
+		OverviewPlayer->Serialize(OrvwAr);
+		SaveGameInstance->OverviewArmLength = OverviewPlayer->GetSpringArm()->TargetArmLength;
+		SaveGameInstance->OverviewCameraRotation = OverviewPlayer->GetSpringArm()->GetRelativeRotation();
+
+		// Save Orbit Visualization Data
 		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-		FMemoryWriter MemoryWriter(SaveGameInstance->OrbitVisualizationData.ActorData);
-		FCelestialSaveGameArchive Ar(MemoryWriter);
-		ODA->Serialize(Ar);
+		SaveGameInstance->OrbitVisualizationData.Class = AOrbitDebugActor::Get()->GetClass();
+		FMemoryWriter ODAMemoryWriter(SaveGameInstance->OrbitVisualizationData.ActorData);
+		FCelestialSaveGameArchive ODAAr(ODAMemoryWriter);
+		ODA->Serialize(ODAAr);
 
 		// Save the data immediately.
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Save", 0))
@@ -313,7 +345,7 @@ void ACelestialGameMode::Save()
 		}
 	}
 }
-#pragma optimize("", on)
+
 void ACelestialGameMode::OrbitDebug()
 {
 	if (currentPerspective != 0)

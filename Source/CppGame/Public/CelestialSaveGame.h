@@ -50,4 +50,13 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	FActorRecord OrbitVisualizationData;
 
+	UPROPERTY(VisibleAnywhere)
+	FActorRecord CelestialPlayerData;
+
+	UPROPERTY(VisibleAnywhere)
+	FActorRecord OverviewPlayerData;
+	UPROPERTY(VisibleAnywhere)
+	float OverviewArmLength;
+	UPROPERTY(VisibleAnywhere)
+	FRotator OverviewCameraRotation;
 };

@@ -19,7 +19,7 @@ public:
 	// Sets default values for this pawn's properties
 	AOverviewPlayer();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "2000"))
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "2000"))
 	int32 Speed = 150;
 
 	// When true, celestial playert can use mmb to pan camera. Set to false when moving planets.
