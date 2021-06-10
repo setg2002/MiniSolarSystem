@@ -13,7 +13,7 @@
 #define GAME_PATCH_VERSION 4
 
 /*****Automatically modified after each build. Don't modify manually*****/
-#define GAME_BUILD_NUMBER 459
+#define GAME_BUILD_NUMBER 460
 
 #define GAME_VERSION_STRING        (std::to_string(GAME_MAJOR_VERSION) + "." + std::to_string(GAME_MINOR_VERSION) + "." + std::to_string(GAME_PATCH_VERSION) + "." + std::to_string(GAME_BUILD_NUMBER)).c_str()
 #define GAME_VERSION_STRING_SHORT  (std::to_string(GAME_MAJOR_VERSION) + "." + std::to_string(GAME_MINOR_VERSION)).c_str()

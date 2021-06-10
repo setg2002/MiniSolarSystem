@@ -47,6 +47,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TArray<FActorRecord> CelestialBodyData;
 
+	//UPROPERTY(VisibleAnywhere)
+
+
 	UPROPERTY(VisibleAnywhere)
 	FActorRecord OrbitVisualizationData;
 

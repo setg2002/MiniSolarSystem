@@ -27,4 +27,14 @@ public:
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	FColor color = FColor(128, 0, 0);
+
+	FORCEINLINE bool operator==(const FStarProperties& other) const
+	{
+		return other.radius == radius && other.mass == mass && other.luminosity == luminosity && other.color == color;
+	}
+
+	FORCEINLINE bool operator!=(const FStarProperties& other) const
+	{
+		return !(*this == other);
+	}
 };

@@ -53,11 +53,16 @@ void AStar::BeginPlay()
 		ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
 		ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
 	}
+
+	SetStarProperties(starProperties);
 }
 
 void AStar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Probably not the most effieient way of detecting a change in star properties.
+	if (OldProperties != starProperties) { SetStarProperties(starProperties); }
 
 	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 
@@ -69,6 +74,8 @@ void AStar::Tick(float DeltaTime)
 	{
 		Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Cast<AOverviewPlayer>(PlayerPawn)->GetCameraLocation()));
 	}
+
+	OldProperties = starProperties;
 }
 
 bool AStar::SetStarProperties(FStarProperties NewProperties)

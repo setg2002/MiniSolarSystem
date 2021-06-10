@@ -91,4 +91,7 @@ protected:
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 
+private:
+	FStarProperties OldProperties;
+
 };
