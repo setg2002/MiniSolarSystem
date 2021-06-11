@@ -34,6 +34,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere)
+	bool bMakeSphere;
 #if WITH_EDITOR
 	// Uses noise from shapeGenerator to generate a heightmap to be used as world displacement in the material
 	UTexture2D* CreateHeightmapTexture(FString TextureName);

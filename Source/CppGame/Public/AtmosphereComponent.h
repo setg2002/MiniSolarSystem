@@ -12,7 +12,7 @@
  */
 
 
-UCLASS(NonTransient, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS(BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CPPGAME_API UAtmosphereComponent : public UStaticMeshComponent
 {
 	GENERATED_BODY()
@@ -32,7 +32,7 @@ public:
 
 	UMaterialInstanceDynamic* DynamicMaterial;
 
-	UPROPERTY()
+	//UPROPERTY()
 	class UCloudComponent* CloudComponent;
 
 	float PlanetRadius;
@@ -96,6 +96,8 @@ public:
 	FLinearColor GetRay() const { return AtmosphereProperties.Ray; }
 	UFUNCTION(BlueprintCallable)
 	void SetRay(FLinearColor NewRay);
+
+	void UpdateProperties();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

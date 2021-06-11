@@ -10,7 +10,7 @@
 class GaseousColorGenerator;
 
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CPPGAME_API URingSystemComponent : public UStaticMeshComponent
 {
 	GENERATED_BODY()
@@ -44,6 +44,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UMaterialInstanceDynamic* GetDynamicMaterial() const { return DynamicMaterial; }
+
+	void UpdateProperties();
 
 protected:
 	// Called when the game starts

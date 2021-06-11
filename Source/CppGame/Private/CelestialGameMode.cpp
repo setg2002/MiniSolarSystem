@@ -7,6 +7,8 @@
 #include "SaveDataBlueprintFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
+#include "RingSystemComponent.h"
+#include "AtmosphereComponent.h"
 #include "AssetRegistryModule.h"
 #include "CelestialSaveGame.h"
 #include "NiagaraComponent.h"
@@ -225,6 +227,31 @@ void ACelestialGameMode::LoadGame()
 				}
 			}
 		}
+		for (auto& CompData : LoadedGame->CelestialComponentData)
+		{
+			ACelestialBody* Parent = GetBodyByName(CompData.ParentName.ToString());
+			FActorRecord CompRecord = CompData.ComponentData;
+
+			UActorComponent* NewComponent = NewObject<UActorComponent>(Parent, CompRecord.Class, CompRecord.Name);
+			FMemoryReader MemoryReader(CompRecord.ActorData);
+			FCelestialSaveGameArchive Ar(MemoryReader);
+			NewComponent->Serialize(Ar);
+#if WITH_EDITOR
+			NewComponent->CreationMethod = EComponentCreationMethod::Instance;
+#endif
+			Parent->AddCelestialComponent(Cast<UStaticMeshComponent>(NewComponent));
+
+			// This could be an interface call?
+			if (Cast<UAtmosphereComponent>(NewComponent))
+			{
+				Cast<UAtmosphereComponent>(NewComponent)->UpdateProperties();
+			}
+			else if (Cast<URingSystemComponent>(NewComponent))
+			{
+				Cast<URingSystemComponent>(NewComponent)->UpdateProperties();
+			}
+		}
+
 
 		// Restore Celestial Player Data
 		CelestialPlayer->SetActorTransform(LoadedGame->CelestialPlayerData.Transform);
@@ -299,6 +326,28 @@ void ACelestialGameMode::Save()
 
 			// Serialize the object
 			Body->Serialize(Ar);
+
+			// Save celestial components
+			for (auto& Comp : Body->GetComponents())
+			{
+				if (Cast<UAtmosphereComponent>(Comp) || Cast<URingSystemComponent>(Comp))
+				{
+					FActorRecord CompRecord;
+
+					CompRecord.Class = Comp->GetClass();
+					CompRecord.Transform = FTransform();
+					CompRecord.Name = Comp->GetFName();
+
+					FMemoryWriter CompMemoryWriter(CompRecord.ActorData);
+					FCelestialSaveGameArchive CompAr(CompMemoryWriter);
+					Comp->Serialize(CompAr);
+
+					FComponentData NewElement;
+					NewElement.ParentName = Body->Name;
+					NewElement.ComponentData = CompRecord;
+					SaveGameInstance->CelestialComponentData.Add(NewElement);
+				}
+			}
 		}
 
 		// Save Celestial Player Data
@@ -373,7 +422,11 @@ void ACelestialGameMode::ReGen(FString Planet)
 
 void ACelestialGameMode::tp(FString toPlanet)
 {
-	GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(GetBodyByName(toPlanet)->GetActorLocation());
+	AActor* planet = GetBodyByName(toPlanet);
+	if (planet)
+	{
+		GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(planet->GetActorLocation());
+	}
 }
 
 void ACelestialGameMode::SetTerrainResolution(FString Planet, int32 resolution)

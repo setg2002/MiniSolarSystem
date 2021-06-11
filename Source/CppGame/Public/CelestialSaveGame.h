@@ -12,7 +12,7 @@
 USTRUCT()
 struct FActorRecord
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
 	UClass* Class;
@@ -35,6 +35,18 @@ struct FActorRecord
 	}
 };
 
+USTRUCT()
+struct FComponentData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FName ParentName;
+
+	UPROPERTY(SaveGame)
+	FActorRecord ComponentData;
+};
+
 
 UCLASS()
 class CPPGAME_API UCelestialSaveGame : public USaveGame
@@ -47,8 +59,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TArray<FActorRecord> CelestialBodyData;
 
-	//UPROPERTY(VisibleAnywhere)
-
+	UPROPERTY(VisibleAnywhere)
+	TArray<FComponentData> CelestialComponentData;
 
 	UPROPERTY(VisibleAnywhere)
 	FActorRecord OrbitVisualizationData;

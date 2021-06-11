@@ -61,7 +61,7 @@ public:
 	void SetCurrentVelocity(FVector NewVelocity);
 
 	UFUNCTION(BlueprintCallable)
-	UStaticMeshComponent* AddCelestialComponent(TSubclassOf<UStaticMeshComponent> NewComponentClass);
+	void AddCelestialComponent(UStaticMeshComponent* NewComp);
 
 	USceneComponent* Root;
 

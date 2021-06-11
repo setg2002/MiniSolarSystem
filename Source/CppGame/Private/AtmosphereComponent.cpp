@@ -10,7 +10,11 @@
 
 UAtmosphereComponent::UAtmosphereComponent()
 {
+
 	CloudComponent = CreateDefaultSubobject<UCloudComponent>("Clouds");
+#if WITH_EDITOR
+	CloudComponent->CreationMethod = EComponentCreationMethod::Instance;
+#endif
 }
 
 
@@ -103,11 +107,22 @@ void UAtmosphereComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Cast<ACelestialBody>(GetOwner())->AddCelestialComponent(CloudComponent);
+
 	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_atmosphere_proportional_Inst.M_atmosphere_proportional_Inst'"), NULL, LOAD_None, NULL));
+	UpdateProperties();
+	CloudComponent->CreateMaterial();
+}
+
+void UAtmosphereComponent::UpdateProperties()
+{
 	PlanetRadius = Cast<APlanet>(GetOwner())->ShapeSettings->GetRadius();
 	this->SetRelativeLocation(FVector::ZeroVector);
 	this->SetRelativeScale3D(FVector(PlanetRadius * 0.0125f));
-	
+
+	SetClouds(bClouds);
+	SetCloudHeight(CloudHeight);
+
 	DynamicMaterial->SetScalarParameterValue("planet_radius", PlanetRadius);
 	DynamicMaterial->SetScalarParameterValue("atmo_radius", AtmosphereProperties.Height);
 	DynamicMaterial->SetScalarParameterValue("density_multiplier", AtmosphereProperties.Density);
@@ -117,7 +132,7 @@ void UAtmosphereComponent::BeginPlay()
 	DynamicMaterial->SetScalarParameterValue("opacity_multiplier", AtmosphereProperties.OpacityMultiplier);
 	DynamicMaterial->SetVectorParameterValue("beta_ambient", AtmosphereProperties.Ambient);
 	DynamicMaterial->SetVectorParameterValue("beta_mie", AtmosphereProperties.Mie);
-	SetHeight(PlanetRadius + 25);
+	DynamicMaterial->SetVectorParameterValue("beta_ray", AtmosphereProperties.Ray);
 }
 
 #if WITH_EDITOR

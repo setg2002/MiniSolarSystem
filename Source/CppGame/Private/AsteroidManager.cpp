@@ -48,7 +48,10 @@ void AAsteroidManager::NewVariants()
 
 #if WITH_EDITOR	
 	// Make the sphere offset texture
-	CreateSphereTexture("AsteroidSphere");
+	if (bMakeSphere)
+	{
+		CreateSphereTexture("AsteroidSphere");
+	}
 
 	// Make the heightmaps
 	HeightmapsArray->SourceTextures.Empty();

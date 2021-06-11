@@ -17,16 +17,20 @@ class CPPGAME_API UCloudComponent : public UStaticMeshComponent
 public:
 	UCloudComponent();
 
+	void CreateMaterial();
+
 	UMaterialInstanceDynamic* DynamicMaterial;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
-	float CloudHeight = 1.1;
+	/*UPROPERTY(EditAnywhere, meta = (ClampMin = "0"))
+	float CloudHeight = 1.1;*/
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
 protected:
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
+
 	virtual void OnComponentCreated() override;
 
 	virtual void BeginPlay() override;
