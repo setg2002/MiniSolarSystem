@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine\DataTable.h"
+//#include "Engine\DataTable.h"
 #include "AtmosphereProperties.generated.h"
 
 
 USTRUCT(BlueprintType)
-struct FAtmosphereProperties : public FTableRowBase
+struct FAtmosphereProperties/* : public FTableRowBase*/
 {
 	GENERATED_BODY()
 

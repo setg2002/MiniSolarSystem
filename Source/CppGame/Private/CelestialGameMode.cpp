@@ -230,10 +230,9 @@ void ACelestialGameMode::LoadGame()
 		for (auto& CompData : LoadedGame->CelestialComponentData)
 		{
 			ACelestialBody* Parent = GetBodyByName(CompData.ParentName.ToString());
-			FActorRecord CompRecord = CompData.ComponentData;
 
-			UActorComponent* NewComponent = NewObject<UActorComponent>(Parent, CompRecord.Class, CompRecord.Name);
-			FMemoryReader MemoryReader(CompRecord.ActorData);
+			UActorComponent* NewComponent = NewObject<UActorComponent>(Parent, CompData.Class, CompData.Name);
+			FMemoryReader MemoryReader(CompData.ActorData);
 			FCelestialSaveGameArchive Ar(MemoryReader);
 			NewComponent->Serialize(Ar);
 #if WITH_EDITOR
@@ -328,24 +327,21 @@ void ACelestialGameMode::Save()
 			Body->Serialize(Ar);
 
 			// Save celestial components
-			for (auto& Comp : Body->GetComponents())
+			for (int32 j = 0; j < Body->GetComponents().Num(); j++)
 			{
+				UActorComponent* Comp = Body->GetComponents().Array()[j];
 				if (Cast<UAtmosphereComponent>(Comp) || Cast<URingSystemComponent>(Comp))
 				{
-					FActorRecord CompRecord;
+					SaveGameInstance->CelestialComponentData.Add(FComponentRecord());
 
-					CompRecord.Class = Comp->GetClass();
-					CompRecord.Transform = FTransform();
-					CompRecord.Name = Comp->GetFName();
+					SaveGameInstance->CelestialComponentData.Last().ParentName = Body->Name;
+					SaveGameInstance->CelestialComponentData.Last().Class = Comp->GetClass();
+					SaveGameInstance->CelestialComponentData.Last().Transform = FTransform();
+					SaveGameInstance->CelestialComponentData.Last().Name = Comp->GetFName();
 
-					FMemoryWriter CompMemoryWriter(CompRecord.ActorData);
+					FMemoryWriter CompMemoryWriter(SaveGameInstance->CelestialComponentData.Last().ActorData);
 					FCelestialSaveGameArchive CompAr(CompMemoryWriter);
 					Comp->Serialize(CompAr);
-
-					FComponentData NewElement;
-					NewElement.ParentName = Body->Name;
-					NewElement.ComponentData = CompRecord;
-					SaveGameInstance->CelestialComponentData.Add(NewElement);
 				}
 			}
 		}
@@ -381,7 +377,7 @@ void ACelestialGameMode::Save()
 			// Save succeeded.
 			if (GEngine)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Save Succedded")));
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Save Succeeded")));
 			}
 		}
 		else

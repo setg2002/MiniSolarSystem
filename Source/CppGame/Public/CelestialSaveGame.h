@@ -36,7 +36,7 @@ struct FActorRecord
 };
 
 USTRUCT()
-struct FComponentData
+struct FComponentRecord
 {
 	GENERATED_BODY()
 
@@ -44,7 +44,25 @@ struct FComponentData
 	FName ParentName;
 
 	UPROPERTY(SaveGame)
-	FActorRecord ComponentData;
+	UClass* Class;
+
+	UPROPERTY(SaveGame)
+	FTransform Transform;
+
+	UPROPERTY(SaveGame)
+	FName Name;
+
+	UPROPERTY(SaveGame)
+	TArray<uint8> ActorData;
+
+	// Default Values
+	FComponentRecord()
+	{
+		ParentName = NAME_None;
+		Class = nullptr;
+		Transform = FTransform();
+		Name = NAME_None;
+	}
 };
 
 
@@ -60,7 +78,7 @@ public:
 	TArray<FActorRecord> CelestialBodyData;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<FComponentData> CelestialComponentData;
+	TArray<FComponentRecord> CelestialComponentData;
 
 	UPROPERTY(VisibleAnywhere)
 	FActorRecord OrbitVisualizationData;

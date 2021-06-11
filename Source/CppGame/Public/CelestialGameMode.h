@@ -107,9 +107,12 @@ protected:
 
 	uint8 currentPerspective;
 
+	UPROPERTY()
 	APlayerController* PC;
 
+	UPROPERTY()
 	ACelestialPlayer* CelestialPlayer;
+	UPROPERTY()
 	AOverviewPlayer* OverviewPlayer;
 
 public:

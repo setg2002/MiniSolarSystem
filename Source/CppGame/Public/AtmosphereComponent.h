@@ -32,7 +32,7 @@ public:
 
 	UMaterialInstanceDynamic* DynamicMaterial;
 
-	//UPROPERTY()
+	UPROPERTY()
 	class UCloudComponent* CloudComponent;
 
 	float PlanetRadius;

@@ -104,6 +104,9 @@ void ACelestialBody::SetCurrentVelocity(FVector NewVelocity)
 
 void ACelestialBody::AddCelestialComponent(UStaticMeshComponent* NewComp)
 {
-	NewComp->RegisterComponent();
+	if (!NewComp->IsRegistered())
+	{
+		NewComp->RegisterComponent();
+	}
 	NewComp->AttachToComponent(this->RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }

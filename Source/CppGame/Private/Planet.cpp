@@ -95,7 +95,7 @@ UObject* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 	}
 
 	UPackage *Package = CreatePackage(*PackagePath);
-	UDataAsset* NewAsset = NewObject<UDataAsset>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+	UObject* NewAsset = NewObject<UObject>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
 
 	FAssetRegistryModule::AssetCreated(NewAsset);
 	NewAsset->MarkPackageDirty();

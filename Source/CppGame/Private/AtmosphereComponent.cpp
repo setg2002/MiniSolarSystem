@@ -10,6 +10,7 @@
 
 UAtmosphereComponent::UAtmosphereComponent()
 {
+	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/StaticMeshes/Atmosphere_mesh.Atmosphere_mesh'"), NULL, LOAD_None, NULL));
 
 	CloudComponent = CreateDefaultSubobject<UCloudComponent>("Clouds");
 #if WITH_EDITOR
