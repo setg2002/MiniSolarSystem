@@ -227,6 +227,21 @@ void ACelestialGameMode::LoadGame()
 				}
 			}
 		}
+		/*for (auto& data : LoadedGame->CelestialBodyData)
+		{
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.Name = data.Name;
+			ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(
+				data.Class,
+				data.Transform,
+				SpawnParameters);
+
+			FMemoryReader MemoryReader(data.ActorData);
+			FCelestialSaveGameArchive Ar(MemoryReader);
+			NewBody->Serialize(Ar);
+
+			UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *Body->Name.ToString());
+		}*/
 		for (auto& CompData : LoadedGame->CelestialComponentData)
 		{
 			ACelestialBody* Parent = GetBodyByName(CompData.ParentName.ToString());

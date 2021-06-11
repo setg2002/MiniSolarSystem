@@ -36,24 +36,12 @@ struct FActorRecord
 };
 
 USTRUCT()
-struct FComponentRecord
+struct FComponentRecord : public FActorRecord
 {
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
 	FName ParentName;
-
-	UPROPERTY(SaveGame)
-	UClass* Class;
-
-	UPROPERTY(SaveGame)
-	FTransform Transform;
-
-	UPROPERTY(SaveGame)
-	FName Name;
-
-	UPROPERTY(SaveGame)
-	TArray<uint8> ActorData;
 
 	// Default Values
 	FComponentRecord()
