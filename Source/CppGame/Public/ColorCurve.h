@@ -28,11 +28,14 @@ public:
 	// Components
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	class UCanvasPanel* CanvasPanel_Gradient;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UButton* Button_Main;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UImage* Image_Gradient;
 
 	UFUNCTION(BlueprintCallable)
-	void AddKey(float Time, FLinearColor Color);
+	void AddKey(float Time, FLinearColor Color, bool Update); //TODO Remove 'Update' and make a new function
 };
