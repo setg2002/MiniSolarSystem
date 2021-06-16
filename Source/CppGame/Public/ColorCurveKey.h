@@ -14,7 +14,11 @@ class CPPGAME_API UColorCurveKey : public UUserWidget
 {
 	GENERATED_BODY()
 
+	DECLARE_DELEGATE(FCurveKeyUpdated)
+
 public:
+	FCurveKeyUpdated OnKeyUpdated;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FLinearColor Color;
 
@@ -26,6 +30,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetNewTime(float NewTime);
+
+	UFUNCTION(BlueprintCallable)
+	void SetNewColor(FLinearColor NewColor);
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveKey();
