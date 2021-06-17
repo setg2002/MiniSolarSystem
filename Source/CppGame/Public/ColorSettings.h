@@ -115,7 +115,7 @@ public:
 
 	FColorSettingsChanged OnColorSettingsChanged;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCurveLinearColor* OceanColor;
 
 	UMaterialInterface* PlanetMat;
