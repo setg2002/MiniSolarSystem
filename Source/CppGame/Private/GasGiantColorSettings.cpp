@@ -17,30 +17,40 @@ void UGasGiantColorSettings::GenerateMaterial()
 {
 	ensure(BasePlanetMat);
 	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, BasePlanetMat);
-	DynamicMaterial->SetTextureParameterValue("_Texture", GaseousColorGenerator::CreateTexture("GasTexture", Gradient));
+	DynamicMaterial->SetTextureParameterValue("_Texture", GaseousColorGenerator::CreateTexture("GasTexture", ColorSettings.Gradient));
 
 	//AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
 }
 
 void UGasGiantColorSettings::NewVoronoiForStorms()
 {
-	if (DynamicMaterial == nullptr)
+	if (!DynamicMaterial)
 	{
 		GenerateMaterial();
 	}
-	UTexture* NewTexture = GaseousColorGenerator::MakeVoronoiTexture(NumStorms, StormFalloff, LowBound, HighBound);
+	UTexture* NewTexture = GaseousColorGenerator::MakeVoronoiTexture(ColorSettings.NumStorms, ColorSettings.StormFalloff, LowBound, HighBound);
 	DynamicMaterial->SetTextureParameterValue("_StormTexture", NewTexture);
+}
+
+void UGasGiantColorSettings::SetGradient(UCurveLinearColor* NewGradient)
+{
+	ColorSettings.Gradient = NewGradient;
+	if (!DynamicMaterial)
+	{
+		GenerateMaterial();
+	}
+	DynamicMaterial->SetTextureParameterValue(FName("_Texture"), GaseousColorGenerator::CreateTexture("GasTexture", ColorSettings.Gradient));
 }
 
 void UGasGiantColorSettings::SetNumStorms(int NewNumStorms)
 {
-	NumStorms = NewNumStorms;
+	ColorSettings.NumStorms = NewNumStorms;
 	NewVoronoiForStorms();
 }
 
 void UGasGiantColorSettings::SetStormFalloff(float NewStormFalloff)
 {
-	StormFalloff = NewStormFalloff;
+	ColorSettings.StormFalloff = NewStormFalloff;
 	NewVoronoiForStorms();
 }
 
@@ -58,12 +68,12 @@ void UGasGiantColorSettings::PostEditChangeProperty(FPropertyChangedEvent& Prope
 				GenerateMaterial();
 			}
 		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(UGasGiantColorSettings, Gradient) && Gradient != nullptr)
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(FGasGiantColorSettings_, Gradient) && ColorSettings.Gradient != nullptr)
 		{
 			if (Mesh)
 			{
 				GenerateMaterial();
-				DynamicMaterial->SetTextureParameterValue(FName("_Texture"), GaseousColorGenerator::CreateTexture("GasTexture", Gradient));
+				DynamicMaterial->SetTextureParameterValue(FName("_Texture"), GaseousColorGenerator::CreateTexture("GasTexture", ColorSettings.Gradient));
 			}
 		}
 	}

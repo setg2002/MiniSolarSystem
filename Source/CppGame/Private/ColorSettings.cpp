@@ -10,54 +10,72 @@ UColorSettings::UColorSettings()
 
 void UBiome::SetStartHeight(float NewHeight)
 {
-	StartHeight = NewHeight;
+	Biome.StartHeight = NewHeight;
+	OnBiomeChanged.Broadcast();
+}
+
+void UBiome::SetGradient(UCurveLinearColor* NewGradient)
+{
+	Biome.Gradient = NewGradient;
 	OnBiomeChanged.Broadcast();
 }
 
 void UBiomeColorSettings::SetUsingNoise(bool NewUsingNoise)
 {
-	bUsingNoise = NewUsingNoise;
+	BiomeColorSettings.bUsingNoise = NewUsingNoise;
 	OnBiomeColorSettingsChanged.Broadcast();
 }
 
 void UBiomeColorSettings::SetNoiseOffset(float NewNoiseOffset)
 {
-	NoiseOffset = NewNoiseOffset;
+	BiomeColorSettings.NoiseOffset = NewNoiseOffset;
 	OnBiomeColorSettingsChanged.Broadcast();
 }
-	 
+
 void UBiomeColorSettings::SetNoiseStrength(float NewNoiseStrength)
 {
-	NoiseStrength = NewNoiseStrength;
+	BiomeColorSettings.NoiseStrength = NewNoiseStrength;
 	OnBiomeColorSettingsChanged.Broadcast();
 }
-	 
+
 void UBiomeColorSettings::AddBiome(UBiome* NewBiome)
 {
-	Biomes.Add(NewBiome);
+	BiomeColorSettings.Biomes.Add(NewBiome);
 	OnBiomeColorSettingsChanged.Broadcast();
 }
-	 
+
 void UBiomeColorSettings::RemoveBiome(int32 index)
 {
-	Biomes.RemoveAt(index);
+	BiomeColorSettings.Biomes.RemoveAt(index);
 	OnBiomeColorSettingsChanged.Broadcast();
 }
-	 
+
 void UBiomeColorSettings::SetBlendAmount(float NewBlendAmount)
 {
-	blendAmount = NewBlendAmount;
+	BiomeColorSettings.blendAmount = NewBlendAmount;
 	OnBiomeColorSettingsChanged.Broadcast();
 }
 
 void UBiomeColorSettings::SetNoise(UNoiseSettings* NewNoise)
 {
-	Noise = NewNoise;
+	BiomeColorSettings.Noise = NewNoise;
 	OnBiomeColorSettingsChanged.Broadcast();
+}
+
+void UColorSettings::SetBiomeColorSettings(UBiomeColorSettings* NewColorSettings)
+{
+	ColorSettings.BiomeColorSettings = NewColorSettings;
+	OnColorSettingsChanged.Broadcast();
 }
 
 void UColorSettings::SetTintPercent(float NewTintPercent)
 {
-	BiomeTintPercent = NewTintPercent;
+	ColorSettings.BiomeTintPercent = NewTintPercent;
+	OnColorSettingsChanged.Broadcast();
+}
+
+void UColorSettings::SetOceanColor(UCurveLinearColor* NewOceanColor)
+{
+	ColorSettings.OceanColor = NewOceanColor;
 	OnColorSettingsChanged.Broadcast();
 }

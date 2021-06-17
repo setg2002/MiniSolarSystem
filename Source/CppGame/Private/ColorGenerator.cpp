@@ -21,9 +21,9 @@ TerrestrialColorGenerator::TerrestrialColorGenerator(AActor* owner)
 void TerrestrialColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 {
 	this->ColorSettings = colorSettings;
-	if (ColorSettings->BiomeColorSettings->GetUsingNoise())
+	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
 	{
-		BiomeNoiseFilter = NoiseFilterFactory::CreateNoiseFilter(ColorSettings->BiomeColorSettings->GetNoise());
+		BiomeNoiseFilter = NoiseFilterFactory::CreateNoiseFilter(ColorSettings->GetBiomeColorSettings()->GetNoise());
 	}
 }
 
@@ -40,18 +40,18 @@ float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere
 {
 	float HeightPercent = (PointOnUnitSphere.Z + 1) / 2.f;
 	// Offset for using noise
-	if (ColorSettings->BiomeColorSettings->GetUsingNoise())
+	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
 	{
-		HeightPercent += (BiomeNoiseFilter->Evaluate(PointOnUnitSphere) - ColorSettings->BiomeColorSettings->GetNoiseOffset()) * ColorSettings->BiomeColorSettings->GetNoiseStrength();
+		HeightPercent += (BiomeNoiseFilter->Evaluate(PointOnUnitSphere) - ColorSettings->GetBiomeColorSettings()->GetNoiseOffset()) * ColorSettings->GetBiomeColorSettings()->GetNoiseStrength();
 	}
 	
 	float BiomeIndex = 0;
-	int NumBiomes = ColorSettings->BiomeColorSettings->GetBiomes().Num();
-	float blendRange = ColorSettings->BiomeColorSettings->GetBlendAmount() / 2.f + 0.001f;
+	int NumBiomes = ColorSettings->GetBiomeColorSettings()->GetBiomes().Num();
+	float blendRange = ColorSettings->GetBiomeColorSettings()->GetBlendAmount() / 2.f + 0.001f;
 
 	for (int i = 0; i < NumBiomes; i++)
 	{
-		float dst = HeightPercent - ColorSettings->BiomeColorSettings->GetBiomes()[i]->GetStartHeight();
+		float dst = HeightPercent - ColorSettings->GetBiomeColorSettings()->GetBiomes()[i]->GetStartHeight();
 		float weight = FMath::Clamp<float>(UKismetMathLibrary::NormalizeToRange(dst, -blendRange, blendRange), 0, 1);
 		BiomeIndex *= (1 - weight);
 		BiomeIndex += i * weight;
@@ -64,15 +64,15 @@ void TerrestrialColorGenerator::UpdateColors()
 {
 	TArray<UCurveLinearColor*> biomeColors;
 	ensure(ColorSettings);
-	for (int i = 0; i < ColorSettings->BiomeColorSettings->GetBiomes().Num(); i++)
+	for (int i = 0; i < ColorSettings->GetBiomeColorSettings()->GetBiomes().Num(); i++)
 	{
-		biomeColors.Add(ColorSettings->BiomeColorSettings->GetBiomes()[i]->Gradient);
+		biomeColors.Add(ColorSettings->GetBiomeColorSettings()->GetBiomes()[i]->GetGradient());
 	}
 
 	UTexture2D* SurfaceTexture = CreateTexture(FString("TerrainTexture"), biomeColors);
 	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_texture"), SurfaceTexture);
 
-	UTexture2D* OceanTexture = CreateTexture(FString("OceanTexture"), TArray<UCurveLinearColor*>() = { ColorSettings->OceanColor });
+	UTexture2D* OceanTexture = CreateTexture(FString("OceanTexture"), TArray<UCurveLinearColor*>() = { ColorSettings->GetOceanColor() });
 	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_oceanTexture"), OceanTexture);
 	
 	//AssetCleaner::CleanDirectory(EDirectoryFilterType::Textures);

@@ -55,12 +55,12 @@ void APlanet::BindDelegates()
 	}
 
 	ColorSettings->OnColorSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
-	ColorSettings->BiomeColorSettings->OnBiomeColorSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
-	if (ColorSettings->BiomeColorSettings->GetUsingNoise())
+	ColorSettings->GetBiomeColorSettings()->OnBiomeColorSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
+	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
 	{
-		ColorSettings->BiomeColorSettings->GetNoise()->OnNoiseSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
+		ColorSettings->GetBiomeColorSettings()->GetNoise()->OnNoiseSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
 	}
-	for (auto& Biome : ColorSettings->BiomeColorSettings->GetBiomes())
+	for (auto& Biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
 	{
 		Biome->OnBiomeChanged.AddUFunction(this, "OnColorSettingsUpdated");
 	}
@@ -134,28 +134,28 @@ void APlanet::CreateSettingsAssets()
 		ColorSettings->GetPackage()->MarkPackageDirty();
 	}
 
-	if (ColorSettings->BiomeColorSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiomeColorSettings::StaticClass()->GetName())))
+	if (ColorSettings->GetBiomeColorSettings() == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiomeColorSettings::StaticClass()->GetName())))
 	{	
 		CreatePackageName(AssetName, PackagePath, *Outer, UBiomeColorSettings::StaticClass());
-		ColorSettings->BiomeColorSettings = LoadObject<UBiomeColorSettings>(Outer, *AssetName, *PackagePath);
+		ColorSettings->SetBiomeColorSettings(LoadObject<UBiomeColorSettings>(Outer, *AssetName, *PackagePath));
 	}
-	else if (ColorSettings->BiomeColorSettings == nullptr)
+	else if (ColorSettings->GetBiomeColorSettings() == nullptr)
 	{
-		ColorSettings->BiomeColorSettings = Cast<UBiomeColorSettings>(CreateSettingsAsset(UBiomeColorSettings::StaticClass()));
-		ColorSettings->BiomeColorSettings->GetPackage()->MarkPackageDirty();
+		ColorSettings->SetBiomeColorSettings(Cast<UBiomeColorSettings>(CreateSettingsAsset(UBiomeColorSettings::StaticClass())));
+		ColorSettings->GetBiomeColorSettings()->GetPackage()->MarkPackageDirty();
 	}
 
-	if ((ColorSettings->BiomeColorSettings->GetBiomes() == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->GetBiomes()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiome::StaticClass()->GetName())))
+	if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiome::StaticClass()->GetName())))
 	{
-		ColorSettings->BiomeColorSettings->GetBiomes().Empty();
+		ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
 		CreatePackageName(AssetName, PackagePath, *Outer, UBiome::StaticClass());
-		ColorSettings->BiomeColorSettings->GetBiomes().Add(LoadObject<UBiome>(Outer, *AssetName, *PackagePath));
+		ColorSettings->GetBiomeColorSettings()->GetBiomes().Add(LoadObject<UBiome>(Outer, *AssetName, *PackagePath));
 	}
-	else if (ColorSettings->BiomeColorSettings->GetBiomes() == TArray<UBiome*>() || ColorSettings->BiomeColorSettings->GetBiomes()[0] == nullptr)
+	else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
 	{
-		ColorSettings->BiomeColorSettings->GetBiomes().Empty();
-		ColorSettings->BiomeColorSettings->GetBiomes().Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
-		ColorSettings->BiomeColorSettings->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
+		ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
+		ColorSettings->GetBiomeColorSettings()->GetBiomes().Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+		ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
 	}
 
 
