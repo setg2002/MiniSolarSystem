@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ColorCurveType.h"
 #include "Blueprint/UserWidget.h"
 #include "ColorCurve.generated.h"
 
@@ -47,6 +48,9 @@ public:
 	virtual void NativeConstruct() override;
 
 	virtual TSharedRef<SWidget> RebuildWidget() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<EColorCurveType> ColorCurveType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveLinearColor* Gradient;
