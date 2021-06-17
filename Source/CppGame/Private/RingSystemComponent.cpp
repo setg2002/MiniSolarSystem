@@ -49,6 +49,13 @@ void URingSystemComponent::SetWidth(float NewWidth)
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 }
 
+void URingSystemComponent::SetGradient(UCurveLinearColor* NewGradient)
+{
+	Gradient = NewGradient;
+	GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
+	DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
+}
+
 // Called when the game starts
 void URingSystemComponent::BeginPlay()
 {

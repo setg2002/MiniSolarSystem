@@ -7,7 +7,7 @@
 
 UTexture2D* UColorCurveFunctionLibrary::TextureFromCurve(UCurveLinearColor* Gradient, int32 sizeX = 256, int32 sizeY = 1)
 {
-	ensure(sizeX > 0 && sizeY > 0);
+	ensure(sizeX > 0 && sizeY > 0 && Gradient != nullptr);
 
 	UTexture2D* DynamicTexture = UTexture2D::CreateTransient(sizeX, sizeY, EPixelFormat::PF_B8G8R8A8);
 

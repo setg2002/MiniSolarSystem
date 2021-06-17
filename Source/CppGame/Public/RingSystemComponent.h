@@ -43,6 +43,11 @@ public:
 	void SetWidth(float NewWidth);
 
 	UFUNCTION(BlueprintCallable)
+	UCurveLinearColor* GetGradient() const { return Gradient; }
+	UFUNCTION(BlueprintCallable)
+	void SetGradient(UCurveLinearColor* NewGradient);
+
+	UFUNCTION(BlueprintCallable)
 	UMaterialInstanceDynamic* GetDynamicMaterial() const { return DynamicMaterial; }
 
 	void UpdateProperties();

@@ -71,8 +71,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateGradient();
 
+	UFUNCTION(BlueprintCallable)
+	void SetObjectToUpdate(UObject* Object);
+
 protected:
 	FLinearColor MakeColor(TArray<TTuple<int8, float>> ColorValues);
 
 	void ConstructKey(TArray<FKeyInfo> KeysInfo);
+
+	UObject* ObjectToUpdate;
 };

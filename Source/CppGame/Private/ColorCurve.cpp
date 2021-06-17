@@ -7,10 +7,14 @@
 #include "ColorCurveFunctionLibrary.h"
 #include "Curves/CurveLinearColor.h"
 #include "Components/CanvasPanel.h"
+#include "GasGiantColorSettings.h"
 #include "Blueprint/WidgetTree.h"
+#include "RingSystemComponent.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "ColorCurveKey.h"
+#include "GasGiant.h"
+#include "Planet.h"
 
 
 
@@ -176,4 +180,22 @@ void UColorCurve::AddKey(float Time, FLinearColor Color = FLinearColor::White)
 void UColorCurve::UpdateGradient()
 {
 	Image_Gradient->SetBrushFromTexture(UColorCurveFunctionLibrary::TextureFromCurve(Gradient, 256, 1));
+	// Update Color settings????
+	if (Cast<APlanet>(ObjectToUpdate))
+	{
+		Cast<APlanet>(ObjectToUpdate)->OnColorSettingsUpdated();
+	}
+	else if (Cast<AGasGiant>(ObjectToUpdate))
+	{
+		Cast<AGasGiant>(ObjectToUpdate)->ColorSettings->SetGradient(Gradient);
+	}
+	else if (Cast<URingSystemComponent>(ObjectToUpdate))
+	{
+		Cast<URingSystemComponent>(ObjectToUpdate)->SetGradient(Gradient);
+	}
+}
+
+void UColorCurve::SetObjectToUpdate(UObject* Object)
+{
+	ObjectToUpdate = Object;
 }
