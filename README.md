@@ -1,4 +1,4 @@
-# CppGame
+# Space Game
 A game about procedurally generated planets and solar systems.
 
 Uses the source build of the Unreal Engine, a guide to which can be found [here](https://docs.unrealengine.com/en-US/ProductionPipelines/DevelopmentSetup/BuildingUnrealEngine/index.html).
@@ -6,3 +6,7 @@ Uses the source build of the Unreal Engine, a guide to which can be found [here]
 Roadmap: https://trello.com/b/sNuAdFSM/spacegame
 
 Work Blog: https://sorengworklog.blogspot.com/
+
+
+### Known Issues: ###
+* If building from source results in an error "bulk data compressed header read error. this package may be corrupt!" then delete the procedural textures folder and try again. The textures can be regenerated in-engine by clicking 'Make Texture' on the BP_Skybox in the scene and 'New Variants' on the asteroid manager. The resulting textures can be applied in their reespective material graph.
