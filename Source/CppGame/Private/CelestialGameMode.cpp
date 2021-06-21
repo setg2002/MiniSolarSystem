@@ -3,6 +3,7 @@
 //TODO Remove unneccesary includes
 #include "CelestialGameMode.h"
 #include "Serialization\ObjectAndNameAsStringProxyArchive.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "SaveDataBlueprintFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -79,10 +80,9 @@ void ACelestialGameMode::BeginPlay()
 		const auto &Interface = Cast<ICelestialObject>(actor);
 		celestialObjects.Add(Interface);
 	}
+	SetPerspective(1);
 
 	LoadGame();
-
-	SetPerspective(1);
 }
 
 void ACelestialGameMode::Tick(float DeltaTime)
@@ -160,6 +160,13 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		currentPerspective = perspective;
 		AOrbitDebugActor::Get()->DrawOrbits();
 
+		TArray<UUserWidget*> Widgets;
+		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Widgets, HighlightWidgetClass, false);
+		for (UUserWidget* Widget : Widgets)
+		{
+			Widget->SetVisibility(ESlateVisibility::Visible);
+		}
+
 		TArray<AActor*> NiagaraSystems;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
 		for (auto& System : NiagaraSystems)
@@ -177,6 +184,14 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		PC->SetShowMouseCursor(false);
 		currentPerspective = perspective;
 		AOrbitDebugActor::Get()->ClearOrbits();
+
+		TArray<UUserWidget*> Widgets;
+		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Widgets, HighlightWidgetClass, false);
+		for (UUserWidget* Widget : Widgets)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Widget"));
+			Widget->SetVisibility(ESlateVisibility::Hidden);
+		}
 
 		TArray<AActor*> NiagaraSystems;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);

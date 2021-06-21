@@ -3,6 +3,8 @@
 
 #include "ColorCurveFunctionLibrary.h"
 #include "Curves/CurveLinearColor.h"
+#include "AssetRegistryModule.h"
+
 
 
 UTexture2D* UColorCurveFunctionLibrary::TextureFromCurve(UCurveLinearColor* Gradient, int32 sizeX = 256, int32 sizeY = 1)
@@ -45,4 +47,25 @@ UTexture2D* UColorCurveFunctionLibrary::TextureFromCurve(UCurveLinearColor* Grad
 	DynamicTexture->UpdateTextureRegions(0, 1, Region, sizeX * 4, 4, Pixels);
 
 	return DynamicTexture;
+}
+
+UCurveLinearColor* UColorCurveFunctionLibrary::CreateNewCurve(FName Name)
+{
+	FString PackageName = TEXT("/Builds/SpaceGame/TEST/WindowsNoEditor/CppGame/Gradients");
+	UPackage* Package = CreatePackage(NULL, *PackageName); //TODO this overload of CreatePackage() is depricated
+
+	UCurveLinearColor* NewGradient =  NewObject<UCurveLinearColor>(Package, Name, EObjectFlags::RF_Public);
+
+	if (NewGradient != NULL)
+	{
+		// Fill in the asset's data here
+	}
+
+	FAssetRegistryModule::AssetCreated(NewGradient);
+	NewGradient->MarkPackageDirty();
+	FString AssetPath = FString("/Builds/SpaceGame/TEST/WindowsNoEditor/CppGame/Gradients/");
+	FString AssetName = Name.ToString();
+	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
+	UPackage::SavePackage(Package, NewGradient, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	return NewGradient;
 }

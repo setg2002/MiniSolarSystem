@@ -36,7 +36,7 @@ void UColorCurve::NativeConstruct()
 	Keys.Sort([](const FKeyInfo& a, const FKeyInfo& b) { return a.Time > b.Time || (a.Time == b.Time && a.RGB < b.RGB); });
 
 	TArray<FKeyInfo> Template = { FKeyInfo(0, 0, 0), FKeyInfo(1, 0, 0), FKeyInfo(2, 0, 0), FKeyInfo(3, 0, 1) };
-	TArray<FKeyInfo> KeyToMake;
+	TArray<FKeyInfo> KeyToMake = Template;
 	for (auto& Key : Keys)
 	{
 		if (KeyToMake.Num() == 0)

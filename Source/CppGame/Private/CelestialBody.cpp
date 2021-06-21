@@ -2,8 +2,10 @@
 
 
 #include "CelestialBody.h"
-#include "OrbitDebugActor.h"
+#include "Components/WidgetComponent.h"
 #include "CelestialGameMode.h"
+#include "OrbitDebugActor.h"
+
 
 // Sets default values
 ACelestialBody::ACelestialBody()

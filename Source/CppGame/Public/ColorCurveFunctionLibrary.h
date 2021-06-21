@@ -17,4 +17,7 @@ class CPPGAME_API UColorCurveFunctionLibrary : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, Category = "Texture")
 	static UTexture2D* TextureFromCurve(UCurveLinearColor* Gradient, int32 sizeX, int32 sizeY);
+
+	UFUNCTION(BlueprintCallable, Category = "Texture")
+	static UCurveLinearColor* CreateNewCurve(FName Name);
 };

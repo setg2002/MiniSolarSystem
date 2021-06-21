@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-//#include "NoiseSettings.h"
 #include "ColorSettings.generated.h"
 
 /**

@@ -35,6 +35,9 @@ public:
 	float gravitationalConstant = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> HighlightWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> OverviewWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

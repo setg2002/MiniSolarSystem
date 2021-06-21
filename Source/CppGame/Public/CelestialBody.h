@@ -10,6 +10,7 @@
 
 //Forward Declarations
 class ACelestialGameMode;
+class UWidgetComponent;
 
 UCLASS(Blueprintable)
 class CPPGAME_API ACelestialBody : public AActor, public ICelestialObject
