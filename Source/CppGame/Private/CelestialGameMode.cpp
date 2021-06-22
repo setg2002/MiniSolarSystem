@@ -189,7 +189,6 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Widgets, HighlightWidgetClass, false);
 		for (UUserWidget* Widget : Widgets)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Widget"));
 			Widget->SetVisibility(ESlateVisibility::Hidden);
 		}
 
