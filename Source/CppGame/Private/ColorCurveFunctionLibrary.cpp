@@ -2,6 +2,7 @@
 
 
 #include "ColorCurveFunctionLibrary.h"
+#include "CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
 #include "AssetRegistryModule.h"
 
@@ -49,23 +50,25 @@ UTexture2D* UColorCurveFunctionLibrary::TextureFromCurve(UCurveLinearColor* Grad
 	return DynamicTexture;
 }
 
-UCurveLinearColor* UColorCurveFunctionLibrary::CreateNewCurve(FName Name)
+UCurveLinearColor* UColorCurveFunctionLibrary::CreateNewCurve(FName Name, TArray<uint8> Data)
 {
-	FString PackageName = TEXT("/Builds/SpaceGame/TEST/WindowsNoEditor/CppGame/Gradients");
-	UPackage* Package = CreatePackage(NULL, *PackageName); //TODO this overload of CreatePackage() is depricated
+	FString PackageName = TEXT("/Game/MaterialStuff/Gradients/Runtime/");
+	UPackage* Package = CreatePackage(*PackageName);
 
 	UCurveLinearColor* NewGradient =  NewObject<UCurveLinearColor>(Package, Name, EObjectFlags::RF_Public);
 
-	if (NewGradient != NULL)
+	if (NewGradient != NULL && Data.Num() > 1)
 	{
 		// Fill in the asset's data here
+		FMemoryReader MemoryReader(Data);
+		FCelestialSaveGameArchive Ar(MemoryReader);
+		NewGradient->Serialize(Ar);
 	}
 
 	FAssetRegistryModule::AssetCreated(NewGradient);
 	NewGradient->MarkPackageDirty();
-	FString AssetPath = FString("/Builds/SpaceGame/TEST/WindowsNoEditor/CppGame/Gradients/");
 	FString AssetName = Name.ToString();
-	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
+	FString FilePath = FString::Printf(TEXT("%s%s%s"), *PackageName, *AssetName, *FPackageName::GetAssetPackageExtension());
 	UPackage::SavePackage(Package, NewGradient, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
 	return NewGradient;
 }

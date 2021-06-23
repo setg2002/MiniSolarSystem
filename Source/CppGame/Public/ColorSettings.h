@@ -18,11 +18,11 @@ struct FBiome_
 
 public:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0", ClampMax = "1"))
-	float StartHeight;
+	float StartHeight = 0;
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly)
-	UCurveLinearColor* Gradient;
+	UCurveLinearColor* Gradient = nullptr;
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
-	FColor Tint;
+	FColor Tint = FColor::White;
 };
 
 UCLASS(BlueprintType)
@@ -65,22 +65,22 @@ struct FBiomeColorSettings_
 
 public:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (InlineEditConditionToggle))
-	bool bUsingNoise;
+	bool bUsingNoise = false;
 
 	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "bUsingNoise"))
-	float NoiseOffset;
+	float NoiseOffset = 0;
 
 	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "bUsingNoise"))
-	float NoiseStrength;
+	float NoiseStrength = 0;
 
 	UPROPERTY(SaveGame, EditAnywhere)
-	TArray<UBiome*> Biomes;
+	TArray<UBiome*> Biomes = {};
 
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0", ClampMax = "1"))
-	float blendAmount;
+	float blendAmount = 0;
 
 	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "bUsingNoise"))
-	UNoiseSettings* Noise;
+	UNoiseSettings* Noise = nullptr;
 };
 
 UCLASS()
@@ -145,13 +145,13 @@ struct FColorSettings_
 
 public:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0", ClampMax = "1"))
-	float BiomeTintPercent;
+	float BiomeTintPercent = 0;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly)
-	UCurveLinearColor* OceanColor;
+	UCurveLinearColor* OceanColor = nullptr;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
-	UBiomeColorSettings* BiomeColorSettings;
+	UBiomeColorSettings* BiomeColorSettings = nullptr;
 };
 
 UCLASS()

@@ -81,6 +81,11 @@ void TerrestrialColorGenerator::UpdateColors()
 
 UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
 {
+	if (Gradients.Num() == 0)
+	{
+		return nullptr;
+	}
+
 	UTexture2D* DynamicTexture = UTexture2D::CreateTransient(TextureResolution, Gradients.Num(), EPixelFormat::PF_B8G8R8A8);
 	
 	DynamicTexture->UpdateResource(); // Absence of this line (or moving it to after UpdateTextureRegions()) will result in a corrupt looking texture, pretty cool

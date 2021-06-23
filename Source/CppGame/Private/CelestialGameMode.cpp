@@ -2,10 +2,13 @@
 
 //TODO Remove unneccesary includes
 #include "CelestialGameMode.h"
-#include "Serialization\ObjectAndNameAsStringProxyArchive.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "SaveDataBlueprintFunctionLibrary.h"
+#include "ColorCurveFunctionLibrary.h"
+#include "CelestialSaveGameArchive.h"
+#include "Curves/CurveLinearColor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "RingSystemComponent.h"
@@ -24,15 +27,6 @@
 #include "NoiseLayer.h"
 #include "Planet.h"
 #include "Star.h"
-
-struct FCelestialSaveGameArchive : public FObjectAndNameAsStringProxyArchive
-{
-	FCelestialSaveGameArchive(FArchive& InInnerArchive)
-		: FObjectAndNameAsStringProxyArchive(InInnerArchive, false)
-	{
-		ArIsSaveGame = true;
-	}
-};
 
 
 ACelestialGameMode::ACelestialGameMode()
@@ -224,6 +218,23 @@ void ACelestialGameMode::LoadGame()
 	{
 		// The operation was successful, so LoadedGame now contains the data we saved earlier.
 		UE_LOG(LogTemp, Warning, TEXT("LOADED"));
+
+		// Load Linear Color Curves
+		for (auto& Asset : LoadedGame->GradientAssets)
+		{
+			if (Asset.Class == UCurveLinearColor::StaticClass())
+			{
+				UCurveLinearColor* NewCurve = UColorCurveFunctionLibrary::CreateNewCurve(Asset.Name, Asset.AssetData);
+			}
+		}
+
+		// Load Settings Assets
+		for (auto& Asset : LoadedGame->GradientAssets)
+		{
+			UObject* NewSettings = APlanet::RestoreSettingsAsset(Asset.Name, Asset.AssetData);
+		}
+
+
 		// Restore Celestial Body Data
 		for (auto& Body : bodies)
 		{
@@ -331,6 +342,7 @@ void ACelestialGameMode::SaveAndQuitToMenu()
 	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 }
 
+#pragma optimize("", off)
 void ACelestialGameMode::Save()
 {
 	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
@@ -400,6 +412,34 @@ void ACelestialGameMode::Save()
 		FCelestialSaveGameArchive ODAAr(ODAMemoryWriter);
 		ODA->Serialize(ODAAr);
 
+		// Save Gradients
+		TArray<FAssetData> GradientsData;
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/MaterialStuff/Gradients/Runtime", GradientsData, true, false);
+		SaveGameInstance->GradientAssets.SetNum(GradientsData.Num());
+		for (int32 i = 0; i < SaveGameInstance->GradientAssets.Num(); i++)
+		{
+			SaveGameInstance->GradientAssets[i].Class = GradientsData[i].GetClass();
+			SaveGameInstance->GradientAssets[i].Name = GradientsData[i].AssetName;
+
+			FMemoryWriter MemoryWriter(SaveGameInstance->GradientAssets[i].AssetData);
+			FCelestialSaveGameArchive Ar(MemoryWriter);
+			GradientsData[i].GetAsset()->Serialize(Ar);
+		}
+
+		// Save Settings Assets
+		TArray<FAssetData> AssetsData;
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets/Runtime", AssetsData, true, false);
+		SaveGameInstance->SettingsAssets.SetNum(AssetsData.Num());
+		for (int32 i = 0; i < SaveGameInstance->SettingsAssets.Num(); i++)
+		{
+			SaveGameInstance->SettingsAssets[i].Class = AssetsData[i].GetClass();
+			SaveGameInstance->SettingsAssets[i].Name = AssetsData[i].AssetName;
+
+			FMemoryWriter MemoryWriter(SaveGameInstance->SettingsAssets[i].AssetData);
+			FCelestialSaveGameArchive Ar(MemoryWriter);
+			AssetsData[i].GetAsset()->Serialize(Ar);
+		}
+
 		// Save the data immediately.
 		if (UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Save", 0))
 		{
@@ -419,7 +459,7 @@ void ACelestialGameMode::Save()
 		}
 	}
 }
-
+#pragma optimize("", on)
 void ACelestialGameMode::OrbitDebug()
 {
 	if (currentPerspective != 0)

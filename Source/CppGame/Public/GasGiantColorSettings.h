@@ -16,7 +16,7 @@ struct FGasGiantColorSettings_
 
 public:
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
-	UCurveLinearColor* Gradient;
+	UCurveLinearColor* Gradient = nullptr;
 
 	UPROPERTY(SaveGame, EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
 	int NumStorms = 25;

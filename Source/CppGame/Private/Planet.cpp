@@ -18,6 +18,7 @@
 #include "UObject/PackageReload.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "CelestialSaveGameArchive.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -79,7 +80,7 @@ void APlanet::ResetPosition()
 
 UObject* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 {
-	FString AssetPath = FString("/Game/DataAssets/" + this->Name.ToString() + "/");
+	FString AssetPath = FString("/Game/DataAssets/Runtime/" + this->Name.ToString() + "/");
 	FString AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
 	FString PackagePath = AssetPath + AssetName;
 	
@@ -107,6 +108,59 @@ UObject* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 	return NewAsset;
 }
 
+UObject* APlanet::CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
+{
+	FString AssetPath = FString("/Game/DataAssets/" + this->Name.ToString() + "/");
+	FString AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
+	FString PackagePath = AssetPath + AssetName;
+
+	int AssetNum = 0;
+	bool PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
+	while (PackageExists)
+	{
+		AssetNum++;
+		AssetName = FString(TEXT("DA_")) + this->Name.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_" + FString::FromInt(AssetNum);
+		PackagePath = AssetPath + AssetName;
+
+		PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
+	}
+
+	UPackage *Package = CreatePackage(*PackagePath);
+	UObject* NewAsset = NewObject<UObject>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+
+	FAssetRegistryModule::AssetCreated(NewAsset);
+	NewAsset->MarkPackageDirty();
+
+	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
+	bool bSuccess = UPackage::SavePackage(Package, NewAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
+
+	return NewAsset;
+}
+
+UObject* APlanet::RestoreSettingsAsset(FName Name, TArray<uint8> Data)
+{
+	FString PackageName = TEXT("/Game/DataAssets/Runtime/");
+	UPackage* Package = CreatePackage(*PackageName);
+
+	UObject* NewAsset = NewObject<UObject>(Package, Name, EObjectFlags::RF_Public);
+
+	if (NewAsset != NULL && Data.Num() > 1)
+	{
+		// Fill in the asset's data here
+		FMemoryReader MemoryReader(Data);
+		FCelestialSaveGameArchive Ar(MemoryReader);
+		NewAsset->Serialize(Ar);
+	}
+
+	FAssetRegistryModule::AssetCreated(NewAsset);
+	NewAsset->MarkPackageDirty();
+	FString AssetName = Name.ToString();
+	FString FilePath = FString::Printf(TEXT("%s%s%s"), *PackageName, *AssetName, *FPackageName::GetAssetPackageExtension());
+	UPackage::SavePackage(Package, NewAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	return NewAsset;
+}
+
 void APlanet::CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UDataAsset> DataAssetClass)
 {
 	FString AssetPath = FString("/Game/DataAssets/" + this->GetName() + "/");
@@ -123,6 +177,7 @@ void APlanet::CreateSettingsAssets()
 	FString PackagePath;
 	UObject* Outer = nullptr;
 
+#if WITH_EDITOR
 	if (ColorSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UColorSettings::StaticClass()->GetName())))
 	{
 		CreatePackageName(AssetName, PackagePath, *Outer, UColorSettings::StaticClass());
@@ -193,7 +248,78 @@ void APlanet::CreateSettingsAssets()
 		ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
 		ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
 	}
+#else
+	if (ColorSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UColorSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UColorSettings::StaticClass());
+		ColorSettings = LoadObject<UColorSettings>(Outer, *AssetName, *PackagePath);
+	}
+	else if (ColorSettings == nullptr)
+	{
+		ColorSettings = Cast<UColorSettings>(CreateSettingsAssetEditor(UColorSettings::StaticClass()));
+		ColorSettings->GetPackage()->MarkPackageDirty();
+	}
 
+	if (ColorSettings->GetBiomeColorSettings() == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiomeColorSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UBiomeColorSettings::StaticClass());
+		ColorSettings->SetBiomeColorSettings(LoadObject<UBiomeColorSettings>(Outer, *AssetName, *PackagePath));
+	}
+	else if (ColorSettings->GetBiomeColorSettings() == nullptr)
+	{
+		ColorSettings->SetBiomeColorSettings(Cast<UBiomeColorSettings>(CreateSettingsAssetEditor(UBiomeColorSettings::StaticClass())));
+		ColorSettings->GetBiomeColorSettings()->GetPackage()->MarkPackageDirty();
+	}
+
+	if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UBiome::StaticClass()->GetName())))
+	{
+		ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
+		CreatePackageName(AssetName, PackagePath, *Outer, UBiome::StaticClass());
+		ColorSettings->GetBiomeColorSettings()->GetBiomes().Add(LoadObject<UBiome>(Outer, *AssetName, *PackagePath));
+	}
+	else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
+	{
+		ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
+		ColorSettings->GetBiomeColorSettings()->GetBiomes().Add(Cast<UBiome>(CreateSettingsAssetEditor(UBiome::StaticClass())));
+		ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
+	}
+
+
+	if (ShapeSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UShapeSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UShapeSettings::StaticClass());
+		ShapeSettings = LoadObject<UShapeSettings>(Outer, *AssetName, *PackagePath);
+	}
+	else if (ShapeSettings == nullptr)
+	{
+		ShapeSettings = Cast<UShapeSettings>(CreateSettingsAssetEditor(UShapeSettings::StaticClass()));
+		ShapeSettings->GetPackage()->MarkPackageDirty();
+	}
+
+	if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseLayer::StaticClass()->GetName())))
+	{
+		ShapeSettings->GetNoiseLayers().Empty();
+		CreatePackageName(AssetName, PackagePath, *Outer, UNoiseLayer::StaticClass());
+		ShapeSettings->GetNoiseLayers().Add(LoadObject<UNoiseLayer>(Outer, *AssetName, *PackagePath));
+	}
+	else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
+	{
+		ShapeSettings->GetNoiseLayers().Empty();
+		ShapeSettings->GetNoiseLayers().Add(Cast<UNoiseLayer>(CreateSettingsAssetEditor(UNoiseLayer::StaticClass())));
+		ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
+	}
+
+	if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->GetName() + "/" + "DA_" + this->GetName() + "_" + UNoiseSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
+		ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath);
+	}
+	else if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr)
+	{
+		ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAssetEditor(UNoiseSettings::StaticClass()));
+		ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
+	}
+#endif
 	//AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
 }
 

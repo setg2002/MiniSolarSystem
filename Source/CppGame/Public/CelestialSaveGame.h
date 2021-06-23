@@ -9,6 +9,29 @@
 /**
  * 
  */
+
+USTRUCT()
+struct FAssetRecord
+{
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	UClass* Class;
+
+	UPROPERTY(SaveGame)
+	FName Name;
+
+	UPROPERTY(SaveGame)
+	TArray<uint8> AssetData;
+
+	// Default Values
+	FAssetRecord()
+	{
+		Class = nullptr;
+		Name = NAME_None;
+	}
+};
+
 USTRUCT()
 struct FActorRecord
 {
@@ -80,4 +103,13 @@ public:
 	float OverviewArmLength;
 	UPROPERTY(VisibleAnywhere)
 	FRotator OverviewCameraRotation;
+
+
+	// Asset Saving \\
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<FAssetRecord> GradientAssets;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<FAssetRecord> SettingsAssets;
 };

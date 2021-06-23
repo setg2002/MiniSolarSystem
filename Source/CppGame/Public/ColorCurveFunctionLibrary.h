@@ -19,5 +19,5 @@ public:
 	static UTexture2D* TextureFromCurve(UCurveLinearColor* Gradient, int32 sizeX, int32 sizeY);
 
 	UFUNCTION(BlueprintCallable, Category = "Texture")
-	static UCurveLinearColor* CreateNewCurve(FName Name);
+	static UCurveLinearColor* CreateNewCurve(FName Name, TArray<uint8> Data);
 };
