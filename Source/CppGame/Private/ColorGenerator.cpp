@@ -40,7 +40,7 @@ float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere
 {
 	float HeightPercent = (PointOnUnitSphere.Z + 1) / 2.f;
 	// Offset for using noise
-	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
+	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise() && BiomeNoiseFilter)
 	{
 		HeightPercent += (BiomeNoiseFilter->Evaluate(PointOnUnitSphere) - ColorSettings->GetBiomeColorSettings()->GetNoiseOffset()) * ColorSettings->GetBiomeColorSettings()->GetNoiseStrength();
 	}
@@ -81,7 +81,7 @@ void TerrestrialColorGenerator::UpdateColors()
 
 UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
 {
-	if (Gradients.Num() == 0)
+	if (Gradients.Num() == 0 || Gradients[0] == NULL)
 	{
 		return nullptr;
 	}

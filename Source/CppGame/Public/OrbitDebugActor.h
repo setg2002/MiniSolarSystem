@@ -139,7 +139,7 @@ private:
 	
 	static AOrbitDebugActor* _instance;
 
-	TArray<FColor> Colors = { FColor::Red, FColor::Blue, FColor::Green, FColor::White, FColor::Magenta, FColor::Cyan };
+	TArray<FColor> Colors = { FColor::Red, FColor::Blue, FColor::Green, FColor::White, FColor::Magenta, FColor::Cyan, FColor::Emerald, FColor::Orange, FColor::Purple, FColor::Silver, FColor::Yellow };
 
 	FVector CalculateAcceleration(int i, TArray<VirtualBody*> VirtualBodies);
 };

@@ -74,6 +74,7 @@ void ACelestialGameMode::BeginPlay()
 		const auto &Interface = Cast<ICelestialObject>(actor);
 		celestialObjects.Add(Interface);
 	}
+
 	SetPerspective(1);
 
 	LoadGame();
@@ -136,6 +137,40 @@ void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)
 		{
 			ReGen(TerrestrialPlanets[TerrestrialPlanets.Find(PlanetName) + 1].ToString());
 		}
+	}
+}
+
+ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform)
+{
+	ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(Class, Transform);
+	NewBody->Name = Name;
+
+	bodies.Add(NewBody);
+
+	APlanet* Planet = Cast<APlanet>(NewBody);
+	if (Planet)
+	{
+		TerrestrialPlanets.Add(Planet->Name);
+	}
+	TerrestrialPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+
+	const auto &Interface = Cast<ICelestialObject>(NewBody);
+	celestialObjects.Add(Interface);
+
+	AOrbitDebugActor::Get()->DrawOrbits();
+
+	return NewBody;
+}
+
+void ACelestialGameMode::RemoveBody(FString Body)
+{
+	ACelestialBody* Body_ = GetBodyByName(Body);
+	if (Body_)
+	{
+		Body_->Destroy();
+		bodies.Remove(Body_);
+		celestialObjects.Remove(Cast<ICelestialObject>(Body_));
+		AOrbitDebugActor::Get()->DrawOrbits();
 	}
 }
 
@@ -203,7 +238,7 @@ ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 {
 	for (auto& body : bodies)
 	{
-		if (body->GetName() == Name)
+		if (body->Name.ToString() == Name)
 		{
 			return body;
 		}
@@ -480,9 +515,15 @@ void ACelestialGameMode::ReGenAll()
 
 void ACelestialGameMode::ReGen(FString Planet)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ReGen on: %s"), *Planet);
-	Cast<APlanet>(GetBodyByName(Planet))->GeneratePlanet();
-	Cast<APlanet>(GetBodyByName(Planet))->ResetPosition();
+	APlanet* Planet_ = Cast<APlanet>(GetBodyByName(Planet));
+	if (Planet_)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ReGen on: %s"), *Planet);
+		Planet_->GeneratePlanet();
+		Planet_->ResetPosition();
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("No body of name %s was found"), *Planet);
 }
 
 void ACelestialGameMode::tp(FString toPlanet)
@@ -490,7 +531,7 @@ void ACelestialGameMode::tp(FString toPlanet)
 	AActor* planet = GetBodyByName(toPlanet);
 	if (planet)
 	{
-		GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(planet->GetActorLocation());
+		GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(planet->GetRootComponent()->GetComponentLocation());
 	}
 }
 

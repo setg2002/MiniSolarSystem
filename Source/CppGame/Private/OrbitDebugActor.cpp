@@ -8,6 +8,7 @@
 #include "ShapeSettings.h"
 #include "NiagaraComponent.h"
 #include "DrawDebugHelpers.h"
+#include "CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/SplineComponent.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
@@ -99,13 +100,16 @@ void AOrbitDebugActor::DrawOrbits()
 	ClearOrbits();
 	
 	TArray<ACelestialBody*> Bodies;
+#if WITH_EDITORONLY_DATA 
 	TArray<AActor*> CollectedActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedActors);
-
 	for (auto& body : CollectedActors)
 	{
 		Bodies.Add(Cast<ACelestialBody>(body));
 	}
+#else
+	Bodies = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetBodies();
+#endif
 
 	if (Bodies.Num() != Splines.Num() && DrawType == EDrawType::Spline)
 	{
@@ -279,7 +283,7 @@ void AOrbitDebugActor::ClearOrbits()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedActors);
 	for (int bodyIndex = 0; bodyIndex < CollectedActors.Num(); bodyIndex++)
 	{
-		if (Splines[bodyIndex])
+		if (Splines.IsValidIndex(bodyIndex))
 		{
 			Splines[bodyIndex]->ClearSplinePoints();
 		}

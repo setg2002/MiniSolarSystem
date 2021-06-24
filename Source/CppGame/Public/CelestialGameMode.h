@@ -49,6 +49,9 @@ public:
 	/* Sets the player perspective to the one desired
 	* @param perspective 0 is overview, 1 is celestial */
 	void SetPerspective(uint8 perspective);
+
+	UFUNCTION(BlueprintCallable)
+	uint8 GetCurrentPerspective() const { return currentPerspective; }
 	
 	void LoadGame();
 
@@ -79,6 +82,9 @@ public:
 	void tp(FString toPlanet);
 
 	UFUNCTION(Exec, BlueprintCallable)
+	void RemoveBody(FString Body);
+
+	UFUNCTION(Exec, BlueprintCallable)
 	void SetTerrainResolution(FString Planet, int32 resolution);
 
 	// ======= End ConsoleCommands =======
@@ -91,6 +97,9 @@ public:
 
 	UFUNCTION()
 	void NewGeneratedPlanet(FName PlanetName);
+
+	UFUNCTION(BlueprintCallable)
+	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform);
 
 protected:
 	// Called when the game starts

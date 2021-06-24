@@ -97,11 +97,11 @@ public:
 
 	// When true, the planet will call ReGenerate() every time a parameter is changed
 	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere)
-	bool bAutoGenerate;
+	bool bAutoGenerate = true;
 
 	// When true, planet terrain generation wil be multithreaded
 	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere)
-	bool bMultithreadGeneration;
+	bool bMultithreadGeneration = true;
 
 	// When true, tangents and normals will be generated for the planet mesh every time a parameter is changed (can only be true if bAutoGenerate is true)
 	UPROPERTY(Category = "Settings", EditInstanceOnly, BlueprintReadWrite, meta = (EditCondition = "bAutoGenerate"))
