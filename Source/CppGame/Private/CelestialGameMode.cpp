@@ -171,7 +171,10 @@ void ACelestialGameMode::RemoveBody(FString Body)
 		bodies.Remove(Body_);
 		celestialObjects.Remove(Cast<ICelestialObject>(Body_));
 		AOrbitDebugActor::Get()->DrawOrbits();
+		UE_LOG(LogTemp, Warning, TEXT("Removed %s"), *Body_->Name.ToString());
+		return;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Could not find body %s to remove"), *Body);
 }
 
 void ACelestialGameMode::SetPerspective(uint8 perspective)
@@ -271,37 +274,30 @@ void ACelestialGameMode::LoadGame()
 
 
 		// Restore Celestial Body Data
-		for (auto& Body : bodies)
+		for (auto& data : LoadedGame->CelestialBodyData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Loading Data For: %s"), *Body->Name.ToString());
-			for (auto& data : LoadedGame->CelestialBodyData)
+			bool BodyAlreadyExists = false;
+			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr)
 			{
-				if (data.Name == Body->Name)
+				if (Itr->GetName() == data.Name.ToString())
 				{
-					Body->SetActorTransform(data.Transform);
 					FMemoryReader MemoryReader(data.ActorData);
 					FCelestialSaveGameArchive Ar(MemoryReader);
-					Body->Serialize(Ar);
-					UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *Body->Name.ToString());
+					Itr->Serialize(Ar);
+					BodyAlreadyExists = true;
 					break;
 				}
 			}
+			if (!BodyAlreadyExists)
+			{
+				ACelestialBody* NewBody = AddBody(data.Class, NAME_None, data.Transform);
+
+				FMemoryReader MemoryReader(data.ActorData);
+				FCelestialSaveGameArchive Ar(MemoryReader);
+				NewBody->Serialize(Ar);
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *data.Name.ToString());
 		}
-		/*for (auto& data : LoadedGame->CelestialBodyData)
-		{
-			FActorSpawnParameters SpawnParameters;
-			SpawnParameters.Name = data.Name;
-			ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(
-				data.Class,
-				data.Transform,
-				SpawnParameters);
-
-			FMemoryReader MemoryReader(data.ActorData);
-			FCelestialSaveGameArchive Ar(MemoryReader);
-			NewBody->Serialize(Ar);
-
-			UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *Body->Name.ToString());
-		}*/
 		for (auto& CompData : LoadedGame->CelestialComponentData)
 		{
 			ACelestialBody* Parent = GetBodyByName(CompData.ParentName.ToString());
@@ -392,7 +388,7 @@ void ACelestialGameMode::Save()
 
 			SaveGameInstance->CelestialBodyData[i].Class = Body->GetClass();
 			SaveGameInstance->CelestialBodyData[i].Transform = Body->GetTransform();
-			SaveGameInstance->CelestialBodyData[i].Name = Body->Name;
+			SaveGameInstance->CelestialBodyData[i].Name = (FName)Body->GetName();
 
 			FMemoryWriter MemoryWriter(SaveGameInstance->CelestialBodyData[i].ActorData);
 
