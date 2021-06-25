@@ -132,6 +132,12 @@ void AOrbitDebugActor::DrawOrbits()
 		}
 	}
 
+	// If the central body got deleted we don't want the debug to be relative
+	if (!CentralBody || (CentralBody->IsPendingKill()))
+	{
+		bRelativeToBody = false;
+		CentralBody = Bodies[0];
+	}
 
 	int ReferenceFrameIndex = 0;
 	FVector ReferenceBodyInitialPosition = FVector::ZeroVector;

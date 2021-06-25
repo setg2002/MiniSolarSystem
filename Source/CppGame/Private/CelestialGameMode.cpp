@@ -157,7 +157,10 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	const auto &Interface = Cast<ICelestialObject>(NewBody);
 	celestialObjects.Add(Interface);
 
-	AOrbitDebugActor::Get()->DrawOrbits();
+	if (currentPerspective == 0)
+	{
+		AOrbitDebugActor::Get()->DrawOrbits();
+	}
 
 	return NewBody;
 }
