@@ -29,6 +29,8 @@
 #include "Star.h"
 
 
+float ACelestialGameMode::gravitationalConstant;
+
 ACelestialGameMode::ACelestialGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -178,6 +180,21 @@ void ACelestialGameMode::RemoveBody(FString Body)
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Could not find body %s to remove"), *Body);
+}
+
+void ACelestialGameMode::SetGravitationalConstant(float NewG)
+{
+	gravitationalConstant = NewG;
+	TArray<AActor*> NiagaraSystems;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
+	for (auto& System : NiagaraSystems)
+	{
+		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetNiagaraVariableFloat("GravitationalConstant", gravitationalConstant);
+	}
+	if (currentPerspective == 0)
+	{
+		AOrbitDebugActor::Get()->DrawOrbits();
+	}
 }
 
 void ACelestialGameMode::SetPerspective(uint8 perspective)

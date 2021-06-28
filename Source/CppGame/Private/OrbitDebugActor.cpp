@@ -309,7 +309,15 @@ FVector AOrbitDebugActor::CalculateAcceleration(int i, TArray<VirtualBody*> Virt
 		FVector ForceDir = (VirtualBodies[j]->Position - VirtualBodies[i]->Position).GetSafeNormal();
 		float sqrDst = (VirtualBodies[j]->Position - VirtualBodies[i]->Position).Size();
 		//TODO Use actual gravitational constant
-		Acceleration += ForceDir * 100 /*Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->gravitationalConstant*/ * VirtualBodies[j]->Mass / sqrDst;
+		/*if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			Acceleration += ForceDir * Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->gravitationalConstant * VirtualBodies[j]->Mass / sqrDst;
+		}
+		else
+		{
+			Acceleration += ForceDir * 100 * VirtualBodies[j]->Mass / sqrDst;
+		}*/
+		Acceleration += ForceDir * ACelestialGameMode::GetGravitationalConstant() * VirtualBodies[j]->Mass / sqrDst;
 	}
 	return Acceleration;
 }

@@ -153,7 +153,7 @@ void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float t
 
 			float sqrDst = (otherBody->GetActorLocation() - this->GetActorLocation()).Size();
 			FVector forceDir = (otherBody->GetActorLocation() - this->GetActorLocation()).GetSafeNormal();
-			FVector force = forceDir * gameMode->gravitationalConstant * mass * otherBody->GetMass() / sqrDst;
+			FVector force = forceDir * ACelestialGameMode::GetGravitationalConstant() * mass * otherBody->GetMass() / sqrDst;
 			FVector acceleration = force / mass;
 			this->currentVelocity += acceleration * timeStep;
 

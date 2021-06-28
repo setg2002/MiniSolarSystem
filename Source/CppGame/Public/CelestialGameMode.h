@@ -25,14 +25,19 @@ class CPPGAME_API ACelestialGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+private:
+	static float gravitationalConstant;
+
 public:
 	ACelestialGameMode();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float gravitationalConstant = 100;
+	UFUNCTION(BlueprintCallable)
+	static float GetGravitationalConstant() { return gravitationalConstant; }
+	UFUNCTION(BlueprintCallable)
+	void SetGravitationalConstant(float NewG);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> HighlightWidgetClass;
