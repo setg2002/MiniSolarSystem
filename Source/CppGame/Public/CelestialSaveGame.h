@@ -104,6 +104,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	FRotator OverviewCameraRotation;
 
+	UPROPERTY(VisibleAnywhere)
+	float GravConst;
+
 
 	// Asset Saving \\
 

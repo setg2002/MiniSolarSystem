@@ -294,6 +294,7 @@ void ACelestialGameMode::LoadGame()
 			UObject* NewSettings = APlanet::RestoreSettingsAsset(Asset.Name, Asset.AssetData);
 		}
 
+		gravitationalConstant = LoadedGame->GravConst;
 
 		// Restore Celestial Body Data
 		for (auto& data : LoadedGame->CelestialBodyData)
@@ -401,6 +402,8 @@ void ACelestialGameMode::Save()
 	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
 	{
 		// Set data on the savegame object.
+
+		SaveGameInstance->GravConst = gravitationalConstant;
 
 		// Save Celestial Body Data
 		SaveGameInstance->CelestialBodyData.SetNum(bodies.Num());
