@@ -12,7 +12,7 @@ class USplineComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
 
-UENUM()
+UENUM(BlueprintType)
 enum EDrawType
 {
 	DebugLine,

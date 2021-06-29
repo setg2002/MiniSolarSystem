@@ -34,6 +34,8 @@ float ACelestialGameMode::gravitationalConstant;
 ACelestialGameMode::ACelestialGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	gravitationalConstant = 100;
 }
 
 void ACelestialGameMode::BeginPlay()
