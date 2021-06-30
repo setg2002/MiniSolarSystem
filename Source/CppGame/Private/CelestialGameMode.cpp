@@ -209,7 +209,9 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		PC->Possess(OverviewPlayer);
 		CelestialWidget->RemoveFromViewport();
 		OverviewWidget->AddToViewport(0);
-		PC->SetInputMode(FInputModeGameAndUI());
+		FInputModeGameAndUI InputMode;
+		InputMode.SetHideCursorDuringCapture(false);
+		PC->SetInputMode(InputMode);
 		PC->SetShowMouseCursor(true);
 		currentPerspective = perspective;
 		AOrbitDebugActor::Get()->DrawOrbits();
@@ -396,7 +398,7 @@ void ACelestialGameMode::SaveAndQuitToMenu()
 	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 }
 
-#pragma optimize("", off)
+//#pragma optimize("", off)
 void ACelestialGameMode::Save()
 {
 	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
@@ -515,7 +517,7 @@ void ACelestialGameMode::Save()
 		}
 	}
 }
-#pragma optimize("", on)
+//#pragma optimize("", on)
 void ACelestialGameMode::OrbitDebug()
 {
 	if (currentPerspective != 0)

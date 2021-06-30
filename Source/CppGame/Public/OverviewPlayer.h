@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanPan = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanRot = true;
+
 	FVector GetCameraLocation();
 
 	USpringArmComponent* GetSpringArm() const { return SpringArm; }

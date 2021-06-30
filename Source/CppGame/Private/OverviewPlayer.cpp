@@ -45,7 +45,7 @@ void AOverviewPlayer::Tick(float DeltaTime)
 	if (Controller)
 	{
 		// Mouse drag rotation w/ left click
-		if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::LeftMouseButton)))
+		if (GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::LeftMouseButton)) && bCanRot)
 		{
 			float speedMultiplier = 3.f;
 			float dX;
