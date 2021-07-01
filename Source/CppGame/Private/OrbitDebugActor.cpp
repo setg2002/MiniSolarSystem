@@ -281,7 +281,10 @@ void AOrbitDebugActor::ClearOrbits()
 {
 	for (int i = 0; i < ParticleComponents.Num(); i++)
 	{
-		ParticleComponents[i]->DestroyComponent();
+		if (ParticleComponents[i]->IsValidLowLevel())
+		{
+			ParticleComponents[i]->DestroyComponent();
+		}
 	}
 	ParticleComponents.Empty();
 

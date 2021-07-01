@@ -13,6 +13,7 @@ UAtmosphereComponent::UAtmosphereComponent()
 	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/StaticMeshes/Atmosphere_mesh.Atmosphere_mesh'"), NULL, LOAD_None, NULL));
 
 	CloudComponent = CreateDefaultSubobject<UCloudComponent>("Clouds");
+	CloudComponent->SetRelativeLocation(FVector::ZeroVector);
 #if WITH_EDITOR
 	CloudComponent->CreationMethod = EComponentCreationMethod::Instance;
 #endif

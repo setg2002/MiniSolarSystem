@@ -229,6 +229,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		{
 			Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetPaused(true);
 		}
+		OnPerspectiveChanged.Broadcast(perspective);
 		break;
 	}
 	case 1: // Celestial mode
@@ -254,6 +255,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		{
 			Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetPaused(false);
 		}
+		OnPerspectiveChanged.Broadcast(perspective);
 		break;
 	}
 	default:

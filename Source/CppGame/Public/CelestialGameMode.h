@@ -20,6 +20,9 @@ class UUserWidget;
 class APlanet;
 class AStar;
 
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPerspectiveChanged, uint8, Perspective);
+
 UCLASS()
 class CPPGAME_API ACelestialGameMode : public AGameModeBase
 {
@@ -30,6 +33,9 @@ private:
 
 public:
 	ACelestialGameMode();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, BlueprintAssignable)
+	FPerspectiveChanged OnPerspectiveChanged;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
