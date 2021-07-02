@@ -3,6 +3,7 @@
 
 #include "OrbitDebugActor.h"
 #include "Planet.h"
+#include "GasGiant.h"
 #include "CelestialBody.h"
 #include "NiagaraSystem.h"
 #include "ShapeSettings.h"
@@ -210,6 +211,10 @@ void AOrbitDebugActor::DrawOrbits()
 					if (Width == 0 && planet != nullptr)
 					{
 						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, planet->ShapeSettings->GetRadius() * 2);
+					}
+					else if (Width == 0 && Cast<AGasGiant>(Bodies[bodyIndex]))
+					{
+						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Cast<AGasGiant>(Bodies[bodyIndex])->GetRadius() * 200);
 					}
 					else
 					{
