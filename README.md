@@ -10,3 +10,9 @@ Work Blog: https://sorengworklog.blogspot.com/
 
 ### Known Issues: ###
 * If building from source results in an error "bulk data compressed header read error. this package may be corrupt!" then delete the procedural textures folder and try again. The textures can be regenerated in-engine by clicking 'Make Texture' on the BP_Skybox in the scene and 'New Variants' on the asteroid manager. The resulting textures can be applied in their reespective material graph.
+
+
+### Changes To UE Source: ###
+* In NiagaraDataInterfaceArrayFunctionLibrary.h all of the static functions need to be made public.
+* In CurveLinearColor.h the variable FloatCurves needs to have the UPROPERTY specifier "SaveGame"
+* In RichCurve.h the variables Time, Value, and Keys all need to have the UPROPERTY specifier "SaveGame"
