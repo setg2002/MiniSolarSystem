@@ -202,82 +202,90 @@ void AOrbitDebugActor::DrawOrbits()
 	{	
 		switch (DrawType)
 		{
-			case DebugLine:
+		case DebugLine:
+		{
+			int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
+			for (int i = 0; i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps * 10) - 1); i++)
 			{
-				int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
-				for (int i = 0; i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps * 10) - 1); i++)
+				APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
+				if (Width == 0 && planet != nullptr)
 				{
-					APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
-					if (Width == 0 && planet != nullptr)
-					{
-						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, planet->ShapeSettings->GetRadius() * 2);
-					}
-					else if (Width == 0 && Cast<AGasGiant>(Bodies[bodyIndex]))
-					{
-						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Cast<AGasGiant>(Bodies[bodyIndex])->GetRadius() * 200);
-					}
-					else
-					{
-						DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Width);
-					}
+					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, planet->ShapeSettings->GetRadius() * 2);
 				}
-				break;
-			}
-			case Spline:
-			{
-				int factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps;
-				// Add more points to the end of the spline until we reach NumSteps
-				if (Splines[bodyIndex]->GetNumberOfSplinePoints() < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1))
+				else if (Width == 0 && Cast<AGasGiant>(Bodies[bodyIndex]))
 				{
-					for (int i = Splines[bodyIndex]->GetNumberOfSplinePoints(); i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); i++)
-					{
-						Splines[bodyIndex]->AddPoint(FSplinePoint(i, DrawPoints[bodyIndex][i * factor]), false);
-					}
+					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Cast<AGasGiant>(Bodies[bodyIndex])->GetRadius() * 200);
 				}
-				// Remove points from the end of the spline until we reach NumSteps
 				else
 				{
-					while (Splines[bodyIndex]->GetNumberOfSplinePoints() > NumSteps)
-					{
-						Splines[bodyIndex]->RemoveSplinePoint(Splines[bodyIndex]->GetNumberOfSplinePoints() - 1, false);
-					}
+					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Width);
 				}
+			}
+			break;
+		}
+		case Spline:
+		{
+			int factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps;
+			// Add more points to the end of the spline until we reach NumSteps
+			if (Splines[bodyIndex]->GetNumberOfSplinePoints() < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1))
+			{
+				for (int i = Splines[bodyIndex]->GetNumberOfSplinePoints(); i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); i++)
+				{
+					Splines[bodyIndex]->AddPoint(FSplinePoint(i, DrawPoints[bodyIndex][i * factor]), false);
+				}
+			}
+			// Remove points from the end of the spline until we reach NumSteps
+			else
+			{
+				while (Splines[bodyIndex]->GetNumberOfSplinePoints() > NumSteps)
+				{
+					Splines[bodyIndex]->RemoveSplinePoint(Splines[bodyIndex]->GetNumberOfSplinePoints() - 1, false);
+				}
+			}
 
-				Splines[bodyIndex]->SetDrawDebug(true);
+			Splines[bodyIndex]->SetDrawDebug(true);
 
 #if WITH_EDITOR
-				Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
-				Splines[bodyIndex]->bShouldVisualizeScale = true;
-				APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
-				if (planet != nullptr)
-				{
-					Splines[bodyIndex]->ScaleVisualizationWidth = planet->ShapeSettings->GetRadius();
-				}
-#endif
-				Splines[bodyIndex]->UpdateSpline();
-				break;
+			Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
+			Splines[bodyIndex]->bShouldVisualizeScale = true;
+			APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
+			if (planet != nullptr)
+			{
+				Splines[bodyIndex]->ScaleVisualizationWidth = planet->ShapeSettings->GetRadius();
 			}
-			case Ribbon:
-				for (int i = 0; i < ParticleComponents.Num(); i++)
-				{
-					UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[i], FName("User.Points"), DrawPoints[i]);
-					ParticleComponents[i]->SetColorParameter(FName("User.Color"), Colors[i]);
-					
-					APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
-					if (Width == 0 && planet != nullptr)
-					{
-						ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), planet->ShapeSettings->GetRadius() * 2);
-					}
-					else
-					{
-						ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
-					}
-					//ParticleComponents[i]->SetFloatParameter(FName("User.NumSteps"), float(NumSteps));
-				}
-				break;
+#endif
+			Splines[bodyIndex]->UpdateSpline();
+			break;
+		}
+		case Ribbon:
+		{
+			TArray<FVector> NewPoints;
+			int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
+			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps * 10) - 1); j++)
+			{
+				NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
+			}
 
-			default:
-				break;
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
+			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[bodyIndex]);
+
+			if (Width == 0 && Cast<APlanet>(Bodies[bodyIndex]))
+			{
+				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Cast<APlanet>(Bodies[bodyIndex])->ShapeSettings->GetRadius() * 2);
+			}
+			else if (Width == 0 && Cast<AGasGiant>(Bodies[bodyIndex]))
+			{
+				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Cast<AGasGiant>(Bodies[bodyIndex])->GetRadius() * 200);
+			}
+			else
+			{
+				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
+			}
+			//ParticleComponents[i]->SetFloatParameter(FName("User.NumSteps"), float(NumSteps));
+			break;
+		}
+		default:
+			break;
 		}
 	}
 }
