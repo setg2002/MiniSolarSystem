@@ -259,12 +259,17 @@ void AOrbitDebugActor::DrawOrbits()
 		}
 		case Ribbon:
 		{
-			RenderedSteps = 75;
+			RenderedSteps = FMath::Clamp<int32>(0.0005f * NumSteps * NumSteps, 0, 5000);
 			TArray<FVector> NewPoints;
-			int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
-			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps * 10) - 1); j++)
+			int factor = NumSteps / (RenderedSteps/* * 10*/) < 1 ? 1 : NumSteps / (RenderedSteps/* * 10*/); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
+			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps/* * 10*/) - 1); j++)
 			{
 				NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
+			}
+
+			if (bodyIndex == aaaaaa)
+			{
+				ARRAY = NewPoints;
 			}
 
 			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
