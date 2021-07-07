@@ -259,6 +259,7 @@ void AOrbitDebugActor::DrawOrbits()
 		}
 		case Ribbon:
 		{
+			RenderedSteps = 75;
 			TArray<FVector> NewPoints;
 			int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
 			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps * 10) - 1); j++)
