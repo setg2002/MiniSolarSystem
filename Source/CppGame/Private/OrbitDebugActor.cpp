@@ -267,10 +267,10 @@ void AOrbitDebugActor::DrawOrbits()
 				NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
 			}
 
-			if (bodyIndex == aaaaaa)
+			/*if (bodyIndex == aaaaaa)
 			{
 				ARRAY = NewPoints;
-			}
+			}*/
 
 			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
 			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[bodyIndex]);
@@ -330,15 +330,6 @@ FVector AOrbitDebugActor::CalculateAcceleration(int i, TArray<VirtualBody*> Virt
 
 		FVector ForceDir = (VirtualBodies[j]->Position - VirtualBodies[i]->Position).GetSafeNormal();
 		float sqrDst = (VirtualBodies[j]->Position - VirtualBodies[i]->Position).Size();
-		//TODO Use actual gravitational constant
-		/*if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode()))
-		{
-			Acceleration += ForceDir * Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->gravitationalConstant * VirtualBodies[j]->Mass / sqrDst;
-		}
-		else
-		{
-			Acceleration += ForceDir * 100 * VirtualBodies[j]->Mass / sqrDst;
-		}*/
 		Acceleration += ForceDir * ACelestialGameMode::GetGravitationalConstant() * VirtualBodies[j]->Mass / sqrDst;
 	}
 	return Acceleration;
