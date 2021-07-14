@@ -54,6 +54,8 @@ void AStar::BeginPlay()
 		ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
 	}
 
+	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/MaterialStuff/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
+
 	SetStarProperties(starProperties);
 }
 
@@ -75,7 +77,14 @@ void AStar::Tick(float DeltaTime)
 		Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Cast<AOverviewPlayer>(PlayerPawn)->GetCameraLocation()));
 	}
 
+	PlanetIlluminationInst->SetVectorParameterValue(FName("StarPos" + FString::FromInt(StarNum)), this->GetActorLocation());
+
 	OldProperties = starProperties;
+}
+
+void AStar::SetStarNum(uint8 num)
+{
+	StarNum = num;
 }
 
 bool AStar::SetStarProperties(FStarProperties NewProperties)
@@ -103,13 +112,13 @@ void AStar::SetLuminosity(int NewLuminosity)
 		dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
 		Sphere->SetMaterial(0, dynamicMaterial);
 	}
-	if (planetMateralParameterCollectionInst == nullptr)
+	if (PlanetIlluminationInst == nullptr)
 	{
-		planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
+		PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
 	}
 
 	dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
-	planetMateralParameterCollectionInst->SetScalarParameterValue(FName("StarLuminosity"), starProperties.luminosity);
+	//PlanetIlluminationInst->SetScalarParameterValue(FName("StarLuminosity"), starProperties.luminosity);
 	Light->SetIntensity(starProperties.luminosity / 5);
 }
 
@@ -168,9 +177,9 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 				dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
 				Sphere->SetMaterial(0, dynamicMaterial);
 			}
-			if (planetMateralParameterCollectionInst == nullptr)
+			if (PlanetIlluminationInst == nullptr)
 			{
-				planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
+				PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
 			}
 			UpdateColor();
 		}
@@ -181,12 +190,12 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 				dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
 				Sphere->SetMaterial(0, dynamicMaterial);
 			}
-			if (planetMateralParameterCollectionInst == nullptr)
+			if (PlanetIlluminationInst == nullptr)
 			{
-				planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
+				PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
 			}
 			dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
-			planetMateralParameterCollectionInst->SetScalarParameterValue(FName("StarLuminosity"), starProperties.luminosity);
+			PlanetIlluminationInst->SetScalarParameterValue(FName("StarLuminosity"), starProperties.luminosity);
 			Light->SetIntensity(starProperties.luminosity / 5);
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(AStar, starType))
@@ -212,10 +221,10 @@ void AStar::PostEditMove(bool bFinished)
 {
 	Super::PostEditMove(bFinished);
 
-	if (planetMateralParameterCollectionInst == nullptr)
+	if (PlanetIlluminationInst == nullptr)
 	{
-		planetMateralParameterCollectionInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
+		PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
 	}
-	planetMateralParameterCollectionInst->SetVectorParameterValue(FName("SunLocation"), this->GetActorLocation());
+	PlanetIlluminationInst->SetVectorParameterValue(FName("SunLocation"), this->GetActorLocation());
 }
 #endif

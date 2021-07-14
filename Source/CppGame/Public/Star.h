@@ -74,8 +74,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void SetStarNum(uint8 num);
+
 protected:
-	UMaterialParameterCollectionInstance* planetMateralParameterCollectionInst;
+	UMaterialParameterCollectionInstance* PlanetIlluminationInst;
 
 	UNiagaraComponent* ParticleComponent;
 
@@ -93,5 +95,8 @@ protected:
 
 private:
 	FStarProperties OldProperties;
+
+	// The number of this star used for planetMateralParameterCollectionInst
+	uint8 StarNum = 5;
 
 };

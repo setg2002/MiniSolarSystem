@@ -143,4 +143,8 @@ public:
 
 private:
 	bool b = true; // dumb
+
+	UMaterialParameterCollectionInstance* PlanetIlluminationInst;
+
+	uint8 NumStars;
 };

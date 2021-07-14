@@ -2,6 +2,7 @@
 
 //TODO Remove unneccesary includes
 #include "CelestialGameMode.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -41,7 +42,10 @@ ACelestialGameMode::ACelestialGameMode()
 void ACelestialGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/MaterialStuff/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
+	NumStars = 0;
+
 	b = true;
 
 	PC = GetWorld()->GetFirstPlayerController();
@@ -67,8 +71,15 @@ void ACelestialGameMode::BeginPlay()
 			TerrestrialPlanets.Add(Planet->Name);
 			Planet->OnPlanetGenerated.BindUFunction(this, "NewGeneratedPlanet");
 		}
+		else if (Cast<AStar>(*Itr))
+		{
+			AStar* Star = Cast<AStar>(*Itr);
+			Star->SetStarNum(NumStars);
+			NumStars++;
+		}
 	}
 	TerrestrialPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+	PlanetIlluminationInst->SetScalarParameterValue("NumStars", NumStars);
 
 	// Gets all actors that implement ICelestialObject and adds them to celestialObjects
 	TArray<AActor*> Actors;
@@ -158,6 +169,14 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	}
 	TerrestrialPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
 
+	if (Cast<AStar>(NewBody))
+	{
+		AStar* Star = Cast<AStar>(NewBody);
+		Star->SetStarNum(NumStars);
+		NumStars++;
+		PlanetIlluminationInst->SetScalarParameterValue("NumStars", NumStars);
+	}
+
 	const auto &Interface = Cast<ICelestialObject>(NewBody);
 	celestialObjects.Add(Interface);
 
@@ -178,6 +197,17 @@ void ACelestialGameMode::RemoveBody(FString Body)
 		bodies.Remove(Body_);
 		celestialObjects.Remove(Cast<ICelestialObject>(Body_));
 		AOrbitDebugActor::Get()->DrawOrbits();
+
+		if (Cast<AStar>(Body_))
+		{
+			NumStars = 0;
+			for (TActorIterator<AStar> Itr(GetWorld()); Itr; ++Itr) {
+				AStar* Star = Cast<AStar>(*Itr);
+				Star->SetStarNum(NumStars);
+				NumStars++;
+			}
+		}
+
 		UE_LOG(LogTemp, Warning, TEXT("Removed %s"), *Body_->Name.ToString());
 		return;
 	}
