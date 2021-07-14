@@ -63,11 +63,6 @@ public:
 	void SetG(float NewG);
 
 	UFUNCTION(BlueprintCallable)
-	float GetIntensity() const { return AtmosphereProperties.Intensity; }
-	UFUNCTION(BlueprintCallable)
-	void SetIntensity(float NewIntensity);
-
-	UFUNCTION(BlueprintCallable)
 	float GetMieHeightScale() const { return AtmosphereProperties.MieHeightScale; }
 	UFUNCTION(BlueprintCallable)
 	void SetMieHeightScale(float NewMieHeightScale);

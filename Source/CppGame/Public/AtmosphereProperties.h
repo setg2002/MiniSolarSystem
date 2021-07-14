@@ -20,8 +20,6 @@ public:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0"))
 	float g = 0.8f;
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0"))
-	float Intensity = 3;
-	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0"))
 	float MieHeightScale = 0.25f;
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0"))
 	float OpacityMultiplier = 1;

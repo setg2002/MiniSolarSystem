@@ -85,6 +85,10 @@ void AStar::Tick(float DeltaTime)
 void AStar::SetStarNum(uint8 num)
 {
 	StarNum = num;
+	if (PlanetIlluminationInst)
+	{
+		PlanetIlluminationInst->SetScalarParameterValue(FName("StarIntensity" + FString::FromInt(StarNum)), starProperties.luminosity / 25);
+	}
 }
 
 bool AStar::SetStarProperties(FStarProperties NewProperties)
@@ -118,7 +122,7 @@ void AStar::SetLuminosity(int NewLuminosity)
 	}
 
 	dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
-	//PlanetIlluminationInst->SetScalarParameterValue(FName("StarLuminosity"), starProperties.luminosity);
+	PlanetIlluminationInst->SetScalarParameterValue(FName("StarIntensity" + FString::FromInt(StarNum)), starProperties.luminosity / 25);
 	Light->SetIntensity(starProperties.luminosity / 5);
 }
 

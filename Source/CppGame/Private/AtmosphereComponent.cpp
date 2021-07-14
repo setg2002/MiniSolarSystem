@@ -51,12 +51,6 @@ void UAtmosphereComponent::SetG(float NewG)
 	DynamicMaterial->SetScalarParameterValue("g", AtmosphereProperties.g);
 }
 
-void UAtmosphereComponent::SetIntensity(float NewIntensity)
-{
-	AtmosphereProperties.Intensity = NewIntensity;
-	DynamicMaterial->SetScalarParameterValue("Intensity", AtmosphereProperties.Intensity);
-}
-
 void UAtmosphereComponent::SetMieHeightScale(float NewMieHeightScale)
 {
 	AtmosphereProperties.MieHeightScale = NewMieHeightScale;
@@ -129,7 +123,6 @@ void UAtmosphereComponent::UpdateProperties()
 	DynamicMaterial->SetScalarParameterValue("atmo_radius", AtmosphereProperties.Height);
 	DynamicMaterial->SetScalarParameterValue("density_multiplier", AtmosphereProperties.Density);
 	DynamicMaterial->SetScalarParameterValue("g", AtmosphereProperties.g);
-	DynamicMaterial->SetScalarParameterValue("Intensity", AtmosphereProperties.Intensity);
 	DynamicMaterial->SetScalarParameterValue("mie_height_scale", AtmosphereProperties.MieHeightScale);
 	DynamicMaterial->SetScalarParameterValue("opacity_multiplier", AtmosphereProperties.OpacityMultiplier);
 	DynamicMaterial->SetVectorParameterValue("beta_ambient", AtmosphereProperties.Ambient);
@@ -157,10 +150,6 @@ void UAtmosphereComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FAtmosphereProperties, g))
 		{
 			DynamicMaterial->SetScalarParameterValue("g", AtmosphereProperties.g);
-		}
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(FAtmosphereProperties, Intensity))
-		{
-			DynamicMaterial->SetScalarParameterValue("Intensity", AtmosphereProperties.Intensity);
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FAtmosphereProperties, MieHeightScale))
 		{
