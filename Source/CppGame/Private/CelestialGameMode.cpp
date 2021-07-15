@@ -259,6 +259,15 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		{
 			Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetPaused(true);
 		}
+
+		TArray<AActor*> Stars;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStar::StaticClass(), Stars);
+		for (AActor* Star : Stars)
+		{
+			Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
+			Cast<AStar>(Star)->GetParticleComp()->SetPaused(true);
+		}
+
 		OnPerspectiveChanged.Broadcast(perspective);
 		break;
 	}
@@ -285,6 +294,15 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		{
 			Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetPaused(false);
 		}
+
+		TArray<AActor*> Stars;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStar::StaticClass(), Stars);
+		for (AActor* Star : Stars)
+		{
+			Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
+			Cast<AStar>(Star)->GetParticleComp()->SetPaused(false);
+		}
+
 		OnPerspectiveChanged.Broadcast(perspective);
 		break;
 	}

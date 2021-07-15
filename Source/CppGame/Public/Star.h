@@ -76,6 +76,9 @@ public:
 
 	void SetStarNum(uint8 num);
 
+	UFUNCTION(BlueprintCallable)
+	UNiagaraComponent* GetParticleComp() const { return ParticleComponent; }
+
 protected:
 	UMaterialParameterCollectionInstance* PlanetIlluminationInst;
 

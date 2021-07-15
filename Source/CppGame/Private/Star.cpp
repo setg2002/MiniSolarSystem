@@ -105,6 +105,9 @@ void AStar::SetRadius(int NewRadius)
 	starProperties.radius = NewRadius;
 	Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
 	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+	bool WasPaused = ParticleComponent->IsPaused();
+	ParticleComponent->ReinitializeSystem();
+	ParticleComponent->SetPaused(WasPaused);
 }
 
 void AStar::SetLuminosity(int NewLuminosity)
