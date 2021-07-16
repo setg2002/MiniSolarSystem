@@ -6,6 +6,7 @@
 #include "OverviewPlayer.h"
 #include "CelestialPlayer.h"
 #include "NiagaraComponent.h"
+#include "CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
@@ -57,6 +58,12 @@ void AStar::BeginPlay()
 	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/MaterialStuff/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
 
 	SetStarProperties(starProperties);
+
+	if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetCurrentPerspective() == 0)
+	{
+		ParticleComponent->SetPaused(true);
+		dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
+	}
 }
 
 void AStar::Tick(float DeltaTime)
