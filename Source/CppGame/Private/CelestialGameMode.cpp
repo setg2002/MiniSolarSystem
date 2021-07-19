@@ -341,9 +341,12 @@ void ACelestialGameMode::LoadGame()
 		}
 
 		// Load Settings Assets
-		for (auto& Asset : LoadedGame->GradientAssets)
+		for (auto& Asset : LoadedGame->SettingsAssets)
 		{
-			UObject* NewSettings = APlanet::RestoreSettingsAsset(Asset.Name, Asset.AssetData);
+			if (Asset.Class == UNoiseLayer::StaticClass())
+			{
+				UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseLayer>(Asset.Name, Asset.AssetData);
+			}
 		}
 
 		gravitationalConstant = LoadedGame->GravConst;
@@ -438,18 +441,21 @@ void ACelestialGameMode::DeleteSave()
 
 void ACelestialGameMode::SaveAndQuit()
 {
-	Save();
-	FGenericPlatformMisc::RequestExit(false);
+	if (Save())
+	{
+		FGenericPlatformMisc::RequestExit(false);
+	}
 }
 
 void ACelestialGameMode::SaveAndQuitToMenu()
 {
-	Save();
-	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+	if (Save())
+	{
+		UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+	}
 }
 
-//#pragma optimize("", off)
-void ACelestialGameMode::Save()
+bool ACelestialGameMode::Save()
 {
 	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
 	{
@@ -541,7 +547,10 @@ void ACelestialGameMode::Save()
 		for (int32 i = 0; i < SaveGameInstance->SettingsAssets.Num(); i++)
 		{
 			SaveGameInstance->SettingsAssets[i].Class = AssetsData[i].GetClass();
-			SaveGameInstance->SettingsAssets[i].Name = AssetsData[i].AssetName;
+			if (AssetsData[i].GetClass() == UNoiseLayer::StaticClass()) //FIX Temporary name get
+				SaveGameInstance->SettingsAssets[i].Name = Cast<UNoiseLayer>(AssetsData[i].GetAsset())->Name;
+			else
+				SaveGameInstance->SettingsAssets[i].Name = AssetsData[i].AssetName;
 
 			FMemoryWriter MemoryWriter(SaveGameInstance->SettingsAssets[i].AssetData);
 			FCelestialSaveGameArchive Ar(MemoryWriter);
@@ -556,6 +565,7 @@ void ACelestialGameMode::Save()
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Save Succeeded")));
 			}
+			return true;
 		}
 		else
 		{
@@ -564,10 +574,12 @@ void ACelestialGameMode::Save()
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT("Save Failed")));
 			}
+			return false;
 		}
 	}
+	return false;
 }
-//#pragma optimize("", on)
+
 void ACelestialGameMode::OrbitDebug()
 {
 	if (currentPerspective != 0)

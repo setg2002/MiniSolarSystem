@@ -35,6 +35,8 @@ private:
 	FNoiseLayer_ NoiseLayer;
 
 public:
+	UNoiseLayer();
+
 	FNoiseLayerChanged OnNoiseLayerChanged;
 
 	FNoiseLayer_ GetStruct() const { return NoiseLayer; }
@@ -43,6 +45,9 @@ public:
 		NoiseLayer = NewStruct;
 		return true;
 	}
+
+	UPROPERTY(SaveGame, BlueprintReadWrite)
+	FName Name;
 
 	UFUNCTION(BlueprintCallable)
 	bool GetEnabled() const { return NoiseLayer.Enabled; }

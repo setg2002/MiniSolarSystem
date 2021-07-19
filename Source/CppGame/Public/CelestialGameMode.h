@@ -78,7 +78,7 @@ public:
 	void SaveAndQuitToMenu();
 
 	UFUNCTION(Exec, BlueprintCallable)
-	void Save();
+	bool Save();
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void OrbitDebug();

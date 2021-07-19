@@ -3,6 +3,14 @@
 
 #include "NoiseLayer.h"
 
+UNoiseLayer::UNoiseLayer()
+{
+	if (Name == NAME_None)
+	{
+		Name = FName(this->GetName());
+	}
+}
+
 void UNoiseLayer::SetEnabled(bool NewEnabled)
 {
 	NoiseLayer.Enabled = NewEnabled;
