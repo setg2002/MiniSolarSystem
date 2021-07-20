@@ -547,10 +547,7 @@ bool ACelestialGameMode::Save()
 		for (int32 i = 0; i < SaveGameInstance->SettingsAssets.Num(); i++)
 		{
 			SaveGameInstance->SettingsAssets[i].Class = AssetsData[i].GetClass();
-			if (AssetsData[i].GetClass() == UNoiseLayer::StaticClass()) //FIX Temporary name get
-				SaveGameInstance->SettingsAssets[i].Name = Cast<UNoiseLayer>(AssetsData[i].GetAsset())->Name;
-			else
-				SaveGameInstance->SettingsAssets[i].Name = AssetsData[i].AssetName;
+			SaveGameInstance->SettingsAssets[i].Name = Cast<USettingsAsset>(AssetsData[i].GetAsset())->Name;
 
 			FMemoryWriter MemoryWriter(SaveGameInstance->SettingsAssets[i].AssetData);
 			FCelestialSaveGameArchive Ar(MemoryWriter);

@@ -25,7 +25,6 @@
 
 APlanet::APlanet()
 {
-	//StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
 	ProcMesh->SetupAttachment(RootComponent);
 	ProcMesh->SetRelativeLocation(FVector::ZeroVector);
@@ -54,22 +53,22 @@ void APlanet::BeginPlay()
 
 void APlanet::BindDelegates()
 {
-	ShapeSettings->OnShapeSettingsChanged.AddUFunction(this, "OnShapeSettingsUpdated");
+	ShapeSettings->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
 	for (auto& NoiseLayer : ShapeSettings->GetNoiseLayers())
 	{
-		NoiseLayer->OnNoiseLayerChanged.AddUFunction(this, "OnShapeSettingsUpdated");
-		NoiseLayer->NoiseSettings->OnNoiseSettingsChanged.AddUFunction(this, "OnShapeSettingsUpdated");
+		NoiseLayer->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
+		NoiseLayer->NoiseSettings->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
 	}
 
-	ColorSettings->OnColorSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
-	ColorSettings->GetBiomeColorSettings()->OnBiomeColorSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
+	ColorSettings->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
+	ColorSettings->GetBiomeColorSettings()->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
 	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
 	{
-		ColorSettings->GetBiomeColorSettings()->GetNoise()->OnNoiseSettingsChanged.AddUFunction(this, "OnColorSettingsUpdated");
+		ColorSettings->GetBiomeColorSettings()->GetNoise()->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
 	}
 	for (auto& Biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
 	{
-		Biome->OnBiomeChanged.AddUFunction(this, "OnColorSettingsUpdated");
+		Biome->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
 	}
 }
 

@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
 #include "EFilterType.h"
+#include "SettingsAsset.h"
 #include "NoiseSettings.generated.h"
 
 /**
@@ -60,11 +60,9 @@ public:
 };
 
 UCLASS(BlueprintType)
-class CPPGAME_API UNoiseSettings : public UObject
+class CPPGAME_API UNoiseSettings : public USettingsAsset
 {
 	GENERATED_BODY()
-
-	DECLARE_MULTICAST_DELEGATE(FNoiseSettingsChanged);
 
 private:
 	UPROPERTY(SaveGame, EditAnywhere)
@@ -80,8 +78,6 @@ public:
 
 	UNoiseSettings();
 	~UNoiseSettings();
-
-	FNoiseSettingsChanged OnNoiseSettingsChanged;
 
 	UFUNCTION(BlueprintCallable)
 	TEnumAsByte<EFilterType> GetFilterType() const { return NoiseSettings.FilterType; }

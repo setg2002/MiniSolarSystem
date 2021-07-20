@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SettingsAsset.h"
 #include "ShapeSettings.generated.h"
 
 class UNoiseLayer;
@@ -27,11 +28,9 @@ public:
 };
 
 UCLASS(BlueprintType)
-class CPPGAME_API UShapeSettings : public UObject
+class CPPGAME_API UShapeSettings : public USettingsAsset
 {
 	GENERATED_BODY()
-
-	DECLARE_MULTICAST_DELEGATE(FShapeSettingsChanged);
 
 private:
 	UPROPERTY(SaveGame, EditAnywhere)
@@ -39,8 +38,6 @@ private:
 
 public:
 	bool IsNoiseLayers();
-
-	FShapeSettingsChanged OnShapeSettingsChanged;
 
 	FShapeSettings_ GetStruct() const { return ShapeSettings; }
 	bool SetStruct (FShapeSettings_ NewStruct)

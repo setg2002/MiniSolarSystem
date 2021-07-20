@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SettingsAsset.h"
 #include "ColorSettings.generated.h"
 
 /**
@@ -26,19 +27,15 @@ public:
 };
 
 UCLASS(BlueprintType)
-class UBiome : public UObject
+class UBiome : public USettingsAsset
 {
 	GENERATED_BODY()
-
-	DECLARE_MULTICAST_DELEGATE(FBiomeChanged);
 
 private:
 	UPROPERTY(SaveGame, EditAnywhere)
 	FBiome_ Biome;
 
 public:
-	FBiomeChanged OnBiomeChanged;
-
 	FBiome_ GetStruct() const { return Biome; }
 	bool SetStruct(FBiome_ NewStruct)
 	{
@@ -84,19 +81,15 @@ public:
 };
 
 UCLASS()
-class UBiomeColorSettings : public UObject
+class UBiomeColorSettings : public USettingsAsset
 {
 	GENERATED_BODY()
-
-	DECLARE_MULTICAST_DELEGATE(FBiomeColorSettingsChanged);
 
 private:
 	UPROPERTY(SaveGame, EditAnywhere)
 	FBiomeColorSettings_ BiomeColorSettings;
 
 public:
-	FBiomeColorSettingsChanged OnBiomeColorSettingsChanged;
-
 	FBiomeColorSettings_ GetStruct() const { return BiomeColorSettings; }
 	bool SetStruct(FBiomeColorSettings_ NewStruct)
 	{
@@ -155,12 +148,10 @@ public:
 };
 
 UCLASS()
-class CPPGAME_API UColorSettings : public UObject
+class CPPGAME_API UColorSettings : public USettingsAsset
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE(FColorSettingsChanged);
-	
 private:
 	UPROPERTY(SaveGame, EditAnywhere)
 	FColorSettings_ ColorSettings;
@@ -174,8 +165,6 @@ public:
 		ColorSettings = NewStruct;
 		return true;
 	}
-
-	FColorSettingsChanged OnColorSettingsChanged;
 
 	UMaterialInterface* PlanetMat;
 

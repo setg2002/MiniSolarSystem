@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SettingsAsset.h"
 #include "GasGiantColorSettings.generated.h"
 
 /**
@@ -26,7 +27,7 @@ public:
 };
 
 UCLASS()
-class CPPGAME_API UGasGiantColorSettings : public UObject
+class CPPGAME_API UGasGiantColorSettings : public USettingsAsset
 {
 	GENERATED_BODY()
 	

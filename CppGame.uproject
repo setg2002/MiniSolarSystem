@@ -14,7 +14,8 @@
 				"SimplexNoise",
 				"RawMesh",
 				"Niagara",
-				"UMG"
+				"UMG",
+				"CoreUObject"
 			]
 		}
 	],

@@ -22,17 +22,17 @@ bool UShapeSettings::IsNoiseLayers()
 void UShapeSettings::SetRadius(float NewRadius)
 {
 	ShapeSettings.PlanetRadius = NewRadius;
-	OnShapeSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UShapeSettings::AddNoiseLayer(UNoiseLayer* NewNoiseLayer)
 {
 	ShapeSettings.NoiseLayers.Add(NewNoiseLayer);
-	OnShapeSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UShapeSettings::RemoveNoiseLayer(int32 index)
 {
 	ShapeSettings.NoiseLayers.RemoveAt(index);
-	OnShapeSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }

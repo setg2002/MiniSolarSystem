@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "NoiseSettings.h"
+#include "SettingsAsset.h"
 #include "NoiseLayer.generated.h"
 
 /**
@@ -24,30 +25,21 @@ public:
 };
 
 UCLASS(BlueprintType)
-class CPPGAME_API UNoiseLayer : public UObject
+class CPPGAME_API UNoiseLayer : public USettingsAsset
 {
 	GENERATED_BODY()
-
-	DECLARE_MULTICAST_DELEGATE(FNoiseLayerChanged);
 
 private:
 	UPROPERTY(SaveGame, EditAnywhere)
 	FNoiseLayer_ NoiseLayer;
 
 public:
-	UNoiseLayer();
-
-	FNoiseLayerChanged OnNoiseLayerChanged;
-
 	FNoiseLayer_ GetStruct() const { return NoiseLayer; }
 	bool SetStruct(FNoiseLayer_ NewStruct)
 	{
 		NoiseLayer = NewStruct;
 		return true;
 	}
-
-	UPROPERTY(SaveGame, BlueprintReadWrite)
-	FName Name;
 
 	UFUNCTION(BlueprintCallable)
 	bool GetEnabled() const { return NoiseLayer.Enabled; }
@@ -61,5 +53,4 @@ public:
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UNoiseSettings* NoiseSettings;
-	
 };

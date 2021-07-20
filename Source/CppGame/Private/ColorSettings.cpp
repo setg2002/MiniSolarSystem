@@ -11,71 +11,71 @@ UColorSettings::UColorSettings()
 void UBiome::SetStartHeight(float NewHeight)
 {
 	Biome.StartHeight = NewHeight;
-	OnBiomeChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UBiome::SetGradient(UCurveLinearColor* NewGradient)
 {
 	Biome.Gradient = NewGradient;
-	OnBiomeChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UBiomeColorSettings::SetUsingNoise(bool NewUsingNoise)
 {
 	BiomeColorSettings.bUsingNoise = NewUsingNoise;
-	OnBiomeColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UBiomeColorSettings::SetNoiseOffset(float NewNoiseOffset)
 {
 	BiomeColorSettings.NoiseOffset = NewNoiseOffset;
-	OnBiomeColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UBiomeColorSettings::SetNoiseStrength(float NewNoiseStrength)
 {
 	BiomeColorSettings.NoiseStrength = NewNoiseStrength;
-	OnBiomeColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UBiomeColorSettings::AddBiome(UBiome* NewBiome)
 {
 	BiomeColorSettings.Biomes.Add(NewBiome);
-	OnBiomeColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UBiomeColorSettings::RemoveBiome(int32 index)
 {
 	BiomeColorSettings.Biomes.RemoveAt(index);
-	OnBiomeColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UBiomeColorSettings::SetBlendAmount(float NewBlendAmount)
 {
 	BiomeColorSettings.blendAmount = NewBlendAmount;
-	OnBiomeColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UBiomeColorSettings::SetNoise(UNoiseSettings* NewNoise)
 {
 	BiomeColorSettings.Noise = NewNoise;
-	OnBiomeColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UColorSettings::SetBiomeColorSettings(UBiomeColorSettings* NewColorSettings)
 {
 	ColorSettings.BiomeColorSettings = NewColorSettings;
-	OnColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UColorSettings::SetTintPercent(float NewTintPercent)
 {
 	ColorSettings.BiomeTintPercent = NewTintPercent;
-	OnColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
 
 void UColorSettings::SetOceanColor(UCurveLinearColor* NewOceanColor)
 {
 	ColorSettings.OceanColor = NewOceanColor;
-	OnColorSettingsChanged.Broadcast();
+	OnSettingsAssetChanged.Broadcast();
 }
