@@ -73,10 +73,4 @@ Plugins/*/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
-Content/ProceduralTextures/BP_Skybox_2_Skybox.uasset
-Content/ProceduralTextures/Asteroids/Level/T_AsteroidSphere.uasset
-Content/ProceduralTextures/Asteroids/Level/T_Heightmap_1.uasset
-Content/ProceduralTextures/Asteroids/Level/T_Heightmap_2.uasset
-Content/ProceduralTextures/Asteroids/Level/T_Heightmap_3.uasset
-Content/ProceduralTextures/Asteroids/Level/T_Heightmap_4.uasset
-Content/ProceduralTextures/Asteroids/Level/T2DA_HeightmapsArray.uasset
+Content/ProceduralTextures/
