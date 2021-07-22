@@ -47,7 +47,7 @@ void APlanet::BeginPlay()
 	BindDelegates();
 	
 	//bGenerating = false;
-	GeneratePlanet();
+	//GeneratePlanet();
 
 }
 
@@ -215,7 +215,7 @@ void APlanet::CreateSettingsAssets()
 	else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
 	{
 		ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
-		ColorSettings->GetBiomeColorSettings()->GetBiomes().Add(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+		ColorSettings->GetBiomeColorSettings()->AddBiome(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
 		ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
 	}
 
@@ -240,7 +240,7 @@ void APlanet::CreateSettingsAssets()
 	else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
 	{
 		ShapeSettings->GetNoiseLayers().Empty();
-		ShapeSettings->GetNoiseLayers().Add(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
+		ShapeSettings->AddNoiseLayer(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
 		ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
 	}
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Kismet/GameplayStatics.h"
 #include "OrbitDebugActor.h"
 #include "GameFramework/GameModeBase.h"
 #include "CelestialGameMode.generated.h"
@@ -65,6 +66,7 @@ public:
 	uint8 GetCurrentPerspective() const { return currentPerspective; }
 	
 	void LoadGame();
+	void SaveAsync(FAsyncSaveGameToSlotDelegate Out);
 
 	// ======= Runtime Console Commands =======
 
@@ -78,7 +80,7 @@ public:
 	void SaveAndQuitToMenu();
 
 	UFUNCTION(Exec, BlueprintCallable)
-	bool Save();
+	void Save() { SaveAsync(nullptr); }
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void OrbitDebug();
@@ -112,6 +114,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform);
 
+	ACelestialBody* GetBodyByName(FString Name);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -120,8 +124,6 @@ protected:
 	TArray<ACelestialBody*> bodies;
 
 	TArray<ICelestialObject*> celestialObjects;
-
-	ACelestialBody* GetBodyByName(FString Name);
 
 	UPROPERTY() // Prevents garbage collection
 	UUserWidget* OverviewWidget;
@@ -140,6 +142,8 @@ protected:
 
 public:
 	TArray<ACelestialBody*> GetBodies() { return bodies; }
+	ACelestialPlayer* GetCelestialPlayer() const { return CelestialPlayer; }
+	AOverviewPlayer* GetOverviewPlayer() const { return OverviewPlayer; }
 
 private:
 	bool b = true; // dumb

@@ -273,7 +273,7 @@ void AOrbitDebugActor::DrawOrbits()
 			}*/
 
 			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
-			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[bodyIndex]);
+			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[bodyIndex % Colors.Num()]);
 
 			if (Width == 0 && Cast<APlanet>(Bodies[bodyIndex]))
 			{
