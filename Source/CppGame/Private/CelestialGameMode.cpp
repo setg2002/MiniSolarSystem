@@ -121,7 +121,7 @@ void ACelestialGameMode::Tick(float DeltaTime)
 ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform)
 {
 	ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(Class, Transform);
-	NewBody->Name = Name.GetNumber() == 0 ? NewBody->Name : Name;
+	NewBody->SetName(Name.GetNumber() == 0 ? NewBody->GetBodyName() : Name);
 
 	bodies.Add(NewBody);
 
@@ -161,7 +161,7 @@ void ACelestialGameMode::RemoveBody(FString Body)
 			}
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Removed %s"), *Body_->Name.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Removed %s"), *Body_->GetBodyName().ToString());
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Could not find body %s to remove"), *Body);
@@ -266,7 +266,7 @@ ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 {
 	for (auto& body : bodies)
 	{
-		if (body->Name.ToString() == Name)
+		if (body->GetBodyName().ToString() == Name)
 			return body;
 	}
 	return nullptr;
@@ -302,7 +302,7 @@ void ACelestialGameMode::LoadGame()
 				bool BodyAlreadyExists = false;
 				for (int32 i = 0; i < bodies.Num(); i++)
 				{
-					if (bodies[i]->GetName() == data.Name.ToString())
+					if (bodies[i]->GetBodyName().ToString() == data.Name.ToString())
 					{
 						FMemoryReader MemoryReader(data.ActorData);
 						FCelestialSaveGameArchive Ar(MemoryReader);
@@ -371,7 +371,7 @@ void ACelestialGameMode::LoadGame()
 			TArray<FName> TerrestrialBodyNames;
 			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
 				if (APlanet* Planet = Cast<APlanet>(*Itr))
-					TerrestrialBodyNames.Add(Planet->Name);
+					TerrestrialBodyNames.Add(Planet->GetBodyName());
 			}
 			TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
 			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
@@ -383,7 +383,7 @@ void ACelestialGameMode::LoadGame()
 			TArray<FName> TerrestrialBodyNames;
 			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
 				if (APlanet* Planet = Cast<APlanet>(*Itr))
-					TerrestrialBodyNames.Add(Planet->Name);
+					TerrestrialBodyNames.Add(Planet->GetBodyName());
 			}
 			TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
 			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
@@ -429,7 +429,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 			SaveGameInstance->CelestialBodyData[i].Class = Body->GetClass();
 			SaveGameInstance->CelestialBodyData[i].Transform = Body->GetTransform();
-			SaveGameInstance->CelestialBodyData[i].Name = (FName)Body->GetName();
+			SaveGameInstance->CelestialBodyData[i].Name = (FName)Body->GetBodyName();
 
 			FMemoryWriter MemoryWriter(SaveGameInstance->CelestialBodyData[i].ActorData);
 
@@ -447,7 +447,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 				{
 					SaveGameInstance->CelestialComponentData.Add(FComponentRecord());
 
-					SaveGameInstance->CelestialComponentData.Last().ParentName = Body->Name;
+					SaveGameInstance->CelestialComponentData.Last().ParentName = Body->GetBodyName();
 					SaveGameInstance->CelestialComponentData.Last().Class = Comp->GetClass();
 					SaveGameInstance->CelestialComponentData.Last().Transform = FTransform();
 					SaveGameInstance->CelestialComponentData.Last().Name = Comp->GetFName();

@@ -17,15 +17,16 @@ class CPPGAME_API ACelestialBody : public AActor, public ICelestialObject
 {
 	GENERATED_BODY()
 	
+protected:
+	UPROPERTY(SaveGame, EditAnywhere)
+	FName BodyName = NAME_None;
+
 public:	
 	// Sets default values for this actor's properties
 	ACelestialBody();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
-	FName Name = NAME_None;
 
 	UPROPERTY(SaveGame, EditInstanceOnly, Category = "Default")
 	FVector initialVelocity;
@@ -54,6 +55,11 @@ public:
 	// Sets the location of the body and re-draws orbits
 	UFUNCTION(BlueprintCallable)
 	void SetLocation(FVector NewLocation);
+
+	UFUNCTION(BlueprintCallable)
+	FName GetBodyName() const { return BodyName; }
+	UFUNCTION(BlueprintCallable)
+	bool SetName(FName NewName);
 
 	// Sets the magnitude of the current velocity to NewVelocity without changing direction
 	UFUNCTION(BlueprintCallable)
