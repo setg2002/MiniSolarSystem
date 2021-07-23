@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/GameplayStatics.h"
-#include "OrbitDebugActor.h"
 #include "GameFramework/GameModeBase.h"
 #include "CelestialGameMode.generated.h"
 
@@ -23,6 +22,7 @@ class AStar;
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPerspectiveChanged, uint8, Perspective);
+
 
 UCLASS()
 class CPPGAME_API ACelestialGameMode : public AGameModeBase
@@ -57,6 +57,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> OrbitDebugWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> LoadingWidgetClass;
 
 	/* Sets the player perspective to the one desired
 	* @param perspective 0 is overview, 1 is celestial */
@@ -98,18 +101,9 @@ public:
 	void RemoveBody(FString Body);
 
 	UFUNCTION(Exec, BlueprintCallable)
-	void SetTerrainResolution(FString Planet, int32 resolution);
+	void SetTerrainResolution(FString PlanetName, int32 resolution);
 
 	// ======= End ConsoleCommands =======
-
-	// For Loading
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> TerrestrialPlanets;
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FName> GeneratedPlanets;
-
-	UFUNCTION()
-	void NewGeneratedPlanet(FName PlanetName);
 
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform);
@@ -146,9 +140,24 @@ public:
 	AOverviewPlayer* GetOverviewPlayer() const { return OverviewPlayer; }
 
 private:
-	bool b = true; // dumb
-
 	UMaterialParameterCollectionInstance* PlanetIlluminationInst;
 
 	uint8 NumStars;
+};
+
+
+namespace GeneratePlanetsOrdered
+{
+	static void DoGeneratePlanetsOrdered(TArray<FName> PlanetNames, ACelestialGameMode* GM);
+
+	namespace // Anonymous namespace makes these variables "private"
+	{
+		static TArray<FName> TerrestrialPlanets;
+		static TArray<FName> GeneratedPlanets;
+		static ACelestialGameMode* GameMode;
+
+		static bool bCurrentlyGenerating = false;
+	}
+
+	static void NewGeneratedPlanet(FName PlanetName);
 };

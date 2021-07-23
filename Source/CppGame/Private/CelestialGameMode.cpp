@@ -16,6 +16,7 @@
 #include "AssetRegistryModule.h"
 #include "CelestialSaveGame.h"
 #include "NiagaraComponent.h"
+#include "OrbitDebugActor.h"
 #include "CelestialObject.h"
 #include "CelestialPlayer.h"
 #include "OverviewPlayer.h"
@@ -45,15 +46,14 @@ void ACelestialGameMode::BeginPlay()
 	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/MaterialStuff/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
 	NumStars = 0;
 
-	b = true;
-
 	PC = GetWorld()->GetFirstPlayerController();
 	
-	//UGameplayStatics::SetGamePaused(GetWorld(), true);
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
 
 	// Make widgets
 	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
 	OverviewWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
+	CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), LoadingWidgetClass)->AddToViewport();
 
 	CelestialPlayer = Cast<ACelestialPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass()));
 	OverviewPlayer = Cast<AOverviewPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOverviewPlayer::StaticClass()));
@@ -64,20 +64,13 @@ void ACelestialGameMode::BeginPlay()
 	for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
 		bodies.Add(*Itr);
 
-		APlanet* Planet = Cast<APlanet>(*Itr);
-		if (Planet)
-		{
-			TerrestrialPlanets.Add(Planet->Name);
-			//Planet->OnPlanetGenerated.BindUFunction(this, "NewGeneratedPlanet");
-		}
-		else if (Cast<AStar>(*Itr))
+		if (Cast<AStar>(*Itr))
 		{
 			AStar* Star = Cast<AStar>(*Itr);
 			Star->SetStarNum(NumStars);
 			NumStars++;
 		}
 	}
-	TerrestrialPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
 	PlanetIlluminationInst->SetScalarParameterValue("NumStars", NumStars);
 
 	// Gets all actors that implement ICelestialObject and adds them to celestialObjects
@@ -90,17 +83,13 @@ void ACelestialGameMode::BeginPlay()
 	}
 
 	SetPerspective(1);
+
+	LoadGame();
 }
 
 void ACelestialGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	if (b)
-	{
-		LoadGame();
-		b = false;
-	}
 
 	if (currentPerspective == 1)
 	{
@@ -129,43 +118,15 @@ void ACelestialGameMode::Tick(float DeltaTime)
 	}
 }
 
-void ACelestialGameMode::NewGeneratedPlanet(FName PlanetName)
-{
-	/*if (b)
-	{
-		GeneratedPlanets.AddUnique(PlanetName);
-
-		GeneratedPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
-		if (GeneratedPlanets == TerrestrialPlanets)
-		{
-			b = false;
-			UGameplayStatics::SetGamePaused(GetWorld(), false);
-			return;
-		}
-		else if (TerrestrialPlanets.Num() > TerrestrialPlanets.Find(PlanetName) + 1)
-		{
-			ReGen(TerrestrialPlanets[TerrestrialPlanets.Find(PlanetName) + 1].ToString());
-		}
-	}*/
-}
-
 ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform)
 {
 	ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(Class, Transform);
-	NewBody->Name = Name;
+	NewBody->Name = Name.GetNumber() == 0 ? NewBody->Name : Name;
 
 	bodies.Add(NewBody);
 
-	APlanet* Planet = Cast<APlanet>(NewBody);
-	if (Planet)
+	if (AStar* Star = Cast<AStar>(NewBody))
 	{
-		TerrestrialPlanets.Add(Planet->Name);
-	}
-	TerrestrialPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
-
-	if (Cast<AStar>(NewBody))
-	{
-		AStar* Star = Cast<AStar>(NewBody);
 		Star->SetStarNum(NumStars);
 		NumStars++;
 		PlanetIlluminationInst->SetScalarParameterValue("NumStars", NumStars);
@@ -175,9 +136,7 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	celestialObjects.Add(Interface);
 
 	if (currentPerspective == 0)
-	{
-		AOrbitDebugActor::Get()->DrawOrbits();
-	}
+			AOrbitDebugActor::Get()->DrawOrbits();
 
 	return NewBody;
 }
@@ -218,9 +177,7 @@ void ACelestialGameMode::SetGravitationalConstant(float NewG)
 		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetNiagaraVariableFloat("GravitationalConstant", gravitationalConstant);
 	}
 	if (currentPerspective == 0)
-	{
 		AOrbitDebugActor::Get()->DrawOrbits();
-	}
 }
 
 void ACelestialGameMode::SetPerspective(uint8 perspective)
@@ -310,13 +267,11 @@ ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 	for (auto& body : bodies)
 	{
 		if (body->Name.ToString() == Name)
-		{
 			return body;
-		}
 	}
 	return nullptr;
 }
-//#pragma optimize("", off)
+
 void ACelestialGameMode::LoadGame()
 {
 	FAsyncLoadGameFromSlotDelegate OnLoadComplete;
@@ -413,216 +368,29 @@ void ACelestialGameMode::LoadGame()
 			FCelestialSaveGameArchive ODAAr(ODAMemoryReader);
 			ODA->Serialize(ODAAr);
 
-			for (int32 i = 0; i < TerrestrialPlanets.Num(); i++)
-			{
-				FString PlanetName = TerrestrialPlanets[i].ToString();
-				ReGen(PlanetName);
-				if (!TerrestrialPlanets.IsValidIndex(i + 1))
-				{
-					OverviewPlayer->SetActorTransform(LoadedGame->OverviewPlayerData.Transform);
-					CelestialPlayer->SetActorTransform(LoadedGame->CelestialPlayerData.Transform);
-					UGameplayStatics::SetGamePaused(GetWorld(), false);
-				}
+			TArray<FName> TerrestrialBodyNames;
+			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
+				if (APlanet* Planet = Cast<APlanet>(*Itr))
+					TerrestrialBodyNames.Add(Planet->Name);
 			}
+			TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("NOT LOADED"));
 
-			for (int32 i = 0; i < TerrestrialPlanets.Num(); i++)
-			{
-				FString PlanetName = TerrestrialPlanets[i].ToString();
-				ReGen(PlanetName);
-				if (!TerrestrialPlanets.IsValidIndex(i+1))
-					UGameplayStatics::SetGamePaused(GetWorld(), false);
+			TArray<FName> TerrestrialBodyNames;
+			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
+				if (APlanet* Planet = Cast<APlanet>(*Itr))
+					TerrestrialBodyNames.Add(Planet->Name);
 			}
+			TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
 		}
 	});
 	UGameplayStatics::AsyncLoadGameFromSlot("Save", 0, OnLoadComplete);
 }
-
-//void ACelestialGameMode::LoadGame()
-//{
-//	auto GM = this;
-//	auto TerrestrialPlanetsPtr = TerrestrialPlanets;
-//	TArray<AActor*> CollectedBodies;
-//	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedBodies);
-//	LoadStage = ELoadStage::Starting;
-//	FLoadRunnable* LoadThread = new FLoadRunnable(GM, TerrestrialPlanetsPtr, CollectedBodies);
-//	FRunnableThread* SharedLoadThread = FRunnableThread::Create(LoadThread, TEXT("LoadingThread"));//MakeShareable(LoadThread);
-//	//TSharedPtr<FLoadRunnable> SomeRunnable = MakeShareable<FLoadRunnable>();
-//
-//	//AsyncTask(ENamedThreads::LocalQueue, [GM, TerrestrialPlanetsPtr, CollectedBodies]()
-//	//	{
-//	//		// Retrieve and cast the USaveGame object to UMySaveGame.
-//	//		if (UCelestialSaveGame* LoadedGame = Cast<UCelestialSaveGame>(UGameplayStatics::LoadGameFromSlot("Save", 0)))
-//	//		{
-//	//			// The operation was successful, so LoadedGame now contains the data we saved earlier.
-//	//			UE_LOG(LogTemp, Warning, TEXT("LOADED"));
-//
-//	//			// Load Linear Color Curves
-//	//			for (auto& Asset : LoadedGame->GradientAssets)
-//	//			{
-//	//				AsyncTask(ENamedThreads::GameThread, [GM, Asset]()
-//	//				{
-//	//					GM->LoadStage = ELoadStage::ColorCurves;
-//	//					UCurveLinearColor* NewCurve = UColorCurveFunctionLibrary::CreateNewCurve(Asset.Name, Asset.AssetData);
-//	//				});
-//	//			}
-//
-//	//			// Load Settings Assets
-//	//			for (auto& Asset : LoadedGame->SettingsAssets)
-//	//			{
-//	//				AsyncTask(ENamedThreads::GameThread, [GM, Asset]()
-//	//				{
-//	//					GM->LoadStage = ELoadStage::SettingsAssets;
-//	//					UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseLayer>(Asset.Name, Asset.AssetData);
-//	//				});
-//	//			}
-//
-//	//			for (uint16 i = 0; i < 65535; i++)
-//	//			{
-//	//				UE_LOG(LogTemp, Warning, TEXT("%s"), *FString::FromInt(i));
-//	//			}
-//
-//	//			gravitationalConstant = LoadedGame->GravConst;
-//
-//	//			// Restore Celestial Body Data
-//	//			AsyncTask(ENamedThreads::GameThread, [GM]()
-//	//				{
-//	//					GM->LoadStage = ELoadStage::CelestialBodyData;
-//	//				});
-//	//			for (auto& data : LoadedGame->CelestialBodyData)
-//	//			{
-//	//				bool BodyAlreadyExists = false;
-//	//				for (int32 i = 0; i < CollectedBodies.Num(); i++)
-//	//				{
-//	//					if (CollectedBodies[i]->GetName() == data.Name.ToString())
-//	//					{
-//	//						FMemoryReader MemoryReader(data.ActorData);
-//	//						FCelestialSaveGameArchive Ar(MemoryReader);
-//	//						CollectedBodies[i]->Serialize(Ar);
-//	//						BodyAlreadyExists = true;
-//	//						break;
-//	//					}
-//	//				}
-//	//				if (!BodyAlreadyExists)
-//	//				{
-//	//					AsyncTask(ENamedThreads::GameThread, [GM, data]()
-//	//					{
-//	//						ACelestialBody* NewBody = GM->AddBody(data.Class, NAME_None, data.Transform);
-//
-//	//						FMemoryReader MemoryReader(data.ActorData);
-//	//						FCelestialSaveGameArchive Ar(MemoryReader);
-//	//						NewBody->Serialize(Ar);
-//	//					});
-//	//				}
-//	//				UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *data.Name.ToString());
-//	//			}
-//	//			for (auto& CompData : LoadedGame->CelestialComponentData)
-//	//			{
-//	//				UE_LOG(LogTemp, Warning, TEXT("Started loading %s"), *CompData.Name.ToString());
-//	//				AsyncTask(ENamedThreads::GameThread, [GM, CompData]()
-//	//				{
-//	//					ACelestialBody* Parent = GM->GetBodyByName(CompData.ParentName.ToString());
-//
-//	//					UActorComponent* NewComponent = NewObject<UActorComponent>(Parent, CompData.Class, CompData.Name);
-//	//					FMemoryReader MemoryReader(CompData.ActorData);
-//	//					FCelestialSaveGameArchive Ar(MemoryReader);
-//	//					NewComponent->Serialize(Ar);
-//	//	#if WITH_EDITOR
-//	//					NewComponent->CreationMethod = EComponentCreationMethod::Instance;
-//	//	#endif
-//	//					Parent->AddCelestialComponent(Cast<UStaticMeshComponent>(NewComponent));
-//
-//	//					// This could be an interface call?
-//	//					if (Cast<UAtmosphereComponent>(NewComponent))
-//	//					{
-//	//						Cast<UAtmosphereComponent>(NewComponent)->UpdateProperties();
-//	//					}
-//	//					else if (Cast<URingSystemComponent>(NewComponent))
-//	//					{
-//	//						Cast<URingSystemComponent>(NewComponent)->UpdateProperties();
-//	//					}
-//	//					UE_LOG(LogTemp, Warning, TEXT("Finished loading %s"), *CompData.Name.ToString());
-//	//				});
-//	//			}
-//
-//
-//	//			// Restore Celestial Player Data
-//	//			AsyncTask(ENamedThreads::GameThread, [GM]()
-//	//				{
-//	//					GM->LoadStage = ELoadStage::CelestialPlayer;
-//	//				});
-//	//			ACelestialPlayer* CelestialPlayer = GM->GetCelestialPlayer();
-//	//			//CelestialPlayer->SetActorTransform(LoadedGame->CelestialPlayerData.Transform);
-//	//			FMemoryReader CelMemoryReader(LoadedGame->CelestialPlayerData.ActorData);
-//	//			FCelestialSaveGameArchive CelAr(CelMemoryReader);
-//	//			CelestialPlayer->Serialize(CelAr);
-//
-//	//			// Restore Overview Player Data
-//	//			AsyncTask(ENamedThreads::GameThread, [GM]()
-//	//				{
-//	//					GM->LoadStage = ELoadStage::OverviewPlayer;
-//	//				});
-//	//			AOverviewPlayer* OverviewPlayer = GM->GetOverviewPlayer();
-//	//			//OverviewPlayer->SetActorTransform(LoadedGame->OverviewPlayerData.Transform);
-//	//			FMemoryReader OrvwMemoryReader(LoadedGame->OverviewPlayerData.ActorData);
-//	//			FCelestialSaveGameArchive OrvwAr(OrvwMemoryReader);
-//	//			OverviewPlayer->Serialize(OrvwAr);
-//	//			OverviewPlayer->GetSpringArm()->TargetArmLength = LoadedGame->OverviewArmLength;
-//	//			OverviewPlayer->GetSpringArm()->SetRelativeRotation(LoadedGame->OverviewCameraRotation);
-//
-//	//			// Restore Orbit Visualization Data
-//	//			AsyncTask(ENamedThreads::GameThread, [GM]()
-//	//				{
-//	//					GM->LoadStage = ELoadStage::OrbitVisualization;
-//	//				});
-//	//			AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-//	//			FMemoryReader ODAMemoryReader(LoadedGame->OrbitVisualizationData.ActorData);
-//	//			FCelestialSaveGameArchive ODAAr(ODAMemoryReader);
-//	//			ODA->Serialize(ODAAr);
-//
-//
-//	//			for (int32 i = 0; i < TerrestrialPlanetsPtr.Num(); i++)
-//	//			{
-//	//				FString PlanetName = TerrestrialPlanetsPtr[i].ToString();
-//	//				AsyncTask(ENamedThreads::GameThread, [GM, PlanetName, TerrestrialPlanetsPtr, i, CelestialPlayer, OverviewPlayer, LoadedGame]()
-//	//					{
-//	//						GM->LoadStage = ELoadStage::CelestialGeneration;
-//	//						GM->ReGen(PlanetName);
-//	//						if (!TerrestrialPlanetsPtr.IsValidIndex(i + 1))
-//	//						{
-//	//							OverviewPlayer->SetActorTransform(LoadedGame->OverviewPlayerData.Transform);
-//	//							CelestialPlayer->SetActorTransform(LoadedGame->CelestialPlayerData.Transform);
-//	//							UGameplayStatics::SetGamePaused(GM->GetWorld(), false);
-//	//						}
-//	//					});
-//	//			}
-//	//		}
-//	//		else
-//	//		{
-//	//			UE_LOG(LogTemp, Warning, TEXT("NOT LOADED"));
-//
-//	//			for (int32 i = 0; i < TerrestrialPlanetsPtr.Num(); i++)
-//	//			{
-//	//				FString PlanetName = TerrestrialPlanetsPtr[i].ToString();
-//	//				AsyncTask(ENamedThreads::GameThread, [GM, PlanetName, TerrestrialPlanetsPtr, i]()
-//	//					{
-//	//						GM->LoadStage = ELoadStage::CelestialGeneration;
-//	//						GM->ReGen(PlanetName);
-//	//						if (!TerrestrialPlanetsPtr.IsValidIndex(i + 1))
-//	//							UGameplayStatics::SetGamePaused(GM->GetWorld(), false);
-//	//					});
-//	//			}
-//	//		}
-//	//		AsyncTask(ENamedThreads::GameThread, [GM]()
-//	//			{
-//	//				GM->LoadStage = ELoadStage::Finished;
-//	//			});
-//	//	});
-//}
-//#pragma optimize("", on)
 
 // ======= Runtime Console Commands ======================================================
 
@@ -647,124 +415,112 @@ void ACelestialGameMode::SaveAndQuitToMenu()
 
 void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 {
-	auto bodiesPtr          = bodies;
-	auto CelestialPlayerPtr = CelestialPlayer;
-	auto OverviewPlayerPtr  = OverviewPlayer;
-	//AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [Out, bodiesPtr, CelestialPlayerPtr, OverviewPlayerPtr]()
-	//{
-		if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
+	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
+	{
+		// Set data on the savegame object.
+
+		SaveGameInstance->GravConst = gravitationalConstant;
+
+		// Save Celestial Body Data
+		SaveGameInstance->CelestialBodyData.SetNum(bodies.Num());
+		for (int32 i = 0; i < bodies.Num(); i++)
 		{
-			// Set data on the savegame object.
+			ACelestialBody* Body = bodies[i];
 
-			SaveGameInstance->GravConst = gravitationalConstant;
+			SaveGameInstance->CelestialBodyData[i].Class = Body->GetClass();
+			SaveGameInstance->CelestialBodyData[i].Transform = Body->GetTransform();
+			SaveGameInstance->CelestialBodyData[i].Name = (FName)Body->GetName();
 
-			// Save Celestial Body Data
-			SaveGameInstance->CelestialBodyData.SetNum(bodiesPtr.Num());
-			for (int32 i = 0; i < bodiesPtr.Num(); i++)
+			FMemoryWriter MemoryWriter(SaveGameInstance->CelestialBodyData[i].ActorData);
+
+			// Use a wrapper archive that converts FNames and UObject*'s to strings that can be read back in
+			FCelestialSaveGameArchive Ar(MemoryWriter);
+
+			// Serialize the object
+			Body->Serialize(Ar);
+
+			// Save celestial components
+			for (int32 j = 0; j < Body->GetComponents().Num(); j++)
 			{
-				ACelestialBody* Body = bodiesPtr[i];
-
-				SaveGameInstance->CelestialBodyData[i].Class = Body->GetClass();
-				SaveGameInstance->CelestialBodyData[i].Transform = Body->GetTransform();
-				SaveGameInstance->CelestialBodyData[i].Name = (FName)Body->GetName();
-
-				FMemoryWriter MemoryWriter(SaveGameInstance->CelestialBodyData[i].ActorData);
-
-				// Use a wrapper archive that converts FNames and UObject*'s to strings that can be read back in
-				FCelestialSaveGameArchive Ar(MemoryWriter);
-
-				// Serialize the object
-				Body->Serialize(Ar);
-
-				// Save celestial components
-				for (int32 j = 0; j < Body->GetComponents().Num(); j++)
+				UActorComponent* Comp = Body->GetComponents().Array()[j];
+				if (Cast<UAtmosphereComponent>(Comp) || Cast<URingSystemComponent>(Comp))
 				{
-					UActorComponent* Comp = Body->GetComponents().Array()[j];
-					if (Cast<UAtmosphereComponent>(Comp) || Cast<URingSystemComponent>(Comp))
-					{
-						SaveGameInstance->CelestialComponentData.Add(FComponentRecord());
+					SaveGameInstance->CelestialComponentData.Add(FComponentRecord());
 
-						SaveGameInstance->CelestialComponentData.Last().ParentName = Body->Name;
-						SaveGameInstance->CelestialComponentData.Last().Class = Comp->GetClass();
-						SaveGameInstance->CelestialComponentData.Last().Transform = FTransform();
-						SaveGameInstance->CelestialComponentData.Last().Name = Comp->GetFName();
+					SaveGameInstance->CelestialComponentData.Last().ParentName = Body->Name;
+					SaveGameInstance->CelestialComponentData.Last().Class = Comp->GetClass();
+					SaveGameInstance->CelestialComponentData.Last().Transform = FTransform();
+					SaveGameInstance->CelestialComponentData.Last().Name = Comp->GetFName();
 
-						FMemoryWriter CompMemoryWriter(SaveGameInstance->CelestialComponentData.Last().ActorData);
-						FCelestialSaveGameArchive CompAr(CompMemoryWriter);
-						Comp->Serialize(CompAr);
-					}
+					FMemoryWriter CompMemoryWriter(SaveGameInstance->CelestialComponentData.Last().ActorData);
+					FCelestialSaveGameArchive CompAr(CompMemoryWriter);
+					Comp->Serialize(CompAr);
 				}
 			}
-
-			// Save Celestial Player Data
-			SaveGameInstance->CelestialPlayerData.Class = CelestialPlayerPtr->GetClass();
-			SaveGameInstance->CelestialPlayerData.Transform = CelestialPlayerPtr->GetTransform();
-			SaveGameInstance->CelestialPlayerData.Name = FName("CelestialPlayer");
-			FMemoryWriter CelMemoryWriter(SaveGameInstance->CelestialPlayerData.ActorData);
-			FCelestialSaveGameArchive CelAr(CelMemoryWriter);
-			CelestialPlayerPtr->Serialize(CelAr);
-
-			// Save Overview Player Data
-			SaveGameInstance->OverviewPlayerData.Class = OverviewPlayerPtr->GetClass();
-			SaveGameInstance->OverviewPlayerData.Transform = OverviewPlayerPtr->GetTransform();
-			SaveGameInstance->OverviewPlayerData.Name = FName("OverviewPlayer");
-			FMemoryWriter OrvwMemoryWriter(SaveGameInstance->OverviewPlayerData.ActorData);
-			FCelestialSaveGameArchive OrvwAr(OrvwMemoryWriter);
-			OverviewPlayerPtr->Serialize(OrvwAr);
-			SaveGameInstance->OverviewArmLength = OverviewPlayerPtr->GetSpringArm()->TargetArmLength;
-			SaveGameInstance->OverviewCameraRotation = OverviewPlayerPtr->GetSpringArm()->GetRelativeRotation();
-
-			// Save Orbit Visualization Data
-			AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-			SaveGameInstance->OrbitVisualizationData.Class = AOrbitDebugActor::Get()->GetClass();
-			FMemoryWriter ODAMemoryWriter(SaveGameInstance->OrbitVisualizationData.ActorData);
-			FCelestialSaveGameArchive ODAAr(ODAMemoryWriter);
-			ODA->Serialize(ODAAr);
-
-			// Save Gradients
-			TArray<FAssetData> GradientsData;
-			FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/MaterialStuff/Gradients/Runtime", GradientsData, true, false);
-			SaveGameInstance->GradientAssets.SetNum(GradientsData.Num());
-			for (int32 i = 0; i < SaveGameInstance->GradientAssets.Num(); i++)
-			{
-				SaveGameInstance->GradientAssets[i].Class = GradientsData[i].GetClass();
-				SaveGameInstance->GradientAssets[i].Name = GradientsData[i].AssetName;
-
-				FMemoryWriter MemoryWriter(SaveGameInstance->GradientAssets[i].AssetData);
-				FCelestialSaveGameArchive Ar(MemoryWriter);
-				GradientsData[i].GetAsset()->Serialize(Ar);
-			}
-
-			// Save Settings Assets
-			TArray<FAssetData> AssetsData;
-			FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets/Runtime", AssetsData, true, false);
-			SaveGameInstance->SettingsAssets.SetNum(AssetsData.Num());
-			for (int32 i = 0; i < SaveGameInstance->SettingsAssets.Num(); i++)
-			{
-				SaveGameInstance->SettingsAssets[i].Class = AssetsData[i].GetClass();
-				SaveGameInstance->SettingsAssets[i].Name = Cast<USettingsAsset>(AssetsData[i].GetAsset())->Name;
-
-				FMemoryWriter MemoryWriter(SaveGameInstance->SettingsAssets[i].AssetData);
-				FCelestialSaveGameArchive Ar(MemoryWriter);
-				AssetsData[i].GetAsset()->Serialize(Ar);
-			}
-
-			// Save the data immediately.
-			/*bool bSaveSuccess = */UGameplayStatics::AsyncSaveGameToSlot(SaveGameInstance, "Save", 0, Out);
-			//AsyncTask(ENamedThreads::GameThread, [Out, bSaveSuccess]()
-			//{
-			//	Out.Execute(bSaveSuccess);
-			//});
 		}
-	//});
+
+		// Save Celestial Player Data
+		SaveGameInstance->CelestialPlayerData.Class = CelestialPlayer->GetClass();
+		SaveGameInstance->CelestialPlayerData.Transform = CelestialPlayer->GetTransform();
+		SaveGameInstance->CelestialPlayerData.Name = FName("CelestialPlayer");
+		FMemoryWriter CelMemoryWriter(SaveGameInstance->CelestialPlayerData.ActorData);
+		FCelestialSaveGameArchive CelAr(CelMemoryWriter);
+		CelestialPlayer->Serialize(CelAr);
+
+		// Save Overview Player Data
+		SaveGameInstance->OverviewPlayerData.Class = OverviewPlayer->GetClass();
+		SaveGameInstance->OverviewPlayerData.Transform = OverviewPlayer->GetTransform();
+		SaveGameInstance->OverviewPlayerData.Name = FName("OverviewPlayer");
+		FMemoryWriter OrvwMemoryWriter(SaveGameInstance->OverviewPlayerData.ActorData);
+		FCelestialSaveGameArchive OrvwAr(OrvwMemoryWriter);
+		OverviewPlayer->Serialize(OrvwAr);
+		SaveGameInstance->OverviewArmLength = OverviewPlayer->GetSpringArm()->TargetArmLength;
+		SaveGameInstance->OverviewCameraRotation = OverviewPlayer->GetSpringArm()->GetRelativeRotation();
+
+		// Save Orbit Visualization Data
+		AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
+		SaveGameInstance->OrbitVisualizationData.Class = AOrbitDebugActor::Get()->GetClass();
+		FMemoryWriter ODAMemoryWriter(SaveGameInstance->OrbitVisualizationData.ActorData);
+		FCelestialSaveGameArchive ODAAr(ODAMemoryWriter);
+		ODA->Serialize(ODAAr);
+
+		// Save Gradients
+		TArray<FAssetData> GradientsData;
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/MaterialStuff/Gradients/Runtime", GradientsData, true, false);
+		SaveGameInstance->GradientAssets.SetNum(GradientsData.Num());
+		for (int32 i = 0; i < SaveGameInstance->GradientAssets.Num(); i++)
+		{
+			SaveGameInstance->GradientAssets[i].Class = GradientsData[i].GetClass();
+			SaveGameInstance->GradientAssets[i].Name = GradientsData[i].AssetName;
+
+			FMemoryWriter MemoryWriter(SaveGameInstance->GradientAssets[i].AssetData);
+			FCelestialSaveGameArchive Ar(MemoryWriter);
+			GradientsData[i].GetAsset()->Serialize(Ar);
+		}
+
+		// Save Settings Assets
+		TArray<FAssetData> AssetsData;
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets/Runtime", AssetsData, true, false);
+		SaveGameInstance->SettingsAssets.SetNum(AssetsData.Num());
+		for (int32 i = 0; i < SaveGameInstance->SettingsAssets.Num(); i++)
+		{
+			SaveGameInstance->SettingsAssets[i].Class = AssetsData[i].GetClass();
+			SaveGameInstance->SettingsAssets[i].Name = Cast<USettingsAsset>(AssetsData[i].GetAsset())->Name;
+
+			FMemoryWriter MemoryWriter(SaveGameInstance->SettingsAssets[i].AssetData);
+			FCelestialSaveGameArchive Ar(MemoryWriter);
+			AssetsData[i].GetAsset()->Serialize(Ar);
+		}
+
+		// Save the data asynchronously
+		UGameplayStatics::AsyncSaveGameToSlot(SaveGameInstance, "Save", 0, Out);
+	}
 }
 
 void ACelestialGameMode::OrbitDebug()
 {
 	if (currentPerspective != 0)
-	{
 		SetPerspective(0);
-	}
 
 	CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OrbitDebugWidgetClass)->AddToViewport(0);
 }
@@ -794,15 +550,58 @@ void ACelestialGameMode::tp(FString toPlanet)
 {
 	AActor* planet = GetBodyByName(toPlanet);
 	if (planet)
-	{
 		GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(planet->GetRootComponent()->GetComponentLocation());
+}
+
+void ACelestialGameMode::SetTerrainResolution(FString PlanetName, int32 resolution)
+{
+	APlanet* Planet = Cast<APlanet>(GetBodyByName(PlanetName));
+	if (Planet)
+	{
+		Planet->resolution = resolution;
+		Planet->GeneratePlanet();
 	}
 }
 
-void ACelestialGameMode::SetTerrainResolution(FString Planet, int32 resolution)
+// ======= End Runtime Console Commands ==================================================
+
+
+
+void GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TArray<FName> PlanetNames, ACelestialGameMode* GM)
 {
-	Cast<APlanet>(GetBodyByName(Planet))->resolution = resolution;
-	Cast<APlanet>(GetBodyByName(Planet))->GeneratePlanet();
+	if (!bCurrentlyGenerating)
+	{
+		bCurrentlyGenerating = true;
+
+		GeneratedPlanets.Empty();
+		TerrestrialPlanets = PlanetNames;
+		GameMode = GM;
+
+		// Set the delegate for when the planet is done genereating
+		for (FName PlanetName : TerrestrialPlanets)
+		{
+			Cast<APlanet>(GameMode->GetBodyByName(PlanetName.ToString()))->OnPlanetGenerated.BindLambda([&](FName Name) {GeneratePlanetsOrdered::NewGeneratedPlanet(Name); });
+		}
+		if (TerrestrialPlanets.IsValidIndex(0))
+			GameMode->ReGen(TerrestrialPlanets[0].ToString());
+	}
 }
 
-// ======= End Runtime Console Commands ==================================================
+void GeneratePlanetsOrdered::NewGeneratedPlanet(FName PlanetName)
+{
+	GeneratedPlanets.Add(PlanetName);
+
+	GeneratedPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+	if (GeneratedPlanets == TerrestrialPlanets)
+	{
+		for (FName Name : TerrestrialPlanets)
+		{
+			Cast<APlanet>(GameMode->GetBodyByName(Name.ToString()))->OnPlanetGenerated.Unbind();
+		}
+		UGameplayStatics::SetGamePaused(GameMode->GetWorld(), false);
+		bCurrentlyGenerating = false;
+		return;
+	}
+	else if (GeneratedPlanets.Num() < TerrestrialPlanets.Num())
+		GameMode->ReGen(TerrestrialPlanets[GeneratedPlanets.Num()].ToString());
+}

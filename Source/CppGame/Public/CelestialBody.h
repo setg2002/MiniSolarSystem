@@ -25,7 +25,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
-	FName Name;
+	FName Name = NAME_None;
 
 	UPROPERTY(SaveGame, EditInstanceOnly, Category = "Default")
 	FVector initialVelocity;
