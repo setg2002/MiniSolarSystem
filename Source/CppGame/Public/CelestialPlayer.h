@@ -106,10 +106,7 @@ private:
 		bIgnoreGravity = !bIgnoreGravity;
 	}
 
-	void SwitchFocusPlanet()
-	{
-		bFocusPlanet = !bFocusPlanet;
-	}
+	void SwitchFocusPlanet();
 	
 	UPROPERTY(EditAnywhere)
 	int RotationForce = 100;

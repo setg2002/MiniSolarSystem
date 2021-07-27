@@ -61,6 +61,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> LoadingWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> PauseWidgetClass;
+
 	/* Sets the player perspective to the one desired
 	* @param perspective 0 is overview, 1 is celestial */
 	void SetPerspective(uint8 perspective);
@@ -103,6 +106,9 @@ public:
 	UFUNCTION(Exec, BlueprintCallable)
 	void SetTerrainResolution(FString PlanetName, int32 resolution);
 
+	UFUNCTION(Exec, BlueprintCallable)
+	void PauseGame();
+
 	// ======= End ConsoleCommands =======
 
 	UFUNCTION(BlueprintCallable)
@@ -123,6 +129,10 @@ protected:
 	UUserWidget* OverviewWidget;
 	UPROPERTY()
 	UUserWidget* CelestialWidget;
+	UPROPERTY()
+	UUserWidget* PauseWidget;
+
+	bool bGamePaused;
 
 	uint8 currentPerspective;
 

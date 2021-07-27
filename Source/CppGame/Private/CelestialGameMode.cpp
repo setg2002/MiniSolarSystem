@@ -9,7 +9,6 @@
 #include "ColorCurveFunctionLibrary.h"
 #include "CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
-//#include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "RingSystemComponent.h"
 #include "AtmosphereComponent.h"
@@ -52,8 +51,9 @@ void ACelestialGameMode::BeginPlay()
 
 	// Make widgets
 	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
-	OverviewWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
-	CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), LoadingWidgetClass)->AddToViewport();
+	OverviewWidget  = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
+	PauseWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), PauseWidgetClass);
+	CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), LoadingWidgetClass)->AddToViewport(10);
 
 	CelestialPlayer = Cast<ACelestialPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass()));
 	OverviewPlayer = Cast<AOverviewPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOverviewPlayer::StaticClass()));
@@ -182,6 +182,9 @@ void ACelestialGameMode::SetGravitationalConstant(float NewG)
 
 void ACelestialGameMode::SetPerspective(uint8 perspective)
 {
+	if (bGamePaused)
+		return;
+
 	ensure(PC);
 	switch (perspective)
 	{
@@ -562,6 +565,45 @@ void ACelestialGameMode::SetTerrainResolution(FString PlanetName, int32 resoluti
 		Planet->GeneratePlanet();
 	}
 }
+
+void ACelestialGameMode::PauseGame()
+{
+	if (bGamePaused)
+	{
+		// Resume Game
+		PauseWidget->RemoveFromParent();
+		if (currentPerspective == 0)
+			OverviewWidget->AddToViewport();
+		else
+		{ 			
+			CelestialWidget->AddToViewport();
+			PC->SetShowMouseCursor(false);
+			PC->SetInputMode(FInputModeGameOnly());
+		}
+
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		bGamePaused = false;
+	}
+	else if (!GetWorld()->IsPaused())
+	{
+		// PauseGame
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+		if (currentPerspective == 0)
+			OverviewWidget->RemoveFromViewport();
+		else
+			CelestialWidget->RemoveFromViewport();
+
+		FInputModeGameAndUI InputMode;
+		InputMode.SetHideCursorDuringCapture(false);
+		PC->SetInputMode(InputMode);
+		PC->SetShowMouseCursor(true);
+		PauseWidget->ReloadConfig();
+		PauseWidget->AddToViewport(1);
+		bGamePaused = true;
+	}
+}
+
 
 // ======= End Runtime Console Commands ==================================================
 

@@ -18,6 +18,7 @@ ACelestialPlayer::ACelestialPlayer()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bTickEvenWhenPaused = false;
 
 	RootComponent = Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("RootCollider"));
 	Collider->InitBoxExtent(FVector::ZeroVector);
@@ -121,6 +122,8 @@ ACelestialBody* ACelestialPlayer::LookingAtPlanet()
 void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ACelestialPlayer::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACelestialPlayer::MoveRight);
@@ -228,4 +231,10 @@ void ACelestialPlayer::MoveUp(float AxisValue)
 void ACelestialPlayer::SwitchPerspective()
 {
 	gameMode->SetPerspective(0);
+}
+
+void ACelestialPlayer::SwitchFocusPlanet()
+{
+	if (!GetWorld()->IsPaused())
+		bFocusPlanet = !bFocusPlanet;
 }
