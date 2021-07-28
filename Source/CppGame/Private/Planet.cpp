@@ -19,6 +19,7 @@
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "CelestialSaveGameArchive.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -26,8 +27,9 @@
 APlanet::APlanet()
 {
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
-	ProcMesh->SetupAttachment(RootComponent);
-	ProcMesh->SetRelativeLocation(FVector::ZeroVector);
+	RootComponent = Collider = CreateDefaultSubobject<USphereComponent>(FName("Col"));
+	//ProcMesh->SetupAttachment(RootComponent);
+	//ProcMesh->SetRelativeLocation(FVector::ZeroVector);
 	bGenerating = false;
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new TerrestrialColorGenerator(this);
@@ -337,6 +339,7 @@ void APlanet::GeneratePlanet()
 		UE_LOG(LogTemp, Warning, TEXT("%s started generating"), *BodyName.ToString());
 		if (ColorSettings)
 		{
+			Collider->SetSphereRadius(ShapeSettings->GetRadius() + 10);
 			ProcMesh->SetRelativeLocation(FVector().ZeroVector);
 
 			if (ShapeSettings != nullptr && ShapeSettings->IsNoiseLayers())

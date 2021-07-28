@@ -13,6 +13,7 @@
  */
 
 class UNiagaraSystem;
+class USphereComponent;
 class UNiagaraComponent;
 class UDirectionalLightComponent;
 
@@ -41,6 +42,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Sphere;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USphereComponent* Collider;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame)
 	FStarProperties starProperties;

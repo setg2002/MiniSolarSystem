@@ -14,6 +14,7 @@
 class TerrainFace;
 class UProceduralMeshComponent;
 class AOrbitDebugActor;
+class USphereComponent;
 class ShapeGenerator;
 class TerrestrialColorGenerator;
 class UShapeSettings;
@@ -56,6 +57,9 @@ public:
 	// Main mesh	
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UProceduralMeshComponent* ProcMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USphereComponent* Collider;
 
 	TerrainFace* TerrainFaces[6];
 

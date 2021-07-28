@@ -13,6 +13,7 @@
 // Forward Declarations
 class UGasGiantColorSettings;
 class GaseousColorGenerator;
+class USphereComponent;
 
 
 UCLASS()
@@ -28,6 +29,9 @@ public:
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UGasGiantColorSettings* ColorSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USphereComponent* Collider;
 
 	UFUNCTION(BlueprintCallable)
 	int GetRadius() const { return Radius; }

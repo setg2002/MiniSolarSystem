@@ -9,6 +9,7 @@
 #include "ColorCurveFunctionLibrary.h"
 #include "CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
+#include "GasGiantColorSettings.h"
 #include "Blueprint/UserWidget.h"
 #include "RingSystemComponent.h"
 #include "AtmosphereComponent.h"
@@ -25,6 +26,7 @@
 #include "NiagaraActor.h"
 #include "EngineUtils.h"
 #include "NoiseLayer.h"
+#include "GasGiant.h"
 #include "Planet.h"
 #include "Star.h"
 
@@ -121,7 +123,7 @@ void ACelestialGameMode::Tick(float DeltaTime)
 ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform)
 {
 	ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(Class, Transform);
-	NewBody->SetName(Name.GetNumber() == 0 ? NewBody->GetBodyName() : Name);
+	//NewBody->SetName(Name.GetNumber() == 0 ? NewBody->GetBodyName() : Name);
 
 	bodies.Add(NewBody);
 
@@ -222,6 +224,13 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 			Cast<AStar>(Star)->GetParticleComp()->SetPaused(true);
 		}
 
+		TArray<AActor*> GasGiants;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGasGiant::StaticClass(), GasGiants);
+		for (AActor* GasGiant : GasGiants)
+		{
+			(Cast<AGasGiant>(GasGiant))->ColorSettings->DynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
+		}
+
 		OnPerspectiveChanged.Broadcast(perspective);
 		break;
 	}
@@ -255,6 +264,13 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		{
 			Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
 			Cast<AStar>(Star)->GetParticleComp()->SetPaused(false);
+		}
+
+		TArray<AActor*> GasGiants;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGasGiant::StaticClass(), GasGiants);
+		for (AActor* GasGiant : GasGiants)
+		{
+			(Cast<AGasGiant>(GasGiant))->ColorSettings->DynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
 		}
 
 		OnPerspectiveChanged.Broadcast(perspective);
@@ -579,6 +595,21 @@ void ACelestialGameMode::PauseGame()
 			CelestialWidget->AddToViewport();
 			PC->SetShowMouseCursor(false);
 			PC->SetInputMode(FInputModeGameOnly());
+
+			/*TArray<AActor*> Stars;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStar::StaticClass(), Stars);
+			for (AActor* Star : Stars)
+			{
+				Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
+				Cast<AStar>(Star)->GetParticleComp()->SetPaused(false);
+			}
+
+			TArray<AActor*> GasGiants;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGasGiant::StaticClass(), GasGiants);
+			for (AActor* GasGiant : GasGiants)
+			{
+				Cast<AStar>(GasGiant)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
+			}*/
 		}
 
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
@@ -592,8 +623,25 @@ void ACelestialGameMode::PauseGame()
 		if (currentPerspective == 0)
 			OverviewWidget->RemoveFromViewport();
 		else
+		{
 			CelestialWidget->RemoveFromViewport();
 
+			/*TArray<AActor*> Stars;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStar::StaticClass(), Stars);
+			for (AActor* Star : Stars)
+			{
+				Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
+				Cast<AStar>(Star)->GetParticleComp()->SetPaused(true);
+			}
+
+			TArray<AActor*> GasGiants;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGasGiant::StaticClass(), GasGiants);
+			for (AActor* GasGiant : GasGiants)
+			{
+				Cast<AStar>(GasGiant)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
+			}*/
+		}
+			
 		FInputModeGameAndUI InputMode;
 		InputMode.SetHideCursorDuringCapture(false);
 		PC->SetInputMode(InputMode);

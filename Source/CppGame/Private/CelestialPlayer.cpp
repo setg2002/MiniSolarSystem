@@ -40,6 +40,8 @@ void ACelestialPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	Collider->SetMassOverrideInKg(NAME_None, mass);
+	Collider->OnComponentBeginOverlap.AddDynamic(this, &ACelestialPlayer::OnCompOverlap);
+
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 
 	for (auto& body : gameMode->GetBodies())
@@ -139,6 +141,16 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("IgnoreGravity", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchIgnoreGravity);
 	PlayerInputComponent->BindAction("FocusPlanet", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchFocusPlanet);
 
+}
+
+void ACelestialPlayer::OnCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL))
+	{
+		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("I Overlapped: %s, with normal vector %s"), *OtherActor->GetName(), *(this->GetActorLocation() - OtherActor->GetActorLocation()).GetUnsafeNormal().ToString()));
+	
+		currentVelocity += (this->GetActorLocation() - OtherActor->GetActorLocation()).GetUnsafeNormal() * (currentVelocity.Size() / 10);//ImpactMultiplier;
+	}
 }
 
 void ACelestialPlayer::LimitVelocity()

@@ -62,7 +62,7 @@ void TerrainFace::ConstructMesh(TerrestrialColorGenerator* color_Generator)
 			}
 		}
 	}
-	ProcMesh->CreateMeshSection(MeshSection, verticies, triangles, normals, uv, VertexColors, tangents, false);
+	ProcMesh->CreateMeshSection(MeshSection, verticies, triangles, normals, uv, VertexColors, tangents, true);
 }
 
 void TerrainFace::CalculateMesh()
