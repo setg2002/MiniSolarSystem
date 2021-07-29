@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "CelestialObject.h"
 #include "GameFramework/Actor.h"
+#include "Components/SphereComponent.h"
 #include "CelestialBody.generated.h"
 
 
@@ -70,7 +71,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddCelestialComponent(UStaticMeshComponent* NewComp);
 
-	USceneComponent* Root;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USphereComponent* Collider;
+
+	// Called when collider is overlapped with
+	UFUNCTION()
+	void OnCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 
 protected:

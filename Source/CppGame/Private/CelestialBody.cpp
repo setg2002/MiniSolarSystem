@@ -13,8 +13,8 @@ ACelestialBody::ACelestialBody()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	Root = CreateDefaultSubobject<USceneComponent>("Root");
-	RootComponent = Root;
+	RootComponent = Collider = CreateDefaultSubobject<USphereComponent>(FName("RootCol"));
+	Collider->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 }
 
 void ACelestialBody::BeginPlay()
@@ -22,6 +22,12 @@ void ACelestialBody::BeginPlay()
 	Super::BeginPlay();
 	currentVelocity = initialVelocity;
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (!Collider)
+		RootComponent = Collider = NewObject<USphereComponent>(this, FName("RootCol"));
+
+	Collider->OnComponentBeginOverlap.RemoveDynamic(this, &ACelestialBody::OnCompOverlap);
+	Collider->OnComponentBeginOverlap.AddDynamic(this, &ACelestialBody::OnCompOverlap);
 
 	// Ensure unique name
 	int32 i = 0;
@@ -111,6 +117,15 @@ void ACelestialBody::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ACelestialBody::OnCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ACelestialBody* OtherBody = Cast<ACelestialBody>(OtherActor);
+	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherBody)
+	{
+		currentVelocity += (GetActorLocation() - OtherBody->GetActorLocation()).GetSafeNormal() * ((OtherBody->mass / mass) * (OtherBody->currentVelocity - currentVelocity).Size() / 25)/*(((OtherBody->mass * OtherBody->currentVelocity.Size()) / (mass * currentVelocity.Size())))*/;
+	}
 }
 
 FVector ACelestialBody::GetCurrentVelocity() const

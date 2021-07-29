@@ -146,10 +146,9 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void ACelestialPlayer::OnCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL))
-	{
-		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("I Overlapped: %s, with normal vector %s"), *OtherActor->GetName(), *(this->GetActorLocation() - OtherActor->GetActorLocation()).GetUnsafeNormal().ToString()));
-	
-		currentVelocity += (this->GetActorLocation() - OtherActor->GetActorLocation()).GetUnsafeNormal() * (currentVelocity.Size() / 10);//ImpactMultiplier;
+	{	
+		//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + ((this->GetActorLocation() - OtherActor->GetActorLocation()).GetUnsafeNormal() * 100), 10, FColor::Red, 5, 10);
+		currentVelocity += (this->GetActorLocation() - OtherActor->GetActorLocation()).GetUnsafeNormal() * (0.0005f * FMath::Square((currentVelocity - Cast<ICelestialObject>(OtherActor)->GetCurrentVelocity()).Size())/*(0.05f * FMath::Pow((currentVelocity - Cast<ICelestialObject>(OtherActor)->GetCurrentVelocity()).Size(), 1.3f)*/);
 	}
 }
 

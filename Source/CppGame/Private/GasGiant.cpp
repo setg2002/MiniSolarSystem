@@ -4,15 +4,13 @@
 #include "GasGiant.h"
 #include "GasGiantColorSettings.h"
 #include "GaseousColorGenerator.h"
-#include "Components/SphereComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 
 AGasGiant::AGasGiant()
 {
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	RootComponent = Collider = CreateDefaultSubobject<USphereComponent>(FName("Col"));
-	//Mesh->SetupAttachment(GetRootComponent());
+	Mesh->SetupAttachment(RootComponent);
 	ColorGenerator = new GaseousColorGenerator();
 }
 
@@ -28,6 +26,7 @@ void AGasGiant::BeginPlay()
 void AGasGiant::SetRadius(int NewRadius)
 {
 	Radius = NewRadius;
+	Collider->SetSphereRadius(NewRadius * 100);
 	this->SetActorScale3D(FVector(Radius));
 }
 

@@ -116,8 +116,6 @@ private:
 	int RotationForce = 100;
 	UPROPERTY(SaveGame)
 	float Throttle = 1;
-	UPROPERTY(EditAnywhere)
-	float ImpactMultiplier = 10;
 
 	void ChangeThrottle(float AxisValue)
 	{

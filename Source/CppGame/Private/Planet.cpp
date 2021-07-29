@@ -19,7 +19,6 @@
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "CelestialSaveGameArchive.h"
-#include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -27,9 +26,6 @@
 APlanet::APlanet()
 {
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
-	RootComponent = Collider = CreateDefaultSubobject<USphereComponent>(FName("Col"));
-	//ProcMesh->SetupAttachment(RootComponent);
-	//ProcMesh->SetRelativeLocation(FVector::ZeroVector);
 	bGenerating = false;
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new TerrestrialColorGenerator(this);
@@ -44,13 +40,14 @@ void APlanet::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ProcMesh->SetRelativeLocation(FVector::ZeroVector);
+
 	CreateSettingsAssets();
 
 	BindDelegates();
 	
 	//bGenerating = false;
 	//GeneratePlanet();
-
 }
 
 void APlanet::BindDelegates()

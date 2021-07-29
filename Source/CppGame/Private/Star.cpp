@@ -10,7 +10,6 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
-#include "Components/SphereComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Materials/MaterialParameterCollection.h"
@@ -20,8 +19,7 @@
 AStar::AStar()
 {
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>(FName("Sphere"));
-	RootComponent = Collider =  CreateDefaultSubobject<USphereComponent>(FName("Col"));
-	//Sphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	Sphere->SetupAttachment(RootComponent);
 	Sphere->CastShadow = 0;
 	Sphere->bCastDynamicShadow = 0;
 
@@ -112,6 +110,7 @@ bool AStar::SetStarProperties(FStarProperties NewProperties)
 void AStar::SetRadius(int NewRadius)
 {
 	starProperties.radius = NewRadius;
+	Collider->SetSphereRadius(NewRadius * 100);
 	Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
 	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
 	bool WasPaused = ParticleComponent->IsPaused();
