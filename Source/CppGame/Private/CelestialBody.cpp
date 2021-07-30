@@ -23,10 +23,6 @@ void ACelestialBody::BeginPlay()
 	currentVelocity = initialVelocity;
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 
-	if (!Collider)
-		RootComponent = Collider = NewObject<USphereComponent>(this, FName("RootCol"));
-
-	Collider->OnComponentBeginOverlap.RemoveDynamic(this, &ACelestialBody::OnCompOverlap);
 	Collider->OnComponentBeginOverlap.AddDynamic(this, &ACelestialBody::OnCompOverlap);
 
 	// Ensure unique name
@@ -121,6 +117,7 @@ void ACelestialBody::Tick(float DeltaTime)
 
 void ACelestialBody::OnCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	//NOTE: This overlap method is not used for collisions with the player. That is handled directly by the CelestialPlayer.
 	ACelestialBody* OtherBody = Cast<ACelestialBody>(OtherActor);
 	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherBody)
 	{

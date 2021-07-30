@@ -11,6 +11,7 @@ AGasGiant::AGasGiant()
 {
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	Mesh->SetupAttachment(RootComponent);
+	Collider->SetSphereRadius(102);
 	ColorGenerator = new GaseousColorGenerator();
 }
 
@@ -18,6 +19,7 @@ void AGasGiant::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	SetRadius(Radius);
 	ColorSettings->SetMesh(Mesh);
 	ColorSettings->GenerateMaterial();
 	ColorSettings->NewVoronoiForStorms();
@@ -26,7 +28,6 @@ void AGasGiant::BeginPlay()
 void AGasGiant::SetRadius(int NewRadius)
 {
 	Radius = NewRadius;
-	Collider->SetSphereRadius(NewRadius * 100);
 	this->SetActorScale3D(FVector(Radius));
 }
 

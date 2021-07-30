@@ -40,7 +40,8 @@ void ACelestialPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	Collider->SetMassOverrideInKg(NAME_None, mass);
-	Collider->OnComponentBeginOverlap.AddDynamic(this, &ACelestialPlayer::OnCompOverlap);
+	Collider->OnComponentEndOverlap.AddDynamic(this, &ACelestialPlayer::OnOverlapEnd);
+	Collider->OnComponentBeginOverlap.AddDynamic(this, &ACelestialPlayer::OnOverlapBegin);
 
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 
@@ -143,13 +144,16 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-void ACelestialPlayer::OnCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ACelestialPlayer::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL))
-	{	
-		//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + ((this->GetActorLocation() - OtherActor->GetActorLocation()).GetUnsafeNormal() * 100), 10, FColor::Red, 5, 10);
-		currentVelocity += (this->GetActorLocation() - OtherActor->GetActorLocation()).GetUnsafeNormal() * (0.0005f * FMath::Square((currentVelocity - Cast<ICelestialObject>(OtherActor)->GetCurrentVelocity()).Size())/*(0.05f * FMath::Pow((currentVelocity - Cast<ICelestialObject>(OtherActor)->GetCurrentVelocity()).Size(), 1.3f)*/);
-	}
+	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL)) OverlappedActor = OtherActor;
+		//if (GEngine) GEngine->AddOnScreenDebugMessage(0, 5, FColor::Green, *FString::Printf(TEXT("Player Col w/ %s"), *Cast<ACelestialBody>(OtherActor)->GetBodyName().ToString()));
+}
+
+void ACelestialPlayer::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && (OtherActor == OverlappedActor)) OverlappedActor = nullptr;
+		//if (GEngine) GEngine->AddOnScreenDebugMessage(0, 5, FColor::Red, *FString::Printf(TEXT("Player End Col w/ %s"), *Cast<ACelestialBody>(OtherActor)->GetBodyName().ToString()));
 }
 
 void ACelestialPlayer::LimitVelocity()
@@ -180,6 +184,11 @@ void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float t
 				ForcePerBody.Add(otherBody, force.Size());
 			}
 		}
+	}
+	if (OverlappedActor)
+	{
+		FVector CollisionNormal = (this->GetActorLocation() - OverlappedActor->GetActorLocation()).GetUnsafeNormal();
+		currentVelocity += (CollisionNormal * (currentVelocity.Size() / 1.5f));
 	}
 }
 

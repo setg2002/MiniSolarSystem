@@ -71,7 +71,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddCelestialComponent(UStaticMeshComponent* NewComp);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* Collider;
 
 	// Called when collider is overlapped with
