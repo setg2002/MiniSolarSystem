@@ -7,6 +7,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "ColorCurveFunctionLibrary.h"
+#include "AsyncLoadingScreenLibrary.h"
 #include "CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
 #include "GasGiantColorSettings.h"
@@ -24,6 +25,7 @@
 #include "CelestialBody.h"
 #include "NoiseSettings.h"
 #include "NiagaraActor.h"
+//#include "MoviePlayer.h"
 #include "EngineUtils.h"
 #include "NoiseLayer.h"
 #include "GasGiant.h"
@@ -48,14 +50,14 @@ void ACelestialGameMode::BeginPlay()
 	NumStars = 0;
 
 	PC = GetWorld()->GetFirstPlayerController();
-	
+
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
 
 	// Make widgets
 	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
 	OverviewWidget  = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
 	PauseWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), PauseWidgetClass);
-	CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), LoadingWidgetClass)->AddToViewport(10);
+	//CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), LoadingWidgetClass)->AddToViewport(10);
 
 	CelestialPlayer = Cast<ACelestialPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass()));
 	OverviewPlayer = Cast<AOverviewPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOverviewPlayer::StaticClass()));
@@ -690,6 +692,7 @@ void GeneratePlanetsOrdered::NewGeneratedPlanet(FName PlanetName)
 		}
 		UGameplayStatics::SetGamePaused(GameMode->GetWorld(), false);
 		bCurrentlyGenerating = false;
+		UAsyncLoadingScreenLibrary::StopLoadingScreen();
 		return;
 	}
 	else if (GeneratedPlanets.Num() < TerrestrialPlanets.Num())

@@ -16,4 +16,7 @@ class CPPGAME_API UCelestialGameInstance : public UGameInstance
 	
 	UFUNCTION(BlueprintCallable)
 	float GetCurrentMaxFPS();
+
+	UFUNCTION(BlueprintCallable)
+	static void PlayLoadingScreen(bool bPlayUntilStopped, float PlayTime);
 };

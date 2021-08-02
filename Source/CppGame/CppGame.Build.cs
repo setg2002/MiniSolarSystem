@@ -8,9 +8,9 @@ public class CppGame : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "SimplexNoise", "RawMesh", "Niagara", "UMG", "Json", "JsonUtilities" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "AsyncLoadingScreen", "SimplexNoise", "RawMesh", "Niagara", "UMG", "Json", "JsonUtilities" });
 
-        PrivateDependencyModuleNames.AddRange(new string[] {  });
+        PrivateDependencyModuleNames.AddRange(new string[] { /*"MoviePlayer",*/ "LoadingScreen" });
 
         //MinFilesUsingPrecompiledHeaderOverride = 1;
         //bFasterWithoutUnity = true;
