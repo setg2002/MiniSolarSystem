@@ -7,10 +7,10 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "ColorCurveFunctionLibrary.h"
-#include "AsyncLoadingScreenLibrary.h"
 #include "CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
 #include "GasGiantColorSettings.h"
+#include "CelestialGameInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "RingSystemComponent.h"
 #include "AtmosphereComponent.h"
@@ -25,7 +25,6 @@
 #include "CelestialBody.h"
 #include "NoiseSettings.h"
 #include "NiagaraActor.h"
-//#include "MoviePlayer.h"
 #include "EngineUtils.h"
 #include "NoiseLayer.h"
 #include "GasGiant.h"
@@ -692,7 +691,8 @@ void GeneratePlanetsOrdered::NewGeneratedPlanet(FName PlanetName)
 		}
 		UGameplayStatics::SetGamePaused(GameMode->GetWorld(), false);
 		bCurrentlyGenerating = false;
-		UAsyncLoadingScreenLibrary::StopLoadingScreen();
+		GameMode->GetGameInstance<UCelestialGameInstance>()->StopLoadingScreen();
+		GameMode->OnLoadingComplete.Broadcast();
 		return;
 	}
 	else if (GeneratedPlanets.Num() < TerrestrialPlanets.Num())

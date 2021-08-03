@@ -330,6 +330,11 @@ void APlanet::CreateSettingsAssets()
 
 void APlanet::GeneratePlanet()
 {
+#if WITH_EDITOR
+	if (!ProcMesh) // Weird crash sometimes
+		ProcMesh = NewObject<UProceduralMeshComponent>(this, FName("ProcMesh"));
+#endif
+	ensure(ProcMesh);
 	if (bGenerating == false)
 	{
 		bGenerating = true;

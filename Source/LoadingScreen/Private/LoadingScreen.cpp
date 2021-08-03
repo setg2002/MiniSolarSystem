@@ -24,6 +24,10 @@ struct FLoadingScreenBrush : public FSlateDynamicImageBrush, public FGCObject
 	}
 };
 
+#define LOCTEXT_NAMESPACE "Loading"
+
+#define TTF_FONT( RelativePath, ... ) FSlateFontInfo( FPaths::ProjectContentDir() / "Slate" / RelativePath + TEXT(".ttf"), __VA_ARGS__ ) // Straight from SGame 
+
 class SLoadingScreen : public SCompoundWidget
 {
 public:
@@ -35,14 +39,19 @@ public:
 		// Load version of the logo with text baked in, path is hardcoded because this loads very early in startup
 		static const FName LoadingScreenName(TEXT("/Game/MaterialStuff/Textures/UE-transparent.UE-transparent"));
 
-		LoadingScreenBrush = MakeShareable(new FLoadingScreenBrush(LoadingScreenName, FVector2D(1024, 256)));
+		LoadingScreenBrush = MakeShareable(new FLoadingScreenBrush(LoadingScreenName, FVector2D(250, 201)));
 		
 		FSlateBrush *BGBrush = new FSlateBrush();
-		BGBrush->TintColor = FLinearColor(0.034f, 0.034f, 0.034f, 1.0f);
+		BGBrush->TintColor = FLinearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+		FSlateBrush* LetterBoxBrush = new FSlateBrush();
+		LetterBoxBrush->TintColor = FLinearColor(0.1f, 0.1f, 0.1f, 0.2f);
 
 		ChildSlot
-			[
+		[
 			SNew(SOverlay)
+			
+			// Background
 			+ SOverlay::Slot()
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Fill)
@@ -50,6 +59,8 @@ public:
 				SNew(SBorder)	
 				.BorderImage(BGBrush)
 			]
+
+			// Main Image
 			+SOverlay::Slot()
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
@@ -57,18 +68,49 @@ public:
 				SNew(SImage)
 				.Image(LoadingScreenBrush.Get())
 			]
+
+			// Bottom Letter-box
 			+SOverlay::Slot()
 			.HAlign(HAlign_Fill)
-			.VAlign(VAlign_Fill)
+			.VAlign(VAlign_Bottom)
 			[
-				SNew(SVerticalBox)
-				+SVerticalBox::Slot()
-				.VAlign(VAlign_Bottom)
-				.HAlign(HAlign_Right)
-				.Padding(FMargin(10.0f))
+				SNew(SOverlay)
+
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Fill)
 				[
-					SNew(SThrobber)
-					.Visibility(this, &SLoadingScreen::GetLoadIndicatorVisibility)
+					SNew(SBorder)
+					.BorderImage(LetterBoxBrush)
+				]
+
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Bottom)
+				[
+					SNew(SHorizontalBox)
+
+					// Tip Text
+					+SHorizontalBox::Slot()
+					.HAlign(HAlign_Center)
+					.VAlign(VAlign_Center)
+					.Padding(15, 15)
+					[
+						SNew(STextBlock)
+						.ColorAndOpacity(FLinearColor::White)
+						.Font(TTF_FONT("Comfortaa-Bold", 16))
+						.Text(LOCTEXT("Tip", "Tip: Amogus"))
+					]
+				
+					// Throbber
+					+ SHorizontalBox::Slot()
+					.HAlign(HAlign_Right)
+					.VAlign(VAlign_Center)
+					.Padding(4, 4)
+					[
+						SNew(SThrobber)
+						//.Visibility(this, &SLoadingScreen::GetLoadIndicatorVisibility)
+					]
 				]
 			]
 		];
@@ -79,12 +121,16 @@ private:
 	EVisibility GetLoadIndicatorVisibility() const
 	{
 		bool Vis =  GetMoviePlayer()->IsLoadingFinished();
-		return GetMoviePlayer()->IsLoadingFinished() ? EVisibility::Collapsed : EVisibility::Visible;
+		return EVisibility::Visible;//GetMoviePlayer()->IsLoadingFinished() ? EVisibility::Collapsed : EVisibility::Visible;
 	}
 	
 	/** Loading screen image brush */
 	TSharedPtr<FSlateDynamicImageBrush> LoadingScreenBrush;
 };
+
+#undef TTF_FONT
+
+#undef LOCTEXT_NAMESPACE
 
 class FLoadingScreenModule : public ILoadingScreenModule
 {
@@ -110,7 +156,7 @@ public:
 		FLoadingScreenAttributes LoadingScreen;
 		LoadingScreen.bAutoCompleteWhenLoadingCompletes = !bPlayUntilStopped;
 		LoadingScreen.bWaitForManualStop = bPlayUntilStopped;
-		LoadingScreen.bAllowEngineTick = bPlayUntilStopped;
+		LoadingScreen.bAllowEngineTick = false;//bPlayUntilStopped;
 		LoadingScreen.MinimumLoadingScreenDisplayTime = PlayTime;
 		LoadingScreen.WidgetLoadingScreen = SNew(SLoadingScreen);
 		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
@@ -125,8 +171,8 @@ public:
 	{
 		FLoadingScreenAttributes LoadingScreen;
 		LoadingScreen.bAutoCompleteWhenLoadingCompletes = true;
-		LoadingScreen.MinimumLoadingScreenDisplayTime = 3.f;
-		LoadingScreen.WidgetLoadingScreen = SNew(SLoadingScreen);
+		LoadingScreen.MinimumLoadingScreenDisplayTime = 0.5f;
+		LoadingScreen.WidgetLoadingScreen = FLoadingScreenAttributes::NewTestLoadingScreenWidget();//SNew(SLoadingScreen);
 		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
 	}
 

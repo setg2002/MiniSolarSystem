@@ -23,6 +23,9 @@ class AStar;
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPerspectiveChanged, uint8, Perspective);
 
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLoadingDone);
+
 
 UCLASS()
 class CPPGAME_API ACelestialGameMode : public AGameModeBase
@@ -37,6 +40,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, BlueprintAssignable)
 	FPerspectiveChanged OnPerspectiveChanged;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, BlueprintAssignable)
+	FLoadingDone OnLoadingComplete;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -127,7 +133,7 @@ protected:
 
 	UPROPERTY() // Prevents garbage collection
 	UUserWidget* OverviewWidget;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	UUserWidget* CelestialWidget;
 	UPROPERTY()
 	UUserWidget* PauseWidget;

@@ -14,3 +14,9 @@ void UCelestialGameInstance::PlayLoadingScreen(bool bPlayUntilStopped, float Pla
 	ILoadingScreenModule& LoadingScreenModule = ILoadingScreenModule::Get();
 	LoadingScreenModule.StartInGameLoadingScreen(bPlayUntilStopped, PlayTime);
 }
+
+void UCelestialGameInstance::StopLoadingScreen()
+{
+	ILoadingScreenModule& LoadingScreenModule = ILoadingScreenModule::Get();
+	LoadingScreenModule.StopInGameLoadingScreen();
+}

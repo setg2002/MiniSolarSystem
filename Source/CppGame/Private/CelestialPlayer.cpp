@@ -19,6 +19,7 @@ ACelestialPlayer::ACelestialPlayer()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bTickEvenWhenPaused = false;
+	bAllowChangePerspective = false;
 
 	RootComponent = Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("RootCollider"));
 	Collider->InitBoxExtent(FVector::ZeroVector);
@@ -79,8 +80,7 @@ ACelestialBody* ACelestialPlayer::GetLargestForce()
 	}
 
 	// Sorts the map from high to low based on values
-	ForcePerBody.ValueSort([](const float A, const float B) {
-		return A > B; });
+	ForcePerBody.ValueSort([](const float A, const float B) { return A > B; });
 
 	for (auto& Pair : ForcePerBody)
 	{
@@ -250,7 +250,7 @@ void ACelestialPlayer::MoveUp(float AxisValue)
 
 void ACelestialPlayer::SwitchPerspective()
 {
-	gameMode->SetPerspective(0);
+	if (bAllowChangePerspective) gameMode->SetPerspective(0);
 }
 
 void ACelestialPlayer::SwitchFocusPlanet()
