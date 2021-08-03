@@ -26,6 +26,7 @@ struct FLoadingScreenBrush : public FSlateDynamicImageBrush, public FGCObject
 
 #define LOCTEXT_NAMESPACE "Loading"
 
+// Easy Font Macro
 #define TTF_FONT( RelativePath, ... ) FSlateFontInfo( FPaths::ProjectContentDir() / "Slate" / RelativePath + TEXT(".ttf"), __VA_ARGS__ ) // Straight from SGame 
 
 class SLoadingScreen : public SCompoundWidget
@@ -172,7 +173,8 @@ public:
 		FLoadingScreenAttributes LoadingScreen;
 		LoadingScreen.bAutoCompleteWhenLoadingCompletes = true;
 		LoadingScreen.MinimumLoadingScreenDisplayTime = 0.5f;
-		LoadingScreen.WidgetLoadingScreen = FLoadingScreenAttributes::NewTestLoadingScreenWidget();//SNew(SLoadingScreen);
+		//TODO Replace this widget with a real startup-type screen
+		LoadingScreen.WidgetLoadingScreen = FLoadingScreenAttributes::NewTestLoadingScreenWidget();
 		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
 	}
 
