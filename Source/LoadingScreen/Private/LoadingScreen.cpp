@@ -93,20 +93,21 @@ public:
 
 					// Tip Text
 					+SHorizontalBox::Slot()
-					.HAlign(HAlign_Center)
-					.VAlign(VAlign_Center)
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Fill)
 					.Padding(15, 15)
 					[
 						SNew(STextBlock)
+						.AutoWrapText(true)
 						.ColorAndOpacity(FLinearColor::White)
 						.Font(TTF_FONT("Comfortaa-Bold", 16))
-						.Text(LOCTEXT("Tip", "Tip: Amogus"))
+						.Text(FText::FromString("Tip: " + GetText().ToString()))
 					]
 				
 					// Throbber
 					+ SHorizontalBox::Slot()
 					.HAlign(HAlign_Right)
-					.VAlign(VAlign_Center)
+					.VAlign(VAlign_Bottom)
 					.Padding(4, 4)
 					[
 						SNew(SThrobber)
@@ -123,6 +124,19 @@ private:
 	{
 		bool Vis =  GetMoviePlayer()->IsLoadingFinished();
 		return EVisibility::Visible;//GetMoviePlayer()->IsLoadingFinished() ? EVisibility::Collapsed : EVisibility::Visible;
+	}
+
+	FText GetText()
+	{
+		FString FileString;
+		FText Result = FText::FromString("Tip: STRING UNABLE TO BE LOADED FROM FILE");
+		if (FFileHelper::LoadFileToString(FileString, *(FPaths::ProjectConfigDir() + "TipText.ini")))
+		{
+			TArray<FString> Parsed;
+			FileString.ParseIntoArray(Parsed, TEXT("\n"));
+			Result = FText::FromString(Parsed[FMath::RandRange(0, Parsed.Num() - 1)]);
+		}
+		return Result;
 	}
 	
 	/** Loading screen image brush */
