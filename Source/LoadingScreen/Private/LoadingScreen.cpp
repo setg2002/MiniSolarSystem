@@ -38,9 +38,9 @@ public:
 	void Construct(const FArguments& InArgs)
 	{
 		// Load version of the logo with text baked in, path is hardcoded because this loads very early in startup
-		static const FName LoadingScreenName(TEXT("/Game/MaterialStuff/Textures/UE-transparent.UE-transparent"));
+		static const FName LoadingScreenName(TEXT("/Game/MaterialStuff/Textures/T_GameIconBW.T_GameIconBW"));
 
-		LoadingScreenBrush = MakeShareable(new FLoadingScreenBrush(LoadingScreenName, FVector2D(250, 201)));
+		LoadingScreenBrush = MakeShareable(new FLoadingScreenBrush(LoadingScreenName, FVector2D(256, 256)));
 		
 		FSlateBrush *BGBrush = new FSlateBrush();
 		BGBrush->TintColor = FLinearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -123,7 +123,7 @@ private:
 	EVisibility GetLoadIndicatorVisibility() const
 	{
 		bool Vis =  GetMoviePlayer()->IsLoadingFinished();
-		return EVisibility::Visible;//GetMoviePlayer()->IsLoadingFinished() ? EVisibility::Collapsed : EVisibility::Visible;
+		return GetMoviePlayer()->IsLoadingFinished() ? EVisibility::Collapsed : EVisibility::Visible;
 	}
 
 	FText GetText()
@@ -153,7 +153,7 @@ public:
 	virtual void StartupModule() override
 	{
 		// Force load for cooker reference
-		LoadObject<UObject>(nullptr, TEXT("/Game/MaterialStuff/Textures/UE-transparent.UE-transparent") );
+		LoadObject<UObject>(nullptr, TEXT("/Game/MaterialStuff/Textures/T_GameIconBW.T_GameIconBW") );
 
 		if (IsMoviePlayerEnabled())
 		{
@@ -171,7 +171,7 @@ public:
 		FLoadingScreenAttributes LoadingScreen;
 		LoadingScreen.bAutoCompleteWhenLoadingCompletes = !bPlayUntilStopped;
 		LoadingScreen.bWaitForManualStop = bPlayUntilStopped;
-		LoadingScreen.bAllowEngineTick = bPlayUntilStopped;//false;
+		LoadingScreen.bAllowEngineTick = bPlayUntilStopped;
 		LoadingScreen.MinimumLoadingScreenDisplayTime = PlayTime;
 		LoadingScreen.WidgetLoadingScreen = SNew(SLoadingScreen);
 		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
