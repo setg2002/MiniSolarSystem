@@ -157,7 +157,7 @@ public:
 		FLoadingScreenAttributes LoadingScreen;
 		LoadingScreen.bAutoCompleteWhenLoadingCompletes = !bPlayUntilStopped;
 		LoadingScreen.bWaitForManualStop = bPlayUntilStopped;
-		LoadingScreen.bAllowEngineTick = false;//bPlayUntilStopped;
+		LoadingScreen.bAllowEngineTick = bPlayUntilStopped;//false;
 		LoadingScreen.MinimumLoadingScreenDisplayTime = PlayTime;
 		LoadingScreen.WidgetLoadingScreen = SNew(SLoadingScreen);
 		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);

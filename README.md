@@ -20,3 +20,4 @@ Work Blog: https://sorengworklog.blogspot.com/
 * In NiagaraDataInterfaceArrayFunctionLibrary.h all of the static functions need to be made public.
 * In CurveLinearColor.h the variable FloatCurves needs to have the UPROPERTY specifier "SaveGame"
 * In RichCurve.h the variables Time, Value, and Keys all need to have the UPROPERTY specifier "SaveGame"
+* In DefaultGameMoviePlayer.cpp the entire body of OnAnyDown() has to be removed except for the return statement.
