@@ -10,7 +10,7 @@
 
 UGasGiantColorSettings::UGasGiantColorSettings()
 {
-	BasePlanetMat = LoadObject<UMaterialInterface>(NULL, TEXT("UMaterialInterface'/Game/MaterialStuff/Instances/M_GasGiant_Inst.M_GasGiant_Inst'"), NULL, LOAD_None, NULL);
+	BasePlanetMat = LoadObject<UMaterialInterface>(NULL, TEXT("UMaterialInterface'/Game/Materials/Instances/M_GasGiant_Inst.M_GasGiant_Inst'"), NULL, LOAD_None, NULL);
 }
 
 void UGasGiantColorSettings::GenerateMaterial()

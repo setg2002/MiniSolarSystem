@@ -55,7 +55,7 @@ void AStar::BeginPlay()
 		ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
 	}
 
-	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/MaterialStuff/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
+	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/Materials/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
 
 	SetStarProperties(starProperties);
 

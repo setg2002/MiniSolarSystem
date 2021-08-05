@@ -5,7 +5,7 @@
 
 UColorSettings::UColorSettings()
 {
-	PlanetMat = LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_Planet_Inst.M_Planet_Inst'"), NULL, LOAD_None, NULL);
+	PlanetMat = LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_Planet_Inst.M_Planet_Inst'"), NULL, LOAD_None, NULL);
 }
 
 void UBiome::SetStartHeight(float NewHeight)

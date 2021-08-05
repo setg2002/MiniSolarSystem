@@ -38,7 +38,7 @@ public:
 	void Construct(const FArguments& InArgs)
 	{
 		// Load version of the logo with text baked in, path is hardcoded because this loads very early in startup
-		static const FName LoadingScreenName(TEXT("/Game/MaterialStuff/Textures/T_GameIconBW.T_GameIconBW"));
+		static const FName LoadingScreenName(TEXT("/Game/UI/Textures/T_GameIconBW.T_GameIconBW"));
 
 		LoadingScreenBrush = MakeShareable(new FLoadingScreenBrush(LoadingScreenName, FVector2D(256, 256)));
 		
@@ -153,7 +153,7 @@ public:
 	virtual void StartupModule() override
 	{
 		// Force load for cooker reference
-		LoadObject<UObject>(nullptr, TEXT("/Game/MaterialStuff/Textures/T_GameIconBW.T_GameIconBW") );
+		LoadObject<UObject>(nullptr, TEXT("/Game/UI/Textures/T_GameIconBW.T_GameIconBW") );
 
 		if (IsMoviePlayerEnabled())
 		{

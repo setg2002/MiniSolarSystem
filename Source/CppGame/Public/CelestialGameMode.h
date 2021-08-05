@@ -53,9 +53,6 @@ public:
 	void SetGravitationalConstant(float NewG);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UUserWidget> HighlightWidgetClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> OverviewWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -63,9 +60,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> OrbitDebugWidgetClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UUserWidget> LoadingWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> PauseWidgetClass;

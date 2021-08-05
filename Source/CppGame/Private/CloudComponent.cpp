@@ -24,7 +24,7 @@ void UCloudComponent::BeginPlay()
 
 void UCloudComponent::CreateMaterial()
 {
-	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_Clouds_Inst.M_Clouds_Inst'"), NULL, LOAD_None, NULL));
+	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_Clouds_Inst.M_Clouds_Inst'"), NULL, LOAD_None, NULL));
 }
 
 #if WITH_EDITOR

@@ -52,7 +52,7 @@ UTexture2D* UColorCurveFunctionLibrary::TextureFromCurve(UCurveLinearColor* Grad
 
 UCurveLinearColor* UColorCurveFunctionLibrary::CreateNewCurve(FName Name, TArray<uint8> Data)
 {
-	FString PackageName = TEXT("/Game/MaterialStuff/Gradients/Runtime/");
+	FString PackageName = TEXT("/Game/Materials/Gradients/Runtime/");
 	UPackage* Package = CreatePackage(*PackageName);
 
 	UCurveLinearColor* NewGradient =  NewObject<UCurveLinearColor>(Package, Name, EObjectFlags::RF_Public);

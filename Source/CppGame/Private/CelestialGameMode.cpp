@@ -45,7 +45,7 @@ void ACelestialGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/MaterialStuff/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
+	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/Materials/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
 	NumStars = 0;
 
 	PC = GetWorld()->GetFirstPlayerController();
@@ -56,7 +56,6 @@ void ACelestialGameMode::BeginPlay()
 	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
 	OverviewWidget  = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
 	PauseWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), PauseWidgetClass);
-	//CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), LoadingWidgetClass)->AddToViewport(10);
 
 	CelestialPlayer = Cast<ACelestialPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass()));
 	OverviewPlayer = Cast<AOverviewPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOverviewPlayer::StaticClass()));
@@ -203,13 +202,6 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		currentPerspective = perspective;
 		AOrbitDebugActor::Get()->DrawOrbits();
 
-		TArray<UUserWidget*> Widgets;
-		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Widgets, HighlightWidgetClass, false);
-		for (UUserWidget* Widget : Widgets)
-		{
-			Widget->SetVisibility(ESlateVisibility::Visible);
-		}
-
 		TArray<AActor*> NiagaraSystems;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
 		for (auto& System : NiagaraSystems)
@@ -244,13 +236,6 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		PC->SetShowMouseCursor(false);
 		currentPerspective = perspective;
 		AOrbitDebugActor::Get()->ClearOrbits();
-
-		TArray<UUserWidget*> Widgets;
-		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Widgets, HighlightWidgetClass, false);
-		for (UUserWidget* Widget : Widgets)
-		{
-			Widget->SetVisibility(ESlateVisibility::Hidden);
-		}
 
 		TArray<AActor*> NiagaraSystems;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
@@ -506,7 +491,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 		// Save Gradients
 		TArray<FAssetData> GradientsData;
-		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/MaterialStuff/Gradients/Runtime", GradientsData, true, false);
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/Materials/Gradients/Runtime", GradientsData, true, false);
 		SaveGameInstance->GradientAssets.SetNum(GradientsData.Num());
 		for (int32 i = 0; i < SaveGameInstance->GradientAssets.Num(); i++)
 		{

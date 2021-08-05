@@ -30,7 +30,7 @@ void URingSystemComponent::OnComponentCreated()
 
 void URingSystemComponent::CreateMaterial()
 {
-	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/MaterialStuff/Instances/M_Ring_Inst.M_Ring_Inst'"), NULL, LOAD_None, NULL));
+	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_Ring_Inst.M_Ring_Inst'"), NULL, LOAD_None, NULL));
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 	if (Gradient)
 	{
