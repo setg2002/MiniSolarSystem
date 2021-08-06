@@ -2,6 +2,7 @@
 
 
 #include "OrbitDebugActor.h"
+#include "Star.h"
 #include "Planet.h"
 #include "GasGiant.h"
 #include "CelestialBody.h"
@@ -261,33 +262,34 @@ void AOrbitDebugActor::DrawOrbits()
 		{
 			RenderedSteps = FMath::Clamp<int32>(0.0005f * NumSteps * NumSteps, 0, 5000);
 			TArray<FVector> NewPoints;
-			int factor = NumSteps / (RenderedSteps/* * 10*/) < 1 ? 1 : NumSteps / (RenderedSteps/* * 10*/); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
-			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps/* * 10*/) - 1); j++)
+			int factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps; // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
+			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); j++)
 			{
 				NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
 			}
 
-			/*if (bodyIndex == aaaaaa)
-			{
-				ARRAY = NewPoints;
-			}*/
-
 			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
 			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[bodyIndex % Colors.Num()]);
 
-			if (Width == 0 && Cast<APlanet>(Bodies[bodyIndex]))
+			if (Width == 0)
 			{
-				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Cast<APlanet>(Bodies[bodyIndex])->ShapeSettings->GetRadius() * 2);
-			}
-			else if (Width == 0 && Cast<AGasGiant>(Bodies[bodyIndex]))
-			{
-				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Cast<AGasGiant>(Bodies[bodyIndex])->GetRadius() * 200);
+				if (APlanet* Planet = Cast<APlanet>(Bodies[bodyIndex]))
+				{
+					ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Planet->ShapeSettings->GetRadius() * 2);
+				}
+				else if (AGasGiant* GasGiant = Cast<AGasGiant>(Bodies[bodyIndex]))
+				{
+					ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), GasGiant->GetRadius() * 200);
+				}
+				else if (AStar * Star = Cast<AStar>(Bodies[bodyIndex]))
+				{
+					ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Star->starProperties.radius * 100);
+				}
 			}
 			else
 			{
 				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
 			}
-			//ParticleComponents[i]->SetFloatParameter(FName("User.NumSteps"), float(NumSteps));
 			break;
 		}
 		default:

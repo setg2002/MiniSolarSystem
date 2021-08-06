@@ -113,12 +113,6 @@ public:
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FVector> ARRAY;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 aaaaaa;
-
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif

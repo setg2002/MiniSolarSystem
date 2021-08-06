@@ -581,21 +581,6 @@ void ACelestialGameMode::PauseGame()
 			CelestialWidget->AddToViewport();
 			PC->SetShowMouseCursor(false);
 			PC->SetInputMode(FInputModeGameOnly());
-
-			/*TArray<AActor*> Stars;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStar::StaticClass(), Stars);
-			for (AActor* Star : Stars)
-			{
-				Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
-				Cast<AStar>(Star)->GetParticleComp()->SetPaused(false);
-			}
-
-			TArray<AActor*> GasGiants;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGasGiant::StaticClass(), GasGiants);
-			for (AActor* GasGiant : GasGiants)
-			{
-				Cast<AStar>(GasGiant)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
-			}*/
 		}
 
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
@@ -609,30 +594,13 @@ void ACelestialGameMode::PauseGame()
 		if (currentPerspective == 0)
 			OverviewWidget->RemoveFromViewport();
 		else
-		{
 			CelestialWidget->RemoveFromViewport();
-
-			/*TArray<AActor*> Stars;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStar::StaticClass(), Stars);
-			for (AActor* Star : Stars)
-			{
-				Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
-				Cast<AStar>(Star)->GetParticleComp()->SetPaused(true);
-			}
-
-			TArray<AActor*> GasGiants;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGasGiant::StaticClass(), GasGiants);
-			for (AActor* GasGiant : GasGiants)
-			{
-				Cast<AStar>(GasGiant)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
-			}*/
-		}
 			
 		FInputModeGameAndUI InputMode;
+		InputMode.SetWidgetToFocus(PauseWidget->TakeWidget());
 		InputMode.SetHideCursorDuringCapture(false);
 		PC->SetInputMode(InputMode);
 		PC->SetShowMouseCursor(true);
-		PauseWidget->ReloadConfig();
 		PauseWidget->AddToViewport(1);
 		bGamePaused = true;
 	}

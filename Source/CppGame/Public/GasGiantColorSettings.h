@@ -47,7 +47,6 @@ public:
 
 	void SetMesh(UStaticMeshComponent* mesh) { Mesh = mesh; }
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UMaterialInterface* BasePlanetMat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -76,10 +75,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetStormFalloff(float NewStormFalloff);
 
-	//UPROPERTY(EditAnywhere, Category = "Storm Settings", AdvancedDisplay, meta = (ClampMin = "0", ClampMax = "1024"))
 	const int LowBound = 100;
-
-	//UPROPERTY(EditAnywhere, Category = "Storm Settings", AdvancedDisplay, meta = (ClampMin = "0", ClampMax = "1024"))
 	const int HighBound = 924;
 
 #if WITH_EDITOR

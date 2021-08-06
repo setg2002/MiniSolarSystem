@@ -22,9 +22,7 @@ void TerrestrialColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 {
 	this->ColorSettings = colorSettings;
 	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
-	{
 		BiomeNoiseFilter = NoiseFilterFactory::CreateNoiseFilter(ColorSettings->GetBiomeColorSettings()->GetNoise());
-	}
 }
 
 TerrestrialColorGenerator::~TerrestrialColorGenerator()

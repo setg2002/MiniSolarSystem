@@ -28,6 +28,8 @@ struct FLoadingScreenBrush : public FSlateDynamicImageBrush, public FGCObject
 
 // Easy Font Macro
 #define TTF_FONT( RelativePath, ... ) FSlateFontInfo( FPaths::ProjectContentDir() / "Slate" / RelativePath + TEXT(".ttf"), __VA_ARGS__ ) // Straight from SGame 
+#define OTF_FONT( RelativePath, ... ) FSlateFontInfo( FPaths::ProjectContentDir() / "Slate" / RelativePath + TEXT(".otf"), __VA_ARGS__ ) 
+
 
 class SLoadingScreen : public SCompoundWidget
 {
@@ -100,7 +102,7 @@ public:
 						SNew(STextBlock)
 						.AutoWrapText(true)
 						.ColorAndOpacity(FLinearColor::White)
-						.Font(TTF_FONT("Comfortaa-Bold", 16))
+						.Font(OTF_FONT("octarine_light", 16))
 						.Text(FText::FromString("Tip: " + GetText().ToString()))
 					]
 				

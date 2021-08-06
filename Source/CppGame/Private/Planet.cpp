@@ -405,7 +405,6 @@ void APlanet::ReGenerateTangents()
 
 void APlanet::Initialize()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("%s"), *ShapeSettings->GetNoiseLayers()[0]->GetBodyName());
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
 
