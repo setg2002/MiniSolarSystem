@@ -54,7 +54,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Main mesh	
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
+	//UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UProceduralMeshComponent* ProcMesh;
 
 	TerrainFace* TerrainFaces[6];
