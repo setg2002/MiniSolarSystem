@@ -2,6 +2,7 @@
 
 
 #include "ShapeSettings.h"
+#include "OrbitDebugActor.h"
 #include "NoiseLayer.h"
 #include "Planet.h"
 
@@ -23,6 +24,7 @@ void UShapeSettings::SetRadius(float NewRadius)
 {
 	ShapeSettings.PlanetRadius = NewRadius;
 	OnSettingsAssetChanged.Broadcast();
+	AOrbitDebugActor::Get()->DrawOrbits();
 }
 
 void UShapeSettings::AddNoiseLayer(UNoiseLayer* NewNoiseLayer)

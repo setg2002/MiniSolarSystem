@@ -5,6 +5,7 @@
 #include "NiagaraSystem.h"
 #include "OverviewPlayer.h"
 #include "CelestialPlayer.h"
+#include "OrbitDebugActor.h"
 #include "NiagaraComponent.h"
 #include "CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
@@ -116,6 +117,9 @@ void AStar::SetRadius(int NewRadius)
 	bool WasPaused = ParticleComponent->IsPaused();
 	ParticleComponent->ReinitializeSystem();
 	ParticleComponent->SetPaused(WasPaused);
+
+	if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetCurrentPerspective() == 0)
+		AOrbitDebugActor::Get()->DrawOrbits();
 }
 
 void AStar::SetLuminosity(int NewLuminosity)

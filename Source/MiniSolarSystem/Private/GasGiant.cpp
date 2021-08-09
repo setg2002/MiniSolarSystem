@@ -2,6 +2,8 @@
 
 
 #include "GasGiant.h"
+#include "OrbitDebugActor.h"
+#include "CelestialGameMode.h"
 #include "GasGiantColorSettings.h"
 #include "GaseousColorGenerator.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -29,6 +31,9 @@ void AGasGiant::SetRadius(int NewRadius)
 {
 	Radius = NewRadius;
 	this->SetActorScale3D(FVector(Radius));
+
+	if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetCurrentPerspective() == 0)
+		AOrbitDebugActor::Get()->DrawOrbits();
 }
 
 #if WITH_EDITOR
