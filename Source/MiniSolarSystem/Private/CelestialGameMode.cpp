@@ -123,7 +123,7 @@ void ACelestialGameMode::Tick(float DeltaTime)
 ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform)
 {
 	ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(Class, Transform);
-	//NewBody->SetName(Name.GetNumber() == 0 ? NewBody->GetBodyName() : Name);
+	NewBody->SetName(Name);
 
 	bodies.Add(NewBody);
 

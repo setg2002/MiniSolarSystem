@@ -25,29 +25,6 @@ void ACelestialBody::BeginPlay()
 
 	Collider->OnComponentEndOverlap.AddDynamic(this, &ACelestialBody::OnOverlapEnd);
 	Collider->OnComponentBeginOverlap.AddDynamic(this, &ACelestialBody::OnOverlapBegin);
-
-	// Ensure unique name
-	int32 i = 0;
-	FName PersistantName = FName(FString(this->GetBodyName().ToString() + "_0"));
-	while (BodyName == NAME_None)
-	{
-		bool NameAlreadyExists = false;
-		for (ACelestialBody* other : gameMode->GetBodies())
-		{
-			if (other->BodyName == PersistantName)
-			{
-				NameAlreadyExists = true;
-				break;
-			}
-		}
-		if (NameAlreadyExists)
-		{
-			i++;
-			PersistantName = FName(FString(this->GetBodyName().ToString() + "_" + FString::FromInt(i)));
-		}
-		else
-			BodyName = PersistantName;
-	}
 }
 
 void ACelestialBody::RequestDestroyComponent(UActorComponent* ComponentToDestroy)
@@ -69,15 +46,54 @@ int ACelestialBody::GetMass() const { return mass; }
 
 bool ACelestialBody::SetName(FName NewName)
 {
+	FName UniqueName = EnsureUniqueName(NewName);
+	if (UniqueName == NewName)
+	{
+		BodyName = NewName;
+		return true;
+	}
+	else
+	{
+		BodyName = UniqueName;
+		return false;
+	}
+}
+
+FName ACelestialBody::EnsureUniqueName(FName InName)
+{
+	bool NameAlreadyExists = false;
 	for (ACelestialBody* other : gameMode->GetBodies())
 	{
-		if (other->BodyName == NewName)
+		if (other->BodyName == InName)
 		{
-			return false;
+			NameAlreadyExists = true;
+			break;
 		}
 	}
-	BodyName = NewName;
-	return true;
+	if (NameAlreadyExists)
+	{
+		int32 i = 0;
+		FName PersistantName = FName(FString(InName.ToString() + "_0"));
+		while (true)
+		{
+			NameAlreadyExists = false;
+			for (ACelestialBody* other : gameMode->GetBodies())
+			{
+				if (other->BodyName == PersistantName)
+				{
+					NameAlreadyExists = true;
+					break;
+				}
+			}
+			if (NameAlreadyExists)
+			{
+				i++;
+				PersistantName = FName(FString(InName.ToString() + "_" + FString::FromInt(i)));
+			}
+			else return PersistantName;
+		}
+	}
+	else return InName;
 }
 
 void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep)

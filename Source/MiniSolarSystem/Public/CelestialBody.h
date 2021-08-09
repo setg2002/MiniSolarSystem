@@ -60,6 +60,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FName GetBodyName() const { return BodyName; }
 	UFUNCTION(BlueprintCallable)
+	// Returns true of the name of the body was set to NewName
 	bool SetName(FName NewName);
 
 	// Sets the magnitude of the current velocity to NewVelocity without changing direction
@@ -91,6 +92,9 @@ protected:
 	FVector currentVelocity;
 
 	ACelestialGameMode* gameMode;
+
+	// Returns an FName with _n if the InName is already taken
+	FName EnsureUniqueName(FName InName);
 
 private:
 	// The actor that is currently being overlapped with, nullptr if not overlapping
