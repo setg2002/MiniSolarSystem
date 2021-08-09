@@ -196,6 +196,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		CelestialWidget->RemoveFromViewport();
 		OverviewWidget->AddToViewport(0);
 		FInputModeGameAndUI InputMode;
+		InputMode.SetWidgetToFocus(OverviewWidget->TakeWidget());
 		InputMode.SetHideCursorDuringCapture(false);
 		PC->SetInputMode(InputMode);
 		PC->SetShowMouseCursor(true);
@@ -575,7 +576,13 @@ void ACelestialGameMode::PauseGame()
 		// Resume Game
 		PauseWidget->RemoveFromParent();
 		if (currentPerspective == 0)
-			OverviewWidget->AddToViewport();
+		{
+			OverviewWidget->AddToViewport(); 
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(OverviewWidget->TakeWidget());
+			InputMode.SetHideCursorDuringCapture(false);
+			PC->SetInputMode(InputMode);
+		}
 		else
 		{ 			
 			CelestialWidget->AddToViewport();
