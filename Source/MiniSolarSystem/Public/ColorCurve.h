@@ -50,6 +50,9 @@ public:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ColorCurveName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TEnumAsByte<EColorCurveType> ColorCurveType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -77,6 +80,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetObjectToUpdate(UObject* Object);
+
+	UFUNCTION(BlueprintCallable)
+	FName GetName();
+
+	UFUNCTION(BlueprintCallable)
+	bool SetName(FString NewName);
 
 protected:
 	FLinearColor MakeColor(TArray<TTuple<int8, float>> ColorValues);

@@ -22,7 +22,6 @@ void UColorCurve::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-
 	TArray<FKeyInfo> Keys;
 	for (int8 i = 0; i < 4; i++)
 	{
@@ -35,39 +34,45 @@ void UColorCurve::NativeConstruct()
 	}	
 	Keys.Sort([](const FKeyInfo& a, const FKeyInfo& b) { return a.Time > b.Time || (a.Time == b.Time && a.RGB < b.RGB); });
 
-	TArray<FKeyInfo> Template = { FKeyInfo(0, 0, 0), FKeyInfo(1, 0, 0), FKeyInfo(2, 0, 0), FKeyInfo(3, 0, 1) };
-	TArray<FKeyInfo> KeyToMake = Template;
-	for (auto& Key : Keys)
+	//TODO Write documentation for this
+	if (Keys.Num() > 0)
 	{
-		if (KeyToMake.Num() == 0)
+		TArray<FKeyInfo> Template = { FKeyInfo(0, 0, 0), FKeyInfo(1, 0, 0), FKeyInfo(2, 0, 0), FKeyInfo(3, 0, 1) };
+		TArray<FKeyInfo> KeyToMake = Template;
+		KeyToMake.RemoveAt(Keys[0].RGB, 1);
+		KeyToMake.EmplaceAt(Keys[0].RGB, Keys[0]);
+		for (auto& Key : Keys)
 		{
-			KeyToMake = Template;
-			for (auto& Info : KeyToMake)
+			if (KeyToMake.Num() == 0)
 			{
-				Info.Time = Key.Time;
+				KeyToMake = Template;
+				for (auto& Info : KeyToMake)
+				{
+					Info.Time = Key.Time;
+				}
+				KeyToMake.RemoveAt(Key.RGB, 1);
+				KeyToMake.EmplaceAt(0, Key);
 			}
-			KeyToMake.RemoveAt(Key.RGB, 1);
-			KeyToMake.EmplaceAt(0, Key);
-		}
-		else if (Key.Time == KeyToMake[0].Time)
-		{
-			KeyToMake.RemoveAt(Key.RGB, 1);
-			KeyToMake.EmplaceAt(Key.RGB, Key);
-		}
-		else
-		{
-			ConstructKey(KeyToMake);
-			KeyToMake.Empty();
-			KeyToMake = Template;
-			for (auto& Info : KeyToMake)
+			else if (Key.Time == KeyToMake[0].Time)
 			{
-				Info.Time = Key.Time;
+				KeyToMake.RemoveAt(Key.RGB, 1);
+				KeyToMake.EmplaceAt(Key.RGB, Key);
 			}
-			KeyToMake.RemoveAt(Key.RGB, 1);
-			KeyToMake.EmplaceAt(0, Key);
+			else
+			{
+				ConstructKey(KeyToMake);
+				KeyToMake.Empty();
+				KeyToMake = Template;
+				for (auto& Info : KeyToMake)
+				{
+					Info.Time = Key.Time;
+				}
+				KeyToMake.RemoveAt(Key.RGB, 1);
+				KeyToMake.EmplaceAt(0, Key);
+			}
 		}
+		ConstructKey(KeyToMake);
 	}
-	ConstructKey(KeyToMake);
 
 	// Bind delegates here.
 }
@@ -209,4 +214,15 @@ void UColorCurve::UpdateGradient()
 void UColorCurve::SetObjectToUpdate(UObject* Object)
 {
 	ObjectToUpdate = Object;
+}
+
+FName UColorCurve::GetName()
+{
+	Gradient->GetName(ColorCurveName);
+	return (FName)ColorCurveName;
+}
+
+bool UColorCurve::SetName(FString NewName)
+{
+	return Gradient->Rename(*NewName);
 }
