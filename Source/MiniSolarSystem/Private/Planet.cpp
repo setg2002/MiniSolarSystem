@@ -211,6 +211,17 @@ void APlanet::CreateSettingsAssets()
 		ColorSettings->GetBiomeColorSettings()->GetPackage()->MarkPackageDirty();
 	}
 
+	if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
+		ColorSettings->GetBiomeColorSettings()->SetNoise(LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath));
+	}
+	else if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr)
+	{
+		ColorSettings->GetBiomeColorSettings()->SetNoise(Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass())));
+		ColorSettings->GetBiomeColorSettings()->GetNoise()->GetPackage()->MarkPackageDirty();
+	}
+
 	if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UBiome::StaticClass()->GetName())))
 	{
 		ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
@@ -280,6 +291,17 @@ void APlanet::CreateSettingsAssets()
 	{
 		ColorSettings->SetBiomeColorSettings(Cast<UBiomeColorSettings>(CreateSettingsAssetEditor(UBiomeColorSettings::StaticClass())));
 		ColorSettings->GetBiomeColorSettings()->GetPackage()->MarkPackageDirty();
+	}
+
+	if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseSettings::StaticClass()->GetName())))
+	{
+		CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
+		ColorSettings->GetBiomeColorSettings()->SetNoise(LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath));
+	}
+	else if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr)
+	{
+		ColorSettings->GetBiomeColorSettings()->SetNoise(Cast<UNoiseSettings>(CreateSettingsAssetEditor(UNoiseSettings::StaticClass())));
+		ColorSettings->GetBiomeColorSettings()->GetNoise()->GetPackage()->MarkPackageDirty();
 	}
 
 	if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UBiome::StaticClass()->GetName())))
@@ -455,6 +477,7 @@ void APlanet::OnColorSettingsUpdated()
 {
 	if (bAutoGenerate)
 	{
+		colorGenerator->UpdateSettings(ColorSettings);
 		for (int i = 0; i < 6; i++)
 		{
 			TerrainFaces[i]->UpdateBiomePercents();

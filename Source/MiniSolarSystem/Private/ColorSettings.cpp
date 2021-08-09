@@ -20,6 +20,7 @@ void UBiome::SetGradient(UCurveLinearColor* NewGradient)
 	OnSettingsAssetChanged.Broadcast();
 }
 
+
 void UBiomeColorSettings::SetUsingNoise(bool NewUsingNoise)
 {
 	BiomeColorSettings.bUsingNoise = NewUsingNoise;
@@ -61,6 +62,7 @@ void UBiomeColorSettings::SetNoise(UNoiseSettings* NewNoise)
 	BiomeColorSettings.Noise = NewNoise;
 	OnSettingsAssetChanged.Broadcast();
 }
+
 
 void UColorSettings::SetBiomeColorSettings(UBiomeColorSettings* NewColorSettings)
 {
