@@ -23,7 +23,8 @@ void ACelestialBody::BeginPlay()
 	currentVelocity = initialVelocity;
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 
-	Collider->OnComponentBeginOverlap.AddDynamic(this, &ACelestialBody::OnCompOverlap);
+	Collider->OnComponentEndOverlap.AddDynamic(this, &ACelestialBody::OnOverlapEnd);
+	Collider->OnComponentBeginOverlap.AddDynamic(this, &ACelestialBody::OnOverlapBegin);
 
 	// Ensure unique name
 	int32 i = 0;
@@ -94,6 +95,12 @@ void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float tim
 			this->currentVelocity += acceleration * timeStep;
 		}
 	}
+	ACelestialBody* OverlappedBody = Cast<ACelestialBody>(OverlappedActor);
+	if (OverlappedActor && gameMode->GetCurrentPerspective() == 1 && OverlappedBody)
+	{
+		FVector CollisionNormal = (this->GetActorLocation() - OverlappedActor->GetActorLocation()).GetUnsafeNormal();
+		currentVelocity += (CollisionNormal * ((currentVelocity.Size()) * ((OverlappedBody->mass * OverlappedBody->currentVelocity.Size()) / (this->mass * currentVelocity.Size()))));
+	}
 }
 
 void ACelestialBody::UpdatePosition(float timeStep)
@@ -115,14 +122,14 @@ void ACelestialBody::Tick(float DeltaTime)
 
 }
 
-void ACelestialBody::OnCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ACelestialBody::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//NOTE: This overlap method is not used for collisions with the player. That is handled directly by the CelestialPlayer.
-	ACelestialBody* OtherBody = Cast<ACelestialBody>(OtherActor);
-	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherBody)
-	{
-		currentVelocity += (GetActorLocation() - OtherBody->GetActorLocation()).GetSafeNormal() * ((OtherBody->mass / mass) * (OtherBody->currentVelocity - currentVelocity).Size() / 25)/*(((OtherBody->mass * OtherBody->currentVelocity.Size()) / (mass * currentVelocity.Size())))*/;
-	}
+	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL)) OverlappedActor = OtherActor; 
+}
+
+void ACelestialBody::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && (OtherActor == OverlappedActor)) OverlappedActor = nullptr;
 }
 
 FVector ACelestialBody::GetCurrentVelocity() const

@@ -40,7 +40,13 @@ void APlanet::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ProcMesh->SetRelativeLocation(FVector::ZeroVector);
+#if WITH_EDITOR
+	if (!ProcMesh) // Weird crash sometimes
+		ProcMesh = NewObject<UProceduralMeshComponent>(this, FName("ProcMesh"));
+#endif
+	ensure(ProcMesh);
+	ProcMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	ProcMesh->SetRelativeLocation(FVector().ZeroVector);
 
 	CreateSettingsAssets();
 
@@ -330,11 +336,6 @@ void APlanet::CreateSettingsAssets()
 
 void APlanet::GeneratePlanet()
 {
-#if WITH_EDITOR
-	if (!ProcMesh) // Weird crash sometimes
-		ProcMesh = NewObject<UProceduralMeshComponent>(this, FName("ProcMesh"));
-#endif
-	ensure(ProcMesh);
 	if (bGenerating == false)
 	{
 		bGenerating = true;
@@ -342,7 +343,6 @@ void APlanet::GeneratePlanet()
 		if (ColorSettings)
 		{
 			Collider->SetSphereRadius(ShapeSettings->GetRadius() + 10);
-			ProcMesh->SetRelativeLocation(FVector().ZeroVector);
 
 			if (ShapeSettings != nullptr && ShapeSettings->IsNoiseLayers())
 			{

@@ -185,7 +185,7 @@ void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float t
 			}
 		}
 	}
-	if (OverlappedActor)
+	if (OverlappedActor && gameMode->GetCurrentPerspective() == 1)
 	{
 		FVector CollisionNormal = (this->GetActorLocation() - OverlappedActor->GetActorLocation()).GetUnsafeNormal();
 		currentVelocity += (CollisionNormal * (currentVelocity.Size() / 1.5f));

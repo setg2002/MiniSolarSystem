@@ -75,8 +75,10 @@ public:
 
 	// Called when collider is overlapped with
 	UFUNCTION()
-	void OnCompOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	// Called when collider overlap ends
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
 	// Called when the game starts or when spawned
@@ -89,4 +91,8 @@ protected:
 	FVector currentVelocity;
 
 	ACelestialGameMode* gameMode;
+
+private:
+	// The actor that is currently being overlapped with, nullptr if not overlapping
+	AActor* OverlappedActor;
 };
