@@ -21,6 +21,9 @@ public:
 
 	FSettingsAssetChanged OnSettingsAssetChanged;
 
-	UPROPERTY(SaveGame, BlueprintReadWrite)
-	FName Name;
+	UFUNCTION(BlueprintCallable)
+	FName GetName();
+
+	UFUNCTION(BlueprintCallable)
+	bool SetName(FString NewName);
 };

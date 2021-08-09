@@ -297,7 +297,14 @@ void ACelestialGameMode::LoadGame()
 			// Load Settings Assets
 			for (auto& Asset : LoadedGame->SettingsAssets)
 			{
-				UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseLayer>(Asset.Name, Asset.AssetData);
+				if (Asset.Class == UNoiseLayer::StaticClass())
+				{
+					UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseLayer>(Asset.Name, Asset.AssetData);
+				}
+				else if (Asset.Class == UNoiseSettings::StaticClass())
+				{
+					UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseSettings>(Asset.Name, Asset.AssetData);
+				}
 			}
 
 			gravitationalConstant = LoadedGame->GravConst;
@@ -506,12 +513,12 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 		// Save Settings Assets
 		TArray<FAssetData> AssetsData;
-		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets/Runtime", AssetsData, true, false);
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets/Runtime", AssetsData, true);
 		SaveGameInstance->SettingsAssets.SetNum(AssetsData.Num());
 		for (int32 i = 0; i < SaveGameInstance->SettingsAssets.Num(); i++)
 		{
 			SaveGameInstance->SettingsAssets[i].Class = AssetsData[i].GetClass();
-			SaveGameInstance->SettingsAssets[i].Name = Cast<USettingsAsset>(AssetsData[i].GetAsset())->Name;
+			SaveGameInstance->SettingsAssets[i].Name = AssetsData[i].AssetName;
 
 			FMemoryWriter MemoryWriter(SaveGameInstance->SettingsAssets[i].AssetData);
 			FCelestialSaveGameArchive Ar(MemoryWriter);

@@ -90,7 +90,7 @@ void APlanet::ResetPosition()
 
 UObject* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 {
-	FString AssetPath = FString("/Game/DataAssets/Runtime/" + this->BodyName.ToString() + "/");
+	FString AssetPath = FString("/Game/DataAssets/Runtime/");
 	FString AssetName = FString(TEXT("DA_")) + this->BodyName.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
 	FString PackagePath = AssetPath + AssetName;
 	

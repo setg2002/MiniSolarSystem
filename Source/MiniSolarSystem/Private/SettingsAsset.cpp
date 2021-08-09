@@ -5,6 +5,16 @@
 
 USettingsAsset::USettingsAsset()
 {
-	if (Name == NAME_None)
-		Name = FName(this->GetName());
+
 }
+
+FName USettingsAsset::GetName()
+{
+	return this->GetFName();
+}
+
+bool USettingsAsset::SetName(FString NewName)
+{
+	return this->Rename(*NewName);
+}
+
