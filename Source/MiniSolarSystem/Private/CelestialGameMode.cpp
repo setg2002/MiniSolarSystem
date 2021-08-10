@@ -37,7 +37,7 @@ float ACelestialGameMode::gravitationalConstant;
 ACelestialGameMode::ACelestialGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	currentPerspective = 255;
 	gravitationalConstant = 100;
 }
 
