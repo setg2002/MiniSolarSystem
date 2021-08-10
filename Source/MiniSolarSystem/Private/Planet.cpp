@@ -509,52 +509,6 @@ void APlanet::GenerateColors()
 	OnPlanetGenerated.ExecuteIfBound(this->BodyName);
 }
 
-void APlanet::CalculateOrbitVelocity()
-{
-	if (OrbitingBody == this || OrbitingBody == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OrbitingBody cannot be null or itself"));
-		return;
-	}
-	else
-	{
-		//TODO Replace 100 with gravitational constant from gamemode
-		float GM = 100 * (this->mass + OrbitingBody->GetMass());
-		orbitVelocity = FMath::Sqrt(GM);
-		return;
-	}
-}
-
-void APlanet::SetToOrbit()
-{
-	if (OrbitingBody == this || OrbitingBody == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OrbitingBody cannot be null or itself"));
-		return;
-	}
-
-	FVector AtPlanet = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), OrbitingBody->GetActorLocation()).Vector();
-	FVector Up = ProcMesh->GetUpVector();
-	FVector Tangent = FVector().CrossProduct(AtPlanet, Up).GetSafeNormal();
-
-	initialVelocity.X = Tangent.X * -orbitVelocity + OrbitingBody->initialVelocity.X;
-	initialVelocity.Y = Tangent.Y * -orbitVelocity + OrbitingBody->initialVelocity.Y;
-	initialVelocity.Z = Tangent.Z * -orbitVelocity + OrbitingBody->initialVelocity.Z;
-
-	if (AOrbitDebugActor::Get()->bAutoDraw)
-	{
-		AOrbitDebugActor::Get()->DrawOrbits();
-	}
-
-	// Debugging
-	if (bVectorDebug)
-	{
-		UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (AtPlanet * VectorLength), VectorSize, FColor::Red, VectorDuration, VectorThickness);
-		UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (Up * VectorLength), VectorSize, FColor::Green, VectorDuration, VectorThickness);
-		UKismetSystemLibrary::DrawDebugArrow(GetWorld(), this->GetActorLocation(), this->GetActorLocation() + (Tangent * VectorLength), VectorSize, FColor::Blue, VectorDuration, VectorThickness);
-	}
-}
-
 void APlanet::ReconveneTerrainFaceThreads(int FaceNum)
 {
 	FinishedFaces.Add(FaceNum);

@@ -114,6 +114,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform);
 
+	UFUNCTION(BlueprintCallable)
 	ACelestialBody* GetBodyByName(FString Name);
 
 protected:

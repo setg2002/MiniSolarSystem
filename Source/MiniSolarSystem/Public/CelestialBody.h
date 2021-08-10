@@ -99,4 +99,37 @@ protected:
 private:
 	// The actor that is currently being overlapped with, nullptr if not overlapping
 	AActor* OverlappedActor;
+
+public:
+	// The CelestialBody that orbitVelocity is to be calculated for
+	UPROPERTY(SaveGame, Category = "Orbits", EditAnywhere, BlueprintReadWrite)
+	ACelestialBody* OrbitingBody;
+
+	// The necessary velocity for this planet to orbit OrbitingBody
+	UPROPERTY(SaveGame, Category = "Orbits", VisibleAnywhere, BlueprintReadOnly)
+	float orbitVelocity;
+
+	// Sets orbitVelocity to the required magnitude to orbit OrbitingBody 
+	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
+	void CalculateOrbitVelocity();
+
+	// Sets velocity to orbitVelocity
+	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
+	void SetToOrbit();
+
+	// Shows/hides orbit calculation vectors
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite)
+	bool bVectorDebug;
+
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
+	int32 VectorLength = 50;
+
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
+	float VectorSize = 1;
+
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
+	int VectorThickness = 1;
+
+	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
+	int32 VectorDuration = 10;
 };

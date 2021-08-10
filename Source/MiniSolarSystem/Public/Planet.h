@@ -62,39 +62,6 @@ public:
 	ShapeGenerator* shapeGenerator;
 	TerrestrialColorGenerator* colorGenerator;
 
-	/* TODO Orbit stuff should be put in ACelestialBody instead */
-	// The CelestialBody that orbitVelocity is to be calculated for
-	UPROPERTY(SaveGame, Category = "Orbits", EditAnywhere)
-	ACelestialBody* OrbitingBody;
-
-	// The necessary velocity for this planet to orbit OrbitingBody
-	UPROPERTY(SaveGame, Category = "Orbits", VisibleAnywhere)
-	float orbitVelocity;
-
-	// Sets orbitVelocity to the required magnitude to orbit OrbitingBody 
-	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
-	void CalculateOrbitVelocity();
-
-	// Sets velocity to orbitVelocity
-	UFUNCTION(Category = "Orbits", BlueprintCallable, CallInEditor)
-	void SetToOrbit();
-
-	// Shows/hides orbit calculation vectors
-	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite)
-	bool bVectorDebug;
-
-	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
-	int32 VectorLength = 50;
-
-	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
-	float VectorSize = 1;
-
-	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
-	int VectorThickness = 1;
-
-	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
-	int32 VectorDuration = 10;
-
 	// When true, the planet will call ReGenerate() every time a parameter is changed
 	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere)
 	bool bAutoGenerate = true;
