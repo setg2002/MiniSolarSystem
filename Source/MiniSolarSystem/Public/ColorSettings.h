@@ -26,6 +26,9 @@ public:
 	FColor Tint = FColor::White;
 };
 
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBiomeHeightUpdated);
+
 UCLASS(BlueprintType)
 class UBiome : public USettingsAsset
 {
@@ -36,6 +39,9 @@ private:
 	FBiome_ Biome;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, BlueprintAssignable)
+	FBiomeHeightUpdated OnBiomeHeightUpdated;
+
 	FBiome_ GetStruct() const { return Biome; }
 	bool SetStruct(FBiome_ NewStruct)
 	{
@@ -90,10 +96,16 @@ private:
 	FBiomeColorSettings_ BiomeColorSettings;
 
 public:
+	UBiomeColorSettings();
+
 	FBiomeColorSettings_ GetStruct() const { return BiomeColorSettings; }
 	bool SetStruct(FBiomeColorSettings_ NewStruct)
 	{
 		BiomeColorSettings = NewStruct;
+		for (UBiome* Biome : BiomeColorSettings.Biomes)
+		{
+			Biome->OnBiomeHeightUpdated.AddDynamic(this, &UBiomeColorSettings::SortBiomesByHeight);
+		}
 		return true;
 	}
 
@@ -118,6 +130,10 @@ public:
 	void AddBiome(UBiome* NewBiome);
 	UFUNCTION(BlueprintCallable)
 	void RemoveBiome(int32 index);
+	UFUNCTION(BlueprintCallable)
+	void RemoveBiomeByRef(UBiome* ref);
+	UFUNCTION(BlueprintCallable)
+	void SortBiomesByHeight();
 
 	UFUNCTION(BlueprintCallable)
 	float GetBlendAmount() const { return BiomeColorSettings.blendAmount; }

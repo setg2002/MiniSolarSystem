@@ -11,6 +11,7 @@ UColorSettings::UColorSettings()
 void UBiome::SetStartHeight(float NewHeight)
 {
 	Biome.StartHeight = NewHeight;
+	OnBiomeHeightUpdated.Broadcast();
 	OnSettingsAssetChanged.Broadcast();
 }
 
@@ -20,6 +21,14 @@ void UBiome::SetGradient(UCurveLinearColor* NewGradient)
 	OnSettingsAssetChanged.Broadcast();
 }
 
+
+UBiomeColorSettings::UBiomeColorSettings()
+{
+	for (UBiome* Biome : BiomeColorSettings.Biomes)
+	{
+		Biome->OnBiomeHeightUpdated.AddDynamic(this, &UBiomeColorSettings::SortBiomesByHeight);
+	}
+}
 
 void UBiomeColorSettings::SetUsingNoise(bool NewUsingNoise)
 {
@@ -42,6 +51,7 @@ void UBiomeColorSettings::SetNoiseStrength(float NewNoiseStrength)
 void UBiomeColorSettings::AddBiome(UBiome* NewBiome)
 {
 	BiomeColorSettings.Biomes.Add(NewBiome);
+	NewBiome->OnBiomeHeightUpdated.AddDynamic(this, &UBiomeColorSettings::SortBiomesByHeight);
 	OnSettingsAssetChanged.Broadcast();
 }
 
@@ -49,6 +59,17 @@ void UBiomeColorSettings::RemoveBiome(int32 index)
 {
 	BiomeColorSettings.Biomes.RemoveAt(index);
 	OnSettingsAssetChanged.Broadcast();
+}
+
+void UBiomeColorSettings::RemoveBiomeByRef(UBiome* ref)
+{
+	BiomeColorSettings.Biomes.Remove(ref);
+	OnSettingsAssetChanged.Broadcast();
+}
+
+void UBiomeColorSettings::SortBiomesByHeight()
+{
+	Algo::Sort(BiomeColorSettings.Biomes, [](const UBiome* a, const UBiome* b) { return b->GetStartHeight() > a->GetStartHeight(); });
 }
 
 void UBiomeColorSettings::SetBlendAmount(float NewBlendAmount)

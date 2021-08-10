@@ -92,7 +92,7 @@ public:
 
 	// Makes new empty data asset for given data asset
 	UFUNCTION(BlueprintCallable)
-	UObject* CreateSettingsAsset(TSubclassOf<UObject> AssetClass);
+	UObject* CreateSettingsAsset(TSubclassOf<UObject> AssetClass); //TODO This should return the type it's given
 	UObject* CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass);
 	template< class T >
 	static T* RestoreSettingsAsset(FName Name, TArray<uint8> Data);

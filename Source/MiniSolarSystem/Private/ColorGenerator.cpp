@@ -91,15 +91,18 @@ UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray
 	uint8* Pixels = new uint8[TextureResolution * Gradients.Num() * 4];
 	for (int32 y = 0; y < Gradients.Num(); y++)
 	{
-		for (int32 x = 0; x < TextureResolution; x++)
+		if (Gradients[y])
 		{
-			float time = (float)x / 256.f;
-			FColor gradientCol = Gradients[y]->GetLinearColorValue(time).ToFColor(true);
-			int32 curPixelIndex = ((y * TextureResolution) + x);
-			Pixels[4 * curPixelIndex    ] = gradientCol.B;
-			Pixels[4 * curPixelIndex + 1] = gradientCol.G;
-			Pixels[4 * curPixelIndex + 2] = gradientCol.R;
-			Pixels[4 * curPixelIndex + 3] = gradientCol.A;
+			for (int32 x = 0; x < TextureResolution; x++)
+			{
+				float time = (float)x / 256.f;
+				FColor gradientCol = Gradients[y]->GetLinearColorValue(time).ToFColor(true);
+				int32 curPixelIndex = ((y * TextureResolution) + x);
+				Pixels[4 * curPixelIndex] = gradientCol.B;
+				Pixels[4 * curPixelIndex + 1] = gradientCol.G;
+				Pixels[4 * curPixelIndex + 2] = gradientCol.R;
+				Pixels[4 * curPixelIndex + 3] = gradientCol.A;
+			}
 		}
 	}
 
