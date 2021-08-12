@@ -60,6 +60,23 @@ void AOrbitDebugActor::Tick(float DeltaTime)
 
 }
 
+void AOrbitDebugActor::AddID(uint32 NewID)
+{
+	IDs.AddUnique(NewID);
+}
+
+void AOrbitDebugActor::RemoveID(uint32 IDToRemove)
+{
+	IDs.Add(0);
+	int32 IndexToRemove = -1;
+	IDs.Find(IDToRemove, IndexToRemove);
+	if (IndexToRemove != -1)
+	{
+		IDs.Swap(IndexToRemove, IDs.Num() - 1);
+		IDs.RemoveAt(IDs.Num() - 1, 1, true);
+	}
+}
+
 void AOrbitDebugActor::CreateSplines()
 {
 	// Clear current splines
@@ -102,20 +119,13 @@ void AOrbitDebugActor::DrawOrbits()
 	ClearOrbits();
 	
 	TArray<ACelestialBody*> Bodies;
-#if WITH_EDITORONLY_DATA 
-	TArray<AActor*> CollectedActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedActors);
-	for (auto& body : CollectedActors)
-	{
-		Bodies.Add(Cast<ACelestialBody>(body));
-	}
-#else
 	Bodies = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetBodies();
-#endif
-
-	if (Bodies.Num() != Splines.Num() && DrawType == EDrawType::Spline)
+	if (IDs.Num() == 0)
 	{
-		CreateSplines();
+		for (ACelestialBody* Body : Bodies)
+		{
+			IDs.Add(Body->GetID());
+		}
 	}
 
 	TArray<VirtualBody*> VirtualBodies;
@@ -269,7 +279,9 @@ void AOrbitDebugActor::DrawOrbits()
 			}
 
 			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
-			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[bodyIndex % Colors.Num()]);
+			int32 ColorIndex;
+			IDs.Find(Bodies[bodyIndex]->GetID(), ColorIndex);
+			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[ColorIndex % Colors.Num()]);
 
 			if (Width == 0)
 			{

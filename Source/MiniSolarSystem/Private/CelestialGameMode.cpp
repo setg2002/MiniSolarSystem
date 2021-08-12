@@ -137,9 +137,11 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 
 	const auto &Interface = Cast<ICelestialObject>(NewBody);
 	celestialObjects.Add(Interface);
-
+	
+	AOrbitDebugActor::Get()->AddID(NewBody->GetID());
 	if (currentPerspective == 0)
 			AOrbitDebugActor::Get()->DrawOrbits();
+	
 
 	return NewBody;
 }
@@ -149,6 +151,8 @@ void ACelestialGameMode::RemoveBody(FString Body)
 	ACelestialBody* Body_ = GetBodyByName(Body);
 	if (Body_)
 	{
+		AOrbitDebugActor::Get()->RemoveID(Body_->GetID());
+
 		Body_->Destroy();
 		bodies.Remove(Body_);
 		celestialObjects.Remove(Cast<ICelestialObject>(Body_));
@@ -379,6 +383,12 @@ void ACelestialGameMode::LoadGame()
 				UCurveLinearColor* NewCurve = UColorCurveFunctionLibrary::CreateNewCurve(Asset.Name, Asset.AssetData);
 			}
 
+			// Restore Orbit Visualization Data
+			AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
+			FMemoryReader ODAMemoryReader(LoadedGame->OrbitVisualizationData.ActorData);
+			FCelestialSaveGameArchive ODAAr(ODAMemoryReader);
+			ODA->Serialize(ODAAr);
+
 			gravitationalConstant = LoadedGame->GravConst;
 
 			// Restore Celestial Body Data
@@ -508,12 +518,6 @@ void ACelestialGameMode::LoadGame()
 			OverviewPlayer->Serialize(OrvwAr);
 			OverviewPlayer->GetSpringArm()->TargetArmLength = LoadedGame->OverviewArmLength;
 			OverviewPlayer->GetSpringArm()->SetRelativeRotation(LoadedGame->OverviewCameraRotation);
-
-			// Restore Orbit Visualization Data
-			AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
-			FMemoryReader ODAMemoryReader(LoadedGame->OrbitVisualizationData.ActorData);
-			FCelestialSaveGameArchive ODAAr(ODAMemoryReader);
-			ODA->Serialize(ODAAr);
 
 			// Restore components
 			for (auto& CompData : LoadedGame->CelestialComponentData)
@@ -660,7 +664,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 		// Save Gradients
 		TArray<FAssetData> GradientsData;
-		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/Materials/Gradients", GradientsData, true, false);
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/Materials/Gradients/Runtime", GradientsData, true, false);
 		SaveGameInstance->GradientAssets.SetNum(GradientsData.Num());
 		for (int32 i = 0; i < SaveGameInstance->GradientAssets.Num(); i++)
 		{
@@ -674,7 +678,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 		// Save Settings Assets
 		TArray<FAssetData> AssetsData;
-		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets", AssetsData, true);
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets/Runtime", AssetsData, true);
 		SaveGameInstance->SettingsAssets.SetNum(AssetsData.Num());
 		for (int32 i = 0; i < SaveGameInstance->SettingsAssets.Num(); i++)
 		{

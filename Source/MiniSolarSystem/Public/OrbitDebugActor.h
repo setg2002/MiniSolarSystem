@@ -35,6 +35,14 @@ class MINISOLARSYSTEM_API AOrbitDebugActor : public AActor
 {
 	GENERATED_BODY()
 	
+// All ID tracking is used to keep orbit colors consistent between saves and when bodies are added/removed
+private:
+	UPROPERTY(SaveGame, EditAnywhere)
+	TArray<uint32> IDs;
+public:
+	void AddID(uint32 NewID);
+	void RemoveID(uint32 IDToRemove);
+
 private:
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EDrawType> DrawType;
