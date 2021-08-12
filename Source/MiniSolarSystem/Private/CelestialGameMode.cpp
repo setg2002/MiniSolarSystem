@@ -418,6 +418,8 @@ void ACelestialGameMode::LoadGame()
 				bool bBodyWasDeleted = true;
 				for (ACelestialBody* RestoredBody : RestoredBodies)
 				{
+					if (RestoredBody->GetID() == Body->GetID() && RestoredBody->GetBodyName() != Body->GetBodyName())
+						break;
 					if (RestoredBody->GetID() == Body->GetID())
 					{
 						bBodyWasDeleted = false;
@@ -658,7 +660,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 		// Save Gradients
 		TArray<FAssetData> GradientsData;
-		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/Materials/Gradients/Runtime", GradientsData, true, false);
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/Materials/Gradients", GradientsData, true, false);
 		SaveGameInstance->GradientAssets.SetNum(GradientsData.Num());
 		for (int32 i = 0; i < SaveGameInstance->GradientAssets.Num(); i++)
 		{
@@ -672,7 +674,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 		// Save Settings Assets
 		TArray<FAssetData> AssetsData;
-		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets/Runtime", AssetsData, true);
+		FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets", AssetsData, true);
 		SaveGameInstance->SettingsAssets.SetNum(AssetsData.Num());
 		for (int32 i = 0; i < SaveGameInstance->SettingsAssets.Num(); i++)
 		{

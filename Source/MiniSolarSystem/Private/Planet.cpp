@@ -51,7 +51,7 @@ void APlanet::BeginPlay()
 	CreateSettingsAssets();
 
 	BindDelegates();
-	
+
 	//bGenerating = false;
 	//GeneratePlanet();
 }
@@ -59,43 +59,75 @@ void APlanet::BeginPlay()
 void APlanet::BindDelegates()
 {
 	UnBindDelegates();
-	ShapeSettings->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
-	for (auto& NoiseLayer : ShapeSettings->GetNoiseLayers())
+	if (ShapeSettings)
 	{
-		NoiseLayer->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
-		NoiseLayer->NoiseSettings->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
-	}
+		ShapeSettings->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
+		if (ShapeSettings->IsNoiseLayers())
+		{
+			for (auto& NoiseLayer : ShapeSettings->GetNoiseLayers())
+			{
+				NoiseLayer->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
+				NoiseLayer->NoiseSettings->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
+			}
+		}
 
-	ColorSettings->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
-	ColorSettings->GetBiomeColorSettings()->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
-	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
-	{
-		ColorSettings->GetBiomeColorSettings()->GetNoise()->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
 	}
-	for (auto& Biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
+	if (ColorSettings)
 	{
-		Biome->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
+		ColorSettings->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
+		if (ColorSettings->GetBiomeColorSettings())
+		{
+			ColorSettings->GetBiomeColorSettings()->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
+			if (ColorSettings->GetBiomeColorSettings()->GetNoise())
+			{
+				ColorSettings->GetBiomeColorSettings()->GetNoise()->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
+			}
+			if (ColorSettings->GetBiomeColorSettings()->GetBiomes().Num() > 0)
+			{
+				for (auto& Biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
+				{
+					Biome->OnSettingsAssetChanged.AddUFunction(this, "OnColorSettingsUpdated");
+				}
+			}
+		}
 	}
+	BindSettingsIDs();
 }
 
 void APlanet::UnBindDelegates()
 {
-	ShapeSettings->OnSettingsAssetChanged.RemoveAll(this);
-	for (auto& NoiseLayer : ShapeSettings->GetNoiseLayers())
+	if (ShapeSettings)
 	{
-		NoiseLayer->OnSettingsAssetChanged.RemoveAll(this);
-		NoiseLayer->NoiseSettings->OnSettingsAssetChanged.RemoveAll(this);
+		ShapeSettings->OnSettingsAssetChanged.RemoveAll(this);
+		if (ShapeSettings->IsNoiseLayers())
+		{
+			for (auto& NoiseLayer : ShapeSettings->GetNoiseLayers())
+			{
+				NoiseLayer->OnSettingsAssetChanged.RemoveAll(this);
+				NoiseLayer->NoiseSettings->OnSettingsAssetChanged.RemoveAll(this);
+			}
+		}
+
 	}
 
-	ColorSettings->OnSettingsAssetChanged.RemoveAll(this);
-	ColorSettings->GetBiomeColorSettings()->OnSettingsAssetChanged.RemoveAll(this);
-	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
+	if (ColorSettings)
 	{
-		ColorSettings->GetBiomeColorSettings()->GetNoise()->OnSettingsAssetChanged.RemoveAll(this);
-	}
-	for (auto& Biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
-	{
-		Biome->OnSettingsAssetChanged.RemoveAll(this);
+		ColorSettings->OnSettingsAssetChanged.RemoveAll(this);
+		if (ColorSettings->GetBiomeColorSettings())
+		{
+			ColorSettings->GetBiomeColorSettings()->OnSettingsAssetChanged.RemoveAll(this);
+			if (ColorSettings->GetBiomeColorSettings()->GetNoise())
+			{
+				ColorSettings->GetBiomeColorSettings()->GetNoise()->OnSettingsAssetChanged.RemoveAll(this);
+			}
+			if (ColorSettings->GetBiomeColorSettings()->GetBiomes().Num() > 0)
+			{
+				for (auto& Biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
+				{
+					Biome->OnSettingsAssetChanged.RemoveAll(this);
+				}
+			}
+		}
 	}
 }
 
