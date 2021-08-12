@@ -35,6 +35,10 @@ void UShapeSettings::AddNoiseLayer(UNoiseLayer* NewNoiseLayer)
 
 void UShapeSettings::RemoveNoiseLayer(int32 index)
 {
-	ShapeSettings.NoiseLayers.RemoveAt(index);
-	OnSettingsAssetChanged.Broadcast();
+	if (ShapeSettings.NoiseLayers.IsValidIndex(index))
+	{
+		ShapeSettings.NoiseLayers[index]->RemoveAppliedID(ID);
+		ShapeSettings.NoiseLayers.RemoveAt(index);
+		OnSettingsAssetChanged.Broadcast();
+	}
 }

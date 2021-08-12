@@ -58,6 +58,7 @@ void APlanet::BeginPlay()
 
 void APlanet::BindDelegates()
 {
+	UnBindDelegates();
 	ShapeSettings->OnSettingsAssetChanged.AddUFunction(this, "OnShapeSettingsUpdated");
 	for (auto& NoiseLayer : ShapeSettings->GetNoiseLayers())
 	{
@@ -95,6 +96,33 @@ void APlanet::UnBindDelegates()
 	for (auto& Biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
 	{
 		Biome->OnSettingsAssetChanged.RemoveAll(this);
+	}
+}
+
+void APlanet::BindSettingsIDs()
+{
+	if (ColorSettings)
+		ColorSettings->AddAppliedID(ID);
+	if (ColorSettings->GetBiomeColorSettings())
+		ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
+	if (ColorSettings->GetBiomeColorSettings()->GetNoise())
+	{
+		ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
+		for (UBiome* Biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
+		{
+			Biome->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
+		}
+	}
+
+	if (ShapeSettings)
+	{
+		ShapeSettings->AddAppliedID(ID);
+		for (UNoiseLayer* Layer : ShapeSettings->GetNoiseLayers())
+		{
+			Layer->AddAppliedID(ShapeSettings->GetID());
+			if (Layer->NoiseSettings)
+				Layer->NoiseSettings->AddAppliedID(Layer->GetID());
+		}
 	}
 }
 
@@ -172,7 +200,7 @@ UObject* APlanet::CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
 template< class T >
 T* APlanet::RestoreSettingsAsset(FName Name, TArray<uint8> Data)
 {
-	FString PackageName = TEXT("/Game/DataAssets/Runtime/");
+	FString PackageName = TEXT("/Game/DataAssets/Runtime/" + Name.ToString());
 	UPackage* Package = CreatePackage(*PackageName);
 
 	T* NewAsset = NewObject<T>(Package, Name, EObjectFlags::RF_Public);

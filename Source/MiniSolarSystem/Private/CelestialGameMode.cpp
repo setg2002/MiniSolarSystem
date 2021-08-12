@@ -152,7 +152,9 @@ void ACelestialGameMode::RemoveBody(FString Body)
 		Body_->Destroy();
 		bodies.Remove(Body_);
 		celestialObjects.Remove(Cast<ICelestialObject>(Body_));
-		AOrbitDebugActor::Get()->DrawOrbits();
+
+		if (currentPerspective == 0)
+			AOrbitDebugActor::Get()->DrawOrbits();
 
 		if (Cast<AStar>(Body_))
 		{
@@ -380,6 +382,7 @@ void ACelestialGameMode::LoadGame()
 			gravitationalConstant = LoadedGame->GravConst;
 
 			// Restore Celestial Body Data
+			TArray<ACelestialBody*> RestoredBodies;
 			for (auto& data : LoadedGame->CelestialBodyData)
 			{
 				bool BodyAlreadyExists = false;
@@ -390,6 +393,7 @@ void ACelestialGameMode::LoadGame()
 						FMemoryReader MemoryReader(data.ActorData);
 						FCelestialSaveGameArchive Ar(MemoryReader);
 						bodies[i]->Serialize(Ar);
+						RestoredBodies.Add(bodies[i]);
 						BodyAlreadyExists = true;
 						break;
 					}
@@ -402,35 +406,30 @@ void ACelestialGameMode::LoadGame()
 					FCelestialSaveGameArchive Ar(MemoryReader);
 					NewBody->Serialize(Ar);
 
+					RestoredBodies.Add(NewBody);
 					if (APlanet* planet = Cast<APlanet>(NewBody))
 						planet->ClearSettingsAssets();
 				}
 				UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *data.Name.ToString());
 			}
-			for (auto& CompData : LoadedGame->CelestialComponentData)
+			TArray<ACelestialBody*> BodiesToDelete;
+			for (ACelestialBody* Body : bodies)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Started loading %s"), *CompData.Name.ToString());
-				ACelestialBody* Parent = GetBodyByName(CompData.ParentName.ToString());
-
-				UActorComponent* NewComponent = NewObject<UActorComponent>(Parent, CompData.Class, CompData.Name);
-				FMemoryReader MemoryReader(CompData.ActorData);
-				FCelestialSaveGameArchive Ar(MemoryReader);
-				NewComponent->Serialize(Ar);
-#if WITH_EDITOR
-				NewComponent->CreationMethod = EComponentCreationMethod::Instance;
-#endif
-				Parent->AddCelestialComponent(Cast<UStaticMeshComponent>(NewComponent));
-
-				// This could be an interface call?
-				if (Cast<UAtmosphereComponent>(NewComponent))
+				bool bBodyWasDeleted = true;
+				for (ACelestialBody* RestoredBody : RestoredBodies)
 				{
-					Cast<UAtmosphereComponent>(NewComponent)->UpdateProperties();
+					if (RestoredBody->GetID() == Body->GetID())
+					{
+						bBodyWasDeleted = false;
+						break;
+					}
 				}
-				else if (Cast<URingSystemComponent>(NewComponent))
-				{
-					Cast<URingSystemComponent>(NewComponent)->UpdateProperties();
-				}
-				UE_LOG(LogTemp, Warning, TEXT("Finished loading %s"), *CompData.Name.ToString());
+				if (bBodyWasDeleted)
+					BodiesToDelete.Add(Body);
+			}
+			for (ACelestialBody* Body : BodiesToDelete)
+			{
+				RemoveBody(Body->GetBodyName().ToString());
 			}
 
 			// Load Settings Assets
@@ -488,7 +487,11 @@ void ACelestialGameMode::LoadGame()
 				}
 			}
 			ApplySettingsAssets();
-
+			for (ACelestialBody* Body : bodies) // Make sure the newly created and assigned asset's delegates are bound
+			{
+				if (APlanet* planet = Cast<APlanet>(Body))
+					planet->BindDelegates();
+			}
 
 			// Restore Celestial Player Data
 			CelestialPlayer->SetActorTransform(LoadedGame->CelestialPlayerData.Transform);
@@ -509,6 +512,33 @@ void ACelestialGameMode::LoadGame()
 			FMemoryReader ODAMemoryReader(LoadedGame->OrbitVisualizationData.ActorData);
 			FCelestialSaveGameArchive ODAAr(ODAMemoryReader);
 			ODA->Serialize(ODAAr);
+
+			// Restore components
+			for (auto& CompData : LoadedGame->CelestialComponentData)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Started loading %s"), *CompData.Name.ToString());
+				ACelestialBody* Parent = GetBodyByName(CompData.ParentName.ToString());
+
+				UActorComponent* NewComponent = NewObject<UActorComponent>(Parent, CompData.Class, CompData.Name);
+				FMemoryReader MemoryReader(CompData.ActorData);
+				FCelestialSaveGameArchive Ar(MemoryReader);
+				NewComponent->Serialize(Ar);
+#if WITH_EDITOR
+				NewComponent->CreationMethod = EComponentCreationMethod::Instance;
+#endif
+				Parent->AddCelestialComponent(Cast<UStaticMeshComponent>(NewComponent));
+
+				// This could be an interface call?
+				if (Cast<UAtmosphereComponent>(NewComponent))
+				{
+					Cast<UAtmosphereComponent>(NewComponent)->UpdateProperties();
+				}
+				else if (Cast<URingSystemComponent>(NewComponent))
+				{
+					Cast<URingSystemComponent>(NewComponent)->UpdateProperties();
+				}
+				UE_LOG(LogTemp, Warning, TEXT("Finished loading %s"), *CompData.Name.ToString());
+			}
 
 			TArray<FName> TerrestrialBodyNames;
 			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {

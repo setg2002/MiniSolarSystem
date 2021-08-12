@@ -33,6 +33,7 @@ public:
 	virtual uint32 GetID() const override { return ID; } 
 
 	void AddAppliedID(uint32 NewID);
+	void RemoveAppliedID(uint32 IDToRemove);
 
 public:
 	USettingsAsset();

@@ -14,6 +14,11 @@ void USettingsAsset::AddAppliedID(uint32 NewID)
 	IDs.AddUnique(NewID);
 }
 
+void USettingsAsset::RemoveAppliedID(uint32 IDToRemove)
+{
+	IDs.Remove(IDToRemove);
+}
+
 FName USettingsAsset::GetName()
 {
 	return this->GetFName();

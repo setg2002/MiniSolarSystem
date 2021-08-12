@@ -42,7 +42,7 @@ void URingSystemComponent::CreateMaterial()
 void URingSystemComponent::SetRadius(float NewRadius)
 {
 	Radius = NewRadius;
-	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
+	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius);
 }
 
 void URingSystemComponent::SetWidth(float NewWidth)
@@ -64,11 +64,12 @@ void URingSystemComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CreateMaterial();
+	SetRadius(Radius);
 }
 
 void URingSystemComponent::UpdateProperties()
 {
-	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
+	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius);
 	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"), NULL, LOAD_None, NULL));
 	this->bCastVolumetricTranslucentShadow = false; // Set to true for the ring to cast shadows on the planet with the side-effect that the shading of the ring itself will break
 	CreateMaterial();
@@ -100,7 +101,7 @@ void URingSystemComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, Radius))
 		{
-			this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius * 6);
+			this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius);
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(URingSystemComponent, RingWidth))
 		{

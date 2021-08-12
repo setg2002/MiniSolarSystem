@@ -137,8 +137,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void BindDelegates();
-
+	UFUNCTION(BlueprintCallable)
 	void UnBindDelegates();
+	UFUNCTION(BlueprintCallable)
+	void BindSettingsIDs();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

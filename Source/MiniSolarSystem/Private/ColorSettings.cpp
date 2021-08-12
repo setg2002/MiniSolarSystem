@@ -57,14 +57,22 @@ void UBiomeColorSettings::AddBiome(UBiome* NewBiome)
 
 void UBiomeColorSettings::RemoveBiome(int32 index)
 {
-	BiomeColorSettings.Biomes.RemoveAt(index);
-	OnSettingsAssetChanged.Broadcast();
+	if (BiomeColorSettings.Biomes.IsValidIndex(index))
+	{
+		BiomeColorSettings.Biomes[index]->RemoveAppliedID(ID);
+		BiomeColorSettings.Biomes.RemoveAt(index);
+		OnSettingsAssetChanged.Broadcast();
+	}
 }
 
 void UBiomeColorSettings::RemoveBiomeByRef(UBiome* ref)
 {
-	BiomeColorSettings.Biomes.Remove(ref);
-	OnSettingsAssetChanged.Broadcast();
+	if (BiomeColorSettings.Biomes.Contains(ref))
+	{
+		ref->RemoveAppliedID(ID);
+		BiomeColorSettings.Biomes.Remove(ref);
+		OnSettingsAssetChanged.Broadcast();
+	}
 }
 
 void UBiomeColorSettings::SortBiomesByHeight()
