@@ -22,7 +22,7 @@ public:
 	UPROPERTY(SaveGame, EditAnywhere)
 	float PlanetRadius = 100;
 
-	UPROPERTY(SaveGame, EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	TArray<UNoiseLayer*> NoiseLayers;
 
 };

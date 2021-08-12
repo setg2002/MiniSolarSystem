@@ -3,9 +3,15 @@
 
 #include "SettingsAsset.h"
 
+
 USettingsAsset::USettingsAsset()
 {
+	ID = this->GetUniqueID();
+}
 
+void USettingsAsset::AddAppliedID(uint32 NewID)
+{
+	IDs.AddUnique(NewID);
 }
 
 FName USettingsAsset::GetName()

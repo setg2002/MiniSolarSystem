@@ -78,9 +78,9 @@ public:
 	UPROPERTY(Category = "Settings", EditInstanceOnly)
 	TEnumAsByte<EFaceRenderMask> FaceRenderMask;
 
-	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	UColorSettings* ColorSettings;
-	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	UShapeSettings* ShapeSettings;
 
 	// Desired resolution for each TerrainFace to generate
@@ -96,6 +96,9 @@ public:
 	UObject* CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass);
 	template< class T >
 	static T* RestoreSettingsAsset(FName Name, TArray<uint8> Data);
+
+	// Sets color and shape settings to null for regenerating planets from save i guess
+	void ClearSettingsAssets();
 
 	// Makes new blank data asset for shape and color settings if either are unassigned
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
@@ -134,6 +137,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void BindDelegates();
+
+	void UnBindDelegates();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CelestialObject.h"
+#include "ISettingsAssetID.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
 #include "CelestialBody.generated.h"
@@ -14,10 +15,18 @@ class ACelestialGameMode;
 class UWidgetComponent;
 
 UCLASS(Blueprintable)
-class MINISOLARSYSTEM_API ACelestialBody : public AActor, public ICelestialObject
+class MINISOLARSYSTEM_API ACelestialBody : public AActor, public ICelestialObject, public ISettingsAssetID
 {
 	GENERATED_BODY()
 	
+protected:
+	UPROPERTY(SaveGame)
+	uint32 ID;
+
+public:
+	UFUNCTION()
+	virtual uint32 GetID() const override { return ID; }
+
 protected:
 	UPROPERTY(SaveGame, EditAnywhere)
 	FName BodyName = NAME_None;

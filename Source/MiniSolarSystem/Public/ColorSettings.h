@@ -76,7 +76,7 @@ public:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "bUsingNoise"))
 	float NoiseStrength = 0;
 
-	UPROPERTY(SaveGame, EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	TArray<UBiome*> Biomes = {};
 
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0", ClampMax = "1"))

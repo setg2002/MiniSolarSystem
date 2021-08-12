@@ -32,6 +32,12 @@ class MINISOLARSYSTEM_API ACelestialGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION(Exec, BlueprintCallable)
+	void ApplySettingsAssets();
+private:
+	TArray<class USettingsAsset*> SettingsAssets;
+
 private:
 	static float gravitationalConstant;
 
@@ -98,6 +104,9 @@ public:
 	void ReGen(FString Planet);
 
 	UFUNCTION(Exec, BlueprintCallable)
+	void ReBind(FString Planet);
+
+	UFUNCTION(Exec, BlueprintCallable)
 	void tp(FString toPlanet);
 
 	UFUNCTION(Exec, BlueprintCallable)
@@ -116,6 +125,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* GetBodyByName(FString Name);
+
+	class ISettingsAssetID* GetAssetByID(uint32 ID);
 
 protected:
 	// Called when the game starts

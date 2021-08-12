@@ -21,6 +21,7 @@
 #include "CelestialObject.h"
 #include "CelestialPlayer.h"
 #include "OverviewPlayer.h"
+#include "ColorSettings.h"
 #include "ShapeSettings.h"
 #include "CelestialBody.h"
 #include "NoiseSettings.h"
@@ -278,6 +279,88 @@ ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 	return nullptr;
 }
 
+ISettingsAssetID* ACelestialGameMode::GetAssetByID(uint32 ID)
+{
+	for (auto& body : bodies)
+	{
+		if (body->GetID() == ID)
+			return body;
+	}
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	TArray<FAssetData> AssetData;
+	FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets/Runtime", AssetData, true);
+	TArray<ISettingsAssetID*> AssetIDs;
+	for (FAssetData Asset : AssetData)
+	{
+		AssetIDs.Add(Cast<ISettingsAssetID>(Asset.GetAsset()));
+	}
+	for (ISettingsAssetID* Settings : AssetIDs)
+	{
+		if (Settings->GetID() == ID)
+			return Settings;
+	}
+	return nullptr;
+}
+
+void ACelestialGameMode::ApplySettingsAssets()
+{
+	// This is so dumb
+	for (USettingsAsset* Asset : SettingsAssets)
+	{
+		TArray<uint32> Ids = Asset->GetAppliedIDs();
+		for (uint32 id : Ids)
+		{
+			if (UShapeSettings* ShapeSettings = Cast<UShapeSettings>(Asset))
+			{
+				if (Cast<APlanet>(GetAssetByID(id)))
+				{
+					Cast<APlanet>(GetAssetByID(id))->ShapeSettings = ShapeSettings;
+				}
+			}
+			else if (UColorSettings* ColorSettings = Cast<UColorSettings>(Asset))
+			{
+				if (Cast<APlanet>(GetAssetByID(id)))
+				{
+					Cast<APlanet>(GetAssetByID(id))->ColorSettings = ColorSettings;
+				}
+			}
+			else if (UBiomeColorSettings* BiomeColorSettings = Cast<UBiomeColorSettings>(Asset))
+			{
+				if (Cast<UColorSettings>(GetAssetByID(id)))
+				{
+					Cast<UColorSettings>(GetAssetByID(id))->SetBiomeColorSettings(BiomeColorSettings);
+				}
+			}
+			else if (UBiome* Biome = Cast<UBiome>(Asset))
+			{
+				if (Cast<UBiomeColorSettings>(GetAssetByID(id)))
+				{
+					Cast<UBiomeColorSettings>(GetAssetByID(id))->AddBiome(Biome);
+				}
+			}
+			else if (UNoiseLayer* NoiseLayer = Cast<UNoiseLayer>(Asset))
+			{
+				if (Cast<UShapeSettings>(GetAssetByID(id)))
+				{
+					Cast<UShapeSettings>(GetAssetByID(id))->AddNoiseLayer(NoiseLayer);
+				}
+			}
+			else if (UNoiseSettings* NoiseSettings = Cast<UNoiseSettings>(Asset))
+			{
+				if (Cast<UNoiseLayer>(GetAssetByID(id)))
+				{
+					Cast<UNoiseLayer>(GetAssetByID(id))->NoiseSettings = NoiseSettings;
+				}
+				else if (Cast<UBiomeColorSettings>(GetAssetByID(id)))
+				{
+					Cast<UBiomeColorSettings>(GetAssetByID(id))->SetNoise(NoiseSettings);
+				}
+			}
+		}
+	}
+	SettingsAssets.Empty();
+}
+
 void ACelestialGameMode::LoadGame()
 {
 	FAsyncLoadGameFromSlotDelegate OnLoadComplete;
@@ -292,19 +375,6 @@ void ACelestialGameMode::LoadGame()
 			for (auto& Asset : LoadedGame->GradientAssets)
 			{
 				UCurveLinearColor* NewCurve = UColorCurveFunctionLibrary::CreateNewCurve(Asset.Name, Asset.AssetData);
-			}
-
-			// Load Settings Assets
-			for (auto& Asset : LoadedGame->SettingsAssets)
-			{
-				if (Asset.Class == UNoiseLayer::StaticClass())
-				{
-					UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseLayer>(Asset.Name, Asset.AssetData);
-				}
-				else if (Asset.Class == UNoiseSettings::StaticClass())
-				{
-					UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseSettings>(Asset.Name, Asset.AssetData);
-				}
 			}
 
 			gravitationalConstant = LoadedGame->GravConst;
@@ -331,6 +401,9 @@ void ACelestialGameMode::LoadGame()
 					FMemoryReader MemoryReader(data.ActorData);
 					FCelestialSaveGameArchive Ar(MemoryReader);
 					NewBody->Serialize(Ar);
+
+					if (APlanet* planet = Cast<APlanet>(NewBody))
+						planet->ClearSettingsAssets();
 				}
 				UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *data.Name.ToString());
 			}
@@ -360,6 +433,62 @@ void ACelestialGameMode::LoadGame()
 				UE_LOG(LogTemp, Warning, TEXT("Finished loading %s"), *CompData.Name.ToString());
 			}
 
+			// Load Settings Assets
+			for (auto& Asset : LoadedGame->SettingsAssets)
+			{
+				if (Asset.Class == UColorSettings::StaticClass())
+				{
+					UObject* NewSettings = APlanet::RestoreSettingsAsset<UColorSettings>(Asset.Name, Asset.AssetData);
+					SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
+				}
+			}
+			ApplySettingsAssets();
+			for (auto& Asset : LoadedGame->SettingsAssets)
+			{
+				if (Asset.Class == UBiomeColorSettings::StaticClass())
+				{
+					UObject* NewSettings = APlanet::RestoreSettingsAsset<UBiomeColorSettings>(Asset.Name, Asset.AssetData);
+					SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
+				}
+			}
+			ApplySettingsAssets();
+			for (auto& Asset : LoadedGame->SettingsAssets)
+			{
+				if (Asset.Class == UShapeSettings::StaticClass())
+				{
+					UObject* NewSettings = APlanet::RestoreSettingsAsset<UShapeSettings>(Asset.Name, Asset.AssetData);
+					SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
+				}
+			}
+			ApplySettingsAssets();
+			for (auto& Asset : LoadedGame->SettingsAssets)
+			{
+				if (Asset.Class == UNoiseLayer::StaticClass())
+				{
+					UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseLayer>(Asset.Name, Asset.AssetData);
+					SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
+				}
+			}
+			ApplySettingsAssets();
+			for (auto& Asset : LoadedGame->SettingsAssets)
+			{
+				if (Asset.Class == UNoiseSettings::StaticClass())
+				{
+					UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseSettings>(Asset.Name, Asset.AssetData);
+					SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
+				}
+			}
+			ApplySettingsAssets();
+			for (auto& Asset : LoadedGame->SettingsAssets)
+			{
+				if (Asset.Class == UBiome::StaticClass())
+				{
+					UObject* NewSettings = APlanet::RestoreSettingsAsset<UBiome>(Asset.Name, Asset.AssetData);
+					SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
+				}
+			}
+			ApplySettingsAssets();
+
 
 			// Restore Celestial Player Data
 			CelestialPlayer->SetActorTransform(LoadedGame->CelestialPlayerData.Transform);
@@ -388,7 +517,7 @@ void ACelestialGameMode::LoadGame()
 			}
 			TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
 			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
-		}
+			}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("NOT LOADED"));
@@ -554,6 +683,18 @@ void ACelestialGameMode::ReGen(FString Planet)
 		UE_LOG(LogTemp, Warning, TEXT("ReGen on: %s"), *Planet);
 		Planet_->GeneratePlanet();
 		Planet_->ResetPosition();
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("No body of name %s was found"), *Planet);
+}
+
+void ACelestialGameMode::ReBind(FString Planet)
+{
+	APlanet* Planet_ = Cast<APlanet>(GetBodyByName(Planet));
+	if (Planet_)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ReBind on: %s"), *Planet);
+		Planet_->BindDelegates();
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("No body of name %s was found"), *Planet);
