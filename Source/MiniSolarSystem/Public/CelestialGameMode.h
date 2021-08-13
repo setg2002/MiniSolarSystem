@@ -70,6 +70,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> PauseWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class ANiagaraActor* AsteroidFieldActor;
+
 	/* Sets the player perspective to the one desired
 	* @param perspective 0 is overview, 1 is celestial */
 	void SetPerspective(uint8 perspective);
@@ -118,7 +121,13 @@ public:
 	UFUNCTION(Exec, BlueprintCallable)
 	void PauseGame();
 
+	UFUNCTION(Exec, BlueprintCallable)
+	void SetAsteroidFieldNum(int32 num); // Because you can't get niagara variable vlaues
+
 	// ======= End ConsoleCommands =======
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetAsteroidFieldNum() { return AsteroidFieldNum; }
 
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform);
@@ -165,6 +174,9 @@ private:
 	UMaterialParameterCollectionInstance* PlanetIlluminationInst;
 
 	uint8 NumStars;
+
+	// The spawn count for the asteroid field
+	int32 AsteroidFieldNum;  // Because you can't get niagara variable vlaues
 };
 
 

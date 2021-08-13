@@ -365,7 +365,7 @@ void ACelestialGameMode::ApplySettingsAssets()
 	}
 	SettingsAssets.Empty();
 }
-#pragma optimize("", off)
+
 void ACelestialGameMode::LoadGame()
 {
 	FAsyncLoadGameFromSlotDelegate OnLoadComplete;
@@ -391,6 +391,7 @@ void ACelestialGameMode::LoadGame()
 			ODA->Serialize(ODAAr);
 
 			gravitationalConstant = LoadedGame->GravConst;
+			SetAsteroidFieldNum(LoadedGame->AsteroidFieldNum);
 
 			// Restore Celestial Body Data
 			TArray<ACelestialBody*> RestoredBodies;
@@ -703,7 +704,7 @@ void ACelestialGameMode::LoadGame()
 	});
 	UGameplayStatics::AsyncLoadGameFromSlot("Save", 0, OnLoadComplete);
 }
-#pragma optimize("", on)
+
 // ======= Runtime Console Commands ======================================================
 
 void ACelestialGameMode::DeleteSave()
@@ -724,7 +725,7 @@ void ACelestialGameMode::SaveAndQuitToMenu()
 	OnSaveComplete.BindLambda([this](const FString&, const int32, bool succeeded) { if (succeeded) UGameplayStatics::OpenLevel(GetWorld(), "MainMenu"); });
 	SaveAsync(OnSaveComplete);
 }
-#pragma optimize("", off)
+
 void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 {
 	if (UCelestialSaveGame* SaveGameInstance = Cast<UCelestialSaveGame>(UGameplayStatics::CreateSaveGameObject(UCelestialSaveGame::StaticClass())))
@@ -732,6 +733,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 		// Set data on the savegame object.
 
 		SaveGameInstance->GravConst = gravitationalConstant;
+		SaveGameInstance->AsteroidFieldNum = AsteroidFieldNum;
 
 		// Save Celestial Body Data
 		SaveGameInstance->CelestialBodyData.SetNum(bodies.Num());
@@ -845,7 +847,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 		UGameplayStatics::AsyncSaveGameToSlot(SaveGameInstance, "Save", 0, Out);
 	}
 }
-#pragma optimize("", on)
+
 void ACelestialGameMode::OrbitDebug()
 {
 	if (currentPerspective != 0)
@@ -948,9 +950,17 @@ void ACelestialGameMode::PauseGame()
 	}
 }
 
+void ACelestialGameMode::SetAsteroidFieldNum(int32 num)
+{
+	AsteroidFieldNum = num;
+	bool WasPaused = AsteroidFieldActor->GetNiagaraComponent()->IsPaused();
+	AsteroidFieldActor->GetNiagaraComponent()->SetVariableInt(FName("SpawnCount"), num);
+	AsteroidFieldActor->GetNiagaraComponent()->ReinitializeSystem();
+	AsteroidFieldActor->GetNiagaraComponent()->SetPaused(WasPaused);
+}
+
 
 // ======= End Runtime Console Commands ==================================================
-
 
 
 void GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TArray<FName> PlanetNames, ACelestialGameMode* GM)

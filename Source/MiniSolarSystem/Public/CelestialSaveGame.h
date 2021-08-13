@@ -121,6 +121,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	float GravConst;
 
+	UPROPERTY(VisibleAnywhere)
+	int32 AsteroidFieldNum;
+
 
 	// Asset Saving \\
 
