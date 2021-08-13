@@ -25,6 +25,11 @@ protected:
 	UPROPERTY(SaveGame)
 	uint32 ID;
 
+	// Need this because GetAssetsByPath stores the asset name in FAssetData with the class name not the 
+	// actual asset name for some reason
+	UPROPERTY(SaveGame)
+	FString LocalName = FString("");
+
 public:
 	UFUNCTION()
 	virtual TArray<uint32> GetAppliedIDs() const override { return IDs; } 
@@ -32,8 +37,8 @@ public:
 	UFUNCTION()
 	virtual uint32 GetID() const override { return ID; } 
 
-	void AddAppliedID(uint32 NewID);
-	void RemoveAppliedID(uint32 IDToRemove);
+	virtual void AddAppliedID(uint32 NewID);
+	virtual void RemoveAppliedID(uint32 IDToRemove);
 
 public:
 	USettingsAsset();

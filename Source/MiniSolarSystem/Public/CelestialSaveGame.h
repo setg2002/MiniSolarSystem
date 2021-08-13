@@ -33,6 +33,20 @@ struct FAssetRecord
 };
 
 USTRUCT()
+struct FDiscAssetRecord : public FAssetRecord
+{
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FName ObjectPath;
+
+	FDiscAssetRecord()
+	{
+		ObjectPath = NAME_None;
+	}
+};
+
+USTRUCT()
 struct FActorRecord
 {
 	GENERATED_BODY()
@@ -115,4 +129,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FAssetRecord> SettingsAssets;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<FDiscAssetRecord> OnDiscSettingsAssets;
 };

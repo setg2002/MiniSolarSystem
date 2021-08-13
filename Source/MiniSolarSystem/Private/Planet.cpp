@@ -488,34 +488,35 @@ void APlanet::CreateSettingsAssets()
 
 void APlanet::GeneratePlanet()
 {
-	if (bGenerating == false)
+	if (bGenerating == false && ShapeSettings && ColorSettings)
 	{
-		bGenerating = true;
 		UE_LOG(LogTemp, Warning, TEXT("%s started generating"), *BodyName.ToString());
-		if (ColorSettings)
+		Collider->SetSphereRadius(ShapeSettings->GetRadius() + 10);
+
+		if (ShapeSettings->IsNoiseLayers())
 		{
-			Collider->SetSphereRadius(ShapeSettings->GetRadius() + 10);
-
-			if (ShapeSettings != nullptr && ShapeSettings->IsNoiseLayers())
+			bGenerating = true;
+			if (bMultithreadGeneration)
 			{
-				if (bMultithreadGeneration)
-				{
-					Initialize();
-					GenerateMesh();
-				}
-				else
-				{
-					Initialize();
-					GenerateMesh();
-					GenerateColors();
-				}
-
+				Initialize();
+				GenerateMesh();
 			}
+			else
+			{
+				Initialize();
+				GenerateMesh();
+				GenerateColors();
+			}
+
 		}
 		if (!bMultithreadGeneration)
 		{
 			//AssetCleaner::CleanAll();
 		}
+	}
+	else
+	{
+		OnPlanetGenerated.ExecuteIfBound(GetBodyName());
 	}
 }
 
@@ -557,6 +558,7 @@ void APlanet::ReGenerateTangents()
 
 void APlanet::Initialize()
 {
+	BindSettingsIDs();
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
 
@@ -596,7 +598,7 @@ void APlanet::GenerateMesh()
 
 void APlanet::OnShapeSettingsUpdated()
 {
-	if (bAutoGenerate)
+	if (bAutoGenerate && ShapeSettings && ColorSettings && gameMode->GetCurrentPerspective() != 128)
 	{
 		Initialize();
 		GenerateMesh();
@@ -605,7 +607,7 @@ void APlanet::OnShapeSettingsUpdated()
 
 void APlanet::OnColorSettingsUpdated()
 {
-	if (bAutoGenerate)
+	if (bAutoGenerate && TerrainFaces[0] != NULL && gameMode->GetCurrentPerspective() != 128)
 	{
 		colorGenerator->UpdateSettings(ColorSettings);
 		for (int i = 0; i < 6; i++)
