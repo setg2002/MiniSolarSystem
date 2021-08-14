@@ -9,10 +9,8 @@
 #include "NiagaraSystem.h"
 #include "ShapeSettings.h"
 #include "NiagaraComponent.h"
-#include "DrawDebugHelpers.h"
 #include "CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Components/SplineComponent.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -77,43 +75,6 @@ void AOrbitDebugActor::RemoveID(uint32 IDToRemove)
 	}
 }
 
-void AOrbitDebugActor::CreateSplines()
-{
-	// Clear current splines
-	for (int i = 0; i < Splines.Num(); i++)
-	{
-		if (Splines[i])
-		{
-			Splines[i]->DestroyComponent();
-		}
-	}
-
-	Splines.Empty();
-
-	TArray<ACelestialBody*> Bodies;
-	TArray<AActor*> CollectedActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedActors);
-
-	for (auto& body : CollectedActors)
-	{
-		Bodies.Add(Cast<ACelestialBody>(body));
-	}
-
-	Splines.SetNum(Bodies.Num());
-
-	for (int i = 0; i < Bodies.Num(); i++)
-	{
-		FString Name = "Spline_";
-		Name.Append(FString::FromInt(i));
-		USplineComponent* NewSpline = NewObject<USplineComponent>(this, FName(Name));
-
-		Splines[i] = NewSpline;
-		NewSpline->RegisterComponent();
-		//NewSpline->OnComponentCreated();  // Crashes the editor
-		NewSpline->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
-	}
-}
-
 void AOrbitDebugActor::DrawOrbits()
 {
 	ClearOrbits();
@@ -134,14 +95,11 @@ void AOrbitDebugActor::DrawOrbits()
 	TArray<TArray<FVector>> DrawPoints;
 	DrawPoints.SetNum(VirtualBodies.Num());
 
-	if (DrawType == EDrawType::Ribbon)
+	ParticleComponents.Empty();
+	ParticleComponents.SetNum(VirtualBodies.Num());
+	for (int i = 0; i < VirtualBodies.Num(); i++)
 	{
-		ParticleComponents.Empty();
-		ParticleComponents.SetNum(VirtualBodies.Num());
-		for (int i = 0; i < VirtualBodies.Num(); i++)
-		{
-			ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, this->GetActorLocation());
-		}
+		ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, this->GetActorLocation());
 	}
 
 	// If the central body got deleted we don't want the debug to be relative
@@ -211,103 +169,39 @@ void AOrbitDebugActor::DrawOrbits()
 	// Draw paths
 	for (int bodyIndex = 0; bodyIndex < VirtualBodies.Num(); bodyIndex++)
 	{	
-		switch (DrawType)
+		RenderedSteps = FMath::Clamp<int32>(0.0005f * NumSteps * NumSteps, 0, 5000);
+		TArray<FVector> NewPoints;
+		int factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps; // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
+		for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); j++)
 		{
-		case DebugLine:
+			NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
+		}
+
+		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
+		int32 ColorIndex;
+		IDs.Find(Bodies[bodyIndex]->GetID(), ColorIndex);
+		ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[ColorIndex % Colors.Num()]);
+
+		if (Width == 0)
 		{
-			int factor = NumSteps / (RenderedSteps * 10) < 1 ? 1 : NumSteps / (RenderedSteps * 10); // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
-			for (int i = 0; i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, (RenderedSteps * 10) - 1); i++)
+			if (APlanet* Planet = Cast<APlanet>(Bodies[bodyIndex]))
 			{
-				APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
-				if (Width == 0 && planet != nullptr)
-				{
-					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, planet->ShapeSettings->GetRadius() * 2);
-				}
-				else if (Width == 0 && Cast<AGasGiant>(Bodies[bodyIndex]))
-				{
-					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Cast<AGasGiant>(Bodies[bodyIndex])->GetRadius() * 200);
-				}
-				else
-				{
-					DrawDebugLine(GetWorld(), DrawPoints[bodyIndex][i * factor], DrawPoints[bodyIndex][(i + 1) * factor], Colors[bodyIndex], true, 0.f, 0, Width);
-				}
+				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Planet->ShapeSettings->GetRadius() * 2);
 			}
-			break;
+			else if (AGasGiant* GasGiant = Cast<AGasGiant>(Bodies[bodyIndex]))
+			{
+				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), GasGiant->GetRadius() * 200);
+			}
+			else if (AStar * Star = Cast<AStar>(Bodies[bodyIndex]))
+			{
+				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Star->starProperties.radius * 100);
+			}
 		}
-		case Spline:
+		else
 		{
-			int factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps;
-			// Add more points to the end of the spline until we reach NumSteps
-			if (Splines[bodyIndex]->GetNumberOfSplinePoints() < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1))
-			{
-				for (int i = Splines[bodyIndex]->GetNumberOfSplinePoints(); i < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); i++)
-				{
-					Splines[bodyIndex]->AddPoint(FSplinePoint(i, DrawPoints[bodyIndex][i * factor]), false);
-				}
-			}
-			// Remove points from the end of the spline until we reach NumSteps
-			else
-			{
-				while (Splines[bodyIndex]->GetNumberOfSplinePoints() > NumSteps)
-				{
-					Splines[bodyIndex]->RemoveSplinePoint(Splines[bodyIndex]->GetNumberOfSplinePoints() - 1, false);
-				}
-			}
-
-			Splines[bodyIndex]->SetDrawDebug(true);
-
-#if WITH_EDITOR
-			Splines[bodyIndex]->EditorUnselectedSplineSegmentColor = Colors[bodyIndex];
-			Splines[bodyIndex]->bShouldVisualizeScale = true;
-			APlanet* planet = Cast<APlanet>(Bodies[bodyIndex]);
-			if (planet != nullptr)
-			{
-				Splines[bodyIndex]->ScaleVisualizationWidth = planet->ShapeSettings->GetRadius();
-			}
-#endif
-			Splines[bodyIndex]->UpdateSpline();
-			break;
+			ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
 		}
-		case Ribbon:
-		{
-			RenderedSteps = FMath::Clamp<int32>(0.0005f * NumSteps * NumSteps, 0, 5000);
-			TArray<FVector> NewPoints;
-			int factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps; // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
-			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); j++)
-			{
-				NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
-			}
-
-			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
-			int32 ColorIndex;
-			IDs.Find(Bodies[bodyIndex]->GetID(), ColorIndex);
-			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[ColorIndex % Colors.Num()]);
-
-			if (Width == 0)
-			{
-				if (APlanet* Planet = Cast<APlanet>(Bodies[bodyIndex]))
-				{
-					ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Planet->ShapeSettings->GetRadius() * 2);
-				}
-				else if (AGasGiant* GasGiant = Cast<AGasGiant>(Bodies[bodyIndex]))
-				{
-					ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), GasGiant->GetRadius() * 200);
-				}
-				else if (AStar * Star = Cast<AStar>(Bodies[bodyIndex]))
-				{
-					ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Star->starProperties.radius * 100);
-				}
-			}
-			else
-			{
-				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
-			}
-			break;
-		}
-		default:
-			break;
-		}
-	}
+}
 }
 
 void AOrbitDebugActor::ClearOrbits()
@@ -320,17 +214,6 @@ void AOrbitDebugActor::ClearOrbits()
 		}
 	}
 	ParticleComponents.Empty();
-
-	TArray<AActor*> CollectedActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACelestialBody::StaticClass(), CollectedActors);
-	for (int bodyIndex = 0; bodyIndex < CollectedActors.Num(); bodyIndex++)
-	{
-		if (Splines.IsValidIndex(bodyIndex))
-		{
-			Splines[bodyIndex]->ClearSplinePoints();
-		}
-	}
-	FlushPersistentDebugLines(GetWorld());
 }
 
 FVector AOrbitDebugActor::CalculateAcceleration(int i, TArray<VirtualBody*> VirtualBodies) {
@@ -354,13 +237,6 @@ VirtualBody::VirtualBody(ACelestialBody* Body)
 	Position = Body->GetActorLocation();
 	Velocity = Body->GetCurrentVelocity();
 	Mass = Body->GetMass();
-}
-
-
-void AOrbitDebugActor::SetDrawType(TEnumAsByte<EDrawType> NewDrawType)
-{
-	DrawType = NewDrawType;
-	DrawOrbits();
 }
 
 void AOrbitDebugActor::SetNumSteps(int32 NewNumSteps)
@@ -410,7 +286,7 @@ void AOrbitDebugActor::PostEditChangeProperty(FPropertyChangedEvent & PropertyCh
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
 		//TODO Is there a shorter way to rewrite this line?
-		if ((PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, DrawType) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, NumSteps) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, TimeStep) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, bRelativeToBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, CentralBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, Width)) && bAutoDraw)
+		if ((PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, NumSteps) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, TimeStep) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, bRelativeToBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, CentralBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, Width)) && bAutoDraw)
 		{
 			DrawOrbits();
 		}

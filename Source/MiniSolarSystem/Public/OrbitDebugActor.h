@@ -12,14 +12,6 @@ class USplineComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
 
-UENUM(BlueprintType)
-enum EDrawType
-{
-	DebugLine,
-	Spline,
-	Ribbon
-};
-
 class VirtualBody
 {
 public:
@@ -44,9 +36,6 @@ public:
 	void RemoveID(uint32 IDToRemove);
 
 private:
-	UPROPERTY(EditAnywhere)
-	TEnumAsByte<EDrawType> DrawType;
-
 	UPROPERTY(SaveGame, EditAnywhere)
 	int32 NumSteps = 1000;
 
@@ -69,11 +58,6 @@ private:
 public:	
 	UFUNCTION(BlueprintCallable)
 	static AOrbitDebugActor* Get();
-
-	UFUNCTION(BlueprintCallable)
-	TEnumAsByte<EDrawType> GetDrawType() const { return DrawType; }
-	UFUNCTION(BlueprintCallable)
-	void SetDrawType(TEnumAsByte<EDrawType> NewDrawType);
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetNumSteps() const { return NumSteps; }
