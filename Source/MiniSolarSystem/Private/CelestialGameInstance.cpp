@@ -20,3 +20,5 @@ void UCelestialGameInstance::StopLoadingScreen()
 	ILoadingScreenModule& LoadingScreenModule = ILoadingScreenModule::Get();
 	LoadingScreenModule.StopInGameLoadingScreen();
 }
+
+void UCelestialGameInstance::SetVolume_Implementation(float NewVolume) { ; } // This has to be here otherwise it won't compile
