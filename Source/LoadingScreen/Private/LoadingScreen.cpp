@@ -40,7 +40,7 @@ public:
 	void Construct(const FArguments& InArgs)
 	{
 		// Load version of the logo with text baked in, path is hardcoded because this loads very early in startup
-		static const FName LoadingScreenName(TEXT("/Game/UI/Textures/T_GameIconBW.T_GameIconBW"));
+		static const FName LoadingScreenName(TEXT("/Game/UI/Textures/T_GameIcon.T_GameIcon"));
 
 		LoadingScreenBrush = MakeShareable(new FLoadingScreenBrush(LoadingScreenName, FVector2D(256, 256)));
 		
@@ -105,15 +105,31 @@ public:
 						.Font(OTF_FONT("octarine_light", 16))
 						.Text(FText::FromString("Tip: " + GetText().ToString()))
 					]
-				
-					// Throbber
-					+ SHorizontalBox::Slot()
-					.HAlign(HAlign_Right)
-					.VAlign(VAlign_Bottom)
+
+				// Loading Stage Text & Throbber
+				+ SHorizontalBox::Slot()
 					.Padding(4, 4)
 					[
-						SNew(SThrobber)
-						//.Visibility(this, &SLoadingScreen::GetLoadIndicatorVisibility)
+						SNew(SHorizontalBox)
+
+						+ SHorizontalBox::Slot()
+						.VAlign(VAlign_Bottom)
+						.HAlign(HAlign_Right)
+						[
+							SNew(STextBlock)
+							.Justification(ETextJustify::Right)
+							.ColorAndOpacity(FLinearColor::White)
+							.Font(OTF_FONT("octarine_light", 14))
+							.Text(GetLoadStage())
+						]
+
+						+ SHorizontalBox::Slot()
+						.AutoWidth()
+						.VAlign(VAlign_Bottom)
+						.HAlign(HAlign_Right)
+						[
+							SNew(SThrobber)
+						]
 					]
 				]
 			]
@@ -121,11 +137,9 @@ public:
 	}
 
 private:
-	/** Rather to show the ... indicator */
-	EVisibility GetLoadIndicatorVisibility() const
+	FText GetLoadStage() const
 	{
-		bool Vis =  GetMoviePlayer()->IsLoadingFinished();
-		return GetMoviePlayer()->IsLoadingFinished() ? EVisibility::Collapsed : EVisibility::Visible;
+		return GetMoviePlayer()->IsLoadingFinished() ? FText::FromString("Generating Planets") : FText::FromString("Loading Level");
 	}
 
 	FText GetText()
@@ -155,7 +169,7 @@ public:
 	virtual void StartupModule() override
 	{
 		// Force load for cooker reference
-		LoadObject<UObject>(nullptr, TEXT("/Game/UI/Textures/T_GameIconBW.T_GameIconBW") );
+		LoadObject<UObject>(nullptr, TEXT("/Game/UI/Textures/T_GameIcon.T_GameIcon") );
 
 		if (IsMoviePlayerEnabled())
 		{

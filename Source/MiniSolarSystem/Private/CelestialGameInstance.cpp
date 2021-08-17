@@ -4,6 +4,12 @@
 #include "CelestialGameInstance.h"
 #include "LoadingScreen.h"
 
+void UCelestialGameInstance::Init()
+{
+	LoadConfig();
+	SetVolume(Volume);
+}
+
 float UCelestialGameInstance::GetCurrentMaxFPS()
 {
 	return GEngine->GetMaxFPS();
@@ -21,4 +27,8 @@ void UCelestialGameInstance::StopLoadingScreen()
 	LoadingScreenModule.StopInGameLoadingScreen();
 }
 
-void UCelestialGameInstance::SetVolume_Implementation(float NewVolume) { ; } // This has to be here otherwise it won't compile
+void UCelestialGameInstance::SetVolume_Implementation(float NewVolume) 
+{ 
+	Volume = NewVolume; 
+	SaveConfig(); 
+}

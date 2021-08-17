@@ -9,10 +9,13 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Config = Game)
 class MINISOLARSYSTEM_API UCelestialGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
+
+public:
+	virtual void Init() override;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -31,6 +34,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetVolume() const { return Volume; }
 protected:
-	UPROPERTY(BlueprintReadWrite)
-	float Volume = 1;
+	UPROPERTY(Config, BlueprintReadWrite)
+	float Volume = 1.f;
 };
