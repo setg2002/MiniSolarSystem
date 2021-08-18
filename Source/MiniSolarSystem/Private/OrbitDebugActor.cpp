@@ -89,17 +89,21 @@ void AOrbitDebugActor::DrawOrbits()
 		}
 	}
 
+	BodyToParticleComp.Empty();
+
 	TArray<VirtualBody*> VirtualBodies;
 	VirtualBodies.SetNum(Bodies.Num());
 
+	SavedPoints.Empty();
 	TArray<TArray<FVector>> DrawPoints;
 	DrawPoints.SetNum(VirtualBodies.Num());
+	SavedPoints.SetNum(VirtualBodies.Num());
 
 	ParticleComponents.Empty();
 	ParticleComponents.SetNum(VirtualBodies.Num());
 	for (int i = 0; i < VirtualBodies.Num(); i++)
 	{
-		ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, this->GetActorLocation());
+		ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, FVector::ZeroVector);
 	}
 
 	// If the central body got deleted we don't want the debug to be relative
@@ -169,13 +173,16 @@ void AOrbitDebugActor::DrawOrbits()
 	// Draw paths
 	for (int bodyIndex = 0; bodyIndex < VirtualBodies.Num(); bodyIndex++)
 	{	
-		RenderedSteps = FMath::Clamp<int32>(0.0005f * NumSteps * NumSteps, 0, 5000);
+		RenderedSteps = FMath::Clamp<int64>(0.0005f * NumSteps * NumSteps, 0, 5000);
 		TArray<FVector> NewPoints;
-		int factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps; // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
+		int32 factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps; // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
 		for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); j++)
 		{
 			NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
 		}
+
+		BodyToParticleComp.Add(Bodies[bodyIndex], ParticleComponents[bodyIndex]);
+		SavedPoints.EmplaceAt(bodyIndex, NewPoints);
 
 		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
 		int32 ColorIndex;
@@ -185,23 +192,15 @@ void AOrbitDebugActor::DrawOrbits()
 		if (Width == 0)
 		{
 			if (APlanet* Planet = Cast<APlanet>(Bodies[bodyIndex]))
-			{
 				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Planet->ShapeSettings->GetRadius() * 2);
-			}
 			else if (AGasGiant* GasGiant = Cast<AGasGiant>(Bodies[bodyIndex]))
-			{
 				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), GasGiant->GetRadius() * 200);
-			}
 			else if (AStar * Star = Cast<AStar>(Bodies[bodyIndex]))
-			{
 				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Star->starProperties.radius * 100);
-			}
 		}
 		else
-		{
 			ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
-		}
-}
+	}
 }
 
 void AOrbitDebugActor::ClearOrbits()
@@ -214,6 +213,29 @@ void AOrbitDebugActor::ClearOrbits()
 		}
 	}
 	ParticleComponents.Empty();
+}
+
+void AOrbitDebugActor::UpdateWidthSpecificBody(ACelestialBody* Body)
+{
+	UNiagaraComponent* ParticleComponent = *BodyToParticleComp.Find(Body);
+	if (APlanet* Planet = Cast<APlanet>(Body))
+	{
+		ParticleComponent->ReinitializeSystem();
+		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
+		ParticleComponent->SetFloatParameter(FName("User.Width"), Planet->ShapeSettings->GetRadius() * 2);
+	}
+	else if (AGasGiant* GasGiant = Cast<AGasGiant>(Body))
+	{
+		ParticleComponent->ReinitializeSystem();
+		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
+		ParticleComponent->SetFloatParameter(FName("User.Width"), GasGiant->GetRadius() * 200);
+	}
+	else if (AStar* Star = Cast<AStar>(Body))
+	{
+		ParticleComponent->ReinitializeSystem();
+		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
+		ParticleComponent->SetFloatParameter(FName("User.Width"), Star->starProperties.radius * 100);
+	}
 }
 
 FVector AOrbitDebugActor::CalculateAcceleration(int i, TArray<VirtualBody*> VirtualBodies) {
@@ -267,6 +289,15 @@ void AOrbitDebugActor::SetRelativeToBody(bool NewRelativeToBody)
 {
 	bRelativeToBody = NewRelativeToBody;
 	DrawOrbits();
+}
+
+void AOrbitDebugActor::SetPhysicsTimeStep(bool NewPhysicsTimeStep)
+{
+	bPhysicsTimeStep = NewPhysicsTimeStep;
+	if (bPhysicsTimeStep)
+		SetTimeStep(0.0833f);
+	else
+		DrawOrbits();
 }
 
 void AOrbitDebugActor::SetRelativeBody(ACelestialBody* NewRelativeBody)

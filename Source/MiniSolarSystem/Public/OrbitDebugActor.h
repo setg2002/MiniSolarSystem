@@ -31,6 +31,10 @@ class MINISOLARSYSTEM_API AOrbitDebugActor : public AActor
 private:
 	UPROPERTY(SaveGame, EditAnywhere)
 	TArray<uint32> IDs;
+
+	TMap<ACelestialBody*, UNiagaraComponent*> BodyToParticleComp;
+	TArray<TArray<FVector>> SavedPoints; // For UpdateWidthSpecificBody
+
 public:
 	void AddID(uint32 NewID);
 	void RemoveID(uint32 IDToRemove);
@@ -46,13 +50,15 @@ private:
 	bool bRelativeToBody;
 
 	UPROPERTY(SaveGame, EditAnywhere)
+	bool bPhysicsTimeStep;
+
+	UPROPERTY(SaveGame, EditAnywhere)
 	ACelestialBody* CentralBody;
 
 	// The width of the debug. If it is 0 (zero) then the planet's radius will be used
 	UPROPERTY(SaveGame, EditAnywhere)
 	float Width = 25;
 
-	UPROPERTY(SaveGame, EditAnywhere)
 	int32 RenderedSteps = 100;
 
 public:	
@@ -85,6 +91,11 @@ public:
 	void SetRelativeToBody(bool NewRelativeToBody);
 
 	UFUNCTION(BlueprintCallable)
+	bool GetPhysicsTimeStep() const { return bPhysicsTimeStep; }
+	UFUNCTION(BlueprintCallable)
+	void SetPhysicsTimeStep(bool NewPhysicsTimeStep);
+
+	UFUNCTION(BlueprintCallable)
 	ACelestialBody* GetRelativeBody() const { return CentralBody; }
 	UFUNCTION(BlueprintCallable)
 	void SetRelativeBody(ACelestialBody* NewRelativeBody);
@@ -103,6 +114,9 @@ public:
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void ClearOrbits();
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateWidthSpecificBody(ACelestialBody* Body);
+
 	virtual void OnConstruction(const FTransform & Transform) override;
 
 #if WITH_EDITOR
@@ -116,8 +130,6 @@ protected:
 	UNiagaraSystem* ParticleTemplate;
 
 	TArray<UNiagaraComponent*> ParticleComponents;
-
-	void CreateSplines();
 
 
 public:	

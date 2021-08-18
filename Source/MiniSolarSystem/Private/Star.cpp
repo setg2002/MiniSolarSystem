@@ -119,7 +119,7 @@ void AStar::SetRadius(int NewRadius)
 	ParticleComponent->SetPaused(WasPaused);
 
 	if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetCurrentPerspective() == 0)
-		AOrbitDebugActor::Get()->DrawOrbits();
+		AOrbitDebugActor::Get()->UpdateWidthSpecificBody(this);
 }
 
 void AStar::SetLuminosity(int NewLuminosity)

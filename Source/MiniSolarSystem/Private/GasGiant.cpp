@@ -33,7 +33,7 @@ void AGasGiant::SetRadius(int NewRadius)
 	this->SetActorScale3D(FVector(Radius));
 
 	if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetCurrentPerspective() == 0)
-		AOrbitDebugActor::Get()->DrawOrbits();
+		AOrbitDebugActor::Get()->UpdateWidthSpecificBody(this);
 }
 
 #if WITH_EDITOR
