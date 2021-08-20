@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SettingsAsset.h"
 #include "GasGiantColorSettings.generated.h"
 
 /**
@@ -11,7 +10,7 @@
  */
 
 USTRUCT(BlueprintType)
-struct FGasGiantColorSettings_
+struct FGasGiantColorSettings
 {
 	GENERATED_BODY()
 
@@ -24,64 +23,4 @@ public:
 
 	UPROPERTY(SaveGame, EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
 	float StormFalloff = 2.5f;
-};
-
-UCLASS()
-class MINISOLARSYSTEM_API UGasGiantColorSettings : public USettingsAsset
-{
-	GENERATED_BODY()
-	
-private:
-	UPROPERTY(SaveGame, EditAnywhere)
-	FGasGiantColorSettings_ ColorSettings;
-
-public:
-	UGasGiantColorSettings();
-
-	FGasGiantColorSettings_ GetStruct() const { return ColorSettings; }
-	bool SetStruct(FGasGiantColorSettings_ NewStruct)
-	{
-		ColorSettings = NewStruct;
-		return true;
-	}
-
-	void SetMesh(UStaticMeshComponent* mesh) { Mesh = mesh; }
-
-	UMaterialInterface* BasePlanetMat;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UMaterialInstanceDynamic* DynamicMaterial;
-
-	UFUNCTION(BlueprintCallable, CallInEditor)
-	void GenerateMaterial();
-
-	UFUNCTION(BlueprintCallable, CallInEditor)
-	void NewVoronoiForStorms();
-
-	UFUNCTION(BlueprintCallable)
-	UCurveLinearColor* GetGradient() const { return ColorSettings.Gradient; }
-	UFUNCTION(BlueprintCallable)
-	void SetGradient(UCurveLinearColor* NewGradient);
-
-	// Voronoi Settings \\
-
-	UFUNCTION(BlueprintCallable)
-	int GetNumStorms() const { return ColorSettings.NumStorms; }
-	UFUNCTION(BlueprintCallable)
-	void SetNumStorms(int NewNumStorms);
-	
-	UFUNCTION(BlueprintCallable)
-	float GetStormFalloff() const { return ColorSettings.StormFalloff; }
-	UFUNCTION(BlueprintCallable)
-	void SetStormFalloff(float NewStormFalloff);
-
-	const int LowBound = 100;
-	const int HighBound = 924;
-
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
-
-private:
-	UStaticMeshComponent* Mesh;
 };

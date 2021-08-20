@@ -229,7 +229,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGasGiant::StaticClass(), GasGiants);
 		for (AActor* GasGiant : GasGiants)
 		{
-			(Cast<AGasGiant>(GasGiant))->ColorSettings->DynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
+			(Cast<AGasGiant>(GasGiant))->DynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
 		}
 
 		OnPerspectiveChanged.Broadcast(perspective);
@@ -264,7 +264,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGasGiant::StaticClass(), GasGiants);
 		for (AActor* GasGiant : GasGiants)
 		{
-			(Cast<AGasGiant>(GasGiant))->ColorSettings->DynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
+			(Cast<AGasGiant>(GasGiant))->DynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
 		}
 
 		OnPerspectiveChanged.Broadcast(perspective);
@@ -407,6 +407,10 @@ void ACelestialGameMode::LoadGame()
 						bodies[i]->Serialize(Ar);
 						bodies[i]->SetActorTransform(data.Transform);
 						RestoredBodies.Add(bodies[i]);
+
+						if (AGasGiant* GasGiant = Cast<AGasGiant>(bodies[i]))
+							GasGiant->ReInit();
+
 						BodyAlreadyExists = true;
 						break;
 					}
@@ -422,6 +426,8 @@ void ACelestialGameMode::LoadGame()
 					RestoredBodies.Add(NewBody);
 					if (APlanet* planet = Cast<APlanet>(NewBody))
 						planet->ClearSettingsAssets();
+					else if (AGasGiant* GasGiant = Cast<AGasGiant>(NewBody))
+						GasGiant->ReInit();
 				}
 				UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *data.Name.ToString());
 			}

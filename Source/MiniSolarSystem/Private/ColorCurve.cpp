@@ -199,7 +199,7 @@ void UColorCurve::UpdateGradient()
 	case(GasGiant):
 		if (Cast<AGasGiant>(ObjectToUpdate))
 		{
-			Cast<AGasGiant>(ObjectToUpdate)->ColorSettings->SetGradient(Gradient);
+			Cast<AGasGiant>(ObjectToUpdate)->SetGradient(Gradient);
 		}
 		break;
 	case(RingSystem):

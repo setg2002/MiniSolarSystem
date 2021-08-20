@@ -7,7 +7,6 @@
 void UCelestialGameInstance::Init()
 {
 	LoadConfig();
-	SetVolume(Volume);
 }
 
 float UCelestialGameInstance::GetCurrentMaxFPS()

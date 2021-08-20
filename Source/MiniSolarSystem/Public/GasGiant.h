@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CelestialBody.h"
+#include "GasGiantColorSettings.h"
 #include "GasGiant.generated.h"
 
 /**
@@ -11,7 +12,6 @@
  */
 
 // Forward Declarations
-class UGasGiantColorSettings;
 class GaseousColorGenerator;
 
 
@@ -23,11 +23,14 @@ class MINISOLARSYSTEM_API AGasGiant : public ACelestialBody
 public:
 	AGasGiant();
 
+	// Used to reinitialize the gas giant after loading
+	void ReInit();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
-	UGasGiantColorSettings* ColorSettings;
+	FGasGiantColorSettings ColorSettings;
 
 	UFUNCTION(BlueprintCallable)
 	void SetRadius(float NewRadius);
@@ -45,4 +48,36 @@ private:
 	float Radius = 1;
 
 	virtual void BeginPlay() override;
+
+public:
+	UMaterialInterface* BasePlanetMat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UMaterialInstanceDynamic* DynamicMaterial;
+
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void GenerateMaterial();
+
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void NewVoronoiForStorms();
+
+	UFUNCTION(BlueprintCallable)
+	UCurveLinearColor* GetGradient() const { return ColorSettings.Gradient; }
+	UFUNCTION(BlueprintCallable)
+	void SetGradient(UCurveLinearColor* NewGradient);
+
+	// Voronoi Settings \\
+
+	UFUNCTION(BlueprintCallable)
+	int GetNumStorms() const { return ColorSettings.NumStorms; }
+	UFUNCTION(BlueprintCallable)
+	void SetNumStorms(int NewNumStorms);
+	
+	UFUNCTION(BlueprintCallable)
+	float GetStormFalloff() const { return ColorSettings.StormFalloff; }
+	UFUNCTION(BlueprintCallable)
+	void SetStormFalloff(float NewStormFalloff);
+
+	const int LowBound = 100;
+	const int HighBound = 924;
 };
