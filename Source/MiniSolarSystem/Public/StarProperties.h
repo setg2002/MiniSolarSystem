@@ -17,7 +17,7 @@ struct FStarProperties : public FTableRowBase
 
 public:
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"), BlueprintReadWrite)
-	int radius = 50;
+	float radius = 50;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"), BlueprintReadWrite)
 	int mass = 1000;

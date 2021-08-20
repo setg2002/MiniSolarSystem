@@ -30,9 +30,9 @@ public:
 	UGasGiantColorSettings* ColorSettings;
 
 	UFUNCTION(BlueprintCallable)
-	void SetRadius(int NewRadius);
+	void SetRadius(float NewRadius);
 
-	virtual int GetBodyRadius() const override { return Radius * 100; }
+	virtual float GetBodyRadius() const override { return Radius * 100; }
 
 	GaseousColorGenerator* ColorGenerator;
 
@@ -42,7 +42,7 @@ public:
 
 private:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "1"))
-	int Radius = 1;
+	float Radius = 1;
 
 	virtual void BeginPlay() override;
 };

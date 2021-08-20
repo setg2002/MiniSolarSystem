@@ -108,7 +108,7 @@ bool AStar::SetStarProperties(FStarProperties NewProperties)
 	return true;
 }
 
-void AStar::SetRadius(int NewRadius)
+void AStar::SetRadius(float NewRadius)
 {
 	starProperties.radius = NewRadius;
 	Collider->SetSphereRadius(NewRadius * 100);

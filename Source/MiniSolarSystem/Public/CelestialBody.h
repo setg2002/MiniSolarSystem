@@ -28,7 +28,7 @@ public:
 	virtual uint32 GetID() const override { return ID; }
 
 	UFUNCTION(BlueprintCallable)
-	virtual int GetBodyRadius() const { return 0; }
+	virtual float GetBodyRadius() const { return 0; }
 
 protected:
 	UPROPERTY(SaveGame, EditAnywhere)

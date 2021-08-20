@@ -58,7 +58,7 @@ public:
 	void ReInitParticles();
 
 	UFUNCTION(BlueprintCallable)
-	void SetRadius(int NewRadius);
+	void SetRadius(float NewRadius);
 	
 	UFUNCTION(BlueprintCallable)
 	void SetLuminosity(int NewLuminosity);
@@ -74,7 +74,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual int GetBodyRadius() const override { return starProperties.radius * 100; }
+	virtual float GetBodyRadius() const override { return starProperties.radius * 100; }
 
 	void SetStarNum(uint8 num);
 

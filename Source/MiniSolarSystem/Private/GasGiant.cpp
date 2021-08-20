@@ -27,7 +27,7 @@ void AGasGiant::BeginPlay()
 	ColorSettings->NewVoronoiForStorms();
 }
 
-void AGasGiant::SetRadius(int NewRadius)
+void AGasGiant::SetRadius(float NewRadius)
 {
 	Radius = NewRadius;
 	this->SetActorScale3D(FVector(Radius));

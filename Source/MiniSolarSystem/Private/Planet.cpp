@@ -651,7 +651,7 @@ void APlanet::ReconveneTerrainFaceThreads(int FaceNum)
 	}
 }
 
-int APlanet::GetBodyRadius() const
+float APlanet::GetBodyRadius() const
 {
 	return ShapeSettings->GetRadius();
 }
