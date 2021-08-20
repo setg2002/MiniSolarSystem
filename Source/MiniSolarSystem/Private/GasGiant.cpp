@@ -21,7 +21,7 @@ void AGasGiant::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	SetRadius(Radius);
+	this->SetActorScale3D(FVector(Radius));
 	ColorSettings->SetMesh(Mesh);
 	ColorSettings->GenerateMaterial();
 	ColorSettings->NewVoronoiForStorms();

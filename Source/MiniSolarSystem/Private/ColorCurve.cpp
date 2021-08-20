@@ -153,7 +153,7 @@ void UColorCurve::ConstructKey(TArray<FKeyInfo> KeysInfo)
 	NewKey->Handle = NewKeyHandle;
 }
 
-void UColorCurve::AddKey(float Time, FLinearColor Color = FLinearColor::White)
+UColorCurveKey* UColorCurve::AddKey(float Time, FLinearColor Color = FLinearColor::White)
 {
 	// Create the widget
 	UColorCurveKey* NewKey = Cast<UColorCurveKey>(CreateWidget<UColorCurveKey>(CanvasPanel_Gradient, KeyClass, FName("Key_" + FString::SanitizeFloat(Time))));
@@ -180,6 +180,8 @@ void UColorCurve::AddKey(float Time, FLinearColor Color = FLinearColor::White)
 		Gradient->FloatCurves[i].AddKey(Time, i == 0 ? Color.R : i == 1 ? Color.G : i == 2 ? Color.B :Color.A, false, NewKeyHandle);
 	}
 	NewKey->Handle = NewKeyHandle;
+
+	return NewKey;
 }
 
 void UColorCurve::UpdateGradient()
