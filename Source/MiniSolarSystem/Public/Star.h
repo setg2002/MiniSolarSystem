@@ -74,6 +74,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual int GetBodyRadius() const override { return starProperties.radius * 100; }
+
 	void SetStarNum(uint8 num);
 
 	UFUNCTION(BlueprintCallable)

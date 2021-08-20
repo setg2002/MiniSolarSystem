@@ -190,14 +190,7 @@ void AOrbitDebugActor::DrawOrbits()
 		ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[ColorIndex % Colors.Num()]);
 
 		if (Width == 0)
-		{
-			if (APlanet* Planet = Cast<APlanet>(Bodies[bodyIndex]))
-				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Planet->ShapeSettings->GetRadius() * 2);
-			else if (AGasGiant* GasGiant = Cast<AGasGiant>(Bodies[bodyIndex]))
-				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), GasGiant->GetRadius() * 200);
-			else if (AStar * Star = Cast<AStar>(Bodies[bodyIndex]))
-				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Star->starProperties.radius * 100);
-		}
+			ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Bodies[bodyIndex]->GetBodyRadius() * 2);
 		else
 			ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
 	}
@@ -218,24 +211,9 @@ void AOrbitDebugActor::ClearOrbits()
 void AOrbitDebugActor::UpdateWidthSpecificBody(ACelestialBody* Body)
 {
 	UNiagaraComponent* ParticleComponent = *BodyToParticleComp.Find(Body);
-	if (APlanet* Planet = Cast<APlanet>(Body))
-	{
-		ParticleComponent->ReinitializeSystem();
-		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
-		ParticleComponent->SetFloatParameter(FName("User.Width"), Planet->ShapeSettings->GetRadius() * 2);
-	}
-	else if (AGasGiant* GasGiant = Cast<AGasGiant>(Body))
-	{
-		ParticleComponent->ReinitializeSystem();
-		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
-		ParticleComponent->SetFloatParameter(FName("User.Width"), GasGiant->GetRadius() * 200);
-	}
-	else if (AStar* Star = Cast<AStar>(Body))
-	{
-		ParticleComponent->ReinitializeSystem();
-		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
-		ParticleComponent->SetFloatParameter(FName("User.Width"), Star->starProperties.radius * 100);
-	}
+	ParticleComponent->ReinitializeSystem();
+	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
+	ParticleComponent->SetFloatParameter(FName("User.Width"), Body->GetBodyRadius() * 2);
 }
 
 FVector AOrbitDebugActor::CalculateAcceleration(int i, TArray<VirtualBody*> VirtualBodies) {

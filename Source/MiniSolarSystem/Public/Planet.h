@@ -142,6 +142,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void BindSettingsIDs();
 
+	virtual int GetBodyRadius() const override;
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	

@@ -27,6 +27,9 @@ public:
 	UFUNCTION()
 	virtual uint32 GetID() const override { return ID; }
 
+	UFUNCTION(BlueprintCallable)
+	virtual int GetBodyRadius() const { return 0; }
+
 protected:
 	UPROPERTY(SaveGame, EditAnywhere)
 	FName BodyName = NAME_None;

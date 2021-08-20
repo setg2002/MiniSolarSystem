@@ -651,6 +651,11 @@ void APlanet::ReconveneTerrainFaceThreads(int FaceNum)
 	}
 }
 
+int APlanet::GetBodyRadius() const
+{
+	return ShapeSettings->GetRadius();
+}
+
 #if WITH_EDITOR
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {

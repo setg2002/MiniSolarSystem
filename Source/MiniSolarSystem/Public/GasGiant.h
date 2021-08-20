@@ -30,9 +30,9 @@ public:
 	UGasGiantColorSettings* ColorSettings;
 
 	UFUNCTION(BlueprintCallable)
-	int GetRadius() const { return Radius; }
-	UFUNCTION(BlueprintCallable)
 	void SetRadius(int NewRadius);
+
+	virtual int GetBodyRadius() const override { return Radius * 100; }
 
 	GaseousColorGenerator* ColorGenerator;
 
