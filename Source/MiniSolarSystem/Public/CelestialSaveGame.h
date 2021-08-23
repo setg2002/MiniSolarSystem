@@ -11,6 +11,24 @@
  */
 
 USTRUCT()
+struct FBodySystemRecord
+{
+	GENERATED_BODY()
+
+	UPROPERTY(SaveGame)
+	FName Name;
+
+	UPROPERTY(SaveGame)
+	TArray<uint32> SystemIDs;
+
+	// Default Values
+	FBodySystemRecord()
+	{
+		Name = NAME_None;
+	}
+};
+
+USTRUCT()
 struct FAssetRecord
 {
 	GENERATED_BODY()
@@ -124,6 +142,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	int32 AsteroidFieldNum;
 
+	UPROPERTY(VisibleAnywhere)
+	TArray<FBodySystemRecord> BodySystemsData;
 
 	// Asset Saving \\
 

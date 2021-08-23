@@ -19,6 +19,7 @@ class ACelestialBody;
 class UUserWidget;
 class APlanet;
 class AStar;
+struct FBodySystem;
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPerspectiveChanged, uint8, Perspective);
@@ -136,6 +137,17 @@ public:
 	ACelestialBody* GetBodyByName(FString Name);
 
 	class ISettingsAssetID* GetAssetByID(uint32 ID);
+
+private:
+	TArray<FBodySystem> BodySystems;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	TArray<FBodySystem> GetBodySystems() const { return BodySystems; }
+	UFUNCTION(BlueprintCallable)
+	void AddBodySystem(FBodySystem NewSystem);
+	UFUNCTION(BlueprintCallable)
+	void RemoveBodySystem(FBodySystem System);
 
 protected:
 	// Called when the game starts

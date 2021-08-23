@@ -7,6 +7,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "ColorCurveFunctionLibrary.h"
+#include "BodySystemFunctionLibrary.h"
 #include "CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
 #include "GasGiantColorSettings.h"
@@ -40,6 +41,16 @@ ACelestialGameMode::ACelestialGameMode()
 	PrimaryActorTick.bCanEverTick = true;
 	currentPerspective = 255;
 	gravitationalConstant = 100;
+}
+
+void ACelestialGameMode::AddBodySystem(FBodySystem NewSystem)
+{
+	BodySystems.Add(NewSystem);
+}
+
+void ACelestialGameMode::RemoveBodySystem(FBodySystem System)
+{
+	BodySystems.Remove(System);
 }
 
 void ACelestialGameMode::BeginPlay()
@@ -644,6 +655,13 @@ void ACelestialGameMode::LoadGame()
 					planet->BindDelegates();
 			}
 
+			// Restore BodySystems
+			for (FBodySystemRecord System : LoadedGame->BodySystemsData)
+			{
+				FBodySystem NewSystem = FBodySystem(System.Name, System.SystemIDs);
+				BodySystems.Add(NewSystem);
+			}
+
 			// Restore Celestial Player Data
 			CelestialPlayer->SetActorTransform(LoadedGame->CelestialPlayerData.Transform);
 			FMemoryReader CelMemoryReader(LoadedGame->CelestialPlayerData.ActorData);
@@ -740,6 +758,14 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 		SaveGameInstance->GravConst = gravitationalConstant;
 		SaveGameInstance->AsteroidFieldNum = AsteroidFieldNum;
+
+		// Save BodySystems
+		SaveGameInstance->BodySystemsData.SetNum(BodySystems.Num());
+		for (int32 i = 0; i < BodySystems.Num(); i++)
+		{
+			SaveGameInstance->BodySystemsData[i].Name = BodySystems[i].SystemName;
+			SaveGameInstance->BodySystemsData[i].SystemIDs = BodySystems[i].BodyIDs;
+		}
 
 		// Save Celestial Body Data
 		SaveGameInstance->CelestialBodyData.SetNum(bodies.Num());
