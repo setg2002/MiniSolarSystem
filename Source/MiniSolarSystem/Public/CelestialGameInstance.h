@@ -6,6 +6,9 @@
 #include "Engine/GameInstance.h"
 #include "CelestialGameInstance.generated.h"
 
+
+class UNoiseLayer;
+
 /**
  * 
  */
@@ -21,7 +24,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetCurrentMaxFPS();
 
-public:
 	UFUNCTION(BlueprintCallable)
 	static void PlayLoadingScreen(bool bPlayUntilStopped, float PlayTime);
 	
@@ -36,4 +38,13 @@ public:
 protected:
 	UPROPERTY(Config, BlueprintReadWrite)
 	float Volume = 1.f;
+
+private:
+	UNoiseLayer* CopiedNoiseLayer;
+
+public:
+	UFUNCTION(BLueprintCallable)
+	void CopyNoiseLayer(UNoiseLayer* NoiseLayerToCopy);
+	UFUNCTION(BLueprintCallable)
+	void PasteNoiseLayer(UNoiseLayer* NoiseLayerToPasteTo);
 };

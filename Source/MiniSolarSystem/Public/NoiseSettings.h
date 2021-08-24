@@ -32,6 +32,28 @@ struct FSimpleNoiseSettings
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float MinValue;
+
+	FSimpleNoiseSettings()
+	{
+		Strength = 1;
+		BaseRoughness = 1;
+		Roughness = 2;
+		Center = FVector::ZeroVector;
+		numLayers = 1;
+		Persistence = .5f;
+		MinValue = 0.f;
+	}
+
+	FSimpleNoiseSettings(float strength, float baseRoughness, float roughness, FVector center, int NumLayers, float persistence, float minValue)
+	{
+		Strength = strength;
+		BaseRoughness = baseRoughness;
+		Roughness = roughness;
+		Center = center;
+		numLayers = NumLayers;
+		Persistence = persistence;
+		MinValue = minValue;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -41,6 +63,30 @@ struct FRidgidNoiseSettings : public FSimpleNoiseSettings
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	float WeightMultiplier = .8f;
+
+	FRidgidNoiseSettings()
+	{
+		Strength = 1;
+		BaseRoughness = 1;
+		Roughness = 2;
+		Center = FVector::ZeroVector;
+		numLayers = 1;
+		Persistence = .5f;
+		MinValue = 0.f;
+		WeightMultiplier = .8f;
+	}
+
+	FRidgidNoiseSettings(float strength, float baseRoughness, float roughness, FVector center, int NumLayers, float persistence, float minValue, float weightMultiplier)
+	{
+		Strength = strength;
+		BaseRoughness = baseRoughness;
+		Roughness = roughness;
+		Center = center;
+		numLayers = NumLayers;
+		Persistence = persistence;
+		MinValue = minValue;
+		WeightMultiplier = weightMultiplier;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -57,6 +103,19 @@ public:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "FilterType == 1", EditConditionHides))
 	FRidgidNoiseSettings RidgidNoiseSettings;
 
+	FNoiseSettings_()
+	{
+		FilterType = EFilterType::Smooth;
+		SimpleNoiseSettings = FSimpleNoiseSettings();
+		RidgidNoiseSettings = FRidgidNoiseSettings();
+	}
+
+	FNoiseSettings_(EFilterType filterType, FSimpleNoiseSettings simpleNoiseSettings, FRidgidNoiseSettings ridgidNoiseSettings)
+	{
+		FilterType = filterType;
+		SimpleNoiseSettings = simpleNoiseSettings;
+		RidgidNoiseSettings = ridgidNoiseSettings;
+	}
 };
 
 UCLASS(BlueprintType)

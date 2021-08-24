@@ -18,10 +18,21 @@ struct FNoiseLayer_
 
 public:
 	UPROPERTY(SaveGame, EditAnywhere)
-	bool Enabled = true;
+	bool Enabled;
 	UPROPERTY(SaveGame, EditAnywhere)
-	bool UseFirstLayerAsMask = false;
+	bool UseFirstLayerAsMask;
 
+	FNoiseLayer_()
+	{
+		Enabled = true;
+		UseFirstLayerAsMask = false;
+	}
+
+	FNoiseLayer_(bool enabled, bool useFirstLayerAsMask)
+	{
+		Enabled = enabled;
+		UseFirstLayerAsMask = useFirstLayerAsMask;
+	}
 };
 
 UCLASS(BlueprintType)

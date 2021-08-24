@@ -7,6 +7,9 @@
 #include "UObject/NoExportTypes.h"
 #include "SettingsAsset.generated.h"
 
+UDELEGATE(BlueprintAuthorityOnly)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSettingsAssetChanged);
+
 /**
  * 
  */
@@ -14,8 +17,6 @@ UCLASS()
 class MINISOLARSYSTEM_API USettingsAsset : public UObject, public ISettingsAssetID
 {
 	GENERATED_BODY()
-	
-	DECLARE_MULTICAST_DELEGATE(FSettingsAssetChanged);
 
 protected:
 	// This is an aray of the IDs of assets that this asset is applied to
@@ -43,6 +44,7 @@ public:
 public:
 	USettingsAsset();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, BlueprintAssignable)
 	FSettingsAssetChanged OnSettingsAssetChanged;
 
 	UFUNCTION(BlueprintCallable)
