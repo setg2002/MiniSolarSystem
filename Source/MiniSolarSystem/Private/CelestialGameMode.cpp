@@ -157,6 +157,126 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	return NewBody;
 }
 
+ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicate)
+{
+	AOrbitDebugActor::Get()->ManualStop = true;
+	ACelestialBody* NewBody = AddBody(BodyToDuplicate->GetClass(), FName(FString(BodyToDuplicate->GetBodyName().ToString() + "_Duplicate")), BodyToDuplicate->GetTransform());
+	
+	NewBody->SetMass(BodyToDuplicate->GetMass());
+	NewBody->rotationRate = BodyToDuplicate->rotationRate;
+	NewBody->SetCurrentVelocity(BodyToDuplicate->GetCurrentVelocity());
+
+	if (APlanet* NewPlanet = Cast<APlanet>(NewBody))
+	{
+		APlanet* OldPlanet = Cast<APlanet>(BodyToDuplicate);
+		
+		// First we need to unbind all of the delegates so they don't try to regen the planet mid-duplication
+		NewPlanet->UnBindDelegates(); 
+
+		// Duplicate BiomeColorSettings
+		FBiomeColorSettings_ NewBiomeColorSettings;
+		FBiomeColorSettings_ OldBiomeColorSettings = OldPlanet->ColorSettings->GetBiomeColorSettings()->GetStruct();
+		NewBiomeColorSettings.bUsingNoise = OldBiomeColorSettings.bUsingNoise;
+		NewBiomeColorSettings.NoiseOffset = OldBiomeColorSettings.NoiseOffset;
+		NewBiomeColorSettings.NoiseStrength = OldBiomeColorSettings.NoiseStrength;
+		NewBiomeColorSettings.blendAmount = OldBiomeColorSettings.blendAmount;
+		UNoiseSettings* NewNoise = Cast<UNoiseSettings>(NewPlanet->CreateSettingsAsset(UNoiseSettings::StaticClass()));
+		NewNoise->SetStruct(
+			FNoiseSettings_(
+				OldBiomeColorSettings.Noise->GetStruct().FilterType,
+				FSimpleNoiseSettings(
+					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.Strength,
+					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.BaseRoughness,
+					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.Roughness,
+					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.Center,
+					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.numLayers,
+					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.Persistence,
+					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.MinValue
+				),
+				FRidgidNoiseSettings(
+					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.Strength,
+					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.BaseRoughness,
+					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.Roughness,
+					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.Center,
+					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.numLayers,
+					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.Persistence,
+					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.MinValue,
+					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.WeightMultiplier
+				)
+			)
+		);
+		NewBiomeColorSettings.Noise = NewNoise;
+
+		NewPlanet->ColorSettings->GetBiomeColorSettings()->SetStruct(NewBiomeColorSettings);
+		// Duplicate all biomes
+		NewPlanet->ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
+		for (UBiome* OldBiome : OldPlanet->ColorSettings->GetBiomeColorSettings()->GetBiomes())
+		{
+			UBiome* NewBiome = Cast<UBiome>(NewPlanet->CreateSettingsAsset(UBiome::StaticClass()));
+			FBiome_ NewStruct;
+			FBiome_ OldStruct = OldBiome->GetStruct();
+			memcpy(&NewStruct, &OldStruct, sizeof(FBiome_));
+			NewBiome->SetStruct(NewStruct);
+			NewPlanet->ColorSettings->GetBiomeColorSettings()->AddBiome(NewBiome);
+		}
+		// Duplicate color settings
+		FColorSettings_ NewColorSettings;
+		NewColorSettings.OceanColor = OldPlanet->ColorSettings->GetStruct().OceanColor;
+		NewColorSettings.BiomeColorSettings = NewPlanet->ColorSettings->GetBiomeColorSettings();
+		NewPlanet->ColorSettings->SetStruct(NewColorSettings);
+
+		// Duplicate shape settings
+		FShapeSettings_ NewShapeSettings;
+		NewShapeSettings.PlanetRadius = OldPlanet->ShapeSettings->GetRadius();
+		NewPlanet->ShapeSettings->SetStruct(NewShapeSettings);
+		// Duplicate noise layers
+		NewPlanet->ShapeSettings->GetStruct().NoiseLayers.Empty();
+		for (UNoiseLayer* OldLayer : OldPlanet->ShapeSettings->GetNoiseLayers())
+		{
+			GetGameInstance<UCelestialGameInstance>()->CopyNoiseLayer(OldLayer);
+			UNoiseLayer* NewLayer = Cast<UNoiseLayer>(NewPlanet->CreateSettingsAsset(UNoiseLayer::StaticClass()));
+			UNoiseSettings* NewSettings = Cast<UNoiseSettings>(NewPlanet->CreateSettingsAsset(UNoiseSettings::StaticClass()));
+			NewLayer->NoiseSettings = NewSettings;
+			GetGameInstance<UCelestialGameInstance>()->PasteNoiseLayer(NewLayer);
+			NewPlanet->ShapeSettings->AddNoiseLayer(NewLayer);
+		}
+
+		NewPlanet->BindDelegates();
+		NewPlanet->ReGenerate();
+
+		AOrbitDebugActor::Get()->ManualStop = false;
+		if (currentPerspective == 0)
+			AOrbitDebugActor::Get()->DrawOrbits();
+		return NewPlanet;
+	}
+	else if (AGasGiant* NewGasGiant = Cast<AGasGiant>(NewBody))
+	{
+		FGasGiantColorSettings CopiedColorSettings;
+		memcpy(&CopiedColorSettings, &Cast<AGasGiant>(BodyToDuplicate)->ColorSettings, sizeof(FGasGiantColorSettings));
+		NewGasGiant->SetRadius(BodyToDuplicate->GetBodyRadius() / 100);
+		NewGasGiant->ColorSettings = CopiedColorSettings;
+		NewGasGiant->ReInit();
+
+		AOrbitDebugActor::Get()->ManualStop = false;
+		if (currentPerspective == 0)
+			AOrbitDebugActor::Get()->DrawOrbits();
+		return NewGasGiant;
+	}
+	else if (AStar* NewStar = Cast<AStar>(NewBody))
+	{
+		FStarProperties CopiedStarProperties;
+		memcpy(&CopiedStarProperties, &Cast<AStar>(BodyToDuplicate)->starProperties, sizeof(FStarProperties));
+		NewStar->SetStarProperties(CopiedStarProperties);
+
+		AOrbitDebugActor::Get()->ManualStop = false;
+		if (currentPerspective == 0)
+			AOrbitDebugActor::Get()->DrawOrbits();
+		return NewStar;
+	}
+
+	return NewBody;
+}
+
 void ACelestialGameMode::RemoveBody(FString Body)
 {
 	ACelestialBody* Body_ = GetBodyByName(Body);

@@ -77,122 +77,125 @@ void AOrbitDebugActor::RemoveID(uint32 IDToRemove)
 
 void AOrbitDebugActor::DrawOrbits()
 {
-	ClearOrbits();
-	
-	TArray<ACelestialBody*> Bodies;
-	Bodies = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetBodies();
-	if (IDs.Num() == 0)
+	if (!ManualStop)
 	{
-		for (ACelestialBody* Body : Bodies)
+		ClearOrbits();
+
+		TArray<ACelestialBody*> Bodies;
+		Bodies = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetBodies();
+		if (IDs.Num() == 0)
 		{
-			IDs.Add(Body->GetID());
+			for (ACelestialBody* Body : Bodies)
+			{
+				IDs.Add(Body->GetID());
+			}
 		}
-	}
 
-	BodyToParticleComp.Empty();
+		BodyToParticleComp.Empty();
 
-	TArray<VirtualBody*> VirtualBodies;
-	VirtualBodies.SetNum(Bodies.Num());
+		TArray<VirtualBody*> VirtualBodies;
+		VirtualBodies.SetNum(Bodies.Num());
 
-	SavedPoints.Empty();
-	TArray<TArray<FVector>> DrawPoints;
-	DrawPoints.SetNum(VirtualBodies.Num());
-	SavedPoints.SetNum(VirtualBodies.Num());
+		SavedPoints.Empty();
+		TArray<TArray<FVector>> DrawPoints;
+		DrawPoints.SetNum(VirtualBodies.Num());
+		SavedPoints.SetNum(VirtualBodies.Num());
 
-	ParticleComponents.Empty();
-	ParticleComponents.SetNum(VirtualBodies.Num());
-	for (int i = 0; i < VirtualBodies.Num(); i++)
-	{
-		ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, FVector::ZeroVector);
-	}
-
-	// If the central body got deleted we don't want the debug to be relative
-	if (!CentralBody || (CentralBody->IsPendingKill()))
-	{
-		bRelativeToBody = false;
-		CentralBody = Bodies[0];
-	}
-
-	int ReferenceFrameIndex = 0;
-	FVector ReferenceBodyInitialPosition = FVector::ZeroVector;
-
-	// Initialize virtual bodies so we don't move the actual bodies
-	for (int i = 0; i < VirtualBodies.Num(); i++)
-	{
-		VirtualBodies[i] = new VirtualBody(Bodies[i]);
-		DrawPoints[i].SetNum(NumSteps);
-
-		if (Bodies[i] == CentralBody && bRelativeToBody)
-		{
-			ReferenceFrameIndex = i;
-			ReferenceBodyInitialPosition = VirtualBodies[i]->Position;
-		}
-	}
-
-	// Simulate 
-	FVector ReferenceBodyPosition = (bRelativeToBody) ? VirtualBodies[ReferenceFrameIndex]->Position : FVector::ZeroVector;
-	for (int i = 0; i < VirtualBodies.Num(); i++) // Makes sure the 1st position of the orbit is at the planet's exact position
-	{
-		if (bRelativeToBody)
-		{
-			DrawPoints[i][0] = VirtualBodies[i]->Position - (ReferenceBodyPosition - ReferenceBodyInitialPosition);
-		}
-		else
-		{
-			DrawPoints[i][0] = VirtualBodies[i]->Position;
-		}
-	}
-	for (int step = 1; step < NumSteps; step++)
-	{
-		ReferenceBodyPosition = (bRelativeToBody) ? VirtualBodies[ReferenceFrameIndex]->Position : FVector::ZeroVector;
-
-		// Update velocity
+		ParticleComponents.Empty();
+		ParticleComponents.SetNum(VirtualBodies.Num());
 		for (int i = 0; i < VirtualBodies.Num(); i++)
 		{
-			VirtualBodies[i]->Velocity += (CalculateAcceleration(i, VirtualBodies) * TimeStep);
+			ParticleComponents[i] = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ParticleTemplate, FVector::ZeroVector);
 		}
-		// Update positions
+
+		// If the central body got deleted we don't want the debug to be relative
+		if (!CentralBody || (CentralBody->IsPendingKill()))
+		{
+			bRelativeToBody = false;
+			CentralBody = Bodies[0];
+		}
+
+		int ReferenceFrameIndex = 0;
+		FVector ReferenceBodyInitialPosition = FVector::ZeroVector;
+
+		// Initialize virtual bodies so we don't move the actual bodies
 		for (int i = 0; i < VirtualBodies.Num(); i++)
 		{
-			FVector newPos = VirtualBodies[i]->Position + (VirtualBodies[i]->Velocity * TimeStep);
-			VirtualBodies[i]->Position = newPos;
+			VirtualBodies[i] = new VirtualBody(Bodies[i]);
+			DrawPoints[i].SetNum(NumSteps);
+
+			if (Bodies[i] == CentralBody && bRelativeToBody)
+			{
+				ReferenceFrameIndex = i;
+				ReferenceBodyInitialPosition = VirtualBodies[i]->Position;
+			}
+		}
+
+		// Simulate 
+		FVector ReferenceBodyPosition = (bRelativeToBody) ? VirtualBodies[ReferenceFrameIndex]->Position : FVector::ZeroVector;
+		for (int i = 0; i < VirtualBodies.Num(); i++) // Makes sure the 1st position of the orbit is at the planet's exact position
+		{
 			if (bRelativeToBody)
 			{
-				auto referenceFrameOffset = ReferenceBodyPosition - ReferenceBodyInitialPosition;
-				newPos -= referenceFrameOffset;
+				DrawPoints[i][0] = VirtualBodies[i]->Position - (ReferenceBodyPosition - ReferenceBodyInitialPosition);
 			}
-			if (bRelativeToBody && i == ReferenceFrameIndex)
+			else
 			{
-				newPos = ReferenceBodyInitialPosition;
+				DrawPoints[i][0] = VirtualBodies[i]->Position;
+			}
+		}
+		for (int step = 1; step < NumSteps; step++)
+		{
+			ReferenceBodyPosition = (bRelativeToBody) ? VirtualBodies[ReferenceFrameIndex]->Position : FVector::ZeroVector;
+
+			// Update velocity
+			for (int i = 0; i < VirtualBodies.Num(); i++)
+			{
+				VirtualBodies[i]->Velocity += (CalculateAcceleration(i, VirtualBodies) * TimeStep);
+			}
+			// Update positions
+			for (int i = 0; i < VirtualBodies.Num(); i++)
+			{
+				FVector newPos = VirtualBodies[i]->Position + (VirtualBodies[i]->Velocity * TimeStep);
+				VirtualBodies[i]->Position = newPos;
+				if (bRelativeToBody)
+				{
+					auto referenceFrameOffset = ReferenceBodyPosition - ReferenceBodyInitialPosition;
+					newPos -= referenceFrameOffset;
+				}
+				if (bRelativeToBody && i == ReferenceFrameIndex)
+				{
+					newPos = ReferenceBodyInitialPosition;
+				}
+
+				DrawPoints[i][step] = newPos;
+			}
+		}
+
+		// Draw paths
+		for (int bodyIndex = 0; bodyIndex < VirtualBodies.Num(); bodyIndex++)
+		{
+			RenderedSteps = FMath::Clamp<int64>(0.0005f * NumSteps * NumSteps, 0, 5000);
+			TArray<FVector> NewPoints;
+			int32 factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps; // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
+			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); j++)
+			{
+				NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
 			}
 
-			DrawPoints[i][step] = newPos;
+			BodyToParticleComp.Add(Bodies[bodyIndex], ParticleComponents[bodyIndex]);
+			SavedPoints.EmplaceAt(bodyIndex, NewPoints);
+
+			UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
+			int32 ColorIndex;
+			IDs.Find(Bodies[bodyIndex]->GetID(), ColorIndex);
+			ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[ColorIndex % Colors.Num()]);
+
+			if (Width == 0)
+				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Bodies[bodyIndex]->GetBodyRadius() * 2);
+			else
+				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
 		}
-	}
-	
-	// Draw paths
-	for (int bodyIndex = 0; bodyIndex < VirtualBodies.Num(); bodyIndex++)
-	{	
-		RenderedSteps = FMath::Clamp<int64>(0.0005f * NumSteps * NumSteps, 0, 5000);
-		TArray<FVector> NewPoints;
-		int32 factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps; // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
-		for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); j++)
-		{
-			NewPoints.Add(DrawPoints[bodyIndex][j * factor]);
-		}
-
-		BodyToParticleComp.Add(Bodies[bodyIndex], ParticleComponents[bodyIndex]);
-		SavedPoints.EmplaceAt(bodyIndex, NewPoints);
-
-		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponents[bodyIndex], FName("User.Points"), NewPoints);
-		int32 ColorIndex;
-		IDs.Find(Bodies[bodyIndex]->GetID(), ColorIndex);
-		ParticleComponents[bodyIndex]->SetColorParameter(FName("User.Color"), Colors[ColorIndex % Colors.Num()]);
-
-		if (Width == 0)
-			ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Bodies[bodyIndex]->GetBodyRadius() * 2);
-		else
-			ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
 	}
 }
 
@@ -210,10 +213,14 @@ void AOrbitDebugActor::ClearOrbits()
 
 void AOrbitDebugActor::UpdateWidthSpecificBody(ACelestialBody* Body)
 {
-	UNiagaraComponent* ParticleComponent = *BodyToParticleComp.Find(Body);
-	ParticleComponent->ReinitializeSystem();
-	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
-	ParticleComponent->SetFloatParameter(FName("User.Width"), Body->GetBodyRadius() * 2);
+	if (UNiagaraComponent** FoundPtr = BodyToParticleComp.Find(Body))
+	{
+		UNiagaraComponent* ParticleComponent = *FoundPtr;
+		ParticleComponent->ReinitializeSystem();
+		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(ParticleComponent, FName("User.Points"), SavedPoints[ParticleComponents.IndexOfByKey(ParticleComponent)]);
+		ParticleComponent->SetFloatParameter(FName("User.Width"), Body->GetBodyRadius() * 2);		
+	}
+
 }
 
 FVector AOrbitDebugActor::CalculateAcceleration(int i, TArray<VirtualBody*> VirtualBodies) {

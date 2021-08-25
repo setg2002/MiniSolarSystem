@@ -133,6 +133,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform);
 
+	// Duplicates the given body and returns the duplicated body
+	UFUNCTION(BlueprintCallable)
+	ACelestialBody* DuplicateBody(ACelestialBody* BodyToDuplicate);
+
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* GetBodyByName(FString Name);
 

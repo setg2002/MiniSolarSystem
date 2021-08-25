@@ -119,6 +119,10 @@ public:
 
 	virtual void OnConstruction(const FTransform & Transform) override;
 
+	// When true, orbits will not be drawn. This is for disabling orbit drawing when doing multiple actions that would otherwise cause unneccesary draw calls
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool ManualStop = false;
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
