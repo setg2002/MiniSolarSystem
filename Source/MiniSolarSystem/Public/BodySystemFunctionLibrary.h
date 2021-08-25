@@ -29,11 +29,18 @@ public:
 		SystemName = NAME_None;
 	}
 
+	FBodySystem(FName Name)
+	{
+		SystemName = Name;
+	}
+
 	FBodySystem(FName Name, TArray<uint32> IDs)
 	{
 		SystemName = Name;
 		BodyIDs = IDs;
 	}
+
+	FBodySystem(FName Name, TArray<class ACelestialBody*> BodiesForIDs);
 };
 
 /**
@@ -46,9 +53,9 @@ class MINISOLARSYSTEM_API UBodySystemFunctionLibrary : public UBlueprintFunction
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static void AddIDs(FBodySystem System, TArray<class ACelestialBody*> IDsToAdd);
+	static void AddIDs(UPARAM(ref) FBodySystem& System, TArray<class ACelestialBody*> IDsToAdd);
 	UFUNCTION(BlueprintCallable)
-	static void RemoveID(FBodySystem System, class ACelestialBody* IDsToRemove);
+	static void RemoveID(UPARAM(ref) FBodySystem& System, class ACelestialBody* IDsToRemove);
 	UFUNCTION(BlueprintCallable)
-	static bool DoesSystemContainBody(FBodySystem System, class ACelestialBody* Body);
+	static bool DoesSystemContainBody(UPARAM(ref) FBodySystem& System, class ACelestialBody* Body);
 };

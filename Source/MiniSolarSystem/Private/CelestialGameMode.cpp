@@ -43,12 +43,12 @@ ACelestialGameMode::ACelestialGameMode()
 	gravitationalConstant = 100;
 }
 
-void ACelestialGameMode::AddBodySystem(FBodySystem NewSystem)
+void ACelestialGameMode::AddBodySystem(FBodySystem& NewSystem)
 {
 	BodySystems.Add(NewSystem);
 }
 
-void ACelestialGameMode::RemoveBodySystem(FBodySystem System)
+void ACelestialGameMode::RemoveBodySystem(FBodySystem& System)
 {
 	BodySystems.Remove(System);
 }

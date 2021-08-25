@@ -5,7 +5,16 @@
 #include "CelestialGameMode.h"
 #include "CelestialBody.h"
 
-void UBodySystemFunctionLibrary::AddIDs(FBodySystem System, TArray<ACelestialBody*> IDsToAdd)
+FBodySystem::FBodySystem(FName Name, TArray<ACelestialBody*> BodiesForIDs)
+{
+	SystemName = Name;
+	for (ACelestialBody* Body : BodiesForIDs)
+	{
+		BodyIDs.Add(Body->GetID());
+	}
+}
+
+void UBodySystemFunctionLibrary::AddIDs(FBodySystem& System, TArray<ACelestialBody*> IDsToAdd)
 {
 	for (ACelestialBody* Body : IDsToAdd)
 	{
@@ -16,7 +25,7 @@ void UBodySystemFunctionLibrary::AddIDs(FBodySystem System, TArray<ACelestialBod
 	GameMode->AddBodySystem(System);
 }
 
-void UBodySystemFunctionLibrary::RemoveID(FBodySystem System, ACelestialBody* IDsToRemove)
+void UBodySystemFunctionLibrary::RemoveID(FBodySystem& System, ACelestialBody* IDsToRemove)
 {
 	System.BodyIDs.Remove(IDsToRemove->GetID());
 	ACelestialGameMode* GameMode = Cast<ACelestialGameMode>(IDsToRemove->GetWorld()->GetAuthGameMode());
@@ -25,7 +34,7 @@ void UBodySystemFunctionLibrary::RemoveID(FBodySystem System, ACelestialBody* ID
 		GameMode->AddBodySystem(System);
 }
 
-bool UBodySystemFunctionLibrary::DoesSystemContainBody(FBodySystem System, ACelestialBody* Body)
+bool UBodySystemFunctionLibrary::DoesSystemContainBody(FBodySystem& System, ACelestialBody* Body)
 {
 	return System.BodyIDs.Contains(Body->GetID());
 }

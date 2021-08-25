@@ -145,9 +145,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<FBodySystem> GetBodySystems() const { return BodySystems; }
 	UFUNCTION(BlueprintCallable)
-	void AddBodySystem(FBodySystem NewSystem);
+	void AddBodySystem(UPARAM(ref) FBodySystem& NewSystem);
 	UFUNCTION(BlueprintCallable)
-	void RemoveBodySystem(FBodySystem System);
+	void RemoveBodySystem(UPARAM(ref) FBodySystem& System);
 
 protected:
 	// Called when the game starts
