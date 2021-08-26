@@ -30,7 +30,7 @@ AOrbitDebugActor* AOrbitDebugActor::Get()
 AOrbitDebugActor::AOrbitDebugActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	_instance = this; //FIX Possibly redundant from Get()?
 
@@ -196,6 +196,7 @@ void AOrbitDebugActor::DrawOrbits()
 			else
 				ParticleComponents[bodyIndex]->SetFloatParameter(FName("User.Width"), Width * 20);
 		}
+		VirtualBodies.Empty();
 	}
 }
 

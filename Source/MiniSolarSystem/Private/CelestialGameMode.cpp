@@ -161,7 +161,11 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicate)
 {
 	AOrbitDebugActor::Get()->ManualStop = true;
-	ACelestialBody* NewBody = AddBody(BodyToDuplicate->GetClass(), FName(FString(BodyToDuplicate->GetBodyName().ToString() + "_Duplicate")), BodyToDuplicate->GetTransform());
+	FTransform NewTransform = FTransform(
+		BodyToDuplicate->GetActorRotation(), 
+		BodyToDuplicate->GetActorLocation() + FVector(0, 0, (BodyToDuplicate->GetBodyRadius() * 2) + 25)
+		);
+	ACelestialBody* NewBody = AddBody(BodyToDuplicate->GetClass(), FName(FString(BodyToDuplicate->GetBodyName().ToString() + "_Duplicate")), NewTransform);
 	
 	NewBody->SetMass(BodyToDuplicate->GetMass());
 	NewBody->rotationRate = BodyToDuplicate->rotationRate;
