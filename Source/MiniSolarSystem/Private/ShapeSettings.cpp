@@ -44,3 +44,11 @@ void UShapeSettings::RemoveNoiseLayer(int32 index)
 		OnSettingsAssetChanged.Broadcast();
 	}
 }
+
+void UShapeSettings::RemoveAllNoiseLayers()
+{
+	for (uint16 i = 0; i < ShapeSettings.NoiseLayers.Num(); i++)
+	{
+		RemoveNoiseLayer(0);
+	}
+}

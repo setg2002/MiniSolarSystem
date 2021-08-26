@@ -133,7 +133,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveBiomeByRef(UBiome* ref);
 	UFUNCTION(BlueprintCallable)
-	void RemoveAllBiomes() { BiomeColorSettings.Biomes.Empty(); }
+	void RemoveAllBiomes();
 	UFUNCTION(BlueprintCallable)
 	void SortBiomesByHeight();
 

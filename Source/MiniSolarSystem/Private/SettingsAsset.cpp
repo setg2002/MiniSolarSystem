@@ -21,6 +21,14 @@ void USettingsAsset::RemoveAppliedID(uint32 IDToRemove)
 	IDs.Remove(IDToRemove);
 }
 
+void USettingsAsset::RemoveAppliedIDs(TArray<uint32> IDsToRemove)
+{
+	for (uint16 i = 0; i < IDsToRemove.Num(); i++)
+	{
+		IDs.Remove(IDsToRemove[i]);
+	}
+}
+
 FName USettingsAsset::GetName()
 {
 	return (FName)LocalName;//this->GetFName();

@@ -57,5 +57,6 @@ public:
 	void AddNoiseLayer(UNoiseLayer* NewNoiseLayer);
 	UFUNCTION(BlueprintCallable)
 	void RemoveNoiseLayer(int32 index);
-
+	UFUNCTION(BlueprintCallable)
+	void RemoveAllNoiseLayers();
 };

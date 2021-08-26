@@ -40,6 +40,7 @@ public:
 
 	virtual void AddAppliedID(uint32 NewID);
 	virtual void RemoveAppliedID(uint32 IDToRemove);
+	virtual void RemoveAppliedIDs(TArray<uint32> IDsToRemove);
 
 public:
 	USettingsAsset();

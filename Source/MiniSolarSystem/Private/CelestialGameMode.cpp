@@ -241,7 +241,7 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 		NewShapeSettings.PlanetRadius = OldPlanet->ShapeSettings->GetRadius();
 		NewPlanet->ShapeSettings->SetStruct(NewShapeSettings);
 		// Duplicate noise layers
-		NewPlanet->ShapeSettings->GetStruct().NoiseLayers.Empty();
+		NewPlanet->ShapeSettings->RemoveAllNoiseLayers();
 		for (UNoiseLayer* OldLayer : OldPlanet->ShapeSettings->GetNoiseLayers())
 		{
 			GetGameInstance<UCelestialGameInstance>()->CopyNoiseLayer(OldLayer);

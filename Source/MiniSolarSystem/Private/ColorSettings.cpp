@@ -65,6 +65,14 @@ void UBiomeColorSettings::RemoveBiome(int32 index)
 	}
 }
 
+void UBiomeColorSettings::RemoveAllBiomes()
+{
+	for (UBiome* Biome : BiomeColorSettings.Biomes)
+	{
+		RemoveBiomeByRef(Biome);
+	}
+}
+
 void UBiomeColorSettings::RemoveBiomeByRef(UBiome* ref)
 {
 	if (BiomeColorSettings.Biomes.Contains(ref))
