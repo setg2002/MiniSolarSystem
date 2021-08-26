@@ -58,4 +58,6 @@ public:
 	static void RemoveID(UPARAM(ref) FBodySystem& System, class ACelestialBody* IDsToRemove);
 	UFUNCTION(BlueprintCallable)
 	static bool DoesSystemContainBody(UPARAM(ref) FBodySystem& System, class ACelestialBody* Body);
+	UFUNCTION(BlueprintCallable)
+	static int32 GetNumIDs(UPARAM(ref) FBodySystem& System) { return System.BodyIDs.Num(); }
 };
