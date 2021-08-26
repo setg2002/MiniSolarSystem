@@ -6,6 +6,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "BodySystemFunctionLibrary.h"
 #include "ColorCurveFunctionLibrary.h"
 #include "BodySystemFunctionLibrary.h"
 #include "CelestialSaveGameArchive.h"
@@ -165,6 +166,16 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 	NewBody->SetMass(BodyToDuplicate->GetMass());
 	NewBody->rotationRate = BodyToDuplicate->rotationRate;
 	NewBody->SetCurrentVelocity(BodyToDuplicate->GetCurrentVelocity());
+
+	// Make sure if the BodyToDuplicate is part of a body system that the new body is also added to that system
+	for (FBodySystem BodySystem : BodySystems)
+	{
+		if (UBodySystemFunctionLibrary::DoesSystemContainBody(BodySystem, BodyToDuplicate))
+		{
+			UBodySystemFunctionLibrary::AddIDs(BodySystem, { NewBody });
+			break;
+		}
+	}
 
 	if (APlanet* NewPlanet = Cast<APlanet>(NewBody))
 	{
