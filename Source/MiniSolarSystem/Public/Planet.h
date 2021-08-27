@@ -83,10 +83,6 @@ public:
 	UPROPERTY(Category = "Settings", EditAnywhere, BlueprintReadWrite)
 	UShapeSettings* ShapeSettings;
 
-	// Desired resolution for each TerrainFace to generate
-	UPROPERTY(SaveGame, Category = "Mesh", EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "2", ClampMax = "512"))
-	int32 resolution = 16;
-
 	// Initializes TerrainFaces
 	void Initialize();
 
@@ -163,5 +159,9 @@ protected:
 									FVector().BackwardVector };
 
 private:
-	TArray<int> FinishedFaces;
+	TArray<int8> FinishedFaces;
+
+private:
+	const int32 Resolutions[5] = { 16, 32, 64, 128, 256 };
+	int8 ResolutionLevel;
 };

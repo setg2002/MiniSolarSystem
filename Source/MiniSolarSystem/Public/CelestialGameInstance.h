@@ -30,6 +30,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void StopLoadingScreen();
 
+//============== Volume Control ==============
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetVolume(float NewVolume);
@@ -39,12 +40,22 @@ protected:
 	UPROPERTY(Config, BlueprintReadWrite)
 	float Volume = 1.f;
 
+//============== Coply/Pasting Noise Layers ==============
 private:
 	UNoiseLayer* CopiedNoiseLayer;
-
 public:
 	UFUNCTION(BLueprintCallable)
 	void CopyNoiseLayer(UNoiseLayer* NoiseLayerToCopy);
 	UFUNCTION(BLueprintCallable)
 	void PasteNoiseLayer(UNoiseLayer* NoiseLayerToPasteTo);
+
+//============== Terrestrial Planet Resolution Level ==============
+private:
+	UPROPERTY(Config)
+	int32 ResMax;
+public:
+	UFUNCTION(BlueprintCallable)
+	int32 GetResMax() { return ResMax; }
+	UFUNCTION(BlueprintCallable)
+	void SetResMax(int32 NewResMax) { ResMax = NewResMax; SaveConfig(); }
 };

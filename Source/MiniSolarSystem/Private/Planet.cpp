@@ -16,6 +16,7 @@
 #include "Engine/DataAsset.h"
 #include "AssetRegistryModule.h"
 #include "UObject/PackageReload.h"
+#include "CelestialGameInstance.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "CelestialSaveGameArchive.h"
@@ -26,7 +27,6 @@
 APlanet::APlanet()
 {
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
-	bGenerating = false;
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new TerrestrialColorGenerator(this);
 }
@@ -40,6 +40,8 @@ void APlanet::BeginPlay()
 {
 	Super::BeginPlay();
 
+	bGenerating = false;
+
 #if WITH_EDITOR
 	if (!ProcMesh) // Weird crash sometimes
 		ProcMesh = NewObject<UProceduralMeshComponent>(this, FName("ProcMesh"));
@@ -48,11 +50,12 @@ void APlanet::BeginPlay()
 	ProcMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	ProcMesh->SetRelativeLocation(FVector().ZeroVector);
 
+	ResolutionLevel = 0;
+
 	CreateSettingsAssets();
 
 	BindDelegates();
 
-	//bGenerating = false;
 	//GeneratePlanet();
 }
 
@@ -488,9 +491,11 @@ void APlanet::CreateSettingsAssets()
 
 void APlanet::GeneratePlanet()
 {
-	if (bGenerating == false && ShapeSettings && ColorSettings)
+	if (!bGenerating && ShapeSettings && ColorSettings)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s started generating"), *BodyName.ToString());
+		if (ResolutionLevel == 0)
+			UE_LOG(LogTemp, Warning, TEXT("%s started generating"), *BodyName.ToString());
+		
 		Collider->SetSphereRadius(ShapeSettings->GetRadius() + 10);
 
 		if (ShapeSettings->IsNoiseLayers())
@@ -509,15 +514,11 @@ void APlanet::GeneratePlanet()
 			}
 
 		}
-		if (!bMultithreadGeneration)
-		{
-			//AssetCleaner::CleanAll();
-		}
 	}
+	else if (bGenerating)
+		ResolutionLevel = -1;
 	else
-	{
 		OnPlanetGenerated.ExecuteIfBound(GetBodyName());
-	}
 }
 
 void APlanet::ClearMeshSections()
@@ -562,11 +563,14 @@ void APlanet::Initialize()
 	shapeGenerator->UpdateSettings(ShapeSettings);
 	colorGenerator->UpdateSettings(ColorSettings);
 
-	ColorSettings->DynamicMaterial = UMaterialInstanceDynamic::Create(ColorSettings->PlanetMat, this);
+	if (!ProcMesh->GetMaterial(0))
+		ColorSettings->DynamicMaterial = UMaterialInstanceDynamic::Create(ColorSettings->PlanetMat, this);
+	
 	for (int32 i = 0; i < 6; i++)
 	{
-		TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, resolution, directions[i], ProcMesh, this);
-		ProcMesh->SetMaterial(i, ColorSettings->DynamicMaterial);
+		TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, Resolutions[ResolutionLevel], directions[i], ProcMesh, this);
+		if (!ProcMesh->GetMaterial(i))
+			ProcMesh->SetMaterial(i, ColorSettings->DynamicMaterial);
 	}
 }
 
@@ -624,29 +628,33 @@ void APlanet::GenerateColors()
 
 	// Reload the texture
 	ProcMesh->GetMaterial(0)->LoadConfig();
-	//ProcMesh->GetMaterial(0)->ReloadConfig();  // Possible engine crash if material doesn't exist?
 
 	if (bMultithreadGeneration)
-	{
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
-		
-		if (bGenerating)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s finished generating"), *BodyName.ToString());
-		}
-		//AssetCleaner::CleanAll();
-	}
 	
 	bGenerating = false;
-	OnPlanetGenerated.ExecuteIfBound(this->BodyName);
+
+	if (ResolutionLevel < Cast<UCelestialGameInstance>(GetGameInstance())->GetResMax() - 1) // Regenerate at the next level
+	{
+		ResolutionLevel++;
+		ReGenerate();
+	}
+	else
+	{	
+		ResolutionLevel = 0;
+		UE_LOG(LogTemp, Warning, TEXT("%s finished generating"), *BodyName.ToString());
+		OnPlanetGenerated.ExecuteIfBound(this->BodyName);
+	}
+		
 }
 
 void APlanet::ReconveneTerrainFaceThreads(int FaceNum)
 {
 	FinishedFaces.Add(FaceNum);
 
-	if (FinishedFaces.IsValidIndex(5) && bMultithreadGeneration)
+	if (FinishedFaces.IsValidIndex(5))
 	{
+		FinishedFaces.Empty();
 		GenerateColors();
 	}
 }
@@ -665,11 +673,6 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, resolution) && bAutoGenerate)
-		{
-			GeneratePlanet();
-			if (bAutoGenerateTangents) { ReGenerateTangents(); }
-		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && bAutoGenerate)
 		{
 			OnShapeSettingsUpdated();

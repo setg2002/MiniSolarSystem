@@ -947,16 +947,6 @@ void ACelestialGameMode::tp(FString toPlanet)
 		GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(planet->GetRootComponent()->GetComponentLocation());
 }
 
-void ACelestialGameMode::SetTerrainResolution(FString PlanetName, int32 resolution)
-{
-	APlanet* Planet = Cast<APlanet>(GetBodyByName(PlanetName));
-	if (Planet)
-	{
-		Planet->resolution = resolution;
-		Planet->GeneratePlanet();
-	}
-}
-
 void ACelestialGameMode::PauseGame()
 {
 	if (bGamePaused)
@@ -1036,15 +1026,11 @@ void GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TArray<FName> PlanetNames,
 
 void GeneratePlanetsOrdered::NewGeneratedPlanet(FName PlanetName)
 {
-	GeneratedPlanets.Add(PlanetName);
-
+	GeneratedPlanets.AddUnique(PlanetName);
+	Cast<APlanet>(GameMode->GetBodyByName(PlanetName.ToString()))->OnPlanetGenerated.Unbind();
 	GeneratedPlanets.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
 	if (GeneratedPlanets == TerrestrialPlanets)
 	{
-		for (FName Name : TerrestrialPlanets)
-		{
-			Cast<APlanet>(GameMode->GetBodyByName(Name.ToString()))->OnPlanetGenerated.Unbind();
-		}
 		UGameplayStatics::SetGamePaused(GameMode->GetWorld(), false);
 		bCurrentlyGenerating = false;
 		GameMode->GetGameInstance<UCelestialGameInstance>()->StopLoadingScreen();

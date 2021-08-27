@@ -117,9 +117,6 @@ public:
 	void RemoveBody(FString Body);
 
 	UFUNCTION(Exec, BlueprintCallable)
-	void SetTerrainResolution(FString PlanetName, int32 resolution);
-
-	UFUNCTION(Exec, BlueprintCallable)
 	void PauseGame();
 
 	UFUNCTION(Exec, BlueprintCallable)
