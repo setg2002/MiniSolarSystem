@@ -53,6 +53,8 @@ class MINISOLARSYSTEM_API UBodySystemFunctionLibrary : public UBlueprintFunction
 
 public:
 	UFUNCTION(BlueprintCallable)
+	static void SetName(UPARAM(ref) FBodySystem& System, FName NewName, ACelestialGameMode* GameMode);
+	UFUNCTION(BlueprintCallable)
 	static void AddIDs(UPARAM(ref) FBodySystem& System, TArray<class ACelestialBody*> IDsToAdd);
 	UFUNCTION(BlueprintCallable)
 	static void RemoveID(UPARAM(ref) FBodySystem& System, class ACelestialBody* IDsToRemove);

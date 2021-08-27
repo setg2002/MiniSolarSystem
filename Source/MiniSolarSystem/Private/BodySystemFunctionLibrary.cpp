@@ -14,6 +14,13 @@ FBodySystem::FBodySystem(FName Name, TArray<ACelestialBody*> BodiesForIDs)
 	}
 }
 
+void UBodySystemFunctionLibrary::SetName(FBodySystem& System, FName NewName, ACelestialGameMode* GameMode)
+{	
+	GameMode->RemoveBodySystem(System);
+	System.SystemName = NewName;
+	GameMode->AddBodySystem(System);
+}
+
 void UBodySystemFunctionLibrary::AddIDs(FBodySystem& System, TArray<ACelestialBody*> IDsToAdd)
 {
 	for (ACelestialBody* Body : IDsToAdd)
