@@ -453,6 +453,53 @@ ISettingsAssetID* ACelestialGameMode::GetAssetByID(uint32 ID)
 	return nullptr;
 }
 
+void ACelestialGameMode::LoadOnDiscAssetsOfClass(TArray<FDiscAssetRecord> LoadedAssets, TArray<FAssetData> OnDiscAssets, UClass* ClassToLoad)
+{
+	static TArray<FDiscAssetRecord> StaticLoadedAssets;
+	static TArray<FAssetData> StaticOnDiscAssets;
+	if (LoadedAssets.Num() > 0)
+	{
+		StaticLoadedAssets = LoadedAssets;
+		StaticOnDiscAssets = OnDiscAssets;
+	}
+
+	for (FDiscAssetRecord Asset : StaticLoadedAssets)
+	{
+		if (Asset.Class == ClassToLoad)
+		{
+			for (FAssetData Data : StaticOnDiscAssets)
+			{
+				if (Data.ObjectPath == Asset.ObjectPath)
+				{
+					FMemoryReader MemoryReader(Asset.AssetData);
+					FCelestialSaveGameArchive Ar(MemoryReader);
+					Data.GetAsset()->Serialize(Ar);
+					break;
+				}
+			}
+		}
+	}
+}
+
+void ACelestialGameMode::LoadRuntimeAssetsOfClass(TArray<FAssetRecord> LoadedAssets, UClass* ClassToLoad)
+{
+	static TArray<FAssetRecord> StaticLoadedAssets;
+	if (LoadedAssets.Num() > 0)
+	{
+		StaticLoadedAssets = LoadedAssets;
+	}
+
+	for (auto& Asset : StaticLoadedAssets)
+	{
+		if (Asset.Class == ClassToLoad)
+		{
+			UObject* NewSettings = APlanet::RestoreSettingsAsset<UColorSettings>(Asset.Name, Asset.AssetData);
+			SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
+		}
+	}
+	ApplySettingsAssets();
+}
+
 void ACelestialGameMode::ApplySettingsAssets()
 {
 	// This is so dumb
@@ -516,7 +563,7 @@ void ACelestialGameMode::LoadGame()
 {
 	FAsyncLoadGameFromSlotDelegate OnLoadComplete;
 	OnLoadComplete.BindLambda([this](const FString&, const int32, USaveGame* SaveGame) 
-		{  
+	{  
 		if (UCelestialSaveGame* LoadedGame = Cast<UCelestialSaveGame>(SaveGame))
 		{
 			currentPerspective = 128;
@@ -602,186 +649,23 @@ void ACelestialGameMode::LoadGame()
 			
 			// Load On Disc Settings Assets
 			{
-				// This is absolutely fucking horrendous
-				//for (ACelestialBody* Body : bodies)
-				//{
-				//	if (APlanet* Planet = Cast<APlanet>(Body))
-				//	{
-				//		Planet->ShapeSettings = nullptr;
-				//		Planet->ColorSettings = nullptr;
-				//	}
-				//}
 				TArray<FAssetData> AssetData;
 				FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets", AssetData, true, true);
-				for (FDiscAssetRecord Asset : LoadedGame->OnDiscSettingsAssets)
-				{
-					if (Asset.Class == UColorSettings::StaticClass())
-					{
-						for (FAssetData Data : AssetData)
-						{
-							if (Data.ObjectPath == Asset.ObjectPath)
-							{
-								FMemoryReader CelMemoryReader(Asset.AssetData);
-								FCelestialSaveGameArchive CelAr(CelMemoryReader);
-								Data.GetAsset()->Serialize(CelAr);
-								//SettingsAssets.Add(Cast<USettingsAsset>(Data.GetAsset()));
-								break;
-							}
-						}
-					}
-				}
-				//ApplySettingsAssets();
-				for (FDiscAssetRecord Asset : LoadedGame->OnDiscSettingsAssets)
-				{
-					if (Asset.Class == UBiomeColorSettings::StaticClass())
-					{
-						for (FAssetData Data : AssetData)
-						{
-							if (Data.ObjectPath == Asset.ObjectPath)
-							{
-								FMemoryReader CelMemoryReader(Asset.AssetData);
-								FCelestialSaveGameArchive CelAr(CelMemoryReader);
-								Data.GetAsset()->Serialize(CelAr);
-								//SettingsAssets.Add(Cast<USettingsAsset>(Data.GetAsset()));
-								break;
-							}
-						}
-					}
-				}
-				//ApplySettingsAssets();
-				for (FDiscAssetRecord Asset : LoadedGame->OnDiscSettingsAssets)
-				{
-					if (Asset.Class == UShapeSettings::StaticClass())
-					{
-						for (FAssetData Data : AssetData)
-						{
-							if (Data.ObjectPath == Asset.ObjectPath)
-							{
-								FMemoryReader CelMemoryReader(Asset.AssetData);
-								FCelestialSaveGameArchive CelAr(CelMemoryReader);
-								Data.GetAsset()->Serialize(CelAr);
-								/*for (int32 i = 0; i < Cast<UShapeSettings>(Data.GetAsset())->GetNoiseLayers().Num(); i++)
-								{
-									Cast<UShapeSettings>(Data.GetAsset())->RemoveNoiseLayer(0);
-								}*/
-								//SettingsAssets.Add(Cast<USettingsAsset>(Data.GetAsset()));
-								break;
-							}
-						}
-					}
-				}
-				//ApplySettingsAssets();
-				for (FDiscAssetRecord Asset : LoadedGame->OnDiscSettingsAssets)
-				{
-					if (Asset.Class == UNoiseLayer::StaticClass())
-					{
-						for (FAssetData Data : AssetData)
-						{
-							if (Data.ObjectPath == Asset.ObjectPath)
-							{
-								FMemoryReader CelMemoryReader(Asset.AssetData);
-								FCelestialSaveGameArchive CelAr(CelMemoryReader);
-								Data.GetAsset()->Serialize(CelAr);
-								//SettingsAssets.Add(Cast<USettingsAsset>(Data.GetAsset()));
-								break;
-							}
-						}
-					}
-				}
-				//ApplySettingsAssets();
-				for (FDiscAssetRecord Asset : LoadedGame->OnDiscSettingsAssets)
-				{
-					if (Asset.Class == UNoiseSettings::StaticClass())
-					{
-						for (FAssetData Data : AssetData)
-						{
-							if (Data.ObjectPath == Asset.ObjectPath)
-							{
-								FMemoryReader CelMemoryReader(Asset.AssetData);
-								FCelestialSaveGameArchive CelAr(CelMemoryReader);
-								Data.GetAsset()->Serialize(CelAr);
-								//SettingsAssets.Add(Cast<USettingsAsset>(Data.GetAsset()));
-								break;
-							}
-						}
-					}
-				}
-				//ApplySettingsAssets();
-				for (FDiscAssetRecord Asset : LoadedGame->OnDiscSettingsAssets)
-				{
-					if (Asset.Class == UBiome::StaticClass())
-					{
-						for (FAssetData Data : AssetData)
-						{
-							if (Data.ObjectPath == Asset.ObjectPath)
-							{
-								FMemoryReader CelMemoryReader(Asset.AssetData);
-								FCelestialSaveGameArchive CelAr(CelMemoryReader);
-								Data.GetAsset()->Serialize(CelAr);
-								//SettingsAssets.Add(Cast<USettingsAsset>(Data.GetAsset()));
-								break;
-							}
-						}
-					}
-				}
-				//ApplySettingsAssets();
+				LoadOnDiscAssetsOfClass(LoadedGame->OnDiscSettingsAssets, AssetData, UColorSettings::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UBiomeColorSettings::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UShapeSettings::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UNoiseLayer::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UNoiseSettings::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UBiome::StaticClass());
 			}
-			// Load Settings Assets
+			// Load Runtime Settings Assets
 			{
-				for (auto& Asset : LoadedGame->SettingsAssets)
-				{
-					if (Asset.Class == UColorSettings::StaticClass())
-					{
-						UObject* NewSettings = APlanet::RestoreSettingsAsset<UColorSettings>(Asset.Name, Asset.AssetData);
-						SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
-					}
-				}
-				ApplySettingsAssets();
-				for (auto& Asset : LoadedGame->SettingsAssets)
-				{
-					if (Asset.Class == UBiomeColorSettings::StaticClass())
-					{
-						UObject* NewSettings = APlanet::RestoreSettingsAsset<UBiomeColorSettings>(Asset.Name, Asset.AssetData);
-						SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
-					}
-				}
-				ApplySettingsAssets();
-				for (auto& Asset : LoadedGame->SettingsAssets)
-				{
-					if (Asset.Class == UShapeSettings::StaticClass())
-					{
-						UObject* NewSettings = APlanet::RestoreSettingsAsset<UShapeSettings>(Asset.Name, Asset.AssetData);
-						SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
-					}
-				}
-				ApplySettingsAssets();
-				for (auto& Asset : LoadedGame->SettingsAssets)
-				{
-					if (Asset.Class == UNoiseLayer::StaticClass())
-					{
-						UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseLayer>(Asset.Name, Asset.AssetData);
-						SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
-					}
-				}
-				ApplySettingsAssets();
-				for (auto& Asset : LoadedGame->SettingsAssets)
-				{
-					if (Asset.Class == UNoiseSettings::StaticClass())
-					{
-						UObject* NewSettings = APlanet::RestoreSettingsAsset<UNoiseSettings>(Asset.Name, Asset.AssetData);
-						SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
-					}
-				}
-				ApplySettingsAssets();
-				for (auto& Asset : LoadedGame->SettingsAssets)
-				{
-					if (Asset.Class == UBiome::StaticClass())
-					{
-						UObject* NewSettings = APlanet::RestoreSettingsAsset<UBiome>(Asset.Name, Asset.AssetData);
-						SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
-					}
-				}
-				ApplySettingsAssets();
+				LoadRuntimeAssetsOfClass(LoadedGame->SettingsAssets, UColorSettings::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UBiomeColorSettings::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UShapeSettings::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UNoiseLayer::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UNoiseSettings::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UBiome::StaticClass());
 			}
 			
 			for (ACelestialBody* Body : bodies) // Make sure the newly created and assigned asset's delegates are bound

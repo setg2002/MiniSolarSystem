@@ -142,6 +142,9 @@ public:
 
 	class ISettingsAssetID* GetAssetByID(uint32 ID);
 
+	void LoadOnDiscAssetsOfClass(TArray<struct FDiscAssetRecord> LoadedAssets, TArray<FAssetData> OnDiscAssets, UClass* ClassToLoad);
+	void LoadRuntimeAssetsOfClass(TArray<struct FAssetRecord> LoadedAssets, UClass* ClassToLoad);
+
 private:
 	TArray<FBodySystem> BodySystems;
 
