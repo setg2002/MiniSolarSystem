@@ -20,6 +20,9 @@ public:
 	FCurveKeyUpdated OnKeyUpdated;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bConstructed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FLinearColor Color;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
