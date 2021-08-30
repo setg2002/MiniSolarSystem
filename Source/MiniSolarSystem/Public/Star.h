@@ -59,7 +59,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetRadius(float NewRadius);
-	
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetLuminosity() const { return starProperties.luminosity; }
 	UFUNCTION(BlueprintCallable)
 	void SetLuminosity(int NewLuminosity);
 
