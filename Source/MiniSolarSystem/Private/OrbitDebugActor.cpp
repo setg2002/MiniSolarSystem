@@ -176,6 +176,8 @@ void AOrbitDebugActor::DrawOrbits()
 		for (int bodyIndex = 0; bodyIndex < VirtualBodies.Num(); bodyIndex++)
 		{
 			RenderedSteps = FMath::Clamp<int64>(0.0005f * NumSteps * NumSteps, 0, 5000);
+			if (RenderedSteps == 0)
+				RenderedSteps = TNumericLimits<int32>::Max(); // Prevents divide by 0
 			TArray<FVector> NewPoints;
 			int32 factor = NumSteps / RenderedSteps < 1 ? 1 : NumSteps / RenderedSteps; // Scale down the number of lines to use as NumSteps grows over RenderedSteps to retain framerate
 			for (int j = 0; j < FMath::Min(DrawPoints[bodyIndex].Num() - 1, RenderedSteps - 1); j++)
