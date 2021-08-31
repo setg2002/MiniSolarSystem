@@ -52,10 +52,20 @@ public:
 //============== Terrestrial Planet Resolution Level ==============
 private:
 	UPROPERTY(Config)
-	int32 ResMax;
+	int32 ResMax = 2;
 public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetResMax() { return ResMax; }
 	UFUNCTION(BlueprintCallable)
 	void SetResMax(int32 NewResMax) { ResMax = NewResMax; SaveConfig(); }
+
+//============== Showing Tutorial on First Play ==============
+private:
+	UPROPERTY(Config)
+	bool bTutorialSeen = false;
+public:
+	UFUNCTION(BlueprintCallable)
+	bool GetTutorialSeen() { return bTutorialSeen; }
+	UFUNCTION(BlueprintCallable)
+	void SetTutorialSeen(bool TutorialSeen) { bTutorialSeen = TutorialSeen; SaveConfig(); }
 };
