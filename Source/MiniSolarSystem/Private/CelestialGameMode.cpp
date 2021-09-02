@@ -730,6 +730,7 @@ void ACelestialGameMode::LoadGame()
 					TerrestrialBodyNames.Add(Planet->GetBodyName());
 			}
 			TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+			GeneratePlanetsOrdered::bCurrentlyGenerating = false;
 			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
 			}
 		else
@@ -742,6 +743,7 @@ void ACelestialGameMode::LoadGame()
 					TerrestrialBodyNames.Add(Planet->GetBodyName());
 			}
 			TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+			GeneratePlanetsOrdered::bCurrentlyGenerating = false;
 			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
 		}
 	});

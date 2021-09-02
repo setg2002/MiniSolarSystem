@@ -204,10 +204,10 @@ namespace GeneratePlanetsOrdered
 	{
 		static TArray<FName> TerrestrialPlanets;
 		static TArray<FName> GeneratedPlanets;
-		static ACelestialGameMode* GameMode;
-
-		static bool bCurrentlyGenerating = false;
+		static ACelestialGameMode* GameMode;	
 	}
 
+	static bool bCurrentlyGenerating = false;
+	
 	static void NewGeneratedPlanet(FName PlanetName);
 };

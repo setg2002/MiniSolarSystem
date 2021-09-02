@@ -46,6 +46,7 @@ public:
 	FPlanetGenerated OnPlanetGenerated;
 	
 	// True when the planet is already generating
+	UPROPERTY(BlueprintReadWrite)
 	bool bGenerating;
 
 	void ResetPosition();
@@ -148,6 +149,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	void CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UDataAsset> DataAssetClass);
 
@@ -163,5 +165,7 @@ private:
 
 private:
 	const int32 Resolutions[5] = { 16, 32, 64, 128, 256 };
-	int8 ResolutionLevel;
+public:
+	UPROPERTY(BlueprintReadWrite)
+	int32 ResolutionLevel;
 };

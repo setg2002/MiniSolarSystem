@@ -31,7 +31,8 @@ TerrestrialColorGenerator::~TerrestrialColorGenerator()
 
 void TerrestrialColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 {
-	ColorSettings->DynamicMaterial->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0));
+	if (ColorSettings->DynamicMaterial)
+		ColorSettings->DynamicMaterial->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0));
 }
 
 float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
@@ -67,11 +68,14 @@ void TerrestrialColorGenerator::UpdateColors()
 		biomeColors.Add(ColorSettings->GetBiomeColorSettings()->GetBiomes()[i]->GetGradient());
 	}
 
-	UTexture2D* SurfaceTexture = CreateTexture(FString("TerrainTexture"), biomeColors);
-	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_texture"), SurfaceTexture);
+	if (ColorSettings->DynamicMaterial)
+	{
+		UTexture2D* SurfaceTexture = CreateTexture(FString("TerrainTexture"), biomeColors);
+		ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_texture"), SurfaceTexture);
 
-	UTexture2D* OceanTexture = CreateTexture(FString("OceanTexture"), TArray<UCurveLinearColor*>() = { ColorSettings->GetOceanColor() });
-	ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_oceanTexture"), OceanTexture);
+		UTexture2D* OceanTexture = CreateTexture(FString("OceanTexture"), TArray<UCurveLinearColor*>() = { ColorSettings->GetOceanColor() });
+		ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_oceanTexture"), OceanTexture);
+	}
 	
 	//AssetCleaner::CleanDirectory(EDirectoryFilterType::Textures);
 }
@@ -79,10 +83,8 @@ void TerrestrialColorGenerator::UpdateColors()
 
 UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
 {
-	if (Gradients.Num() == 0 || Gradients[0] == NULL)
-	{
+	if (Gradients.Num() == 0 || Gradients[0] == NULL || IsGarbageCollecting())
 		return nullptr;
-	}
 
 	UTexture2D* DynamicTexture = UTexture2D::CreateTransient(TextureResolution, Gradients.Num(), EPixelFormat::PF_B8G8R8A8);
 	

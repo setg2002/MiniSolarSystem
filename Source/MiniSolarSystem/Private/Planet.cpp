@@ -59,6 +59,19 @@ void APlanet::BeginPlay()
 	//GeneratePlanet();
 }
 
+void APlanet::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// Stop threads
+	for (int32 i = 0; i < 6; i++)
+	{
+		if (TerrainFaces[i])
+		{	
+			if (TerrainFaces[i]->Worker)
+				TerrainFaces[i]->Worker->EnsureCompletion();
+		}
+	}
+}
+
 void APlanet::BindDelegates()
 {
 	UnBindDelegates();
@@ -515,15 +528,13 @@ void APlanet::GeneratePlanet()
 
 		}
 	}
-	else if (bGenerating)
-		ResolutionLevel = -1;
 	else
 		OnPlanetGenerated.ExecuteIfBound(GetBodyName());
 }
 
 void APlanet::ClearMeshSections()
 {
-	for (int i = 0; i < 6; i++)
+	for (int8 i = 0; i < 6; i++)
 	{
 		ProcMesh->ClearMeshSection(i);
 	}
@@ -566,7 +577,7 @@ void APlanet::Initialize()
 	if (!ProcMesh->GetMaterial(0))
 		ColorSettings->DynamicMaterial = UMaterialInstanceDynamic::Create(ColorSettings->PlanetMat, this);
 	
-	for (int32 i = 0; i < 6; i++)
+	for (int8 i = 0; i < 6; i++)
 	{
 		TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, Resolutions[ResolutionLevel], directions[i], ProcMesh, this);
 		if (!ProcMesh->GetMaterial(i))
@@ -604,8 +615,20 @@ void APlanet::OnShapeSettingsUpdated()
 {
 	if (bAutoGenerate && ShapeSettings && ColorSettings && gameMode->GetCurrentPerspective() != 128)
 	{
-		Initialize();
-		GenerateMesh();
+		if (bGenerating && ResolutionLevel != 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Attempting to stop threads early"));
+			ResolutionLevel = 0;
+			bGenerating = false;
+			// Stop threads
+			for (int8 i = 0; i < 6; i++)
+			{
+				TerrainFaces[i]->Worker->Stop();
+			}
+			GeneratePlanet();
+		}
+		else
+			GeneratePlanet();
 	}
 }
 
@@ -631,21 +654,23 @@ void APlanet::GenerateColors()
 
 	if (bMultithreadGeneration)
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
-	
+
 	bGenerating = false;
 
-	if (ResolutionLevel < Cast<UCelestialGameInstance>(GetGameInstance())->GetResMax() - 1) // Regenerate at the next level
+	if (GetWorld())
 	{
-		ResolutionLevel++;
-		ReGenerate();
-	}
-	else
-	{	
-		ResolutionLevel = 0;
-		UE_LOG(LogTemp, Warning, TEXT("%s finished generating"), *BodyName.ToString());
-		OnPlanetGenerated.ExecuteIfBound(this->BodyName);
-	}
-		
+		if (ResolutionLevel < Cast<UCelestialGameInstance>(GetGameInstance())->GetResMax() - 1) // Regenerate at the next level
+		{
+			ResolutionLevel++;
+			ReGenerate();
+		}
+		else
+		{	
+			ResolutionLevel = 0;
+			UE_LOG(LogTemp, Warning, TEXT("%s finished generating"), *BodyName.ToString());
+			OnPlanetGenerated.ExecuteIfBound(this->BodyName);
+		}
+	}	
 }
 
 void APlanet::ReconveneTerrainFaceThreads(int FaceNum)
