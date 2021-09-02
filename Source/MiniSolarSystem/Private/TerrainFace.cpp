@@ -10,7 +10,7 @@
 #include "Planet.h"
 
 
-TerrainFace::TerrainFace(int32 FaceMeshSection, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* procMesh)
+TerrainFace::TerrainFace(int8 FaceMeshSection, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* procMesh)
 	: ProcMesh(procMesh), colorGenerator(color_Generator), shapeGenerator(shape_Generator), MeshSection(FaceMeshSection), bFinished(false)
 {
 	Data = FTerrainFaceData(resolution, localUp);
@@ -18,7 +18,15 @@ TerrainFace::TerrainFace(int32 FaceMeshSection, ShapeGenerator* shape_Generator,
 
 TerrainFace::~TerrainFace()
 {
+	//delete& Data;
 	if (Worker)	Worker->EnsureCompletion();
+}
+
+void TerrainFace::UpdateResolution(int32 NewResolution)
+{
+	FVector LocalUp = Data.LocalUp;
+	//delete& Data;
+	Data = FTerrainFaceData(NewResolution, LocalUp);
 }
 
 void TerrainFace::CalculateMesh()
@@ -137,7 +145,7 @@ uint32 FTerrainFaceWorker::Run()
 	if (!bGenerateTangentsNormalsOnly)
 	{
 		int triIndex = 0;
-		
+
 		for (int y = 0; y < Data.Resolution; y++)
 		{
 			for (int x = 0; x < Data.Resolution; x++)
@@ -171,8 +179,20 @@ uint32 FTerrainFaceWorker::Run()
 			}
 		}
 	}
-	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(Data.verticies, Data.triangles, Data.uv, Data.normals, Data.tangents);
-	AsyncTask(ENamedThreads::GameThread, [this]() { Parent->CreateMesh(); });
+	//	We need to make a copy of Data to pass to the tangents calculation because the game will crash if data is
+	// deleted mid-calculation.
+	FTerrainFaceData DataCopy = FTerrainFaceData(Data.verticies, Data.triangles, Data.uv, Data.normals, Data.tangents);
+	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(DataCopy.verticies, DataCopy.triangles, DataCopy.uv, DataCopy.normals, DataCopy.tangents);
+
+	if (StopTaskCounter.GetValue() == 0)
+	{
+		Data.normals = DataCopy.normals;
+		Data.tangents = DataCopy.tangents;
+		AsyncTask(ENamedThreads::GameThread, [this]() { Parent->CreateMesh(); });
+	}
+	else
+		return 1;
+
 	return 0;
 }
 

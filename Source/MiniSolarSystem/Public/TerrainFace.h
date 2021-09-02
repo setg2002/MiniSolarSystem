@@ -55,16 +55,32 @@ struct FTerrainFaceData
         tangents = TArray<FProcMeshTangent>();
         VertexColors = TArray<FColor>();
     }
+
+    FTerrainFaceData(TArray<FVector> IN_Verticies, TArray<int32> IN_Triangles, TArray<FVector2D> IN_uv, TArray<FVector> IN_Normals, TArray<FProcMeshTangent> IN_Tangents)
+        : verticies(IN_Verticies), 
+        triangles(IN_Triangles), 
+        uv(IN_uv), 
+        normals(IN_Normals), 
+        tangents(IN_Tangents),
+        VertexColors(TArray<FColor>()),
+        Resolution(0),
+        LocalUp(FVector::ZeroVector),
+        axisA(FVector::ZeroVector),
+        axisB(FVector::ZeroVector)
+    {
+    }
 };
 
 
 class MINISOLARSYSTEM_API TerrainFace
 {
 public:
-	TerrainFace(int32 FaceMeshSection, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* mesh);
+	TerrainFace(int8 FaceMeshSection, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* mesh);
 	~TerrainFace();
 
     FTerrainFaceData Data;
+
+    void UpdateResolution(int32 NewResolution);
 
 	UProceduralMeshComponent* ProcMesh;
 
@@ -73,7 +89,7 @@ public:
 
     class FTerrainFaceWorker* Worker;
 
-	int32 MeshSection;
+	int8 MeshSection;
 
 	void ConstructMeshAsync(TerrestrialColorGenerator* colorGenerator);
 

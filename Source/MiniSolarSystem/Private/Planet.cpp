@@ -604,8 +604,8 @@ void APlanet::Initialize()
 		if (!TerrainFaces[i])
 			TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, Resolutions[ResolutionLevel], directions[i], ProcMesh);
 		else
-			TerrainFaces[i]->Data = FTerrainFaceData(Resolutions[ResolutionLevel], directions[i]);
-		
+			TerrainFaces[i]->UpdateResolution(Resolutions[ResolutionLevel]);
+			
 		if (!ProcMesh->GetMaterial(i))
 			ProcMesh->SetMaterial(i, ColorSettings->DynamicMaterial);
 	}
