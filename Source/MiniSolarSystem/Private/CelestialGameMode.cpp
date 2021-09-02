@@ -1,6 +1,5 @@
 // Copyright Soren Gilbertson
 
-//TODO Remove unneccesary includes
 #include "CelestialGameMode.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -8,12 +7,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "BodySystemFunctionLibrary.h"
 #include "ColorCurveFunctionLibrary.h"
-#include "BodySystemFunctionLibrary.h"
 #include "CelestialSaveGameArchive.h"
-#include "Curves/CurveLinearColor.h"
 #include "GasGiantColorSettings.h"
 #include "CelestialGameInstance.h"
-#include "Blueprint/UserWidget.h"
 #include "RingSystemComponent.h"
 #include "AtmosphereComponent.h"
 #include "AssetRegistryModule.h"
