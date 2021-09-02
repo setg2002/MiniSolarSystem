@@ -26,9 +26,17 @@
 
 APlanet::APlanet()
 {
+	PrimaryActorTick.bTickEvenWhenPaused = true;
+
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
 	shapeGenerator = new ShapeGenerator();
 	colorGenerator = new TerrestrialColorGenerator(this);
+}
+
+APlanet::~APlanet()
+{
+	delete shapeGenerator;
+	delete colorGenerator;
 }
 
 void APlanet::OnConstruction(const FTransform & Transform)
@@ -55,8 +63,6 @@ void APlanet::BeginPlay()
 	CreateSettingsAssets();
 
 	BindDelegates();
-
-	//GeneratePlanet();
 }
 
 void APlanet::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -177,6 +183,21 @@ void APlanet::BindSettingsIDs()
 void APlanet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bGenerating && bMultithreadGeneration)
+	{
+		bool bAllThreadsFinished = true;
+		for (int8 i = 0; i < 6; i++)
+		{
+			if (!TerrainFaces[i]->GetIsFinished())
+			{
+				bAllThreadsFinished = false;
+				break;
+			}
+		}
+		if (bAllThreadsFinished)
+			GenerateColors();
+	}
 
 }
 
@@ -507,9 +528,10 @@ void APlanet::GeneratePlanet()
 	if (!bGenerating && ShapeSettings && ColorSettings)
 	{
 		if (ResolutionLevel == 0)
+		{
 			UE_LOG(LogTemp, Warning, TEXT("%s started generating"), *BodyName.ToString());
-		
-		Collider->SetSphereRadius(ShapeSettings->GetRadius() + 10);
+			Collider->SetSphereRadius(ShapeSettings->GetRadius() + 10);
+		}
 
 		if (ShapeSettings->IsNoiseLayers())
 		{
@@ -579,7 +601,11 @@ void APlanet::Initialize()
 	
 	for (int8 i = 0; i < 6; i++)
 	{
-		TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, Resolutions[ResolutionLevel], directions[i], ProcMesh, this);
+		if (!TerrainFaces[i])
+			TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, Resolutions[ResolutionLevel], directions[i], ProcMesh);
+		else
+			TerrainFaces[i]->Data = FTerrainFaceData(Resolutions[ResolutionLevel], directions[i]);
+		
 		if (!ProcMesh->GetMaterial(i))
 			ProcMesh->SetMaterial(i, ColorSettings->DynamicMaterial);
 	}
@@ -599,13 +625,9 @@ void APlanet::GenerateMesh()
 		for (int i = 0; i < 6; i++)
 		{
 			if ((int)FaceRenderMask - 1 == i || FaceRenderMask == EFaceRenderMask::NoMask)
-			{
 				TerrainFaces[i]->CalculateMesh();
-			}
 			else
-			{
 				ProcMesh->ClearMeshSection(i);
-			}
 		}
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
 	}
@@ -617,7 +639,6 @@ void APlanet::OnShapeSettingsUpdated()
 	{
 		if (bGenerating && ResolutionLevel != 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Attempting to stop threads early"));
 			ResolutionLevel = 0;
 			bGenerating = false;
 			// Stop threads
@@ -671,17 +692,6 @@ void APlanet::GenerateColors()
 			OnPlanetGenerated.ExecuteIfBound(this->BodyName);
 		}
 	}	
-}
-
-void APlanet::ReconveneTerrainFaceThreads(int FaceNum)
-{
-	FinishedFaces.Add(FaceNum);
-
-	if (FinishedFaces.IsValidIndex(5))
-	{
-		FinishedFaces.Empty();
-		GenerateColors();
-	}
 }
 
 float APlanet::GetBodyRadius() const

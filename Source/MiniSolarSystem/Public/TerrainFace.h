@@ -61,10 +61,8 @@ struct FTerrainFaceData
 class MINISOLARSYSTEM_API TerrainFace
 {
 public:
-	TerrainFace(int32 i, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* mesh, AActor* owner);
+	TerrainFace(int32 FaceMeshSection, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* mesh);
 	~TerrainFace();
-
-	AActor* Owner;
 
     FTerrainFaceData Data;
 
@@ -77,7 +75,6 @@ public:
 
 	int32 MeshSection;
 
-	void ConstructMesh(TerrestrialColorGenerator* colorGenerator);
 	void ConstructMeshAsync(TerrestrialColorGenerator* colorGenerator);
 
 	void CalculateMesh();
@@ -88,8 +85,12 @@ public:
 	void UpdateTangentsNormals();
 	void UpdateTangentsNormalsAsync();
 
+    bool GetIsFinished() const { return bFinished; }
+
 private:
 	TArray<FVector> PointsOnUnitSphere;
+
+    bool bFinished;
 };
 
 
@@ -109,17 +110,16 @@ class FTerrainFaceWorker : public FRunnable
     /** Stop this thread? Uses Thread Safe Counter */
     FThreadSafeCounter StopTaskCounter;
 
+    bool bGenerateTangentsNormalsOnly;
+
+public:
     //Done?
-    bool IsFinished() const
-    {
-        return Data.verticies.Num() == FMath::Square(Data.Resolution);
-    }
+    bool IsFinished() const { return Parent->GetIsFinished(); }
 
     //~~~ Thread Core Functions ~~~
 
-public:
     //Constructor / Destructor
-    FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, TerrestrialColorGenerator* IN_ColorGenerator, ShapeGenerator* IN_ShapeGenerator);
+    FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, TerrestrialColorGenerator* IN_ColorGenerator, ShapeGenerator* IN_ShapeGenerator, bool GenerateTangentsNormalsOnly);
     ~FTerrainFaceWorker();
 
     // Begin FRunnable interface.

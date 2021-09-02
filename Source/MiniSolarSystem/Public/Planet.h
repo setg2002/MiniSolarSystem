@@ -42,6 +42,7 @@ class MINISOLARSYSTEM_API APlanet : public ACelestialBody
 	
 public:
 	APlanet();
+	~APlanet();
 
 	FPlanetGenerated OnPlanetGenerated;
 	
@@ -127,9 +128,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnColorSettingsUpdated();
 
-	// Executes remaining funcetions necessary to complete planet generation once all terrain face threads are finished
-	void ReconveneTerrainFaceThreads(int FaceNum);
-
 	virtual void OnConstruction(const FTransform & Transform) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -153,6 +151,7 @@ protected:
 
 	void CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UDataAsset> DataAssetClass);
 
+private:
 	const FVector directions[6] = { FVector().UpVector,
 									FVector().DownVector,
 									FVector().LeftVector,
@@ -160,12 +159,6 @@ protected:
 									FVector().ForwardVector,
 									FVector().BackwardVector };
 
-private:
-	TArray<int8> FinishedFaces;
-
-private:
 	const int32 Resolutions[5] = { 16, 32, 64, 128, 256 };
-public:
-	UPROPERTY(BlueprintReadWrite)
 	int32 ResolutionLevel;
 };
