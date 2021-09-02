@@ -180,15 +180,22 @@ void ACelestialBody::AddCelestialComponent(UStaticMeshComponent* NewComp)
 
 void ACelestialBody::CalculateOrbitVelocity()
 {
-	if (OrbitingBody == this || OrbitingBody == nullptr)
+	if (OrbitingBody == this || !OrbitingBody)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OrbitingBody cannot be null or itself"));
 		return;
 	}
 	else
 	{
-		//TODO Replace 100 with gravitational constant from gamemode
-		float GM = 100 * (this->mass + OrbitingBody->GetMass());
+		float GM;
+#if WITH_EDITOR
+		if (GetWorld()->IsPlayInEditor())
+			GM = gameMode->GetGravitationalConstant() * (this->mass + OrbitingBody->GetMass());
+		else
+			GM = 100 * (this->mass + OrbitingBody->GetMass());
+#else
+		GM = gameMode->GetGravitationalConstant() * (this->mass + OrbitingBody->GetMass());
+#endif
 		orbitVelocity = FMath::Sqrt(GM);
 		return;
 	}
@@ -206,14 +213,12 @@ void ACelestialBody::SetToOrbit()
 	FVector Up = Collider->GetUpVector();
 	FVector Tangent = FVector().CrossProduct(AtPlanet, Up).GetSafeNormal();
 
-	initialVelocity.X = Tangent.X * -orbitVelocity + OrbitingBody->initialVelocity.X;
-	initialVelocity.Y = Tangent.Y * -orbitVelocity + OrbitingBody->initialVelocity.Y;
-	initialVelocity.Z = Tangent.Z * -orbitVelocity + OrbitingBody->initialVelocity.Z;
+	currentVelocity.X = initialVelocity.X = Tangent.X * -orbitVelocity + OrbitingBody->initialVelocity.X;
+	currentVelocity.Y = initialVelocity.Y = Tangent.Y * -orbitVelocity + OrbitingBody->initialVelocity.Y;
+	currentVelocity.Z = initialVelocity.Z = Tangent.Z * -orbitVelocity + OrbitingBody->initialVelocity.Z;
 
 	if (AOrbitDebugActor::Get()->bAutoDraw)
-	{
 		AOrbitDebugActor::Get()->DrawOrbits();
-	}
 
 	// Debugging
 	if (bVectorDebug)

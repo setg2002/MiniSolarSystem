@@ -186,7 +186,7 @@ void UAtmosphereComponent::PostEditChangeProperty(FPropertyChangedEvent& Propert
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(UAtmosphereComponent, CloudHeight))
 		{
-			CloudComponent->SetRelativeScale3D(FVector(CloudHeight)); //HACK This should not be here, only the cloud component itself should control this 
+			CloudComponent->SetRelativeScale3D(FVector(CloudHeight));
 		}
 	}
 }
