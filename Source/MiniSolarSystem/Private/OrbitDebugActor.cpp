@@ -20,9 +20,8 @@ AOrbitDebugActor* AOrbitDebugActor::_instance; // Needed for singleton implement
 AOrbitDebugActor* AOrbitDebugActor::Get()
 {
 	if (_instance == 0)
-	{
 		_instance = NewObject<AOrbitDebugActor>();
-	}
+		
 	return _instance;
 }
 
@@ -32,7 +31,7 @@ AOrbitDebugActor::AOrbitDebugActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	_instance = this; //FIX Possibly redundant from Get()?
+	_instance = this;
 
 	ParticleTemplate = LoadObject<UNiagaraSystem>(NULL, TEXT("NiagaraSystem'/Game/Particles/OrbitDebug/OrbitDebugEmitter_System.OrbitDebugEmitter_System'"), NULL, LOAD_None, NULL);
 }
@@ -304,7 +303,6 @@ void AOrbitDebugActor::PostEditChangeProperty(FPropertyChangedEvent & PropertyCh
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
-		//TODO Is there a shorter way to rewrite this line?
 		if ((PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, NumSteps) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, TimeStep) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, bRelativeToBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, CentralBody) || PropertyName == GET_MEMBER_NAME_CHECKED(AOrbitDebugActor, Width)) && bAutoDraw)
 		{
 			DrawOrbits();

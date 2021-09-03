@@ -176,8 +176,7 @@ UColorCurveKey* UColorCurve::AddKey(float Time, FLinearColor Color = FLinearColo
 	FKeyHandle NewKeyHandle = FKeyHandle();
 	for (int8 i = 0; i < 4; i++)
 	{
-		//TODO Is this the best way to write this line?
-		Gradient->FloatCurves[i].AddKey(Time, i == 0 ? Color.R : i == 1 ? Color.G : i == 2 ? Color.B :Color.A, false, NewKeyHandle);
+		Gradient->FloatCurves[i].AddKey(Time, i == 0 ? Color.R : i == 1 ? Color.G : i == 2 ? Color.B : Color.A, false, NewKeyHandle);
 	}
 	NewKey->Handle = NewKeyHandle;
 
