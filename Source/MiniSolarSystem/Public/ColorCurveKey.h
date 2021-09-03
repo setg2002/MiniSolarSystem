@@ -17,6 +17,8 @@ class MINISOLARSYSTEM_API UColorCurveKey : public UUserWidget
 	DECLARE_DELEGATE(FCurveKeyUpdated)
 
 public:
+	virtual void NativeConstruct() override;
+
 	FCurveKeyUpdated OnKeyUpdated;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -32,10 +34,10 @@ public:
 	FKeyHandle Handle;
 
 	UFUNCTION(BlueprintCallable)
-	void SetNewTime(float NewTime, bool bUpdate);
+	void SetNewTime(float NewTime, bool bUpdate = true);
 
 	UFUNCTION(BlueprintCallable)
-	void SetNewColor(FLinearColor NewColor);
+	void SetNewColor(FLinearColor NewColor, bool bUpdate = true);
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveKey();

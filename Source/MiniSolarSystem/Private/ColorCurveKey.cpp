@@ -5,6 +5,12 @@
 #include "Curves/CurveLinearColor.h"
 #include "Components/CanvasPanelSlot.h"
 
+void UColorCurveKey::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	bHasScriptImplementedTick = false;
+}
 
 void UColorCurveKey::SetNewTime(float NewTime, bool bUpdate)
 {
@@ -20,7 +26,7 @@ void UColorCurveKey::SetNewTime(float NewTime, bool bUpdate)
 		OnKeyUpdated.ExecuteIfBound();
 }
 
-void UColorCurveKey::SetNewColor(FLinearColor NewColor)
+void UColorCurveKey::SetNewColor(FLinearColor NewColor, bool bUpdate)
 {
 	Color = NewColor;
 
@@ -28,7 +34,8 @@ void UColorCurveKey::SetNewColor(FLinearColor NewColor)
 	{
 		Gradient->FloatCurves[i].SetKeyValue(Handle, i == 0 ? Color.R : i == 1 ? Color.G : i == 2 ? Color.B : Color.A);
 	}
-	OnKeyUpdated.ExecuteIfBound();
+	if (bUpdate)
+		OnKeyUpdated.ExecuteIfBound();
 }
 
 void UColorCurveKey::RemoveKey()
