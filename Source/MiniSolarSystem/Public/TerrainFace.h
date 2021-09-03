@@ -18,7 +18,7 @@ class AActor;
 
 struct FTerrainFaceData
 {
-    TArray<FVector> verticies;
+    TArray<FVector> vertices;
     TArray<int32> triangles;
     TArray<FVector2D> uv;
     TArray<FVector> normals;
@@ -35,7 +35,7 @@ struct FTerrainFaceData
         Resolution = 0;
         axisA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X);
         axisB = FVector().CrossProduct(LocalUp, axisA);
-        verticies = TArray<FVector>();
+        vertices = TArray<FVector>();
         triangles = TArray<int32>();
         uv = TArray<FVector2D>();
         normals = TArray<FVector>();
@@ -48,7 +48,7 @@ struct FTerrainFaceData
     {
         axisA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X);
         axisB = FVector().CrossProduct(LocalUp, axisA);
-        verticies = TArray<FVector>();
+        vertices = TArray<FVector>();
         triangles = TArray<int32>();
         uv = TArray<FVector2D>();
         normals = TArray<FVector>();
@@ -57,7 +57,7 @@ struct FTerrainFaceData
     }
 
     FTerrainFaceData(TArray<FVector> IN_Verticies, TArray<int32> IN_Triangles, TArray<FVector2D> IN_uv, TArray<FVector> IN_Normals, TArray<FProcMeshTangent> IN_Tangents)
-        : verticies(IN_Verticies), 
+        : vertices(IN_Verticies), 
         triangles(IN_Triangles), 
         uv(IN_uv), 
         normals(IN_Normals), 

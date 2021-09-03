@@ -49,7 +49,7 @@ void TerrainFace::CalculateMesh()
 			PointsOnUnitSphere[i] = pointOnUnitSphere;
 			float unscaledElevation = shapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
 			float scaledElevation = shapeGenerator->GetScaledElevation(unscaledElevation);
-			Data.verticies.EmplaceAt(i, pointOnUnitSphere * scaledElevation);
+			Data.vertices.EmplaceAt(i, pointOnUnitSphere * scaledElevation);
 			Data.uv[i].X = colorGenerator->BiomePercentFromPoint(pointOnUnitSphere);
 			Data.uv[i].Y = unscaledElevation;
 
@@ -81,7 +81,7 @@ void TerrainFace::UpdateBiomePercents()
 			Data.uv[i].X = colorGenerator->BiomePercentFromPoint(PointsOnUnitSphere[i]);
 		}
 	}
-	ProcMesh->UpdateMeshSection(MeshSection, Data.verticies, Data.normals, Data.uv, Data.VertexColors, Data.tangents);
+	ProcMesh->UpdateMeshSection(MeshSection, Data.vertices, Data.normals, Data.uv, Data.VertexColors, Data.tangents);
 }
 
 void TerrainFace::ConstructMeshAsync(TerrestrialColorGenerator* color_Generator)
@@ -94,7 +94,7 @@ void TerrainFace::ConstructMeshAsync(TerrestrialColorGenerator* color_Generator)
 
 void TerrainFace::UpdateTangentsNormals()
 {
-	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(Data.verticies, Data.triangles, Data.uv, Data.normals, Data.tangents);
+	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(Data.vertices, Data.triangles, Data.uv, Data.normals, Data.tangents);
 	AsyncTask(ENamedThreads::GameThread, [this]() { CreateMesh(); });
 }
 
@@ -108,7 +108,7 @@ void TerrainFace::UpdateTangentsNormalsAsync()
 
 void TerrainFace::CreateMesh()
 {
-	ProcMesh->CreateMeshSection(MeshSection, Data.verticies, Data.triangles, Data.normals, Data.uv, Data.VertexColors, Data.tangents, false);
+	ProcMesh->CreateMeshSection(MeshSection, Data.vertices, Data.triangles, Data.normals, Data.uv, Data.VertexColors, Data.tangents, false);
 	bFinished = true;
 }
 
@@ -132,7 +132,7 @@ bool FTerrainFaceWorker::Init()
     //Init the Data 
 	if (!bGenerateTangentsNormalsOnly)
 	{
-		Data.verticies.Empty();
+		Data.vertices.Empty();
 		Data.uv.Empty();
 		Data.uv.SetNum(Data.Resolution * Data.Resolution);
 		PointsOnUnitSphere.Empty();
@@ -160,7 +160,7 @@ uint32 FTerrainFaceWorker::Run()
 					FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
 					PointsOnUnitSphere[i] = pointOnUnitSphere;
 					float unscaledElevation = shapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
-					Data.verticies.EmplaceAt(i, pointOnUnitSphere * shapeGenerator->GetScaledElevation(unscaledElevation));
+					Data.vertices.EmplaceAt(i, pointOnUnitSphere * shapeGenerator->GetScaledElevation(unscaledElevation));
 					Data.uv[i].X = ColorGenerator->BiomePercentFromPoint(pointOnUnitSphere);
 					Data.uv[i].Y = unscaledElevation;
 
@@ -184,8 +184,8 @@ uint32 FTerrainFaceWorker::Run()
 	}
 	//	We need to make a copy of Data to pass to the tangents calculation because the game will crash if data is
 	// deleted mid-calculation.
-	FTerrainFaceData DataCopy = FTerrainFaceData(Data.verticies, Data.triangles, Data.uv, Data.normals, Data.tangents);
-	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(DataCopy.verticies, DataCopy.triangles, DataCopy.uv, DataCopy.normals, DataCopy.tangents);
+	FTerrainFaceData DataCopy = FTerrainFaceData(Data.vertices, Data.triangles, Data.uv, Data.normals, Data.tangents);
+	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(DataCopy.vertices, DataCopy.triangles, DataCopy.uv, DataCopy.normals, DataCopy.tangents);
 
 	if (StopTaskCounter.GetValue() == 0)
 	{
