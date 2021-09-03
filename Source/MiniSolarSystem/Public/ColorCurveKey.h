@@ -32,7 +32,7 @@ public:
 	FKeyHandle Handle;
 
 	UFUNCTION(BlueprintCallable)
-	void SetNewTime(float NewTime);
+	void SetNewTime(float NewTime, bool bUpdate);
 
 	UFUNCTION(BlueprintCallable)
 	void SetNewColor(FLinearColor NewColor);

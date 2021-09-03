@@ -6,7 +6,7 @@
 #include "Components/CanvasPanelSlot.h"
 
 
-void UColorCurveKey::SetNewTime(float NewTime)
+void UColorCurveKey::SetNewTime(float NewTime, bool bUpdate)
 {
 	Time = NewTime;
 	UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(this->Slot);
@@ -16,7 +16,8 @@ void UColorCurveKey::SetNewTime(float NewTime)
 	{
 		Gradient->FloatCurves[i].SetKeyTime(Handle, NewTime);
 	}
-	OnKeyUpdated.ExecuteIfBound();
+	if (bUpdate)
+		OnKeyUpdated.ExecuteIfBound();
 }
 
 void UColorCurveKey::SetNewColor(FLinearColor NewColor)

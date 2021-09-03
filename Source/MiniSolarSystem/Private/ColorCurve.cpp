@@ -186,27 +186,19 @@ UColorCurveKey* UColorCurve::AddKey(float Time, FLinearColor Color = FLinearColo
 
 void UColorCurve::UpdateGradient()
 {
-	Image_Gradient->SetBrushFromTexture(UColorCurveFunctionLibrary::TextureFromCurve(Gradient, 256, 1));
-	// Update Color settings????
 	switch (ColorCurveType)
 	{
 	case(Ocean || Biome):
-		if (Cast<APlanet>(ObjectToUpdate))
-		{
-			Cast<APlanet>(ObjectToUpdate)->OnColorSettingsUpdated();
-		}
+		if (APlanet* Planet = Cast<APlanet>(ObjectToUpdate))
+			Planet->OnColorSettingsUpdated();
 		break;
 	case(GasGiant):
-		if (Cast<AGasGiant>(ObjectToUpdate))
-		{
-			Cast<AGasGiant>(ObjectToUpdate)->SetGradient(Gradient);
-		}
+		if (AGasGiant* GasGiant = Cast<AGasGiant>(ObjectToUpdate))
+			GasGiant->SetGradient(Gradient);
 		break;
 	case(RingSystem):
-		if (Cast<URingSystemComponent>(ObjectToUpdate))
-		{
-			Cast<URingSystemComponent>(ObjectToUpdate)->SetGradient(Gradient);
-		}
+		if (URingSystemComponent* RingSystemComponent = Cast<URingSystemComponent>(ObjectToUpdate))
+			RingSystemComponent->SetGradient(Gradient);
 		break;
 	default:
 		break;
