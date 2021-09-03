@@ -189,7 +189,7 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 		NewBiomeColorSettings.NoiseOffset = OldBiomeColorSettings.NoiseOffset;
 		NewBiomeColorSettings.NoiseStrength = OldBiomeColorSettings.NoiseStrength;
 		NewBiomeColorSettings.blendAmount = OldBiomeColorSettings.blendAmount;
-		UNoiseSettings* NewNoise = Cast<UNoiseSettings>(NewPlanet->CreateSettingsAsset(UNoiseSettings::StaticClass()));
+		UNoiseSettings* NewNoise = NewPlanet->CreateSettingsAsset<UNoiseSettings>(UNoiseSettings::StaticClass());
 		NewNoise->SetStruct(
 			FNoiseSettings_(
 				OldBiomeColorSettings.Noise->GetStruct().FilterType,
@@ -221,7 +221,7 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 		NewPlanet->ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
 		for (UBiome* OldBiome : OldPlanet->ColorSettings->GetBiomeColorSettings()->GetBiomes())
 		{
-			UBiome* NewBiome = Cast<UBiome>(NewPlanet->CreateSettingsAsset(UBiome::StaticClass()));
+			UBiome* NewBiome = NewPlanet->CreateSettingsAsset<UBiome>(UBiome::StaticClass());
 			FBiome_ NewStruct;
 			FBiome_ OldStruct = OldBiome->GetStruct();
 			memcpy(&NewStruct, &OldStruct, sizeof(FBiome_));
@@ -243,8 +243,8 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 		for (UNoiseLayer* OldLayer : OldPlanet->ShapeSettings->GetNoiseLayers())
 		{
 			GetGameInstance<UCelestialGameInstance>()->CopyNoiseLayer(OldLayer);
-			UNoiseLayer* NewLayer = Cast<UNoiseLayer>(NewPlanet->CreateSettingsAsset(UNoiseLayer::StaticClass()));
-			UNoiseSettings* NewSettings = Cast<UNoiseSettings>(NewPlanet->CreateSettingsAsset(UNoiseSettings::StaticClass()));
+			UNoiseLayer* NewLayer = NewPlanet->CreateSettingsAsset<UNoiseLayer>(UNoiseLayer::StaticClass());
+			UNoiseSettings* NewSettings = NewPlanet->CreateSettingsAsset<UNoiseSettings>(UNoiseSettings::StaticClass());
 			NewLayer->NoiseSettings = NewSettings;
 			GetGameInstance<UCelestialGameInstance>()->PasteNoiseLayer(NewLayer);
 			NewPlanet->ShapeSettings->AddNoiseLayer(NewLayer);

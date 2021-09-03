@@ -206,7 +206,38 @@ void APlanet::ResetPosition()
 	ProcMesh->SetRelativeLocation(FVector::ZeroVector);
 }
 
-UObject* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
+UObject* APlanet::CreateSettingsAssetBP(TSubclassOf<UObject> AssetClass)
+{
+	FString AssetPath = FString("/Game/DataAssets/Runtime/");
+	FString AssetName = FString(TEXT("DA_")) + this->BodyName.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
+	FString PackagePath = AssetPath + AssetName;
+
+	int AssetNum = 0;
+	bool PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
+	while (PackageExists)
+	{
+		AssetNum++;
+		AssetName = FString(TEXT("DA_")) + this->BodyName.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_" + FString::FromInt(AssetNum);
+		PackagePath = AssetPath + AssetName;
+
+		PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
+	}
+
+	UPackage* Package = CreatePackage(*PackagePath);
+	UObject* NewAsset = NewObject<UObject>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+
+	FAssetRegistryModule::AssetCreated(NewAsset);
+	NewAsset->MarkPackageDirty();
+
+	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
+	bool bSuccess = UPackage::SavePackage(Package, NewAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
+
+	return NewAsset;
+}
+
+template< class T >
+T* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 {
 	FString AssetPath = FString("/Game/DataAssets/Runtime/");
 	FString AssetName = FString(TEXT("DA_")) + this->BodyName.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
@@ -224,7 +255,7 @@ UObject* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 	}
 
 	UPackage *Package = CreatePackage(*PackagePath);
-	UObject* NewAsset = NewObject<UObject>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+	T* NewAsset = NewObject<T>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
 
 	FAssetRegistryModule::AssetCreated(NewAsset);
 	NewAsset->MarkPackageDirty();
@@ -236,7 +267,8 @@ UObject* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 	return NewAsset;
 }
 
-UObject* APlanet::CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
+template< class T >
+T* APlanet::CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
 {
 	FString AssetPath = FString("/Game/DataAssets/" + this->BodyName.ToString() + "/");
 	FString AssetName = FString(TEXT("DA_")) + this->BodyName.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
@@ -254,7 +286,7 @@ UObject* APlanet::CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
 	}
 
 	UPackage *Package = CreatePackage(*PackagePath);
-	UObject* NewAsset = NewObject<UObject>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
+	T* NewAsset = NewObject<T>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
 
 	FAssetRegistryModule::AssetCreated(NewAsset);
 	NewAsset->MarkPackageDirty();
@@ -334,7 +366,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ColorSettings == nullptr)
 		{
-			ColorSettings = Cast<UColorSettings>(CreateSettingsAsset(UColorSettings::StaticClass()));
+			ColorSettings = CreateSettingsAsset<UColorSettings>(UColorSettings::StaticClass());
 			ColorSettings->GetPackage()->MarkPackageDirty();
 			ColorSettings->AddAppliedID(ID);
 		}
@@ -347,7 +379,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ColorSettings->GetBiomeColorSettings() == nullptr)
 		{
-			ColorSettings->SetBiomeColorSettings(Cast<UBiomeColorSettings>(CreateSettingsAsset(UBiomeColorSettings::StaticClass())));
+			ColorSettings->SetBiomeColorSettings(CreateSettingsAsset<UBiomeColorSettings>(UBiomeColorSettings::StaticClass()));
 			ColorSettings->GetBiomeColorSettings()->GetPackage()->MarkPackageDirty();
 			ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
 		}
@@ -360,7 +392,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr)
 		{
-			ColorSettings->GetBiomeColorSettings()->SetNoise(Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass())));
+			ColorSettings->GetBiomeColorSettings()->SetNoise(CreateSettingsAsset<UNoiseSettings>(UNoiseSettings::StaticClass()));
 			ColorSettings->GetBiomeColorSettings()->GetNoise()->GetPackage()->MarkPackageDirty();
 			ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
 		}
@@ -375,7 +407,7 @@ void APlanet::CreateSettingsAssets()
 		else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
 		{
 			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
-			ColorSettings->GetBiomeColorSettings()->AddBiome(Cast<UBiome>(CreateSettingsAsset(UBiome::StaticClass())));
+			ColorSettings->GetBiomeColorSettings()->AddBiome(CreateSettingsAsset<UBiome>(UBiome::StaticClass()));
 			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
 			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
 		}
@@ -389,7 +421,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ShapeSettings == nullptr)
 		{
-			ShapeSettings = Cast<UShapeSettings>(CreateSettingsAsset(UShapeSettings::StaticClass()));
+			ShapeSettings = CreateSettingsAsset<UShapeSettings>(UShapeSettings::StaticClass());
 			ShapeSettings->GetPackage()->MarkPackageDirty();
 			ShapeSettings->AddAppliedID(ID);
 		}
@@ -404,7 +436,7 @@ void APlanet::CreateSettingsAssets()
 		else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
 		{
 			ShapeSettings->GetNoiseLayers().Empty();
-			ShapeSettings->AddNoiseLayer(Cast<UNoiseLayer>(CreateSettingsAsset(UNoiseLayer::StaticClass())));
+			ShapeSettings->AddNoiseLayer(CreateSettingsAsset<UNoiseLayer>(UNoiseLayer::StaticClass()));
 			ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
 			ShapeSettings->GetNoiseLayers()[0]->AddAppliedID(ShapeSettings->GetID());
 		}
@@ -417,7 +449,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr)
 		{
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAsset(UNoiseSettings::StaticClass()));
+			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = CreateSettingsAsset<UNoiseSettings>(UNoiseSettings::StaticClass());
 			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
 			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->AddAppliedID(ShapeSettings->GetNoiseLayers()[0]->GetID());
 		}
@@ -432,7 +464,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ColorSettings == nullptr)
 		{
-			ColorSettings = Cast<UColorSettings>(CreateSettingsAssetEditor(UColorSettings::StaticClass()));
+			ColorSettings = CreateSettingsAssetEditor<UColorSettings>(UColorSettings::StaticClass());
 			ColorSettings->GetPackage()->MarkPackageDirty();
 			ColorSettings->AddAppliedID(ID);
 		}
@@ -445,7 +477,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ColorSettings->GetBiomeColorSettings() == nullptr)
 		{
-			ColorSettings->SetBiomeColorSettings(Cast<UBiomeColorSettings>(CreateSettingsAssetEditor(UBiomeColorSettings::StaticClass())));
+			ColorSettings->SetBiomeColorSettings(CreateSettingsAssetEditor<UBiomeColorSettings>(UBiomeColorSettings::StaticClass()));
 			ColorSettings->GetBiomeColorSettings()->GetPackage()->MarkPackageDirty();
 			ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
 		}
@@ -458,7 +490,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr)
 		{
-			ColorSettings->GetBiomeColorSettings()->SetNoise(Cast<UNoiseSettings>(CreateSettingsAssetEditor(UNoiseSettings::StaticClass())));
+			ColorSettings->GetBiomeColorSettings()->SetNoise(CreateSettingsAssetEditor<UNoiseSettings>(UNoiseSettings::StaticClass()));
 			ColorSettings->GetBiomeColorSettings()->GetNoise()->GetPackage()->MarkPackageDirty();
 			ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
 		}
@@ -473,7 +505,7 @@ void APlanet::CreateSettingsAssets()
 		else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
 		{
 			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
-			ColorSettings->GetBiomeColorSettings()->AddBiome(Cast<UBiome>(CreateSettingsAssetEditor(UBiome::StaticClass())));
+			ColorSettings->GetBiomeColorSettings()->AddBiome(CreateSettingsAssetEditor<UBiome>(UBiome::StaticClass()));
 			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
 			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
 		}
@@ -487,7 +519,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ShapeSettings == nullptr)
 		{
-			ShapeSettings = Cast<UShapeSettings>(CreateSettingsAssetEditor(UShapeSettings::StaticClass()));
+			ShapeSettings = CreateSettingsAssetEditor<UShapeSettings>(UShapeSettings::StaticClass());
 			ShapeSettings->GetPackage()->MarkPackageDirty();
 			ShapeSettings->AddAppliedID(ID);
 		}
@@ -502,7 +534,7 @@ void APlanet::CreateSettingsAssets()
 		else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
 		{
 			ShapeSettings->GetNoiseLayers().Empty();
-			ShapeSettings->AddNoiseLayer(Cast<UNoiseLayer>(CreateSettingsAssetEditor(UNoiseLayer::StaticClass())));
+			ShapeSettings->AddNoiseLayer(CreateSettingsAssetEditor<UNoiseLayer>(UNoiseLayer::StaticClass()));
 			ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
 			ShapeSettings->GetNoiseLayers()[0]->AddAppliedID(ShapeSettings->GetID());
 		}
@@ -515,12 +547,11 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr)
 		{
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = Cast<UNoiseSettings>(CreateSettingsAssetEditor(UNoiseSettings::StaticClass()));
+			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = CreateSettingsAssetEditor<UNoiseSettings>(UNoiseSettings::StaticClass());
 			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
 			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->AddAppliedID(ShapeSettings->GetNoiseLayers()[0]->GetID());
 		}
 	}
-	//AssetCleaner::CleanDirectory(EDirectoryFilterType::DataAssets);
 }
 
 void APlanet::GeneratePlanet()
