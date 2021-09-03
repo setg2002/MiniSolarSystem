@@ -81,7 +81,7 @@ void TerrainFace::UpdateBiomePercents()
 			Data.uv[i].X = colorGenerator->BiomePercentFromPoint(PointsOnUnitSphere[i]);
 		}
 	}
-	ProcMesh->CreateMeshSection(MeshSection, Data.verticies, Data.triangles, Data.normals, Data.uv, Data.VertexColors, Data.tangents, false);
+	ProcMesh->UpdateMeshSection(MeshSection, Data.verticies, Data.normals, Data.uv, Data.VertexColors, Data.tangents);
 }
 
 void TerrainFace::ConstructMeshAsync(TerrestrialColorGenerator* color_Generator)
@@ -89,7 +89,7 @@ void TerrainFace::ConstructMeshAsync(TerrestrialColorGenerator* color_Generator)
 	//if (!Worker->IsFinished())
 		//Worker->Stop();
 	bFinished = false;
-	Worker = new FTerrainFaceWorker(this, Data, colorGenerator, shapeGenerator, false);
+	Worker = new FTerrainFaceWorker(this, Data, false, PointsOnUnitSphere, colorGenerator, shapeGenerator);
 }
 
 void TerrainFace::UpdateTangentsNormals()
@@ -103,7 +103,7 @@ void TerrainFace::UpdateTangentsNormalsAsync()
 	//if (!Worker->IsFinished())
 		//Worker->Stop();
 	bFinished = false;
-	Worker = new FTerrainFaceWorker(this, Data, nullptr, nullptr, true);
+	Worker = new FTerrainFaceWorker(this, Data, true, PointsOnUnitSphere);
 }
 
 void TerrainFace::CreateMesh()
@@ -115,8 +115,8 @@ void TerrainFace::CreateMesh()
 
 // =============== Terrain Face Worker ===============
 
-FTerrainFaceWorker::FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, TerrestrialColorGenerator* IN_ColorGenerator, ShapeGenerator* IN_ShapeGenerator, bool GenerateTangentsNormalsOnly)
-	:  Data(IN_Data), ColorGenerator(IN_ColorGenerator), shapeGenerator(IN_ShapeGenerator), Parent(IN_Parent) , bGenerateTangentsNormalsOnly(GenerateTangentsNormalsOnly)
+FTerrainFaceWorker::FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, bool GenerateTangentsNormalsOnly, TArray<FVector>& IN_PointsOnUnitSphere, TerrestrialColorGenerator* IN_ColorGenerator, ShapeGenerator* IN_ShapeGenerator)
+	:  Data(IN_Data), PointsOnUnitSphere(IN_PointsOnUnitSphere), ColorGenerator(IN_ColorGenerator), shapeGenerator(IN_ShapeGenerator), Parent(IN_Parent) , bGenerateTangentsNormalsOnly(GenerateTangentsNormalsOnly)
 {
     Thread = FRunnableThread::Create(this, TEXT("FTerrainFaceWorker"), 0, TPri_BelowNormal); //windows default = 8mb for thread, could specify more
 }
@@ -135,6 +135,8 @@ bool FTerrainFaceWorker::Init()
 		Data.verticies.Empty();
 		Data.uv.Empty();
 		Data.uv.SetNum(Data.Resolution * Data.Resolution);
+		PointsOnUnitSphere.Empty();
+		PointsOnUnitSphere.SetNum(Data.Resolution * Data.Resolution);
 	}
 
     return true;
@@ -156,6 +158,7 @@ uint32 FTerrainFaceWorker::Run()
 					FVector2D percent = FVector2D(x, y) / (Data.Resolution - 1);
 					FVector pointOnUnitCube = -Data.LocalUp + (percent.X - .5f) * 2 * Data.axisA + (percent.Y - .5f) * 2 * Data.axisB;
 					FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
+					PointsOnUnitSphere[i] = pointOnUnitSphere;
 					float unscaledElevation = shapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
 					Data.verticies.EmplaceAt(i, pointOnUnitSphere * shapeGenerator->GetScaledElevation(unscaledElevation));
 					Data.uv[i].X = ColorGenerator->BiomePercentFromPoint(pointOnUnitSphere);

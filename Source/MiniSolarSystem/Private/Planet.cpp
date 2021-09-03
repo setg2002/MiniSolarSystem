@@ -676,10 +676,10 @@ void APlanet::GenerateColors()
 	if (bMultithreadGeneration)
 		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
 
-	bGenerating = false;
-
-	if (GetWorld())
+	if (GetWorld() && bGenerating)
 	{
+		bGenerating = false;
+
 		if (ResolutionLevel < Cast<UCelestialGameInstance>(GetGameInstance())->GetResMax() - 1) // Regenerate at the next level
 		{
 			ResolutionLevel++;

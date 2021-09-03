@@ -119,6 +119,8 @@ class FTerrainFaceWorker : public FRunnable
     /** The Terrain Face Data to Fill */
     FTerrainFaceData& Data;
 
+    TArray<FVector>& PointsOnUnitSphere;
+
     TerrestrialColorGenerator* ColorGenerator;
     ShapeGenerator* shapeGenerator;
     TerrainFace* Parent;
@@ -135,7 +137,7 @@ public:
     //~~~ Thread Core Functions ~~~
 
     //Constructor / Destructor
-    FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, TerrestrialColorGenerator* IN_ColorGenerator, ShapeGenerator* IN_ShapeGenerator, bool GenerateTangentsNormalsOnly);
+    FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, bool GenerateTangentsNormalsOnly, TArray<FVector>& IN_PointsOnUnitSphere, TerrestrialColorGenerator* IN_ColorGenerator = nullptr, ShapeGenerator* IN_ShapeGenerator = nullptr);
     ~FTerrainFaceWorker();
 
     // Begin FRunnable interface.
