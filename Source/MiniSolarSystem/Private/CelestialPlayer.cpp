@@ -198,55 +198,41 @@ void ACelestialPlayer::UpdatePosition(float timeStep)
 }
 
 
-//TODO Remove the "Is Paused" check by having the controller possess an empty pawn on world load
-
 void ACelestialPlayer::RotationX(float AxisValue)
 {
-	if (Controller && !GetWorld()->IsPaused())
-	{
+	if (Controller)
 		Collider->AddTorqueInDegrees(this->GetActorUpVector() * (AxisValue * RotationForce), NAME_None, true);
-	}
 }
 
 void ACelestialPlayer::RotationY(float AxisValue)
 {
-	if (Controller && !GetWorld()->IsPaused())
-	{
+	if (Controller)
 		Collider->AddTorqueInDegrees(this->GetActorRightVector() * (AxisValue * RotationForce), NAME_None, true);
-	}
 }
 
 void ACelestialPlayer::RotationZ(float AxisValue)
 {
-	if (Controller && !GetWorld()->IsPaused())
-	{
+	if (Controller)
 		Collider->AddTorqueInDegrees(this->GetActorForwardVector() * (-AxisValue * RotationForce), NAME_None, true);
-	}
 }
 
 
 void ACelestialPlayer::MoveForward(float AxisValue)
 {
-	if (Controller && !GetWorld()->IsPaused())
-	{
+	if (Controller)
 		currentVelocity += (this->GetActorRotation().Vector() * AxisValue * Throttle);
-	}
 }
 
 void ACelestialPlayer::MoveRight(float AxisValue)
 {
-	if (Controller && !GetWorld()->IsPaused())
-	{
+	if (Controller)
 		currentVelocity += (UKismetMathLibrary::GetRightVector(this->GetActorRotation()) * AxisValue * Throttle);
-	}
 }
 
 void ACelestialPlayer::MoveUp(float AxisValue)
 {
-	if (Controller && !GetWorld()->IsPaused())
-	{
+	if (Controller)
 		currentVelocity += (UKismetMathLibrary::GetUpVector(this->GetActorRotation()) * AxisValue * Throttle);
-	}
 }
 
 

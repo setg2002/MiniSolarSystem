@@ -93,8 +93,6 @@ void ACelestialGameMode::BeginPlay()
 		celestialObjects.Add(Interface);
 	}
 
-	SetPerspective(1);
-
 	LoadGame();
 }
 
@@ -1032,6 +1030,7 @@ void GeneratePlanetsOrdered::NewGeneratedPlanet(FName PlanetName)
 		UGameplayStatics::SetGamePaused(GameMode->GetWorld(), false);
 		bCurrentlyGenerating = false;
 		GameMode->GetGameInstance<UCelestialGameInstance>()->StopLoadingScreen();
+		GameMode->SetPerspective(1);
 		GameMode->OnLoadingComplete.Broadcast();
 		return;
 	}
