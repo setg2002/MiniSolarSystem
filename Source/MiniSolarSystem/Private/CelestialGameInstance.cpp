@@ -7,22 +7,9 @@
 
 void UCelestialGameInstance::Init()
 {
-#if WITH_EDITOR
-	if (!FPaths::FileExists(FPaths::ProjectConfigDir() + "DefaultGame.ini"))
-	{
-		Volume = 1.f;
-		ResMax = 2;
-		bTutorialSeen = false;
-	}
-#else 
-	if (!FPaths::FileExists(FPaths::ProjectConfigDir() + "WindowsNoEditor/Game.ini"))
-	{
-		Volume = 1.f;
-		ResMax = 2;
-		bTutorialSeen = false;
-	}
-#endif
 	LoadConfig();
+	SetVolume(Volume);
+	SetUIVolume(UIVol);
 }
 
 float UCelestialGameInstance::GetCurrentMaxFPS()
@@ -84,11 +71,17 @@ void UCelestialGameInstance::PasteNoiseLayer(UNoiseLayer* NoiseLayerToPasteTo)
 void UCelestialGameInstance::SetVolume_Implementation(float NewVolume) 
 { 
 	Volume = NewVolume; 
-	SaveConfig(); 
+	SaveConfig();
 }
 
 void UCelestialGameInstance::SetUIVolume_Implementation(float NewUIVolume)
 {
-	UIVolume = NewUIVolume;
+	UIVol = NewUIVolume;
+	SaveConfig();
+}
+
+void UCelestialGameInstance::SetTutorialSeen(bool TutorialSeen)
+{ 
+	bTutorialSeen = TutorialSeen; 
 	SaveConfig();
 }

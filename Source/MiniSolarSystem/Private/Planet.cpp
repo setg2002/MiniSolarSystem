@@ -298,13 +298,12 @@ T* APlanet::CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
 	return NewAsset;
 }
 
-template< class T >
-T* APlanet::RestoreSettingsAsset(FName Name, TArray<uint8> Data)
+UObject* APlanet::RestoreSettingsAsset(FName Name, TArray<uint8> Data, UClass* Class)
 {
 	FString PackageName = TEXT("/Game/DataAssets/Runtime/" + Name.ToString());
 	UPackage* Package = CreatePackage(*PackageName);
 
-	T* NewAsset = NewObject<T>(Package, Name, EObjectFlags::RF_Public);
+	UObject* NewAsset = NewObject<UObject>(Package, Class, Name, EObjectFlags::RF_Public);
 
 	if (NewAsset != NULL && Data.Num() > 1)
 	{

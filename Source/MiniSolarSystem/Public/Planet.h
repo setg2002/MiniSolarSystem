@@ -95,8 +95,7 @@ public:
 	T* CreateSettingsAsset(TSubclassOf<UObject> AssetClass);
 	template< class T >
 	T* CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass);
-	template< class T >
-	static T* RestoreSettingsAsset(FName Name, TArray<uint8> Data);
+	static UObject* RestoreSettingsAsset(FName Name, TArray<uint8> Data, UClass* Class);
 
 	// Sets color and shape settings to null for regenerating planets from save i guess
 	void ClearSettingsAssets();

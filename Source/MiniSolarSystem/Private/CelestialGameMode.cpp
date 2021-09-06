@@ -487,7 +487,7 @@ void ACelestialGameMode::LoadRuntimeAssetsOfClass(TArray<FAssetRecord> LoadedAss
 	{
 		if (Asset.Class == ClassToLoad)
 		{
-			UObject* NewSettings = APlanet::RestoreSettingsAsset<UColorSettings>(Asset.Name, Asset.AssetData);
+			UObject* NewSettings = APlanet::RestoreSettingsAsset(Asset.Name, Asset.AssetData, ClassToLoad);
 			SettingsAssets.Add(Cast<USettingsAsset>(NewSettings));
 		}
 	}

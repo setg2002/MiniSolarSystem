@@ -12,7 +12,7 @@ class UNoiseLayer;
 /**
  * 
  */
-UCLASS(Config = Game)
+UCLASS(Config=Game)
 class MINISOLARSYSTEM_API UCelestialGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
@@ -40,12 +40,12 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetUIVolume(float NewUIVolume);
 	UFUNCTION(BlueprintCallable)
-	float GetUIVolume() const { return UIVolume; }
+	float GetUIVolume() const { return UIVol; }
 protected:
 	UPROPERTY(Config, BlueprintReadWrite)
 	float Volume = 1.f;
-	UPROPERTY(Config, BlueprintReadWrite)
-	float UIVolume = 1.f;
+	UPROPERTY(Config)
+	float UIVol = 1.f;
 
 //============== Coply/Pasting Noise Layers ==============
 private:
@@ -74,5 +74,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetTutorialSeen() { return bTutorialSeen; }
 	UFUNCTION(BlueprintCallable)
-	void SetTutorialSeen(bool TutorialSeen) { bTutorialSeen = TutorialSeen; SaveConfig(); }
+		void SetTutorialSeen(bool TutorialSeen);
 };
