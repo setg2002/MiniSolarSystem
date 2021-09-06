@@ -86,3 +86,9 @@ void UCelestialGameInstance::SetVolume_Implementation(float NewVolume)
 	Volume = NewVolume; 
 	SaveConfig(); 
 }
+
+void UCelestialGameInstance::SetUIVolume_Implementation(float NewUIVolume)
+{
+	UIVolume = NewUIVolume;
+	SaveConfig();
+}

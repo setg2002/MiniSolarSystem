@@ -36,9 +36,16 @@ public:
 	void SetVolume(float NewVolume);
 	UFUNCTION(BlueprintCallable)
 	float GetVolume() const { return Volume; }
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetUIVolume(float NewUIVolume);
+	UFUNCTION(BlueprintCallable)
+	float GetUIVolume() const { return UIVolume; }
 protected:
 	UPROPERTY(Config, BlueprintReadWrite)
 	float Volume = 1.f;
+	UPROPERTY(Config, BlueprintReadWrite)
+	float UIVolume = 1.f;
 
 //============== Coply/Pasting Noise Layers ==============
 private:
