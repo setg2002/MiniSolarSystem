@@ -16,14 +16,14 @@ struct FStarProperties : public FTableRowBase
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"), BlueprintReadWrite)
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"))
 	float radius = 50;
 
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"), BlueprintReadWrite)
-	int mass = 1000;
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1"))
+	int32 mass = 1000;
 
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"), BlueprintReadWrite)
-	int luminosity = 50;
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
+	int32 luminosity = 50;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	FColor color = FColor(128, 0, 0);
