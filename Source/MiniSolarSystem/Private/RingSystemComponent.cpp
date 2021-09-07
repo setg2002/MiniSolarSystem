@@ -3,6 +3,7 @@
 
 #include "RingSystemComponent.h"
 #include "UObject/UObjectGlobals.h"
+#include "CelestialBody.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "GaseousColorGenerator.h"
 
@@ -25,7 +26,6 @@ void URingSystemComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-	UpdateProperties();
 }
 
 void URingSystemComponent::CreateMaterial()
@@ -63,13 +63,12 @@ void URingSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CreateMaterial();
-	SetRadius(Radius);
+	UpdateProperties();
 }
 
 void URingSystemComponent::UpdateProperties()
 {
-	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius);
+	this->SetRelativeScale3D(FVector(Cast<ACelestialBody>(GetOwner())->GetBodyRadius() / 100 * Radius));
 	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"), NULL, LOAD_None, NULL));
 	this->bCastVolumetricTranslucentShadow = false; // Set to true for the ring to cast shadows on the planet with the side-effect that the shading of the ring itself will break
 	CreateMaterial();
