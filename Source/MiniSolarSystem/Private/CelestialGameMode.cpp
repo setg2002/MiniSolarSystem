@@ -274,7 +274,11 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 	else if (AStar* NewStar = Cast<AStar>(NewBody))
 	{
 		FStarProperties CopiedStarProperties;
+#if PLATFORM_WINDOWS
 		memcpy(&CopiedStarProperties, &Cast<AStar>(BodyToDuplicate)->starProperties, sizeof(FStarProperties));
+#else // Linux and Mac don't like memcpy()
+		CopiedStarProperties = FStarProperties(Cast<AStar>(BodyToDuplicate)->starProperties);
+#endif
 		NewStar->SetStarProperties(CopiedStarProperties);
 
 		AOrbitDebugActor::Get()->ManualStop = false;

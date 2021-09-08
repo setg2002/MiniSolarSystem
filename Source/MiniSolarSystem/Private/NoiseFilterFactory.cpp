@@ -3,7 +3,7 @@
 
 #include "NoiseFilterFactory.h"
 #include "SimpleNoiseFilter.h"
-#include "RidgidNoiseFIlter.h"
+#include "RidgidNoiseFilter.h"
 
 INoiseFilter* NoiseFilterFactory::CreateNoiseFilter(UNoiseSettings* NoiseSettings)
 {

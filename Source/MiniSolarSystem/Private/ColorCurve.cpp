@@ -187,7 +187,11 @@ void UColorCurve::UpdateGradient()
 {
 	switch (ColorCurveType)
 	{
-	case(Ocean || Biome):
+	case(Ocean):
+		if (APlanet* Planet = Cast<APlanet>(ObjectToUpdate))
+			Planet->OnColorSettingsUpdated();
+		break;
+	case(Biome):
 		if (APlanet* Planet = Cast<APlanet>(ObjectToUpdate))
 			Planet->OnColorSettingsUpdated();
 		break;

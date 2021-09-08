@@ -66,7 +66,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetGradient(UCurveLinearColor* NewGradient);
 
-	// Voronoi Settings \\
+	// ~~~ Voronoi Settings ~~~
 
 	UFUNCTION(BlueprintCallable)
 	int GetNumStorms() const { return ColorSettings.NumStorms; }

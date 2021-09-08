@@ -30,9 +30,9 @@ public:
 	int8 Steps_j = 4;
 
 	UPROPERTY(SaveGame, EditAnywhere)
-	FLinearColor Ambient = FVector4(0, 0, 0, 0);
+	FLinearColor Ambient = FLinearColor(0, 0, 0, 0);
 	UPROPERTY(SaveGame, EditAnywhere)
-	FLinearColor Mie = FVector4(.5f, .5f, .5f, .5f);
+	FLinearColor Mie = FLinearColor(.5f, .5f, .5f, .5f);
 	UPROPERTY(SaveGame, EditAnywhere)
-	FLinearColor Ray = FVector4(.333f, .666f, 1, 1);
+	FLinearColor Ray = FLinearColor(.333f, .666f, 1, 1);
 };
