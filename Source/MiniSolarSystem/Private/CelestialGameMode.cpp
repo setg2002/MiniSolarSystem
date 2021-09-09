@@ -265,6 +265,8 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 		NewGasGiant->SetRadius(BodyToDuplicate->GetBodyRadius() / 100);
 		NewGasGiant->ColorSettings = CopiedColorSettings;
 		NewGasGiant->ReInit();
+		if (currentPerspective == 0)
+			NewGasGiant->DynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
 
 		AOrbitDebugActor::Get()->ManualStop = false;
 		if (currentPerspective == 0)

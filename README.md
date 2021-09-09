@@ -1,5 +1,5 @@
 # Mini Solar System
-A game about procedurally generated planets and solar systems.
+A simulation about procedurally generated planets and solar systems.
 
 Uses the source build of the Unreal Engine, a guide to which can be found [here](https://docs.unrealengine.com/en-US/ProductionPipelines/DevelopmentSetup/BuildingUnrealEngine/index.html).
 
@@ -19,5 +19,6 @@ Work Blog: https://sorengworklog.blogspot.com/
 ### Changes To UE Source: ###
 * In NiagaraDataInterfaceArrayFunctionLibrary.h all of the static functions need to be made public.
 * In CurveLinearColor.h the variable FloatCurves needs to have the UPROPERTY specifier "SaveGame"
+* In CurveLinearColor.h add 'UDELEGATE(BlueprintAuthorityOnly) DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGradientUpdated);' under the include statements, then add 'FGradientUpdated OnGradientUpdated;' in the public section of the UCurveLinearColor class
 * In RichCurve.h the variables Time, Value, and Keys all need to have the UPROPERTY specifier "SaveGame"
 * In DefaultGameMoviePlayer.cpp the entire body of OnAnyDown() has to be removed except for the return statement.

@@ -5,6 +5,7 @@
 #include "OrbitDebugActor.h"
 #include "CelestialGameMode.h"
 #include "GaseousColorGenerator.h"
+#include "Curves/CurveLinearColor.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 
@@ -22,6 +23,8 @@ void AGasGiant::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (ColorSettings.Gradient)
+		ColorSettings.Gradient->OnGradientUpdated.AddDynamic(this, &AGasGiant::GenerateMaterial);
 	this->SetActorScale3D(FVector(Radius));
 	GenerateMaterial();
 	NewVoronoiForStorms();
@@ -32,6 +35,7 @@ void AGasGiant::ReInit()
 	this->SetActorScale3D(FVector(Radius));
 	GenerateMaterial();
 	NewVoronoiForStorms();
+	ColorSettings.Gradient->OnGradientUpdated.AddDynamic(this, &AGasGiant::GenerateMaterial);
 }
 
 void AGasGiant::SetRadius(float NewRadius)
@@ -46,7 +50,8 @@ void AGasGiant::SetRadius(float NewRadius)
 void AGasGiant::GenerateMaterial()
 {
 	ensure(BasePlanetMat);
-	DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, BasePlanetMat);
+	if (!DynamicMaterial)
+		DynamicMaterial = Mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, BasePlanetMat);
 	if (ColorSettings.Gradient)
 		DynamicMaterial->SetTextureParameterValue("_Texture", GaseousColorGenerator::CreateTexture("GasTexture", ColorSettings.Gradient));
 }
@@ -61,7 +66,10 @@ void AGasGiant::NewVoronoiForStorms()
 
 void AGasGiant::SetGradient(UCurveLinearColor* NewGradient)
 {
+	if (ColorSettings.Gradient)
+		ColorSettings.Gradient->OnGradientUpdated.RemoveDynamic(this, &AGasGiant::GenerateMaterial);
 	ColorSettings.Gradient = NewGradient;
+	ColorSettings.Gradient->OnGradientUpdated.AddDynamic(this, &AGasGiant::GenerateMaterial);
 	if (!DynamicMaterial)
 		GenerateMaterial();
 	if (ColorSettings.Gradient)

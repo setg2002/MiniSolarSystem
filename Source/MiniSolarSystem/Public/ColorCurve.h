@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ColorCurveType.h"
 #include "Blueprint/UserWidget.h"
 #include "ColorCurve.generated.h"
 
@@ -53,9 +52,6 @@ public:
 	FString ColorCurveName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<EColorCurveType> ColorCurveType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCurveLinearColor* Gradient;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -79,9 +75,6 @@ public:
 	void UpdateGradient();
 
 	UFUNCTION(BlueprintCallable)
-	void SetObjectToUpdate(UObject* Object);
-
-	UFUNCTION(BlueprintCallable)
 	FName GetName();
 
 	UFUNCTION(BlueprintCallable)
@@ -91,6 +84,4 @@ protected:
 	FLinearColor MakeColor(TArray<TTuple<int8, float>> ColorValues);
 
 	void ConstructKey(TArray<FKeyInfo> KeysInfo);
-
-	UObject* ObjectToUpdate;
 };

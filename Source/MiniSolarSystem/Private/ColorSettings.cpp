@@ -2,10 +2,29 @@
 
 
 #include "ColorSettings.h"
+#include "Curves/CurveLinearColor.h"
 
 UColorSettings::UColorSettings()
 {
 	PlanetMat = LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_Planet_Inst.M_Planet_Inst'"), NULL, LOAD_None, NULL);
+	
+	if (ColorSettings.OceanColor)
+		ColorSettings.OceanColor->OnGradientUpdated.AddDynamic(this, &UColorSettings::ColorSettingsUpdated);
+}
+
+void UColorSettings::Init()
+{
+	if (ColorSettings.OceanColor)
+		ColorSettings.OceanColor->OnGradientUpdated.AddDynamic(this, &UColorSettings::ColorSettingsUpdated);
+
+	if (ColorSettings.BiomeColorSettings)
+	{
+		for (UBiome* Biome : ColorSettings.BiomeColorSettings->GetBiomes())
+		{
+			Biome->OnBiomeHeightUpdated.AddDynamic(ColorSettings.BiomeColorSettings, &UBiomeColorSettings::SortBiomesByHeight);
+			Biome->GetGradient()->OnGradientUpdated.AddDynamic(Biome, &UBiome::BiomeUpdated);
+		}
+	}
 }
 
 void UBiome::SetStartHeight(float NewHeight)
@@ -17,7 +36,10 @@ void UBiome::SetStartHeight(float NewHeight)
 
 void UBiome::SetGradient(UCurveLinearColor* NewGradient)
 {
+	if (Biome.Gradient)
+		Biome.Gradient->OnGradientUpdated.RemoveDynamic(this, &UBiome::BiomeUpdated);
 	Biome.Gradient = NewGradient;
+	Biome.Gradient->OnGradientUpdated.AddDynamic(this, &UBiome::BiomeUpdated);
 	OnSettingsAssetChanged.Broadcast();
 }
 
@@ -27,6 +49,7 @@ UBiomeColorSettings::UBiomeColorSettings()
 	for (UBiome* Biome : BiomeColorSettings.Biomes)
 	{
 		Biome->OnBiomeHeightUpdated.AddDynamic(this, &UBiomeColorSettings::SortBiomesByHeight);
+		Biome->GetGradient()->OnGradientUpdated.AddDynamic(Biome, &UBiome::BiomeUpdated);
 	}
 }
 
@@ -115,6 +138,8 @@ void UColorSettings::SetTintPercent(float NewTintPercent)
 
 void UColorSettings::SetOceanColor(UCurveLinearColor* NewOceanColor)
 {
+	ColorSettings.OceanColor->OnGradientUpdated.RemoveDynamic(this, &UColorSettings::ColorSettingsUpdated);
 	ColorSettings.OceanColor = NewOceanColor;
+	ColorSettings.OceanColor->OnGradientUpdated.AddDynamic(this, &UColorSettings::ColorSettingsUpdated);
 	OnSettingsAssetChanged.Broadcast();
 }

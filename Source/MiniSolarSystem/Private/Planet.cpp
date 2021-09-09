@@ -96,6 +96,7 @@ void APlanet::BindDelegates()
 	}
 	if (ColorSettings)
 	{
+		ColorSettings->Init();
 		ColorSettings->OnSettingsAssetChanged.AddDynamic(this, &APlanet::OnColorSettingsUpdated);
 		if (ColorSettings->GetBiomeColorSettings())
 		{

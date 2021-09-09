@@ -49,6 +49,9 @@ public:
 		return true;
 	}
 
+	UFUNCTION()
+	void BiomeUpdated() { OnSettingsAssetChanged.Broadcast(); }
+
 	UFUNCTION(BlueprintCallable)
 	float GetStartHeight() const { return Biome.StartHeight; }
 	UFUNCTION(BlueprintCallable)
@@ -174,6 +177,9 @@ private:
 	UPROPERTY(SaveGame, EditAnywhere)
 	FColorSettings_ ColorSettings;
 
+	UFUNCTION()
+	void ColorSettingsUpdated() { OnSettingsAssetChanged.Broadcast(); }
+
 public:
 	UColorSettings();
 
@@ -183,6 +189,8 @@ public:
 		ColorSettings = NewStruct;
 		return true;
 	}
+
+	void Init();
 
 	UMaterialInterface* PlanetMat;
 

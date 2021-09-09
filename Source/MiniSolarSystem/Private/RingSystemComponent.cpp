@@ -2,10 +2,11 @@
 
 
 #include "RingSystemComponent.h"
-#include "UObject/UObjectGlobals.h"
 #include "CelestialBody.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "GaseousColorGenerator.h"
+#include "UObject/UObjectGlobals.h"
+#include "Curves/CurveLinearColor.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 
 
@@ -30,7 +31,8 @@ void URingSystemComponent::OnComponentCreated()
 
 void URingSystemComponent::CreateMaterial()
 {
-	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_Ring_Inst.M_Ring_Inst'"), NULL, LOAD_None, NULL));
+	if (!DynamicMaterial)
+		DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_Ring_Inst.M_Ring_Inst'"), NULL, LOAD_None, NULL));
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 	if (Gradient)
 	{
@@ -53,7 +55,10 @@ void URingSystemComponent::SetWidth(float NewWidth)
 
 void URingSystemComponent::SetGradient(UCurveLinearColor* NewGradient)
 {
+	if (Gradient)
+		Gradient->OnGradientUpdated.RemoveDynamic(this, &URingSystemComponent::CreateMaterial);
 	Gradient = NewGradient;
+	Gradient->OnGradientUpdated.AddDynamic(this, &URingSystemComponent::CreateMaterial);
 	GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 	DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 }
@@ -75,6 +80,7 @@ void URingSystemComponent::UpdateProperties()
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 	if (Gradient)
 	{
+		Gradient->OnGradientUpdated.RemoveDynamic(this, &URingSystemComponent::CreateMaterial);
 		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 	}

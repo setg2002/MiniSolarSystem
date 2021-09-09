@@ -178,32 +178,7 @@ UColorCurveKey* UColorCurve::AddKey(float Time, FLinearColor Color)
 
 void UColorCurve::UpdateGradient()
 {
-	switch (ColorCurveType)
-	{
-	case(Ocean):
-		if (APlanet* Planet = Cast<APlanet>(ObjectToUpdate))
-			Planet->OnColorSettingsUpdated();
-		break;
-	case(Biome):
-		if (APlanet* Planet = Cast<APlanet>(ObjectToUpdate))
-			Planet->OnColorSettingsUpdated();
-		break;
-	case(GasGiant):
-		if (AGasGiant* GasGiant = Cast<AGasGiant>(ObjectToUpdate))
-			GasGiant->SetGradient(Gradient);
-		break;
-	case(RingSystem):
-		if (URingSystemComponent* RingSystemComponent = Cast<URingSystemComponent>(ObjectToUpdate))
-			RingSystemComponent->SetGradient(Gradient);
-		break;
-	default:
-		break;
-	}
-}
-
-void UColorCurve::SetObjectToUpdate(UObject* Object)
-{
-	ObjectToUpdate = Object;
+	Gradient->OnGradientUpdated.Broadcast();
 }
 
 FName UColorCurve::GetName()
