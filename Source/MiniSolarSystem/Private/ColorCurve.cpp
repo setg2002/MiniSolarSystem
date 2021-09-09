@@ -74,6 +74,7 @@ void UColorCurve::NativeConstruct()
 		ConstructKey(KeyToMake);
 	}
 
+	UpdateGradient();
 	// Bind delegates here.
 }
 
@@ -94,21 +95,13 @@ FLinearColor UColorCurve::MakeColor(TArray<TTuple<int8, float>> ColorValues)
 	for (int8 i = 0; i < ColorValues.Num(); i++)
 	{
 		if (ColorValues[i].Key == 0)
-		{
 			Red = ColorValues[i].Value;
-		}
 		else if (ColorValues[i].Key == 1)
-		{
 			Green = ColorValues[i].Value;
-		}
 		else if (ColorValues[i].Key == 2)
-		{
 			Blue = ColorValues[i].Value;
-		}
 		//else if (ColorValues[i].Key == 3)
-		//{
 		//	Alpha = ColorValues[i].Value;
-		//}
 	}
 	return FLinearColor(Red, Green, Blue, 1);
 }
@@ -153,7 +146,7 @@ void UColorCurve::ConstructKey(TArray<FKeyInfo> KeysInfo)
 	NewKey->Handle = NewKeyHandle;
 }
 
-UColorCurveKey* UColorCurve::AddKey(float Time, FLinearColor Color = FLinearColor::White)
+UColorCurveKey* UColorCurve::AddKey(float Time, FLinearColor Color)
 {
 	// Create the widget
 	UColorCurveKey* NewKey = Cast<UColorCurveKey>(CreateWidget<UColorCurveKey>(CanvasPanel_Gradient, KeyClass, FName("Key_" + FString::SanitizeFloat(Time))));

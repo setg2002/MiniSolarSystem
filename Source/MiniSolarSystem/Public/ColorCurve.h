@@ -73,7 +73,7 @@ public:
 	class UImage* Image_Gradient;
 
 	UFUNCTION(BlueprintCallable)
-	class UColorCurveKey* AddKey(float Time, FLinearColor Color);
+	class UColorCurveKey* AddKey(float Time, FLinearColor Color = FLinearColor::White);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateGradient();
