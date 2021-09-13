@@ -79,7 +79,6 @@ void AAxis3::Tick(float DeltaTime)
 			bMouseDown = 1;
 		else
 			bMouseDown = 255;
-
 	}
 	// Release mouse
 	else if (!GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::LeftMouseButton)) && bMouseDown == 1)
@@ -132,13 +131,6 @@ void AAxis3::Tick(float DeltaTime)
 			Star->GetParticleComp()->SetPaused(true);
 		}
 	}
-
-	// Calculate the plane to move the actor along
-	//FVector Location;
-	//FVector Direction;
-	//GetWorld()->GetFirstPlayerController()->DeprojectMousePositionToWorld(Location, Direction);
-	//FVector LineEnd = Location + (Direction * 100000000);
-	//UKismetSystemLibrary::DrawDebugArrow(GetWorld(), Location, LineEnd, 10, FColor::Red, 0.01f, 5);
 }
 
 bool AAxis3::EnsureHit(bool BlockingHit, TWeakObjectPtr<AActor> HitActor, TWeakObjectPtr<UPrimitiveComponent> HitComponent)

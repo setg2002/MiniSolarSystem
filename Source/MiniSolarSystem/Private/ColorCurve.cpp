@@ -34,7 +34,12 @@ void UColorCurve::NativeConstruct()
 	}	
 	Keys.Sort([](const FKeyInfo& a, const FKeyInfo& b) { return a.Time > b.Time || (a.Time == b.Time && a.RGB < b.RGB); });
 
-	//TODO Write documentation for this
+	//  The following loop is meant to add "missing keys" to the existing color curve. This is because in the unreal editor,
+	// when creating a color curve, the editor only puts keys on the curve for colors that change to save space. However,
+	// for the use of the widget we need a key to exist for every color regardless of if it changed. To do this we start with
+	// the template. The template array contains a key for each color with the value and time 0. Looping through the array
+	// Keys then, if we find a key we replace the time and value of the corresponding color. When we reach a new key, the
+	// KeyToMake is constructed and is then reset to the template and the loop begins again.
 	if (Keys.Num() > 0)
 	{
 		TArray<FKeyInfo> Template = { FKeyInfo(0, 0, 0), FKeyInfo(1, 0, 0), FKeyInfo(2, 0, 0), FKeyInfo(3, 0, 1) };
