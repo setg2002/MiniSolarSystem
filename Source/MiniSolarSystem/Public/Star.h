@@ -101,6 +101,8 @@ protected:
 	virtual void OnConstruction(const FTransform & Transform) override;
 
 private:
+	APawn* PlayerPawn;
+
 	FStarProperties OldProperties;
 
 	// The number of this star used for planetMateralParameterCollectionInst

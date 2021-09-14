@@ -17,6 +17,11 @@
 #include "Materials/MaterialParameterCollectionInstance.h"
 
 
+// Delay shortcut
+#define LATER_SECS(seconds, ...) \
+     FTimerHandle __tempTimerHandle; \
+     GetWorldTimerManager().SetTimer(__tempTimerHandle, FTimerDelegate().CreateLambda(__VA_ARGS__), seconds, false);
+
 AStar::AStar()
 {
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>(FName("Sphere"));
@@ -74,16 +79,12 @@ void AStar::Tick(float DeltaTime)
 	// Probably not the most effieient way of detecting a change in star properties.
 	if (OldProperties != starProperties) { SetStarProperties(starProperties); }
 
-	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+	PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 
 	if (Cast<ACelestialPlayer>(PlayerPawn))
-	{
 		Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerPawn->GetActorLocation()));
-	}
 	else if (Cast<AOverviewPlayer>(PlayerPawn))
-	{
 		Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Cast<AOverviewPlayer>(PlayerPawn)->GetCameraLocation()));
-	}
 
 	PlanetIlluminationInst->SetVectorParameterValue(FName("StarPos" + FString::FromInt(StarNum)), this->GetActorLocation());
 
@@ -94,9 +95,7 @@ void AStar::SetStarNum(uint8 num)
 {
 	StarNum = num;
 	if (PlanetIlluminationInst)
-	{
 		PlanetIlluminationInst->SetScalarParameterValue(FName("StarIntensity" + FString::FromInt(StarNum)), starProperties.luminosity / 25);
-	}
 }
 
 bool AStar::SetStarProperties(FStarProperties NewProperties)
@@ -114,9 +113,12 @@ void AStar::SetRadius(float NewRadius)
 	Collider->SetSphereRadius(NewRadius * 100);
 	Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
 	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+	
 	bool WasPaused = ParticleComponent->IsPaused();
 	ParticleComponent->ReinitializeSystem();
-	ParticleComponent->SetPaused(WasPaused);
+	LATER_SECS(0.05f, [this, WasPaused]() {
+		ParticleComponent->SetPaused(WasPaused);
+	});
 
 	if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetCurrentPerspective() == 0)
 		AOrbitDebugActor::Get()->UpdateWidthSpecificBody(this);
@@ -132,9 +134,7 @@ void AStar::SetLuminosity(int NewLuminosity)
 		Sphere->SetMaterial(0, dynamicMaterial);
 	}
 	if (PlanetIlluminationInst == nullptr)
-	{
 		PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(planetMateralParameterCollection);
-	}
 
 	dynamicMaterial->SetScalarParameterValue(FName("_glowPower"), starProperties.luminosity);
 	PlanetIlluminationInst->SetScalarParameterValue(FName("StarIntensity" + FString::FromInt(StarNum)), starProperties.luminosity / 25);

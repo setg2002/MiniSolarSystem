@@ -12,6 +12,11 @@
 #include "OverviewPlayer.h"
 #include "CelestialGameMode.h"
 
+// Delay shortcut
+#define LATER_SECS(seconds, ...) \
+     FTimerHandle __tempTimerHandle; \
+     GetWorldTimerManager().SetTimer(__tempTimerHandle, FTimerDelegate().CreateLambda(__VA_ARGS__), seconds, false);
+
 // Sets default values
 AAxis3::AAxis3()
 {
@@ -83,6 +88,16 @@ void AAxis3::Tick(float DeltaTime)
 	// Release mouse
 	else if (!GetWorld()->GetFirstPlayerController()->IsInputKeyDown(FKey(EKeys::LeftMouseButton)) && bMouseDown == 1)
 	{
+		// Update Niagara particles
+		if (ANiagaraActor* NiagaraActor = Cast<ANiagaraActor>(BodyToMove))
+		{
+			bool bPaused = NiagaraActor->GetNiagaraComponent()->IsPaused();
+			NiagaraActor->GetNiagaraComponent()->ReinitializeSystem();
+			LATER_SECS(0.05f, [NiagaraActor, bPaused]() {
+				NiagaraActor->GetNiagaraComponent()->SetPaused(bPaused);
+			});
+		}
+
 		GetWorld()->GetFirstPlayerController()->GetPawn<AOverviewPlayer>()->bCanRot = true;
 		BoxX->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		BoxY->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -118,18 +133,6 @@ void AAxis3::Tick(float DeltaTime)
 			GetActorLocation() * (Axis == 0 ? FVector::ZeroVector : Axis == 1 ? FVector(0, 1, 1) : Axis == 2 ? FVector(1, 0, 1) : FVector(1, 1, 0));
 		SetActorLocation(NewLocation);
 		BodyToMove->SetActorLocation(NewLocation);
-
-		// Update any Niagara particles
-		if (ANiagaraActor* NiagaraActor = Cast<ANiagaraActor>(BodyToMove))
-		{
-			NiagaraActor->GetNiagaraComponent()->ReinitializeSystem();
-			NiagaraActor->GetNiagaraComponent()->SetPaused(true);
-		}
-		else if (AStar* Star = Cast<AStar>(BodyToMove))
-		{
-			Star->GetParticleComp()->ReinitializeSystem();
-			Star->GetParticleComp()->SetPaused(true);
-		}
 	}
 }
 
