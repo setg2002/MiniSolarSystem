@@ -14,15 +14,17 @@ UColorSettings::UColorSettings()
 
 void UColorSettings::Init()
 {
-	if (ColorSettings.OceanColor)
+	if (ColorSettings.OceanColor && !ColorSettings.OceanColor->OnGradientUpdated.IsAlreadyBound(this, &UColorSettings::ColorSettingsUpdated))
 		ColorSettings.OceanColor->OnGradientUpdated.AddDynamic(this, &UColorSettings::ColorSettingsUpdated);
 
 	if (ColorSettings.BiomeColorSettings)
 	{
 		for (UBiome* Biome : ColorSettings.BiomeColorSettings->GetBiomes())
 		{
-			Biome->OnBiomeHeightUpdated.AddDynamic(ColorSettings.BiomeColorSettings, &UBiomeColorSettings::SortBiomesByHeight);
-			Biome->GetGradient()->OnGradientUpdated.AddDynamic(Biome, &UBiome::BiomeUpdated);
+			if (!Biome->OnBiomeHeightUpdated.IsAlreadyBound(ColorSettings.BiomeColorSettings, &UBiomeColorSettings::SortBiomesByHeight))
+				Biome->OnBiomeHeightUpdated.AddDynamic(ColorSettings.BiomeColorSettings, &UBiomeColorSettings::SortBiomesByHeight);
+			if (!Biome->GetGradient()->OnGradientUpdated.IsAlreadyBound(Biome, &UBiome::BiomeUpdated))
+				Biome->GetGradient()->OnGradientUpdated.AddDynamic(Biome, &UBiome::BiomeUpdated);
 		}
 	}
 }
