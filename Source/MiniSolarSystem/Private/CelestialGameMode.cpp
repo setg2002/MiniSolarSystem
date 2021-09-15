@@ -128,7 +128,7 @@ void ACelestialGameMode::Tick(float DeltaTime)
 	}
 }
 
-ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform)
+ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform, bool bRegenerate)
 {
 	ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(Class, Transform);
 	NewBody->SetName(Name);
@@ -141,6 +141,11 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 		Star->SetStarNum(NumStars);
 		NumStars++;
 		PlanetIlluminationInst->SetScalarParameterValue("NumStars", NumStars);
+	}
+	else if (bRegenerate)
+	{
+		if (APlanet* Planet = Cast<APlanet>(NewBody))
+			Planet->ReGenerate();
 	}
 
 	const auto &Interface = Cast<ICelestialObject>(NewBody);
@@ -161,7 +166,7 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 		BodyToDuplicate->GetActorRotation(), 
 		BodyToDuplicate->GetActorLocation() + FVector(0, 0, (BodyToDuplicate->GetBodyRadius() * 2) + 25)
 		);
-	ACelestialBody* NewBody = AddBody(BodyToDuplicate->GetClass(), FName(FString(BodyToDuplicate->GetBodyName().ToString() + "_Duplicate")), NewTransform);
+	ACelestialBody* NewBody = AddBody(BodyToDuplicate->GetClass(), FName(FString(BodyToDuplicate->GetBodyName().ToString() + "_Duplicate")), NewTransform, false);
 	
 	NewBody->SetMass(BodyToDuplicate->GetMass());
 	NewBody->rotationRate = BodyToDuplicate->rotationRate;

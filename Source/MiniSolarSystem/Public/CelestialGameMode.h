@@ -128,7 +128,7 @@ public:
 	int32 GetAsteroidFieldNum() { return AsteroidFieldNum; }
 
 	UFUNCTION(BlueprintCallable)
-	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform);
+	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform, bool bRegenerate = true);
 
 	// Duplicates the given body and returns the duplicated body
 	UFUNCTION(BlueprintCallable)
