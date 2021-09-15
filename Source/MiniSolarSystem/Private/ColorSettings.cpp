@@ -23,7 +23,7 @@ void UColorSettings::Init()
 		{
 			if (!Biome->OnBiomeHeightUpdated.IsAlreadyBound(ColorSettings.BiomeColorSettings, &UBiomeColorSettings::SortBiomesByHeight))
 				Biome->OnBiomeHeightUpdated.AddDynamic(ColorSettings.BiomeColorSettings, &UBiomeColorSettings::SortBiomesByHeight);
-			if (!Biome->GetGradient()->OnGradientUpdated.IsAlreadyBound(Biome, &UBiome::BiomeUpdated))
+			if (Biome->GetGradient() && !Biome->GetGradient()->OnGradientUpdated.IsAlreadyBound(Biome, &UBiome::BiomeUpdated))
 				Biome->GetGradient()->OnGradientUpdated.AddDynamic(Biome, &UBiome::BiomeUpdated);
 		}
 	}

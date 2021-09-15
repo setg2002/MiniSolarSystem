@@ -176,13 +176,9 @@ void ACelestialPlayer::UpdateVelocity(TArray<ACelestialBody*> allBodies, float t
 			this->currentVelocity += acceleration * timeStep;
 
 			if (ForcePerBody.Find(otherBody) != nullptr)
-			{
 				ForcePerBody[otherBody] = force.Size();
-			}
 			else
-			{
 				ForcePerBody.Add(otherBody, force.Size());
-			}
 		}
 	}
 	if (OverlappedActor && gameMode->GetCurrentPerspective() == 1)

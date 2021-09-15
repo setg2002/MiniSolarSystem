@@ -115,10 +115,10 @@ void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float tim
 		}
 	}
 	ACelestialBody* OverlappedBody = Cast<ACelestialBody>(OverlappedActor);
-	if (OverlappedActor && gameMode->GetCurrentPerspective() == 1 && OverlappedBody)
+	if (OverlappedBody && gameMode->GetCurrentPerspective() == 1)
 	{
 		FVector CollisionNormal = (this->GetActorLocation() - OverlappedActor->GetActorLocation()).GetUnsafeNormal();
-		currentVelocity += (CollisionNormal * ((currentVelocity.Size()) * ((OverlappedBody->mass * OverlappedBody->currentVelocity.Size()) / (this->mass * currentVelocity.Size()))));
+		currentVelocity += (CollisionNormal * (((OverlappedBody->mass * OverlappedBody->currentVelocity.Size()) / (this->mass * currentVelocity.Size()))));
 	}
 }
 
