@@ -101,7 +101,7 @@ FName ACelestialBody::EnsureUniqueName(FName InName)
 
 void ACelestialBody::UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep)
 {
-	for(int i = 0; i < allBodies.Num(); i++)
+	for(int32 i = 0; i < allBodies.Num(); i++)
 	{
 		ACelestialBody* otherBody = allBodies[i];
 

@@ -102,7 +102,8 @@ void ACelestialGameMode::Tick(float DeltaTime)
 
 	if (currentPerspective == 1)
 	{
-		for (int i = 0; i < celestialObjects.Num(); i++) {
+		for (int32 i = 0; i < celestialObjects.Num(); i++) 
+		{
 			ICelestialObject* thisObject = celestialObjects[i];
 
 			thisObject->UpdateVelocity(bodies, DeltaTime);
@@ -131,6 +132,7 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 {
 	ACelestialBody* NewBody = GetWorld()->SpawnActor<ACelestialBody>(Class, Transform);
 	NewBody->SetName(Name);
+	NewBody->SetMass(1);
 
 	bodies.Add(NewBody);
 

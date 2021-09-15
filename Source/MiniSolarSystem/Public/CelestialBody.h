@@ -98,7 +98,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(SaveGame, EditInstanceOnly, Category = "Default")
-	int mass;
+	int32 mass;
 
 	UPROPERTY(SaveGame)
 	FVector currentVelocity;
@@ -140,7 +140,7 @@ public:
 	float VectorSize = 1;
 
 	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
-	int VectorThickness = 1;
+	int32 VectorThickness = 1;
 
 	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
 	int32 VectorDuration = 10;
