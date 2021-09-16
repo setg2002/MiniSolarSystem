@@ -30,6 +30,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void StopLoadingScreen();
 
+//============== Save Game Slot ==============
+private:
+	uint8 Slot;
+public:
+	UFUNCTION(BLueprintCallable)
+	uint8 GetGameSlot() const { return Slot; }
+	UFUNCTION(BLueprintCallable)
+	void SetGameSlot(uint8 NewSlot) { Slot = NewSlot; }
+
 //============== Volume Control ==============
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -47,7 +56,7 @@ protected:
 	UPROPERTY(Config)
 	float UIVol = 1.f;
 
-//============== Coply/Pasting Noise Layers ==============
+//============== Copy/Pasting Noise Layers ==============
 private:
 	UNoiseLayer* CopiedNoiseLayer;
 public:

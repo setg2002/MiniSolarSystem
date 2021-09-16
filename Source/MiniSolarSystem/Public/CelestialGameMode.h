@@ -87,7 +87,7 @@ public:
 	// ======= Runtime Console Commands =======
 
 	UFUNCTION(Exec, BlueprintCallable)
-	void DeleteSave();
+	void DeleteSave(int32 slot);
 
 	UFUNCTION(Exec, BlueprintCallable)
 	void SaveAndQuit();

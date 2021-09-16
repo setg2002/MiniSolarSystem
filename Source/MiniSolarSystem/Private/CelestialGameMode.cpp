@@ -158,7 +158,7 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 
 	return NewBody;
 }
-#pragma optimize("", off)
+
 ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicate)
 {
 	AOrbitDebugActor::Get()->ManualStop = true;
@@ -321,7 +321,7 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 
 	return NewBody;
 }
-#pragma optimize("", on)
+
 void ACelestialGameMode::RemoveBody(FString Body)
 {
 	ACelestialBody* Body_ = GetBodyByName(Body);
@@ -777,14 +777,16 @@ void ACelestialGameMode::LoadGame()
 			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
 		}
 	});
-	UGameplayStatics::AsyncLoadGameFromSlot("Save", 0, OnLoadComplete);
+	FString SlotName = FString("Save" + FString::FromInt(Cast<UCelestialGameInstance>(GetGameInstance())->GetGameSlot()));
+	UGameplayStatics::AsyncLoadGameFromSlot(SlotName, 0, OnLoadComplete);
 }
 
 // ======= Runtime Console Commands ======================================================
 
-void ACelestialGameMode::DeleteSave()
+void ACelestialGameMode::DeleteSave(int32 slot)
 {
-	UGameplayStatics::DeleteGameInSlot("Save", 0);
+	FString SlotName = FString("Save" + FString::FromInt(slot));
+	UGameplayStatics::DeleteGameInSlot(SlotName, 0);
 }
 
 void ACelestialGameMode::SaveAndQuit()
@@ -927,7 +929,8 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 		}
 
 		// Save the data asynchronously
-		UGameplayStatics::AsyncSaveGameToSlot(SaveGameInstance, "Save", 0, Out);
+		FString SlotName = FString("Save" + FString::FromInt(Cast<UCelestialGameInstance>(GetGameInstance())->GetGameSlot()));
+		UGameplayStatics::AsyncSaveGameToSlot(SaveGameInstance, SlotName, 0, Out);
 	}
 }
 
