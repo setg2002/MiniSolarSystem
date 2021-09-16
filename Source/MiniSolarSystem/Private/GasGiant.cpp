@@ -35,7 +35,8 @@ void AGasGiant::ReInit()
 	this->SetActorScale3D(FVector(Radius));
 	GenerateMaterial();
 	NewVoronoiForStorms();
-	ColorSettings.Gradient->OnGradientUpdated.AddDynamic(this, &AGasGiant::GenerateMaterial);
+	if (ColorSettings.Gradient && !ColorSettings.Gradient->OnGradientUpdated.IsAlreadyBound(this, &AGasGiant::GenerateMaterial))
+		ColorSettings.Gradient->OnGradientUpdated.AddDynamic(this, &AGasGiant::GenerateMaterial);
 }
 
 void AGasGiant::SetRadius(float NewRadius)

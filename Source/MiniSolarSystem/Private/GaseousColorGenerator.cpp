@@ -112,7 +112,9 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float Sto
 			}
 
 			// Find the closest point to that other point to determine radius of storm
-			float PointDist = StormRadii[ClosePoint];
+			float PointDist = 1;
+			if (StormRadii.Num() != 0)
+				PointDist = StormRadii[ClosePoint];
 
 			// How far away from the point is the currnet pixel
 			float percent = FMath::Clamp<float>(PixelDist / PointDist, 0, 1);
