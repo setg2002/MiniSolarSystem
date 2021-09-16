@@ -158,7 +158,7 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 
 	return NewBody;
 }
-
+#pragma optimize("", off)
 ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicate)
 {
 	AOrbitDebugActor::Get()->ManualStop = true;
@@ -167,7 +167,8 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 		BodyToDuplicate->GetActorLocation() + FVector(0, 0, (BodyToDuplicate->GetBodyRadius() * 2) + 25)
 		);
 	ACelestialBody* NewBody = AddBody(BodyToDuplicate->GetClass(), FName(FString(BodyToDuplicate->GetBodyName().ToString() + "_Duplicate")), NewTransform, false);
-	
+
+	// Duplicate physics parameters
 	NewBody->SetMass(BodyToDuplicate->GetMass());
 	NewBody->rotationRate = BodyToDuplicate->rotationRate;
 	NewBody->SetCurrentVelocity(BodyToDuplicate->GetCurrentVelocity());
@@ -182,6 +183,28 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 		}
 	}
 
+	// Duplicate components
+	for (UActorComponent* Component : BodyToDuplicate->GetComponents().Array())
+	{
+		if (Component->GetClass() == UAtmosphereComponent::StaticClass())
+		{
+			UAtmosphereComponent* NewAtmosphere = NewObject<UAtmosphereComponent>(NewBody);
+			NewAtmosphere->SetProperties(Cast<UAtmosphereComponent>(Component)->GetProperties());
+			NewBody->AddCelestialComponent(NewAtmosphere);
+		}
+		else if (Component->GetClass() == URingSystemComponent::StaticClass())
+		{
+			URingSystemComponent* NewRingSystem = NewObject<URingSystemComponent>(NewBody);
+			URingSystemComponent* OldRingSystem = Cast<URingSystemComponent>(Component);
+			NewRingSystem->SetRadius(OldRingSystem->GetRadius());
+			NewRingSystem->SetWidth(OldRingSystem->GetWidth());
+			NewRingSystem->SetGradient(OldRingSystem->GetGradient());
+			NewBody->AddCelestialComponent(NewRingSystem);
+			NewRingSystem->UpdateProperties();
+		}
+	}
+
+	// Type specific duplication
 	if (APlanet* NewPlanet = Cast<APlanet>(NewBody))
 	{
 		APlanet* OldPlanet = Cast<APlanet>(BodyToDuplicate);
@@ -298,7 +321,7 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 
 	return NewBody;
 }
-
+#pragma optimize("", on)
 void ACelestialGameMode::RemoveBody(FString Body)
 {
 	ACelestialBody* Body_ = GetBodyByName(Body);

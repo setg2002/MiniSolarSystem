@@ -44,13 +44,15 @@ void URingSystemComponent::CreateMaterial()
 void URingSystemComponent::SetRadius(float NewRadius)
 {
 	Radius = NewRadius;
-	this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius);
+	if (GetOwner())
+		this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius);
 }
 
 void URingSystemComponent::SetWidth(float NewWidth)
 {
 	RingWidth = NewWidth;
-	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
+	if (DynamicMaterial)
+		DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 }
 
 void URingSystemComponent::SetGradient(UCurveLinearColor* NewGradient)
@@ -59,8 +61,11 @@ void URingSystemComponent::SetGradient(UCurveLinearColor* NewGradient)
 		Gradient->OnGradientUpdated.RemoveDynamic(this, &URingSystemComponent::CreateMaterial);
 	Gradient = NewGradient;
 	Gradient->OnGradientUpdated.AddDynamic(this, &URingSystemComponent::CreateMaterial);
-	GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
-	DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
+	if (DynamicMaterial)
+	{
+		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
+		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
+	}
 }
 
 // Called when the game starts

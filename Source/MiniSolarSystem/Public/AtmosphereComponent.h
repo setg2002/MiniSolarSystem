@@ -38,6 +38,11 @@ public:
 	float PlanetRadius;
 
 	UFUNCTION(BlueprintCallable)
+	FAtmosphereProperties GetProperties() const { return AtmosphereProperties; }
+	UFUNCTION(BlueprintCallable)
+	void SetProperties(FAtmosphereProperties PropertiesToSet);
+
+	UFUNCTION(BlueprintCallable)
 	bool GetClouds() const { return bClouds; }
 	UFUNCTION(BlueprintCallable)
 	void SetClouds(bool NewClouds);

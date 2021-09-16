@@ -20,6 +20,14 @@ UAtmosphereComponent::UAtmosphereComponent()
 }
 
 
+void UAtmosphereComponent::SetProperties(FAtmosphereProperties PropertiesToSet)
+{
+	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_atmosphere_proportional_Inst.M_atmosphere_proportional_Inst'"), NULL, LOAD_None, NULL));
+	CloudComponent->CreateMaterial();
+	memcpy(&AtmosphereProperties, &PropertiesToSet, sizeof(FAtmosphereProperties));
+	UpdateProperties();
+}
+
 void UAtmosphereComponent::SetClouds(bool NewClouds)
 {
 	bClouds = NewClouds;
