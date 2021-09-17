@@ -22,13 +22,20 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	float GetCurrentMaxFPS();
-
-	UFUNCTION(BlueprintCallable)
 	static void PlayLoadingScreen(bool bPlayUntilStopped, float PlayTime);
 	
 	UFUNCTION(BlueprintCallable)
 	static void StopLoadingScreen();
+
+//============== Max FPS ==============
+private:
+	UPROPERTY(Config)
+	int32 MaxFPS = 0;
+public:
+	UFUNCTION(BlueprintCallable)
+	int32 GetMaxFPS() const { return MaxFPS; }
+	UFUNCTION(BlueprintNativeEvent, BLueprintCallable)
+	void SetMaxFPS(int32 NewMaxFPS);
 
 //============== Save Game Slot ==============
 private:
@@ -83,5 +90,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetTutorialSeen() { return bTutorialSeen; }
 	UFUNCTION(BlueprintCallable)
-		void SetTutorialSeen(bool TutorialSeen);
+	void SetTutorialSeen(bool TutorialSeen);
 };

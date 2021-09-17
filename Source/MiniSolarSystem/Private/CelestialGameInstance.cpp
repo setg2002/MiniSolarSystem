@@ -10,11 +10,13 @@ void UCelestialGameInstance::Init()
 	LoadConfig();
 	SetVolume(Volume);
 	SetUIVolume(UIVol);
+	SetMaxFPS(MaxFPS);
 }
 
-float UCelestialGameInstance::GetCurrentMaxFPS()
+void UCelestialGameInstance::SetMaxFPS_Implementation(int32 NewMaxFPS)
 {
-	return GEngine->GetMaxFPS();
+	MaxFPS = NewMaxFPS;
+	SaveConfig();
 }
 
 void UCelestialGameInstance::PlayLoadingScreen(bool bPlayUntilStopped, float PlayTime)
