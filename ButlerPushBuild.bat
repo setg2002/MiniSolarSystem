@@ -12,7 +12,7 @@ REM #compress the build to tmp zip for Butler use:
 cd %pathToBuild%
 
 REM #delete debug files
-del %pathToBuild%\WindowsNoEditor\MiniSolarSystem\Binaries\Win64\MiniSolarSystem.pdb /f /q
+del %pathToBuild%\WindowsNoEditor\MiniSolarSystem\Binaries\Win64\MiniSolarSystem-Win64-Shipping.pdb /f /q
 del %pathToBuild%\LinuxNoEditor\MiniSolarSystem\Binaries\Linux\MiniSolarSystem-Linux-Shipping.debug /f /q
 
 REM #Zip windows version
