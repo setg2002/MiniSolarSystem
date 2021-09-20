@@ -35,13 +35,13 @@ struct FSimpleNoiseSettings
 
 	FSimpleNoiseSettings()
 	{
-		Strength = 1;
-		BaseRoughness = 1;
-		Roughness = 2;
-		Center = FVector::ZeroVector;
-		numLayers = 1;
+		Strength = .25f;
+		BaseRoughness = 2;
+		Roughness = 3;
+		Center = FMath::VRand() * FMath::RandHelper(1000);
+		numLayers = 2;
 		Persistence = .5f;
-		MinValue = 0.f;
+		MinValue = .65f;
 	}
 
 	FSimpleNoiseSettings(float strength, float baseRoughness, float roughness, FVector center, int NumLayers, float persistence, float minValue)
@@ -66,14 +66,14 @@ struct FRidgidNoiseSettings : public FSimpleNoiseSettings
 
 	FRidgidNoiseSettings()
 	{
-		Strength = 1;
-		BaseRoughness = 1;
-		Roughness = 2;
-		Center = FVector::ZeroVector;
-		numLayers = 1;
+		Strength = .25f;
+		BaseRoughness = 2;
+		Roughness = 3;
+		Center = FMath::VRand() * FMath::RandHelper(1000);
+		numLayers = 2;
 		Persistence = .5f;
-		MinValue = 0.f;
-		WeightMultiplier = .8f;
+		MinValue = .65f;
+		WeightMultiplier = .25f;
 	}
 
 	FRidgidNoiseSettings(float strength, float baseRoughness, float roughness, FVector center, int NumLayers, float persistence, float minValue, float weightMultiplier)
