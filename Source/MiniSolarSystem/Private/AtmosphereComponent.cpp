@@ -116,6 +116,7 @@ void UAtmosphereComponent::BeginPlay()
 	DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_atmosphere_proportional_Inst.M_atmosphere_proportional_Inst'"), NULL, LOAD_None, NULL));
 	UpdateProperties();
 	CloudComponent->CreateMaterial();
+	CloudComponent->SetRelativeLocation(FVector::ZeroVector);
 }
 
 void UAtmosphereComponent::UpdateProperties()
