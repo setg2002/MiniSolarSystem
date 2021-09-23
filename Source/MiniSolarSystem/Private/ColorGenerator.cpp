@@ -13,9 +13,8 @@
 #include "Materials/MaterialInstanceDynamic.h"
 
 
-TerrestrialColorGenerator::TerrestrialColorGenerator(AActor* owner)
+TerrestrialColorGenerator::TerrestrialColorGenerator()
 {
-	Owner = owner;
 }
 
 void TerrestrialColorGenerator::UpdateSettings(UColorSettings* colorSettings)
@@ -37,7 +36,9 @@ void TerrestrialColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 
 float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
 {
-	float HeightPercent = (PointOnUnitSphere.Z + 1) / 2.f;
+	// Height of the current point from 0 - 1 (0 being south pole 1 being north pole)
+	float HeightPercent = (PointOnUnitSphere.Z + 1.f) / 2.f;
+	
 	// Offset for using noise
 	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise() && BiomeNoiseFilter)
 	{
@@ -45,19 +46,24 @@ float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere
 	}
 	
 	float BiomeIndex = 0;
-	int NumBiomes = ColorSettings->GetBiomeColorSettings()->GetBiomes().Num();
+	int16 NumBiomes = ColorSettings->GetBiomeColorSettings()->GetBiomes().Num();
 	float blendRange = ColorSettings->GetBiomeColorSettings()->GetBlendAmount() / 2.f + 0.001f;
 
-	for (int i = 0; i < NumBiomes; i++)
+	for (int16 i = 0; i < NumBiomes; i++)
 	{
 		float dst = HeightPercent - ColorSettings->GetBiomeColorSettings()->GetBiomes()[i]->GetStartHeight();
 		float weight = FMath::Clamp<float>(UKismetMathLibrary::NormalizeToRange(dst, -blendRange, blendRange), 0, 1);
 		BiomeIndex *= (1 - weight);
 		BiomeIndex += i * weight;
 	}
-	return (float)BiomeIndex / FMath::Max<int>(1, NumBiomes - 1);
-}
+	
+	float MaxBiome = FMath::Max<float>(1, NumBiomes - 1);
 
+	// Remaps BiomeIndex to start and end at the center of the starting and ending gradients
+	float min = (1.f / NumBiomes) / 2.f;
+	float max = 1.f - min;
+	return FMath::Lerp<float>(min, max, BiomeIndex / MaxBiome);
+}
 
 void TerrestrialColorGenerator::UpdateColors()
 {
@@ -70,10 +76,10 @@ void TerrestrialColorGenerator::UpdateColors()
 
 	if (ColorSettings->DynamicMaterial)
 	{
-		UTexture2D* SurfaceTexture = CreateTexture(FString("TerrainTexture"), biomeColors);
+		UTexture2D* SurfaceTexture = CreateTexture(biomeColors);
 		ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_texture"), SurfaceTexture);
 
-		UTexture2D* OceanTexture = CreateTexture(FString("OceanTexture"), TArray<UCurveLinearColor*>() = { ColorSettings->GetOceanColor() });
+		UTexture2D* OceanTexture = CreateTexture(TArray<UCurveLinearColor*>() = { ColorSettings->GetOceanColor() });
 		ColorSettings->DynamicMaterial->SetTextureParameterValue(FName("_oceanTexture"), OceanTexture);
 	}
 	
@@ -81,7 +87,7 @@ void TerrestrialColorGenerator::UpdateColors()
 }
 
 
-UTexture2D* TerrestrialColorGenerator::CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients)
+UTexture2D* TerrestrialColorGenerator::CreateTexture(TArray<UCurveLinearColor*> Gradients)
 {
 	if (Gradients.Num() == 0 || Gradients[0] == NULL || IsGarbageCollecting())
 		return nullptr;
