@@ -608,14 +608,14 @@ void APlanet::ReGenerateTangents()
 {
 	if (bMultithreadGeneration)
 	{
-		for (int i = 0; i < 6; i++)
+		for (int8 i = 0; i < 6; i++)
 		{
 			TerrainFaces[i]->UpdateTangentsNormalsAsync();
 		}
 	}
 	else
 	{
-		for (int i = 0; i < 6; i++)
+		for (int8 i = 0; i < 6; i++)
 		{
 			TerrainFaces[i]->UpdateTangentsNormals();
 		}
@@ -647,14 +647,14 @@ void APlanet::GenerateMesh()
 {
 	if (bMultithreadGeneration)
 	{
-		for (int i = 0; i < 6; i++)
+		for (int8 i = 0; i < 6; i++)
 		{
 			TerrainFaces[i]->ConstructMeshAsync(colorGenerator);
 		}
 	}
 	else 
 	{
-		for (int i = 0; i < 6; i++)
+		for (int8 i = 0; i < 6; i++)
 		{
 			if ((int)FaceRenderMask - 1 == i || FaceRenderMask == EFaceRenderMask::NoMask)
 				TerrainFaces[i]->CalculateMesh();
@@ -697,7 +697,7 @@ void APlanet::OnColorSettingsUpdated()
 	if (bAutoGenerate && TerrainFaces[0] != NULL && gameMode->GetCurrentPerspective() != 128)
 	{
 		colorGenerator->UpdateSettings(ColorSettings);
-		for (int i = 0; i < 6; i++)
+		for (int8 i = 0; i < 6; i++)
 		{
 			TerrainFaces[i]->UpdateBiomePercents();
 		}
