@@ -140,7 +140,8 @@ void UColorSettings::SetTintPercent(float NewTintPercent)
 
 void UColorSettings::SetOceanColor(UCurveLinearColor* NewOceanColor)
 {
-	ColorSettings.OceanColor->OnGradientUpdated.RemoveDynamic(this, &UColorSettings::ColorSettingsUpdated);
+	if (ColorSettings.OceanColor)
+		ColorSettings.OceanColor->OnGradientUpdated.RemoveDynamic(this, &UColorSettings::ColorSettingsUpdated);
 	ColorSettings.OceanColor = NewOceanColor;
 	ColorSettings.OceanColor->OnGradientUpdated.AddDynamic(this, &UColorSettings::ColorSettingsUpdated);
 	OnSettingsAssetChanged.Broadcast();
