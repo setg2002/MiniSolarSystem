@@ -30,7 +30,7 @@ APlanet::APlanet()
 
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
 	shapeGenerator = new ShapeGenerator();
-	colorGenerator = new TerrestrialColorGenerator(this);
+	colorGenerator = new TerrestrialColorGenerator();
 }
 
 APlanet::~APlanet()

@@ -16,17 +16,13 @@ class INoiseFilter;
 class MINISOLARSYSTEM_API TerrestrialColorGenerator
 {
 public:
-	TerrestrialColorGenerator(AActor* owner);
+	TerrestrialColorGenerator();
 	void UpdateSettings(UColorSettings* colorSettings);
 	~TerrestrialColorGenerator();
-
-	AActor* Owner;
 
 	UColorSettings* ColorSettings;
 
 	INoiseFilter* BiomeNoiseFilter;
-
-	const int TextureResolution = 256;
 
 	void UpdateElevation(MinMax* elevationMinMax);
 
@@ -34,5 +30,8 @@ public:
 
 	void UpdateColors();
 
-	UTexture2D* CreateTexture(FString TextureName, TArray<UCurveLinearColor*> Gradients);
+	UTexture2D* CreateTexture(TArray<UCurveLinearColor*> Gradients);
+
+private:
+	const int32 TextureResolution = 256;
 };
