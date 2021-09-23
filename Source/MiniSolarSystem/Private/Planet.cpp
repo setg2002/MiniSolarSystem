@@ -15,6 +15,7 @@
 #include "Misc/PackageName.h"
 #include "Engine/DataAsset.h"
 #include "AssetRegistryModule.h"
+#include "AtmosphereComponent.h"
 #include "UObject/PackageReload.h"
 #include "CelestialGameInstance.h"
 #include "ProceduralMeshComponent.h"
@@ -681,6 +682,13 @@ void APlanet::OnShapeSettingsUpdated()
 		}
 		else
 			GeneratePlanet();
+
+		// Update the size of the atmosphere
+		for (UActorComponent* Component : GetComponents().Array())
+		{
+			if (Component->GetClass() == UAtmosphereComponent::StaticClass())
+				Cast<UAtmosphereComponent>(Component)->SetRelativeScale3D(FVector(ShapeSettings->GetRadius() * 0.0125f));
+		}
 	}
 }
 

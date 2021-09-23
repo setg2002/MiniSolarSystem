@@ -99,10 +99,8 @@ void UAtmosphereComponent::OnComponentCreated()
 
 void UAtmosphereComponent::DestroyComponent(bool bPromoteChildren)
 {
-	if (CloudComponent != nullptr)
-	{
+	if (CloudComponent)
 		CloudComponent->DestroyComponent();
-	}
 
 	Super::DestroyComponent(bPromoteChildren);
 }
