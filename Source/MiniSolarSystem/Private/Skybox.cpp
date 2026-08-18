@@ -2,8 +2,12 @@
 
 
 #include "Skybox.h"
-#include "AssetRegistryModule.h"
+
+#include "AssetToolsModule.h"
+#include "IAssetTools.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "UObject/SavePackage.h"
 
 
 // Sets default values
@@ -51,6 +55,7 @@ void ASkybox::Tick(float DeltaTime)
 
 // This is very slow
 #if WITH_EDITOR
+UE_DISABLE_OPTIMIZATION
 void ASkybox::MakeTexture()
 {
 	int16 TextureRes = 2048;
@@ -61,20 +66,30 @@ void ASkybox::MakeTexture()
 	{
 		Points.AddUnique(FVector2D(FMath::RandRange(0, TextureRes), FMath::RandRange(0, TextureRes)));
 	}
+	
+	FString PackagePath = TEXT("/Game/ProceduralTextures");
+	FString AssetName = TEXT("Skybox");
+	FString LongPackageName = PackagePath + TEXT("/") + AssetName;
 
-	FString TextureName = "Skybox";
-	FString PackageName = TEXT("/Game/ProceduralTextures/" + this->GetName() + "_" + TextureName);
-	UPackage* Package = CreatePackage(*PackageName);
-	Package->FullyLoad();
+	IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
-	UTexture2D* SkyboxTexture = NewObject<UTexture2D>(Package, *TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
+	// Ensure unique naming conventions to avoid accidental overwrites
+	FString UniquePackageName;
+	FString UniqueAssetName;
+	AssetTools.CreateUniqueAssetName(LongPackageName, TEXT(""), UniquePackageName, UniqueAssetName);
+
+	UPackage* Package = CreatePackage(*UniquePackageName);
+	if (!Package) return;
+
+	UTexture2D* SkyboxTexture = NewObject<UTexture2D>(Package, UTexture2D::StaticClass(), *UniqueAssetName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
 
 	SkyboxTexture->AddToRoot();								// This line prevents garbage collection of the texture
-	SkyboxTexture->PlatformData = new FTexturePlatformData();	// Initialize the PlatformData
-	SkyboxTexture->PlatformData->SizeX = TextureRes;
-	SkyboxTexture->PlatformData->SizeY = TextureRes;
-	SkyboxTexture->PlatformData->SetNumSlices(1);
-	SkyboxTexture->PlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
+	FTexturePlatformData* NewPlatformData = new FTexturePlatformData();	// Initialize the PlatformData
+	SkyboxTexture->SetPlatformData(NewPlatformData);
+	NewPlatformData->SizeX = TextureRes;
+	NewPlatformData->SizeY = TextureRes;
+	NewPlatformData->SetNumSlices(1);
+	NewPlatformData->PixelFormat = EPixelFormat::PF_B8G8R8A8;
 	SkyboxTexture->AddressX = TA_Wrap;
 	SkyboxTexture->AddressY = TA_Wrap;
 
@@ -98,13 +113,13 @@ void ASkybox::MakeTexture()
 			Pixels[4 * curPixelIndex] = color.B;
 			Pixels[4 * curPixelIndex + 1] = color.G;
 			Pixels[4 * curPixelIndex + 2] = color.R;
-			Pixels[4 * curPixelIndex + 3] = 255;
+			Pixels[4 * curPixelIndex + 3] = FMath::RandRange(0, 255);
 		}
 	}
 
 	// Allocate first mipmap.
 	FTexture2DMipMap* Mip = new FTexture2DMipMap();
-	SkyboxTexture->PlatformData->Mips.Add(Mip);
+	NewPlatformData->Mips.Add(Mip);
 	Mip->SizeX = TextureRes;
 	Mip->SizeY = TextureRes;
 
@@ -117,19 +132,30 @@ void ASkybox::MakeTexture()
 	SkyboxTexture->Source.Init(TextureRes, TextureRes, 1, 1, ETextureSourceFormat::TSF_BGRA8, Pixels);
 
 	SkyboxTexture->UpdateResource();
+    
+	if (SkyboxTexture)
+	{
+		// ~ Modify asset property structures here if needed ~
+		SkyboxTexture->MarkPackageDirty();
 
-	FAssetRegistryModule::AssetCreated(SkyboxTexture);
+		// Broadcast structural changes to the internal Asset Registry layout
+		FAssetRegistryModule::AssetCreated(SkyboxTexture);
 
-	FString PackageFileName = FPackageName::LongPackageNameToFilename(PackageName, FPackageName::GetAssetPackageExtension());
-	bool bSaved = UPackage::SavePackage(Package, SkyboxTexture, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *PackageFileName, GError, nullptr, true, true, SAVE_NoError);
+		// Write the active package tracking system structure cleanly onto local disk
+		FSavePackageArgs SaveArgs;
+		SaveArgs.TopLevelFlags = RF_Public | RF_Standalone;
+		SaveArgs.SaveFlags = SAVE_NoError;
 
-	delete[] Pixels;	// Don't forget to free the memory here
+		FString PackageFileName = FPackageName::LongPackageNameToFilename(UniquePackageName, FPackageName::GetAssetPackageExtension());
+        
+		UPackage::Save(Package, SkyboxTexture, *PackageFileName, SaveArgs);
+	}
 
+	delete[] Pixels; // Remember to free memory before we're done
+	
 	DynamicMaterial->SetTextureParameterValue("StarTexture", SkyboxTexture);
-	Package->MarkPackageDirty();
-
-	return /*SkyboxTexture*/;
 }
+UE_ENABLE_OPTIMIZATION
 #endif
 
 

@@ -16,7 +16,7 @@ class UNiagaraSystem;
 class UNiagaraComponent;
 class UDirectionalLightComponent;
 
-UENUM()
+UENUM(BlueprintType)
 enum EStarType {
 	O   UMETA(DisplayName = "Blue Supergiant"),
 	B	UMETA(DisplayName = "Blue Giant"),
@@ -27,6 +27,8 @@ enum EStarType {
 	M	UMETA(DisplayName = "Brown Dwarf"),
 	D	UMETA(DisplayName = "White Dwarf")
 };
+
+template<> MINISOLARSYSTEM_API UEnum* StaticEnum<EStarType>();
 
 UCLASS(hidecategories = ("Default"))
 class MINISOLARSYSTEM_API AStar : public ACelestialBody

@@ -11,11 +11,13 @@ public class MiniSolarSystemEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
+        //#TODO - Make these paths not absolute
+
         // Absolute path to the GameVersion header file
-        const string GAME_VERSION_FILE              = @"G:\UnrealProjects\MiniSolarSystem\Source\MiniSolarSystem\Public\GameVersion.h";
+        const string GAME_VERSION_FILE              = @"B:\MiniSolarSystem\Game\Source\MiniSolarSystem\Public\GameVersion.h";
 
         // Absolute path to the GAME_BUILD text file
-        const string GAME_BUILD_FILE                = @"G:\UnrealProjects\MiniSolarSystem\Source\MiniSolarSystem\GAME_BUILD.txt";
+        const string GAME_BUILD_FILE                = @"B:\MiniSolarSystem\Game\Source\MiniSolarSystem\GAME_BUILD.txt";
 
         // Text to replace in GameVersion header file
         const string BUILD_NUMBER_TEXT              = "#define GAME_BUILD_NUMBER";
@@ -85,7 +87,9 @@ public class MiniSolarSystemEditorTarget : TargetRules
             throw new BuildException("Failed to get GAME_VERSION_FILE or GAME_BUILD_FILE. Make sure they exist!");
         }
 
-        DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange( new string[] { "MiniSolarSystem" } );
+        BuildEnvironment = TargetBuildEnvironment.Unique;
+
+        DefaultBuildSettings = BuildSettingsVersion.Latest;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 	}
 }

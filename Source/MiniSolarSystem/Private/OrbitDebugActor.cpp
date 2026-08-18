@@ -2,15 +2,13 @@
 
 
 #include "OrbitDebugActor.h"
-#include "Star.h"
-#include "Planet.h"
-#include "GasGiant.h"
 #include "CelestialBody.h"
 #include "NiagaraSystem.h"
 #include "ShapeSettings.h"
 #include "NiagaraComponent.h"
 #include "CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
+#include "BodySystemFunctionLibrary.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -70,7 +68,7 @@ void AOrbitDebugActor::RemoveID(uint32 IDToRemove)
 	if (IndexToRemove != -1)
 	{
 		IDs.Swap(IndexToRemove, IDs.Num() - 1);
-		IDs.RemoveAt(IDs.Num() - 1, 1, true);
+		IDs.RemoveAt(IDs.Num() - 1, 1, EAllowShrinking::Yes);
 	}
 }
 
@@ -108,7 +106,7 @@ void AOrbitDebugActor::DrawOrbits()
 		}
 
 		// If the central body got deleted we don't want the debug to be relative
-		if (!CentralBody || (CentralBody->IsPendingKill()))
+		if (!CentralBody || (CentralBody->IsPendingKillPending()))
 		{
 			bRelativeToBody = false;
 			CentralBody = Bodies[0];

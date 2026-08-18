@@ -2,7 +2,6 @@
 
 
 #include "GaseousColorGenerator.h"
-#include "AssetRegistryModule.h"
 #include "Curves/CurveLinearColor.h"
 
 GaseousColorGenerator::GaseousColorGenerator()
@@ -59,7 +58,7 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float StormFalloff, int LowBound, int HighBound, int TextureResolution)
 {
 	// Make sure TextureResolution is a power of 2
-	FGenericPlatformMath::FloorLog2(FMath::Max(TextureResolution, 1) * 2);
+	//FGenericPlatformMath::FloorLog2(FMath::Max(TextureResolution, 1) * 2);
 
 	TArray<FVector2D> Points;
 	for (int32 i = 0; i < NumStorms; ++i)

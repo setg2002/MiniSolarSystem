@@ -12,7 +12,7 @@
 #include "CelestialGameInstance.h"
 #include "RingSystemComponent.h"
 #include "AtmosphereComponent.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "CelestialSaveGame.h"
 #include "NiagaraComponent.h"
 #include "OrbitDebugActor.h"
@@ -29,6 +29,8 @@
 #include "GasGiant.h"
 #include "Planet.h"
 #include "Star.h"
+#include "Blueprint/UserWidget.h"
+#include "Materials/MaterialParameterCollection.h"
 
 
 float ACelestialGameMode::gravitationalConstant;
@@ -62,9 +64,9 @@ void ACelestialGameMode::BeginPlay()
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
 
 	// Make widgets
-	CelestialWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
-	OverviewWidget  = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
-	PauseWidget = CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), PauseWidgetClass);
+	CelestialWidget = CreateWidget<UUserWidget, APlayerController*>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
+	OverviewWidget  = CreateWidget<UUserWidget, APlayerController*>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
+	PauseWidget = CreateWidget<UUserWidget, APlayerController*>(GetWorld()->GetFirstPlayerController(), PauseWidgetClass);
 
 	CelestialPlayer = Cast<ACelestialPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass()));
 	OverviewPlayer = Cast<AOverviewPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AOverviewPlayer::StaticClass()));
@@ -124,7 +126,7 @@ void ACelestialGameMode::Tick(float DeltaTime)
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
 	for (auto& System : NiagaraSystems)
 	{
-		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetNiagaraVariableVec3("GravityPos", LargestBody->GetActorLocation());
+		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetVariableVec3(FName("GravityPos"), LargestBody->GetActorLocation());
 	}
 }
 
@@ -768,13 +770,26 @@ void ACelestialGameMode::LoadGame()
 			UE_LOG(LogTemp, Warning, TEXT("NOT LOADED"));
 
 			TArray<FName> TerrestrialBodyNames;
-			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
+			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) 
+			{
 				if (APlanet* Planet = Cast<APlanet>(*Itr))
+				{
 					TerrestrialBodyNames.Add(Planet->GetBodyName());
+				}
 			}
-			TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
-			GeneratePlanetsOrdered::bCurrentlyGenerating = false;
-			GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
+			
+			if (TerrestrialBodyNames.Num() > 0)
+			{
+				TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+				GeneratePlanetsOrdered::bCurrentlyGenerating = false;
+				GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
+			}
+			else
+			{
+				GetGameInstance<UCelestialGameInstance>()->StopLoadingScreen();
+				SetPerspective(1);
+				OnLoadingComplete.Broadcast();
+			}
 		}
 	});
 	FString SlotName = FString("Save" + FString::FromInt(Cast<UCelestialGameInstance>(GetGameInstance())->GetGameSlot()));
@@ -939,7 +954,7 @@ void ACelestialGameMode::OrbitDebug()
 	if (currentPerspective != 0)
 		SetPerspective(0);
 
-	CreateWidget<UUserWidget, APlayerController>(GetWorld()->GetFirstPlayerController(), OrbitDebugWidgetClass)->AddToViewport(0);
+	CreateWidget<UUserWidget, APlayerController*>(GetWorld()->GetFirstPlayerController(), OrbitDebugWidgetClass)->AddToViewport(0);
 }
 
 void ACelestialGameMode::ReGenAll()

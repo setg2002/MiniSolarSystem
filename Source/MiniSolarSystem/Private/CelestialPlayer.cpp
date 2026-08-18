@@ -10,6 +10,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
+#include "BodySystemFunctionLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 

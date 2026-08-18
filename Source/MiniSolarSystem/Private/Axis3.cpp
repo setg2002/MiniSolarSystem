@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/PlayerInput.h"
+#include "BodySystemFunctionLibrary.h"
 #include "OverviewPlayer.h"
 #include "CelestialGameMode.h"
 
@@ -80,7 +81,7 @@ void AAxis3::Tick(float DeltaTime)
 	{
 		FHitResult Hit;
 		GetWorld()->GetFirstPlayerController()->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery4, false, Hit);
-		if (EnsureHit(Hit.bBlockingHit, Hit.Actor, Hit.Component))
+		if (EnsureHit(Hit.bBlockingHit, Hit.GetActor(), Hit.Component))
 			bMouseDown = 1;
 		else
 			bMouseDown = 255;

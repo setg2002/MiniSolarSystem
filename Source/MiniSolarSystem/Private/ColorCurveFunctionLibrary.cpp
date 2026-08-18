@@ -4,8 +4,8 @@
 #include "ColorCurveFunctionLibrary.h"
 #include "CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
-#include "AssetRegistryModule.h"
-
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "UObject/SavePackage.h"
 
 
 UTexture2D* UColorCurveFunctionLibrary::TextureFromCurve(UCurveLinearColor* Gradient, int32 sizeX = 256, int32 sizeY = 1)
@@ -69,6 +69,8 @@ UCurveLinearColor* UColorCurveFunctionLibrary::CreateNewCurve(FName Name, TArray
 	NewGradient->MarkPackageDirty();
 	FString AssetName = Name.ToString();
 	FString FilePath = FString::Printf(TEXT("%s%s%s"), *PackageName, *AssetName, *FPackageName::GetAssetPackageExtension());
-	UPackage::SavePackage(Package, NewGradient, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	FSavePackageArgs Args = FSavePackageArgs();
+	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+	UPackage::SavePackage(Package, NewGradient, *FilePath, Args);
 	return NewGradient;
 }

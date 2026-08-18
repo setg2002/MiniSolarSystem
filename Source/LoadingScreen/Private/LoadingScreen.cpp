@@ -15,12 +15,17 @@ struct FLoadingScreenBrush : public FSlateDynamicImageBrush, public FGCObject
 		SetResourceObject(LoadObject<UObject>(NULL, *InTextureName.ToString()));
 	}
 
-	virtual void AddReferencedObjects(FReferenceCollector& Collector)
+	virtual void AddReferencedObjects(FReferenceCollector& Collector) override
 	{
 		if (UObject* CachedResourceObject = GetResourceObject())
 		{
 			Collector.AddReferencedObject(CachedResourceObject);
 		}
+	}
+	
+	virtual FString GetReferencerName() const override
+	{
+		return TEXT("FLoadingScreenBrush");
 	}
 };
 

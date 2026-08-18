@@ -9,6 +9,7 @@
 #include "NiagaraComponent.h"
 #include "CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
+#include "BodySystemFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -57,8 +58,8 @@ void AStar::BeginPlay()
 	if (!ParticleComponent)
 	{
 		ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, RootComponent, FName(""), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
-		ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
-		ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+		ParticleComponent->SetVariableLinearColor(FName("User.StarColor"), starProperties.color);
+		ParticleComponent->SetVariableFloat(FName("User.Radius"), float(starProperties.radius) * 100.f);
 	}
 
 	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/Materials/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
@@ -112,7 +113,7 @@ void AStar::SetRadius(float NewRadius)
 	starProperties.radius = NewRadius;
 	Collider->SetSphereRadius(NewRadius * 100);
 	Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
-	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+	ParticleComponent->SetVariableFloat(FName("User.Radius"), float(starProperties.radius) * 100.f);
 	
 	bool WasPaused = ParticleComponent->IsPaused();
 	ParticleComponent->ReinitializeSystem();
@@ -151,8 +152,8 @@ void AStar::ReInitParticles()
 {
 	if (ParticleComponent) { ParticleComponent->Deactivate(); ParticleComponent->DestroyComponent(); }
 	ParticleComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(SolarParticleTemplate, RootComponent, FName(""), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
-	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
-	ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+	ParticleComponent->SetVariableLinearColor(FName("User.StarColor"), starProperties.color);
+	ParticleComponent->SetVariableFloat(FName("User.Radius"), float(starProperties.radius) * 100.f);
 	ParticleComponent->ReinitializeSystem();
 }
 
@@ -164,7 +165,7 @@ void AStar::UpdateColor()
 		Sphere->SetMaterial(0, dynamicMaterial);
 	}
 	dynamicMaterial->SetVectorParameterValue(FName("_baseColor"), starProperties.color);
-	ParticleComponent->SetNiagaraVariableLinearColor(FString("User.StarColor"), starProperties.color);
+	ParticleComponent->SetVariableLinearColor(FName("User.StarColor"), starProperties.color);
 
 	Light->SetLightColor(FColor(
 		FMath::Max(starProperties.color.R, uint8(178.5f)),
@@ -183,7 +184,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, radius))
 		{
 			Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
-			ParticleComponent->SetNiagaraVariableFloat(FString("User.Radius"), float(starProperties.radius) * 100.f);
+			ParticleComponent->SetVariableFloat(FName("User.Radius"), float(starProperties.radius) * 100.f);
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, mass))
 		{

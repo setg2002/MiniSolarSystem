@@ -72,6 +72,7 @@ protected:
 
 	const int MaxSpeed = 9999;
 
+	UPROPERTY()
 	UUserWidget* Widget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -109,6 +110,7 @@ private:
 	void RotationY(float AxisValue);
 	void RotationZ(float AxisValue);
 
+	UFUNCTION(Exec)
 	void SwitchPerspective();
 
 	void SwitchIgnoreGravity()

@@ -14,20 +14,24 @@
 #include "MeshDescription.h"
 #include "Misc/PackageName.h"
 #include "Engine/DataAsset.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "AtmosphereComponent.h"
 #include "UObject/PackageReload.h"
 #include "CelestialGameInstance.h"
+#include "CelestialGameMode.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "CelestialSaveGameArchive.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "BodySystemFunctionLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "UObject/SavePackage.h"
 
 
 APlanet::APlanet()
 {
 	PrimaryActorTick.bTickEvenWhenPaused = true;
+	PrimaryActorTick.bCanEverTick = true;
 
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
 	shapeGenerator = new ShapeGenerator();
@@ -77,6 +81,8 @@ void APlanet::EndPlay(const EEndPlayReason::Type EndPlayReason)
 				TerrainFaces[i]->Worker->EnsureCompletion();
 		}
 	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void APlanet::BindDelegates()
@@ -232,7 +238,9 @@ UObject* APlanet::CreateSettingsAssetBP(TSubclassOf<UObject> AssetClass)
 	NewAsset->MarkPackageDirty();
 
 	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
-	bool bSuccess = UPackage::SavePackage(Package, NewAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	FSavePackageArgs Args = FSavePackageArgs();
+	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+	bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
 	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
 
 	return NewAsset;
@@ -263,7 +271,9 @@ T* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
 	NewAsset->MarkPackageDirty();
 
 	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
-	bool bSuccess = UPackage::SavePackage(Package, NewAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	FSavePackageArgs Args = FSavePackageArgs();
+	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+	bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
 	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
 
 	return NewAsset;
@@ -294,7 +304,9 @@ T* APlanet::CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
 	NewAsset->MarkPackageDirty();
 
 	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
-	bool bSuccess = UPackage::SavePackage(Package, NewAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	FSavePackageArgs Args = FSavePackageArgs();
+	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+	bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
 	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
 
 	return NewAsset;
@@ -319,7 +331,9 @@ UObject* APlanet::RestoreSettingsAsset(FName Name, TArray<uint8> Data, UClass* C
 	NewAsset->MarkPackageDirty();
 	FString AssetName = Name.ToString();
 	FString FilePath = FString::Printf(TEXT("%s%s%s"), *PackageName, *AssetName, *FPackageName::GetAssetPackageExtension());
-	UPackage::SavePackage(Package, NewAsset, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone, *FilePath);
+	FSavePackageArgs Args = FSavePackageArgs();
+	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
+	bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
 	return NewAsset;
 }
 
