@@ -74,3 +74,6 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 Content/ProceduralTextures/
+.idea/
+*.slnx
+.vsconfig
