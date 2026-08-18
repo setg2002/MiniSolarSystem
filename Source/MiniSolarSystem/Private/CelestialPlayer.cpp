@@ -11,6 +11,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
 #include "BodySystemFunctionLibrary.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "DataAssets/InputDataConfig.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
@@ -128,21 +131,24 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &ACelestialPlayer::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ACelestialPlayer::MoveRight);
-	PlayerInputComponent->BindAxis("MoveUp", this, &ACelestialPlayer::MoveUp);
-
-	PlayerInputComponent->BindAxis("RotationX", this, &ACelestialPlayer::RotationX);
-	PlayerInputComponent->BindAxis("RotationY", this, &ACelestialPlayer::RotationY);
-	PlayerInputComponent->BindAxis("RotationZ", this, &ACelestialPlayer::RotationZ);
-
-	PlayerInputComponent->BindAxis("ChangeSpeed", this, &ACelestialPlayer::ChangeThrottle);
-
-	PlayerInputComponent->BindAction("SwitchPerspective", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchPerspective);
-	PlayerInputComponent->BindAction("IgnoreGravity", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchIgnoreGravity);
-	PlayerInputComponent->BindAction("FocusPlanet", EInputEvent::IE_Released, this, &ACelestialPlayer::SwitchFocusPlanet);
-
+	
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+ 
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+    
+	Subsystem->ClearAllMappings();
+	Subsystem->AddMappingContext(InputMappingContext, 0);
+	
+	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+    
+	if(!CelestialInputConfig) return; // Don't wanna bind to invalid UInputActions!
+    
+	Input->BindAction(CelestialInputConfig->Move, ETriggerEvent::Triggered, this, &ACelestialPlayer::Move);
+	Input->BindAction(CelestialInputConfig->Look, ETriggerEvent::Triggered, this, &ACelestialPlayer::Rotate);
+	Input->BindAction(CelestialInputConfig->ChangeSpeed, ETriggerEvent::Triggered, this, &ACelestialPlayer::ChangeThrottle);
+	Input->BindAction(CelestialInputConfig->SwitchPerspective, ETriggerEvent::Completed, this, &ACelestialPlayer::SwitchPerspective);
+	Input->BindAction(CelestialInputConfig->IgnoreGravity, ETriggerEvent::Completed, this, &ACelestialPlayer::SwitchIgnoreGravity);
+	Input->BindAction(CelestialInputConfig->FocusPlanet, ETriggerEvent::Completed, this, &ACelestialPlayer::SwitchFocusPlanet);
 }
 
 void ACelestialPlayer::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -155,6 +161,14 @@ void ACelestialPlayer::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor*
 {
 	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && (OtherActor == OverlappedActor)) OverlappedActor = nullptr;
 		//if (GEngine) GEngine->AddOnScreenDebugMessage(0, 5, FColor::Red, *FString::Printf(TEXT("Player End Col w/ %s"), *Cast<ACelestialBody>(OtherActor)->GetBodyName().ToString()));
+}
+
+void ACelestialPlayer::ChangeThrottle(const FInputActionValue& Value)
+{
+	if (Throttle + Value.Get<float>() / 10.f > 0.09f && Throttle + Value.Get<float>() / 10.f <= 5)
+	{
+		Throttle += Value.Get<float>() / 10.f;
+	}
 }
 
 void ACelestialPlayer::LimitVelocity()
@@ -194,42 +208,22 @@ void ACelestialPlayer::UpdatePosition(float timeStep)
 	this->SetActorLocation(FVector(this->GetActorLocation() + (currentVelocity * timeStep)));
 }
 
-
-void ACelestialPlayer::RotationX(float AxisValue)
+void ACelestialPlayer::Move(const FInputActionValue& Value)
 {
 	if (Controller)
-		Collider->AddTorqueInDegrees(this->GetActorUpVector() * (AxisValue * RotationForce), NAME_None, true);
+	{
+		currentVelocity += (GetActorRotation().Vector() * Value.Get<FVector>() * Throttle);
+	}
 }
 
-void ACelestialPlayer::RotationY(float AxisValue)
+void ACelestialPlayer::Rotate(const FInputActionValue& Value)
 {
 	if (Controller)
-		Collider->AddTorqueInDegrees(this->GetActorRightVector() * (AxisValue * RotationForce), NAME_None, true);
-}
-
-void ACelestialPlayer::RotationZ(float AxisValue)
-{
-	if (Controller)
-		Collider->AddTorqueInDegrees(this->GetActorForwardVector() * (-AxisValue * RotationForce), NAME_None, true);
-}
-
-
-void ACelestialPlayer::MoveForward(float AxisValue)
-{
-	if (Controller)
-		currentVelocity += (this->GetActorRotation().Vector() * AxisValue * Throttle);
-}
-
-void ACelestialPlayer::MoveRight(float AxisValue)
-{
-	if (Controller)
-		currentVelocity += (UKismetMathLibrary::GetRightVector(this->GetActorRotation()) * AxisValue * Throttle);
-}
-
-void ACelestialPlayer::MoveUp(float AxisValue)
-{
-	if (Controller)
-		currentVelocity += (UKismetMathLibrary::GetUpVector(this->GetActorRotation()) * AxisValue * Throttle);
+	{
+		Collider->AddTorqueInDegrees(GetActorUpVector() * (Value.Get<FVector>().X * RotationForce), NAME_None, true);
+		Collider->AddTorqueInDegrees(GetActorRightVector() * (Value.Get<FVector>().Y * RotationForce), NAME_None, true);
+		Collider->AddTorqueInDegrees(GetActorForwardVector() * (Value.Get<FVector>().Z * RotationForce), NAME_None, true);
+	}
 }
 
 

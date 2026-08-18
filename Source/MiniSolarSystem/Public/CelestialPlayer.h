@@ -11,6 +11,8 @@
 class ACelestialGameMode;
 class UCameraComponent;
 class UBoxComponent;
+class UInputMappingContext;
+class UInputDataConfig_Celestial;
 
 UCLASS()
 class MINISOLARSYSTEM_API ACelestialPlayer : public APawn, public ICelestialObject
@@ -83,6 +85,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCameraComponent* Camera; //NOTE: Making components into UPROPERTY() makes them NULL at runtime
+	
+	/** MappingContext for player input. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
+	UInputMappingContext* InputMappingContext;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
+	UInputDataConfig_Celestial* CelestialInputConfig;
 
 public:	
 	// Called every frame
@@ -102,14 +111,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> PlanetHighlightClass;
 
-	void MoveForward(float AxisValue);
-	void MoveRight(float AxisValue);
-	void MoveUp(float AxisValue);
-
-	void RotationX(float AxisValue);
-	void RotationY(float AxisValue);
-	void RotationZ(float AxisValue);
-
+	UFUNCTION()
+	void Move(const FInputActionValue& Value);
+	
+	UFUNCTION()
+	void Rotate(const FInputActionValue& Value);
+	
 	UFUNCTION(Exec)
 	void SwitchPerspective();
 
@@ -125,13 +132,8 @@ private:
 	UPROPERTY(SaveGame)
 	float Throttle = 1;
 
-	void ChangeThrottle(float AxisValue)
-	{
-		if (Throttle + AxisValue / 10.f > 0.09f && Throttle + AxisValue / 10.f <= 5)
-		{
-			Throttle += AxisValue / 10.f;
-		}
-	}
+	UFUNCTION()
+	void ChangeThrottle(const FInputActionValue& Value);
 
 	void LimitVelocity();
 
