@@ -6,6 +6,9 @@
 #include "GameFramework/Pawn.h"
 #include "OverviewPlayer.generated.h"
 
+struct FInputActionValue;
+class UInputDataConfig_Overview;
+class UInputMappingContext;
 class USpringArmComponent;
 class ACelestialGameMode;
 class UCameraComponent;
@@ -29,6 +32,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanRot = true;
 
+	/** MappingContext for player input. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
+	UInputMappingContext* InputMappingContext;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
+	UInputDataConfig_Overview* OverviewInputConfig;
+	
 	FVector GetCameraLocation();
 
 	USpringArmComponent* GetSpringArm() const { return SpringArm; }
@@ -52,27 +62,20 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	UFUNCTION()
 	void SwitchPerspective();
 
-	void MoveForward(float AxisValue);
-	void MoveRight(float AxisValue);
-	void MoveUp(float AxisValue);
+	UFUNCTION()
+	void Move(const FInputActionValue& Value);
+	
+	UFUNCTION()
+	void Rotate(const FInputActionValue& Value);
 
-	void RotateX(float AxisValue)
-	{
-		this->AddActorWorldRotation(FRotator(0, AxisValue, 0));
-	}
-	void RotateY(float AxisValue);
+	UFUNCTION()
+	void Zoom(const FInputActionValue& Value);
 
-	void Zoom(float AxisValue);
-
-	void ChangeSpeed(float AxisValue)
-	{
-		if (Speed + AxisValue * 50 > 1 && Speed + AxisValue * 50 <= 2000)
-		{
-			Speed += AxisValue * 50;
-		}
-	}
+	UFUNCTION()
+	void ChangeSpeed(const FInputActionValue& Value);
 
 	ACelestialGameMode* gameMode;
 };

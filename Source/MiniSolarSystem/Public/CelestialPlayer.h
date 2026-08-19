@@ -143,5 +143,6 @@ private:
 
 private:
 	// The actor that is currently being overlapped with, nullptr if not overlapping
+	UPROPERTY()
 	AActor* OverlappedActor;
 };

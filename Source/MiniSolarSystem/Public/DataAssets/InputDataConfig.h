@@ -16,6 +16,9 @@ class MINISOLARSYSTEM_API UInputDataConfig : public UDataAsset
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* SwitchPerspective;
 };
 
 
@@ -35,9 +38,6 @@ public:
 	UInputAction* ChangeSpeed;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UInputAction* SwitchPerspective;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* IgnoreGravity;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -50,4 +50,16 @@ class MINISOLARSYSTEM_API UInputDataConfig_Overview : public UInputDataConfig
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* Move;
+ 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* Look;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* ChangeSpeed;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* Zoom;
 };

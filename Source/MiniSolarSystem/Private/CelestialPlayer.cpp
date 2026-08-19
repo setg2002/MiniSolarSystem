@@ -137,7 +137,7 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
     
 	Subsystem->ClearAllMappings();
-	Subsystem->AddMappingContext(InputMappingContext, 0);
+	Subsystem->AddMappingContext(InputMappingContext, 1);
 	
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
     
@@ -212,7 +212,7 @@ void ACelestialPlayer::Move(const FInputActionValue& Value)
 {
 	if (Controller)
 	{
-		currentVelocity += (GetActorRotation().Vector() * Value.Get<FVector>() * Throttle);
+		currentVelocity += (Camera->GetComponentRotation().RotateVector(Value.Get<FVector>()) * Throttle);
 	}
 }
 

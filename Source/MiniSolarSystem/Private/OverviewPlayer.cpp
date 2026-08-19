@@ -3,7 +3,11 @@
 
 #include "OverviewPlayer.h"
 #include "CelestialGameMode.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "DataAssets/InputDataConfig.h"
+#include "BodySystemFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -85,18 +89,22 @@ void AOverviewPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("SwitchPerspective", EInputEvent::IE_Released, this, &AOverviewPlayer::SwitchPerspective);
-
-	PlayerInputComponent->BindAxis("Overview_MoveForward", this, &AOverviewPlayer::MoveForward);
-	PlayerInputComponent->BindAxis("Overview_MoveRight", this, &AOverviewPlayer::MoveRight);
-	PlayerInputComponent->BindAxis("Overview_MoveUp", this, &AOverviewPlayer::MoveUp);
-
-	PlayerInputComponent->BindAxis("Overview_RotationX", this, &AOverviewPlayer::RotateX);
-	PlayerInputComponent->BindAxis("Overview_RotationY", this, &AOverviewPlayer::RotateY);
-	PlayerInputComponent->BindAxis("Zoom", this, &AOverviewPlayer::Zoom);
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+ 
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	
-	PlayerInputComponent->BindAxis("Overview_IncreaseSpeed", this, &AOverviewPlayer::ChangeSpeed);
-
+	Subsystem->ClearAllMappings();
+	Subsystem->AddMappingContext(InputMappingContext, 1);
+	
+	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+    
+	if(!OverviewInputConfig) return; // Don't wanna bind to invalid UInputActions!
+    
+	Input->BindAction(OverviewInputConfig->Move, ETriggerEvent::Triggered, this, &AOverviewPlayer::Move);
+	Input->BindAction(OverviewInputConfig->Look, ETriggerEvent::Triggered, this, &AOverviewPlayer::Rotate);
+	Input->BindAction(OverviewInputConfig->ChangeSpeed, ETriggerEvent::Triggered, this, &AOverviewPlayer::ChangeSpeed);
+	Input->BindAction(OverviewInputConfig->Zoom, ETriggerEvent::Triggered, this, &AOverviewPlayer::Zoom);
+	Input->BindAction(OverviewInputConfig->SwitchPerspective, ETriggerEvent::Triggered, this, &AOverviewPlayer::SwitchPerspective);
 }
 
 void AOverviewPlayer::SwitchPerspective()
@@ -104,32 +112,34 @@ void AOverviewPlayer::SwitchPerspective()
 	gameMode->SetPerspective(1);
 }
 
-void AOverviewPlayer::RotateY(float AxisValue)
+void AOverviewPlayer::Move(const FInputActionValue& Value)
 {
-	SpringArm->AddLocalRotation(FRotator(AxisValue, 0, 0));
+	SetActorLocation(GetActorLocation() + (GetActorRotation().RotateVector(Value.Get<FVector>()) * Speed));
 }
 
-void AOverviewPlayer::Zoom(float AxisValue)
+void AOverviewPlayer::Rotate(const FInputActionValue& Value)
 {
-	if (SpringArm->TargetArmLength + (AxisValue * Speed) >= 0)
+	FVector2D InputVector = Value.Get<FVector2D>();
+	SpringArm->AddLocalRotation(FRotator(InputVector.Y, 0, 0));
+	this->AddActorWorldRotation(FRotator(0, InputVector.X, 0));
+}
+
+void AOverviewPlayer::ChangeSpeed(const FInputActionValue& Value)
+{
+	float InputValue = Value.Get<float>();
+	if (Speed + InputValue * 50 > 1 && Speed + InputValue * 50 <= 2000)
 	{
-		SpringArm->TargetArmLength += (AxisValue * Speed);
+		Speed += InputValue * 50;
 	}
 }
 
-void AOverviewPlayer::MoveForward(float AxisValue)
+void AOverviewPlayer::Zoom(const FInputActionValue& Value)
 {
-	this->SetActorLocation(this->GetActorLocation() + (Root->GetForwardVector() * (AxisValue * Speed)));
-}
-
-void AOverviewPlayer::MoveRight(float AxisValue)
-{
-	this->SetActorLocation(this->GetActorLocation() + (Root->GetRightVector() * (AxisValue * Speed)));
-}
-
-void AOverviewPlayer::MoveUp(float AxisValue)
-{
-	this->SetActorLocation(this->GetActorLocation() + (FVector::UpVector * (AxisValue * Speed)));
+	float InputValue = Value.Get<float>();
+	if (SpringArm->TargetArmLength + (InputValue * Speed) >= 0)
+	{
+		SpringArm->TargetArmLength += (InputValue * Speed);
+	}
 }
 
 FVector AOverviewPlayer::GetCameraLocation()
