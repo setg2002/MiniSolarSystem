@@ -30,6 +30,7 @@
 #include "Planet.h"
 #include "Star.h"
 #include "Blueprint/UserWidget.h"
+#include "Game/CelestialGameState.h"
 #include "Materials/MaterialParameterCollection.h"
 
 
@@ -40,6 +41,8 @@ ACelestialGameMode::ACelestialGameMode()
 	PrimaryActorTick.bCanEverTick = true;
 	currentPerspective = 255;
 	gravitationalConstant = 100;
+	
+	GameStateClass = ACelestialGameState::StaticClass();
 }
 
 void ACelestialGameMode::AddBodySystem(FBodySystem& NewSystem)
