@@ -2,12 +2,12 @@
 
 
 #include "OverviewPlayer.h"
-#include "CelestialGameMode.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "DataAssets/InputDataConfig.h"
 #include "BodySystemFunctionLibrary.h"
+#include "Game/CelestialGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -33,15 +33,12 @@ AOverviewPlayer::AOverviewPlayer()
 	Camera->SetupAttachment(SpringArm);
 }
 
-// Called when the game starts or when spawned
 void AOverviewPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
-	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
+	
 }
 
-// Called every frame
 void AOverviewPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -93,8 +90,14 @@ void AOverviewPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
  
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	
-	Subsystem->ClearAllMappings();
-	Subsystem->AddMappingContext(InputMappingContext, 1);
+	ACelestialGameState* GameState = GetWorld()->GetGameState<ACelestialGameState>();
+	
+	if (!GameState) return;
+	
+	GameState->SetOverviewMappingContext(InputMappingContext);
+	
+	Subsystem->RemoveMappingContext(GameState->GetCelestialInputMappingContext());
+	Subsystem->AddMappingContext(InputMappingContext, 0);
 	
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
     
@@ -104,12 +107,6 @@ void AOverviewPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	Input->BindAction(OverviewInputConfig->Look, ETriggerEvent::Triggered, this, &AOverviewPlayer::Rotate);
 	Input->BindAction(OverviewInputConfig->ChangeSpeed, ETriggerEvent::Triggered, this, &AOverviewPlayer::ChangeSpeed);
 	Input->BindAction(OverviewInputConfig->Zoom, ETriggerEvent::Triggered, this, &AOverviewPlayer::Zoom);
-	Input->BindAction(OverviewInputConfig->SwitchPerspective, ETriggerEvent::Triggered, this, &AOverviewPlayer::SwitchPerspective);
-}
-
-void AOverviewPlayer::SwitchPerspective()
-{
-	gameMode->SetPerspective(1);
 }
 
 void AOverviewPlayer::Move(const FInputActionValue& Value)

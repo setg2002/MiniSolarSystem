@@ -63,9 +63,6 @@ public:
 
 private:
 	UFUNCTION()
-	void SwitchPerspective();
-
-	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 	
 	UFUNCTION()
@@ -77,5 +74,5 @@ private:
 	UFUNCTION()
 	void ChangeSpeed(const FInputActionValue& Value);
 
-	ACelestialGameMode* gameMode;
+	
 };

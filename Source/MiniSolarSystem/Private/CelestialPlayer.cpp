@@ -14,6 +14,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "DataAssets/InputDataConfig.h"
+#include "Game/CelestialGameState.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
@@ -23,7 +24,6 @@ ACelestialPlayer::ACelestialPlayer()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bTickEvenWhenPaused = false;
-	bAllowChangePerspective = false;
 
 	RootComponent = Collider = CreateDefaultSubobject<UBoxComponent>(TEXT("RootCollider"));
 	Collider->InitBoxExtent(FVector::ZeroVector);
@@ -129,15 +129,19 @@ ACelestialBody* ACelestialPlayer::LookingAtPlanet()
 void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	gameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
 	
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
  
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
     
-	Subsystem->ClearAllMappings();
-	Subsystem->AddMappingContext(InputMappingContext, 1);
+	ACelestialGameState* GameState = GetWorld()->GetGameState<ACelestialGameState>();
+	
+	if (!GameState) return;
+	
+	GameState->SetCelestialMappingContext(InputMappingContext);
+	
+	Subsystem->RemoveMappingContext(GameState->GetOverviewInputMappingContext());
+	Subsystem->AddMappingContext(InputMappingContext, 0);
 	
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
     
@@ -146,7 +150,6 @@ void ACelestialPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Input->BindAction(CelestialInputConfig->Move, ETriggerEvent::Triggered, this, &ACelestialPlayer::Move);
 	Input->BindAction(CelestialInputConfig->Look, ETriggerEvent::Triggered, this, &ACelestialPlayer::Rotate);
 	Input->BindAction(CelestialInputConfig->ChangeSpeed, ETriggerEvent::Triggered, this, &ACelestialPlayer::ChangeThrottle);
-	Input->BindAction(CelestialInputConfig->SwitchPerspective, ETriggerEvent::Completed, this, &ACelestialPlayer::SwitchPerspective);
 	Input->BindAction(CelestialInputConfig->IgnoreGravity, ETriggerEvent::Completed, this, &ACelestialPlayer::SwitchIgnoreGravity);
 	Input->BindAction(CelestialInputConfig->FocusPlanet, ETriggerEvent::Completed, this, &ACelestialPlayer::SwitchFocusPlanet);
 }
@@ -224,12 +227,6 @@ void ACelestialPlayer::Rotate(const FInputActionValue& Value)
 		Collider->AddTorqueInDegrees(GetActorRightVector() * (Value.Get<FVector>().Y * RotationForce), NAME_None, true);
 		Collider->AddTorqueInDegrees(GetActorForwardVector() * (Value.Get<FVector>().Z * RotationForce), NAME_None, true);
 	}
-}
-
-
-void ACelestialPlayer::SwitchPerspective()
-{
-	if (bAllowChangePerspective) gameMode->SetPerspective(0);
 }
 
 void ACelestialPlayer::SwitchFocusPlanet()

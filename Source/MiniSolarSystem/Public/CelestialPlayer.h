@@ -26,9 +26,6 @@ public:
 	UPROPERTY(SaveGame, BlueprintReadWrite)
 	bool bFocusPlanet = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAllowChangePerspective;
-
 	UFUNCTION(BlueprintCallable)
 	virtual int GetMass() const override;
 
@@ -116,9 +113,6 @@ private:
 	
 	UFUNCTION()
 	void Rotate(const FInputActionValue& Value);
-	
-	UFUNCTION(Exec)
-	void SwitchPerspective();
 
 	void SwitchIgnoreGravity()
 	{

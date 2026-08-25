@@ -16,6 +16,14 @@ class MINISOLARSYSTEM_API UInputDataConfig : public UDataAsset
 {
 	GENERATED_BODY()
 	
+};
+
+
+UCLASS()
+class MINISOLARSYSTEM_API UInputDataConfig_Controller : public UInputDataConfig
+{
+	GENERATED_BODY()
+		
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UInputAction* SwitchPerspective;
