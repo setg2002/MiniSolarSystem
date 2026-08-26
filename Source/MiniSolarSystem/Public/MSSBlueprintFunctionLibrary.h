@@ -7,6 +7,7 @@
 #include "MSSBlueprintFunctionLibrary.generated.h"
 
 class ACelestialGameState;
+class ACelestialGameMode;
 
 /**
  * 
@@ -18,4 +19,7 @@ class MINISOLARSYSTEM_API UMSSBlueprintFunctionLibrary : public UBlueprintFuncti
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(WorldContext="WorldContextObject"))
 	static ACelestialGameState* GetCelestialGameState(UObject* WorldContextObject);
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(WorldContext="WorldContextObject"))
+	static ACelestialGameMode* GetCelestialGameMode(UObject* WorldContextObject);
 };

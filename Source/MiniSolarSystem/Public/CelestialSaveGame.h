@@ -141,6 +141,8 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	int32 AsteroidFieldNum;
+	
+	// TODO SG- Save player made asteroid belts and their data
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FBodySystemRecord> BodySystemsData;

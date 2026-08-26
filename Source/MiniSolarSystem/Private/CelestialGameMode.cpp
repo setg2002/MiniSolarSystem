@@ -60,7 +60,6 @@ void ACelestialGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	PlanetIlluminationInst = GetWorld()->GetParameterCollectionInstance(LoadObject<UMaterialParameterCollection>(NULL, TEXT("MaterialParameterCollection'/Game/Materials/PlanetIllumination.PlanetIllumination'"), NULL, LOAD_None, NULL));
-	NumStars = 0;
 
 	PC = GetWorld()->GetFirstPlayerController();
 
@@ -78,16 +77,16 @@ void ACelestialGameMode::BeginPlay()
 
 	// Gets all ACelestialBodies and adds them to bodies
 	for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) {
-		bodies.Add(*Itr);
+		Bodies.Add(*Itr);
 
 		if (Cast<AStar>(*Itr))
 		{
 			AStar* Star = Cast<AStar>(*Itr);
-			Star->SetStarNum(NumStars);
-			NumStars++;
+			Star->SetStarNum(Stars.Num());
+			Stars.Add(Star);
 		}
 	}
-	PlanetIlluminationInst->SetScalarParameterValue("NumStars", NumStars);
+	PlanetIlluminationInst->SetScalarParameterValue("NumStars", Stars.Num());
 
 	// Gets all actors that implement ICelestialObject and adds them to celestialObjects
 	TArray<AActor*> Actors;
@@ -95,7 +94,13 @@ void ACelestialGameMode::BeginPlay()
 	for (auto& actor : Actors)
 	{
 		const auto &Interface = Cast<ICelestialObject>(actor);
-		celestialObjects.Add(Interface);
+		CelestialObjects.Add(Interface);
+	}
+	
+	
+	for (TActorIterator<ANiagaraActor> Itr(GetWorld()); Itr; ++Itr)
+	{
+		Asteroids.AddUnique(*Itr);
 	}
 
 	LoadGame();
@@ -107,29 +112,28 @@ void ACelestialGameMode::Tick(float DeltaTime)
 
 	if (currentPerspective == 1)
 	{
-		for (int32 i = 0; i < celestialObjects.Num(); i++) 
+		for (int32 i = 0; i < CelestialObjects.Num(); i++) 
 		{
-			ICelestialObject* thisObject = celestialObjects[i];
+			ICelestialObject* thisObject = CelestialObjects[i];
 
-			thisObject->UpdateVelocity(bodies, DeltaTime);
+			thisObject->UpdateVelocity(Bodies, DeltaTime);
 			thisObject->UpdatePosition(DeltaTime);
 		}
 	}
 
 	// Set the gravity location of asteroid Niagara systems to the location of the most massive body
 	ACelestialBody* LargestBody = nullptr;
-	for (auto& Body : bodies)
+	for (auto& Body : Bodies)
 	{
 		if (LargestBody == nullptr)
 			LargestBody = Body;
 		else if (Body->GetMass() > LargestBody->GetMass())
 			LargestBody = Body;
 	}
-	TArray<AActor*> NiagaraSystems;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
-	for (auto& System : NiagaraSystems)
+	
+	for (auto& System : Asteroids)
 	{
-		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetVariableVec3(FName("GravityPos"), LargestBody->GetActorLocation());
+		System->GetNiagaraComponent()->SetVariableVec3(FName("GravityPos"), LargestBody->GetActorLocation());
 	}
 }
 
@@ -139,13 +143,13 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	NewBody->SetName(Name);
 	NewBody->SetMass(1);
 
-	bodies.Add(NewBody);
+	Bodies.Add(NewBody);
 
 	if (AStar* Star = Cast<AStar>(NewBody))
 	{
-		Star->SetStarNum(NumStars);
-		NumStars++;
-		PlanetIlluminationInst->SetScalarParameterValue("NumStars", NumStars);
+		Star->SetStarNum(Stars.Num());
+		Stars.Add(Star);
+		PlanetIlluminationInst->SetScalarParameterValue("NumStars", Stars.Num());
 	}
 	else if (bRegenerate)
 	{
@@ -154,7 +158,7 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	}
 
 	const auto &Interface = Cast<ICelestialObject>(NewBody);
-	celestialObjects.Add(Interface);
+	CelestialObjects.Add(Interface);
 	
 	AOrbitDebugActor::Get()->AddID(NewBody->GetID());
 	if (currentPerspective == 0)
@@ -162,6 +166,37 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	
 
 	return NewBody;
+}
+
+ANiagaraActor* ACelestialGameMode::AddAsteroidSystem(FTransform Transform, UNiagaraSystem* System, bool bStartPaused)
+{
+	ANiagaraActor* NewSystem = GetWorld()->SpawnActor<ANiagaraActor>(ANiagaraActor::StaticClass(), Transform);
+
+	if (UNiagaraComponent* NiagaraComponent = NewSystem->GetNiagaraComponent())
+	{
+		NiagaraComponent->SetAsset(System);
+		NiagaraComponent->SetPaused(bStartPaused);
+	}
+	
+	Asteroids.Add(NewSystem);
+	
+	return NewSystem;
+}
+
+void ACelestialGameMode::RemoveAsteroidSystem(ANiagaraActor* SystemToRemove)
+{
+	if (!SystemToRemove)
+	{
+		return;
+	}
+	
+	int32 Removed = Asteroids.Remove(SystemToRemove);
+	if (Removed == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Trying to remove asteroid system that isn't tracked! (%s)"), *SystemToRemove->GetName());
+	}
+	
+	SystemToRemove->Destroy();
 }
 
 ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicate)
@@ -329,29 +364,33 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 
 void ACelestialGameMode::RemoveBody(FString Body)
 {
-	ACelestialBody* Body_ = GetBodyByName(Body);
-	if (Body_)
+	ACelestialBody* BodyPtr = GetBodyByName(Body);
+	if (BodyPtr)
 	{
-		AOrbitDebugActor::Get()->RemoveID(Body_->GetID());
-
-		Body_->Destroy();
-		bodies.Remove(Body_);
-		celestialObjects.Remove(Cast<ICelestialObject>(Body_));
+		AOrbitDebugActor::Get()->RemoveID(BodyPtr->GetID());
+		
+		Bodies.Remove(BodyPtr);
+		CelestialObjects.Remove(Cast<ICelestialObject>(BodyPtr));
 
 		if (currentPerspective == 0)
-			AOrbitDebugActor::Get()->DrawOrbits();
-
-		if (Cast<AStar>(Body_))
 		{
-			NumStars = 0;
-			for (TActorIterator<AStar> Itr(GetWorld()); Itr; ++Itr) {
-				AStar* Star = Cast<AStar>(*Itr);
-				Star->SetStarNum(NumStars);
-				NumStars++;
+			AOrbitDebugActor::Get()->DrawOrbits();
+		}
+		
+		if (AStar* Star = Cast<AStar>(BodyPtr))
+		{
+			Stars.Remove(Star);
+
+			// Reindex other stars
+			for (int i = 0; i < Stars.Num(); ++i)
+			{
+				Stars[i]->SetStarNum(i);
 			}
 		}
+		
+		BodyPtr->Destroy();
 
-		UE_LOG(LogTemp, Warning, TEXT("Removed %s"), *Body_->GetBodyName().ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Removed %s"), *BodyPtr->GetBodyName().ToString());
 		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Could not find body %s to remove"), *Body);
@@ -360,14 +399,34 @@ void ACelestialGameMode::RemoveBody(FString Body)
 void ACelestialGameMode::SetGravitationalConstant(float NewG)
 {
 	gravitationalConstant = NewG;
-	TArray<AActor*> NiagaraSystems;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
-	for (auto& System : NiagaraSystems)
+	
+	for (auto& System : Asteroids)
 	{
 		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetNiagaraVariableFloat("GravitationalConstant", gravitationalConstant);
 	}
 	if (currentPerspective == 0)
 		AOrbitDebugActor::Get()->DrawOrbits();
+}
+
+bool ACelestialGameMode::SetAsteroidFieldActor(ANiagaraActor* NewAsteroidFieldActor)
+{
+	if (!AsteroidFieldActor)
+	{
+		return false;
+	}
+	if (Asteroids.Contains(NewAsteroidFieldActor))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Trying to set asteroid field actor that is already tracked! (%s)"), *NewAsteroidFieldActor->GetName());
+		return false;
+	}
+	
+	AsteroidFieldActor = NewAsteroidFieldActor;
+	Asteroids.Add(NewAsteroidFieldActor);
+	
+	bool bValidNiagaraVar = false;
+	AsteroidFieldSpawnCount = AsteroidFieldActor->GetNiagaraComponent()->GetVariableInt(FName("SpawnCount"), bValidNiagaraVar);
+	
+	return true;
 }
 
 void ACelestialGameMode::SetPerspective(uint8 perspective)
@@ -391,19 +450,15 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		currentPerspective = perspective;
 		AOrbitDebugActor::Get()->DrawOrbits();
 
-		TArray<AActor*> NiagaraSystems;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
-		for (auto& System : NiagaraSystems)
+		for (auto& System : Asteroids)
 		{
-			Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetPaused(true);
+			System->GetNiagaraComponent()->SetPaused(true);
 		}
 
-		TArray<AActor*> Stars;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStar::StaticClass(), Stars);
-		for (AActor* Star : Stars)
+		for (AStar* Star : Stars)
 		{
-			Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
-			Cast<AStar>(Star)->GetParticleComp()->SetPaused(true);
+			Star->dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
+			Star->GetParticleComp()->SetPaused(true);
 		}
 
 		TArray<AActor*> GasGiants;
@@ -426,19 +481,15 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		currentPerspective = perspective;
 		AOrbitDebugActor::Get()->ClearOrbits();
 
-		TArray<AActor*> NiagaraSystems;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ANiagaraActor::StaticClass(), NiagaraSystems);
-		for (auto& System : NiagaraSystems)
+		for (auto& System : Asteroids)
 		{
-			Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetPaused(false);
+			System->GetNiagaraComponent()->SetPaused(false);
 		}
 
-		TArray<AActor*> Stars;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStar::StaticClass(), Stars);
-		for (AActor* Star : Stars)
+		for (AStar* Star : Stars)
 		{
-			Cast<AStar>(Star)->dynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
-			Cast<AStar>(Star)->GetParticleComp()->SetPaused(false);
+			Star->dynamicMaterial->SetScalarParameterValue("bIsPaused", 0);
+			Star->GetParticleComp()->SetPaused(false);
 		}
 
 		TArray<AActor*> GasGiants;
@@ -458,7 +509,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 
 ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 {
-	for (auto& body : bodies)
+	for (auto& body : Bodies)
 	{
 		if (body->GetBodyName().ToString() == Name)
 			return body;
@@ -468,7 +519,7 @@ ACelestialBody* ACelestialGameMode::GetBodyByName(FString Name)
 
 ISettingsAssetID* ACelestialGameMode::GetAssetByID(uint32 ID)
 {
-	for (auto& body : bodies)
+	for (auto& body : Bodies)
 	{
 		if (body->GetID() == ID)
 			return body;
@@ -626,17 +677,17 @@ void ACelestialGameMode::LoadGame()
 			for (auto& data : LoadedGame->CelestialBodyData)
 			{
 				bool BodyAlreadyExists = false;
-				for (int32 i = 0; i < bodies.Num(); i++)
+				for (int32 i = 0; i < Bodies.Num(); i++)
 				{
-					if (bodies[i]->GetBodyName().ToString() == data.Name.ToString())
+					if (Bodies[i]->GetBodyName().ToString() == data.Name.ToString())
 					{
 						FMemoryReader MemoryReader(data.ActorData);
 						FCelestialSaveGameArchive Ar(MemoryReader);
-						bodies[i]->Serialize(Ar);
-						bodies[i]->SetActorTransform(data.Transform);
-						RestoredBodies.Add(bodies[i]);
+						Bodies[i]->Serialize(Ar);
+						Bodies[i]->SetActorTransform(data.Transform);
+						RestoredBodies.Add(Bodies[i]);
 
-						if (AGasGiant* GasGiant = Cast<AGasGiant>(bodies[i]))
+						if (AGasGiant* GasGiant = Cast<AGasGiant>(Bodies[i]))
 							GasGiant->ReInit();
 
 						BodyAlreadyExists = true;
@@ -660,7 +711,7 @@ void ACelestialGameMode::LoadGame()
 				UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *data.Name.ToString());
 			}
 			TArray<ACelestialBody*> BodiesToDelete;
-			for (ACelestialBody* Body : bodies)
+			for (ACelestialBody* Body : Bodies)
 			{
 				bool bBodyWasDeleted = true;
 				for (ACelestialBody* RestoredBody : RestoredBodies)
@@ -703,7 +754,7 @@ void ACelestialGameMode::LoadGame()
 				LoadRuntimeAssetsOfClass({}, UBiome::StaticClass());
 			}
 			
-			for (ACelestialBody* Body : bodies) // Make sure the newly created and assigned asset's delegates are bound
+			for (ACelestialBody* Body : Bodies) // Make sure the newly created and assigned asset's delegates are bound
 			{
 				if (APlanet* planet = Cast<APlanet>(Body))
 					planet->BindDelegates();
@@ -828,7 +879,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 		// Set data on the savegame object.
 
 		SaveGameInstance->GravConst = gravitationalConstant;
-		SaveGameInstance->AsteroidFieldNum = AsteroidFieldNum;
+		SaveGameInstance->AsteroidFieldNum = AsteroidFieldSpawnCount;
 
 		// Save BodySystems
 		SaveGameInstance->BodySystemsData.SetNum(BodySystems.Num());
@@ -839,10 +890,10 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 		}
 
 		// Save Celestial Body Data
-		SaveGameInstance->CelestialBodyData.SetNum(bodies.Num());
-		for (int32 i = 0; i < bodies.Num(); i++)
+		SaveGameInstance->CelestialBodyData.SetNum(Bodies.Num());
+		for (int32 i = 0; i < Bodies.Num(); i++)
 		{
-			ACelestialBody* Body = bodies[i];
+			ACelestialBody* Body = Bodies[i];
 
 			SaveGameInstance->CelestialBodyData[i].Class = Body->GetClass();
 			SaveGameInstance->CelestialBodyData[i].Transform = Body->GetTransform();
@@ -1046,11 +1097,18 @@ void ACelestialGameMode::PauseGame()
 
 void ACelestialGameMode::SetAsteroidFieldNum(int32 num)
 {
-	AsteroidFieldNum = num;
-	bool WasPaused = AsteroidFieldActor->GetNiagaraComponent()->IsPaused();
-	AsteroidFieldActor->GetNiagaraComponent()->SetVariableInt(FName("SpawnCount"), num);
-	AsteroidFieldActor->GetNiagaraComponent()->ReinitializeSystem();
-	AsteroidFieldActor->GetNiagaraComponent()->SetPaused(WasPaused);
+	AsteroidFieldSpawnCount = num;
+	
+	UNiagaraComponent* NiagaraComponent = AsteroidFieldActor->GetNiagaraComponent();
+	if (!NiagaraComponent)
+	{
+		return;
+	}
+	
+	bool WasPaused = NiagaraComponent->IsPaused();
+	NiagaraComponent->SetVariableInt(FName("SpawnCount"), num);
+	NiagaraComponent->ReinitializeSystem();
+	NiagaraComponent->SetPaused(WasPaused);
 }
 
 

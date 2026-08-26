@@ -16,6 +16,7 @@ class ICelestialObject;
 class ACelestialPlayer;
 class AOverviewPlayer;
 class ACelestialBody;
+class ANiagaraActor;
 class UUserWidget;
 class APlanet;
 class AStar;
@@ -71,9 +72,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> PauseWidgetClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class ANiagaraActor* AsteroidFieldActor;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	ANiagaraActor* AsteroidFieldActor;
 
+	UFUNCTION(BlueprintCallable)
+	bool SetAsteroidFieldActor(ANiagaraActor* NewAsteroidFieldActor);
+	
 	/* Sets the player perspective to the one desired
 	* @param perspective 0 is overview, 1 is celestial */
 	void SetPerspective(uint8 perspective);
@@ -125,11 +129,17 @@ public:
 	// ======= End ConsoleCommands =======
 
 	UFUNCTION(BlueprintCallable)
-	int32 GetAsteroidFieldNum() { return AsteroidFieldNum; }
+	int32 GetAsteroidFieldNum() { return AsteroidFieldSpawnCount; }
 
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform, bool bRegenerate = true);
-
+	
+	UFUNCTION(BlueprintCallable)
+	ANiagaraActor* AddAsteroidSystem(FTransform Transform, UNiagaraSystem* System, bool bStartPaused = true);
+		
+	UFUNCTION(BlueprintCallable)
+	void RemoveAsteroidSystem(ANiagaraActor* SystemToRemove);
+	
 	// Duplicates the given body and returns the duplicated body
 	UFUNCTION(BlueprintCallable)
 	ACelestialBody* DuplicateBody(ACelestialBody* BodyToDuplicate);
@@ -157,10 +167,16 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(BlueprintReadWrite)
-	TArray<ACelestialBody*> bodies;
-
-	TArray<ICelestialObject*> celestialObjects;
+	UPROPERTY(BlueprintReadOnly)
+	TArray<ACelestialBody*> Bodies;
+	
+	UPROPERTY(BlueprintReadOnly)
+	TArray<AStar*> Stars;
+	
+	UPROPERTY(BlueprintReadOnly)
+	TArray<ANiagaraActor*> Asteroids;
+	
+	TArray<ICelestialObject*> CelestialObjects;
 
 	UPROPERTY() // Prevents garbage collection
 	UUserWidget* OverviewWidget;
@@ -182,17 +198,17 @@ protected:
 	AOverviewPlayer* OverviewPlayer;
 
 public:
-	TArray<ACelestialBody*> GetBodies() { return bodies; }
+	TArray<ACelestialBody*> GetBodies() { return Bodies; }
+	TArray<AStar*> GetStars() { return Stars; }
 	ACelestialPlayer* GetCelestialPlayer() const { return CelestialPlayer; }
 	AOverviewPlayer* GetOverviewPlayer() const { return OverviewPlayer; }
 
 private:
+	UPROPERTY()
 	UMaterialParameterCollectionInstance* PlanetIlluminationInst;
 
-	uint8 NumStars;
-
 	// The spawn count for the asteroid field
-	int32 AsteroidFieldNum;  // Because you can't get niagara variable vlaues
+	int32 AsteroidFieldSpawnCount;  // Because you can't get niagara variable values
 };
 
 
