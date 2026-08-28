@@ -56,12 +56,7 @@ struct FDiscAssetRecord : public FAssetRecord
 	GENERATED_BODY()
 
 	UPROPERTY(SaveGame)
-	FName ObjectPath;
-
-	FDiscAssetRecord()
-	{
-		ObjectPath = NAME_None;
-	}
+	FSoftObjectPath ObjectPath;
 };
 
 USTRUCT()

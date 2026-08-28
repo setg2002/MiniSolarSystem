@@ -19,7 +19,6 @@ public:
 
 	// Saves a struct to file, returns true if saved successfully
 	template <typename StructClass>
-	UFUNCTION(BlueprintCallable, Category = "Save")
 	static bool SaveStruct(const StructClass& Struct, const FString& FilePath)
 	{
 		FString JsonString;
@@ -30,7 +29,6 @@ public:
 
 	// Load a file to struct, returns true if loaded successfully
 	template <typename StructClass>
-	UFUNCTION(BlueprintCallable, Category = "Save")
 	static bool LoadStruct(const FString& FilePath, StructClass& OutStruct)
 	{
 		if (!IFileManager::Get().FileExists(*FilePath))
@@ -50,7 +48,6 @@ public:
 
 	// Converts struct to FString
 	template <typename StructClass>
-	UFUNCTION(BlueprintCallable, Category = "Save")
 	static bool SaveStruct_String(const StructClass& Struct)
 	{
 		FString JsonString;
@@ -59,11 +56,10 @@ public:
 			return true;
 		}
 		return false;
-	};
+	}
 
 	// Load a Json string to struct
 	template <typename StructClass>
-	UFUNCTION(BlueprintCallable, Category = "Save")
 	static bool LoadStruct_String(const FString& String, StructClass& OutStruct)
 	{
 		FString JsonString;

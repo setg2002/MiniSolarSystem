@@ -402,7 +402,7 @@ void ACelestialGameMode::SetGravitationalConstant(float NewG)
 	
 	for (auto& System : Asteroids)
 	{
-		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetNiagaraVariableFloat("GravitationalConstant", gravitationalConstant);
+		Cast<ANiagaraActor>(System)->GetNiagaraComponent()->SetVariableFloat(FName("GravitationalConstant"), gravitationalConstant);
 	}
 	if (currentPerspective == 0)
 		AOrbitDebugActor::Get()->DrawOrbits();
@@ -440,7 +440,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 	case 0: // Overview mode
 	{
 		PC->Possess(OverviewPlayer);
-		CelestialWidget->RemoveFromViewport();
+		CelestialWidget->RemoveFromParent();
 		OverviewWidget->AddToViewport(0);
 		FInputModeGameAndUI InputMode;
 		InputMode.SetWidgetToFocus(OverviewWidget->TakeWidget());
@@ -474,7 +474,7 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 	case 1: // Celestial mode
 	{
 		PC->Possess(CelestialPlayer);
-		OverviewWidget->RemoveFromViewport();
+		OverviewWidget->RemoveFromParent();
 		CelestialWidget->AddToViewport(0);
 		PC->SetInputMode(FInputModeGameOnly());
 		PC->SetShowMouseCursor(false);
@@ -555,7 +555,7 @@ void ACelestialGameMode::LoadOnDiscAssetsOfClass(TArray<FDiscAssetRecord> Loaded
 		{
 			for (FAssetData Data : StaticOnDiscAssets)
 			{
-				if (Data.ObjectPath == Asset.ObjectPath)
+				if (Data.GetSoftObjectPath() == Asset.ObjectPath)
 				{
 					FMemoryReader MemoryReader(Asset.AssetData);
 					FCelestialSaveGameArchive Ar(MemoryReader);
@@ -988,7 +988,7 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 		SaveGameInstance->OnDiscSettingsAssets.SetNum(OnDiscAssetsData.Num());
 		for (int32 i = 0; i < SaveGameInstance->OnDiscSettingsAssets.Num(); i++)
 		{
-			SaveGameInstance->OnDiscSettingsAssets[i].ObjectPath = OnDiscAssetsData[i].ObjectPath;
+			SaveGameInstance->OnDiscSettingsAssets[i].ObjectPath = OnDiscAssetsData[i].GetSoftObjectPath();
 			SaveGameInstance->OnDiscSettingsAssets[i].Class = OnDiscAssetsData[i].GetClass();
 			SaveGameInstance->OnDiscSettingsAssets[i].Name = OnDiscAssetsData[i].AssetName;
 
@@ -1081,9 +1081,9 @@ void ACelestialGameMode::PauseGame()
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
 
 		if (currentPerspective == 0)
-			OverviewWidget->RemoveFromViewport();
+			OverviewWidget->RemoveFromParent();
 		else
-			CelestialWidget->RemoveFromViewport();
+			CelestialWidget->RemoveFromParent();
 			
 		FInputModeGameAndUI InputMode;
 		InputMode.SetWidgetToFocus(PauseWidget->TakeWidget());
