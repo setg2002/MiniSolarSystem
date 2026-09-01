@@ -1,19 +1,19 @@
 // Copyright Soren Gilbertson
 
 
-#include "RidgidNoiseFilter.h"
+#include "Shape/RidgidNoiseFilter.h"
 #include "SimplexNoiseBPLibrary.h"
 
-RidgidNoiseFilter::RidgidNoiseFilter(FRidgidNoiseSettings settings)
+RigidNoiseFilter::RigidNoiseFilter(FRigidNoiseSettings settings)
 {
 	this->Settings = settings;
 }
 
-RidgidNoiseFilter::~RidgidNoiseFilter()
+RigidNoiseFilter::~RigidNoiseFilter()
 {
 }
 
-float RidgidNoiseFilter::Evaluate(FVector point)
+float RigidNoiseFilter::Evaluate(FVector point)
 {
 	float noiseValue = 0;
 	float frequency = Settings.BaseRoughness;

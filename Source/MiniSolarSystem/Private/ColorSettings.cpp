@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "ColorSettings.h"
+#include "Color/ColorSettings.h"
 #include "Curves/CurveLinearColor.h"
 
 UColorSettings::UColorSettings()

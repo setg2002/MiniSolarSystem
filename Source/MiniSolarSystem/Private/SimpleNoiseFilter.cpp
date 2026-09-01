@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "SimpleNoiseFilter.h"
+#include "Shape/SimpleNoiseFilter.h"
 #include "SimplexNoiseBPLibrary.h"
 
 SimpleNoiseFilter::SimpleNoiseFilter(FSimpleNoiseSettings settings)

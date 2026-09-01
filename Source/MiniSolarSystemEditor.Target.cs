@@ -14,7 +14,7 @@ public class MiniSolarSystemEditorTarget : TargetRules
         //#TODO - Make these paths not absolute
 
         // Absolute path to the GameVersion header file
-        const string GAME_VERSION_FILE              = @"B:\MiniSolarSystem\Game\Source\MiniSolarSystem\Public\GameVersion.h";
+        const string GAME_VERSION_FILE              = @"B:\MiniSolarSystem\Game\Source\MiniSolarSystem\Public\Game\GameVersion.h";
 
         // Absolute path to the GAME_BUILD text file
         const string GAME_BUILD_FILE                = @"B:\MiniSolarSystem\Game\Source\MiniSolarSystem\GAME_BUILD.txt";

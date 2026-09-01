@@ -1,11 +1,12 @@
 // Copyright Soren Gilbertson
 
 
-#include "CelestialBody.h"
+#include "Bodies/CelestialBody.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "CelestialGameMode.h"
+#include "Game/CelestialGameMode.h"
 #include "OrbitDebugActor.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 
 
 // Sets default values

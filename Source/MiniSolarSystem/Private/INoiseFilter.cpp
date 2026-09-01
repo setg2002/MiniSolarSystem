@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "INoiseFilter.h"
+#include "Shape/INoiseFilter.h"
 
 float INoiseFilter::Evaluate(FVector point)
 {

@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "MinMax.h"
+#include "Helpers/MinMax.h"
 
 MinMax::MinMax()
 {

@@ -1,5 +1,5 @@
 // Copyright Soren Gilbertson
 
 
-#include "ColorCurveType.h"
+#include "Color/ColorCurveType.h"
 

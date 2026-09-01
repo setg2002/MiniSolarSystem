@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "ColorCurveKey.h"
+#include "Color/ColorCurveKey.h"
 #include "Curves/CurveLinearColor.h"
 #include "Components/CanvasPanelSlot.h"
 

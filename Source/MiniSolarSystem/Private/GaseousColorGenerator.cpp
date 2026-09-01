@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "GaseousColorGenerator.h"
+#include "Color/GaseousColorGenerator.h"
 #include "Curves/CurveLinearColor.h"
 
 GaseousColorGenerator::GaseousColorGenerator()

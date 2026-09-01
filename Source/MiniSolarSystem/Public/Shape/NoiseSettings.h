@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EFilterType.h"
+#include "Shape/EFilterType.h"
 #include "SettingsAsset.h"
 #include "NoiseSettings.generated.h"
 
@@ -52,20 +52,20 @@ struct FSimpleNoiseSettings
 };
 
 USTRUCT(BlueprintType)
-struct FRidgidNoiseSettings : public FSimpleNoiseSettings
+struct FRigidNoiseSettings : public FSimpleNoiseSettings
 {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	float WeightMultiplier = .8f;
 
-	FRidgidNoiseSettings()
+	FRigidNoiseSettings()
 		: WeightMultiplier(.25f)
 	{
 		Center = FMath::VRand() * FMath::RandHelper(1000);
 	}
 
-	FRidgidNoiseSettings(float strength, float baseRoughness, float roughness, FVector center, int NumLayers, float persistence, float minValue, float weightMultiplier)
+	FRigidNoiseSettings(float strength, float baseRoughness, float roughness, FVector center, int NumLayers, float persistence, float minValue, float weightMultiplier)
 	{
 		Strength = strength;
 		BaseRoughness = baseRoughness;
@@ -90,20 +90,20 @@ public:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "FilterType == 0", EditConditionHides))
 	FSimpleNoiseSettings SimpleNoiseSettings;
 	UPROPERTY(SaveGame, EditAnywhere, meta = (EditCondition = "FilterType == 1", EditConditionHides))
-	FRidgidNoiseSettings RidgidNoiseSettings;
+	FRigidNoiseSettings RigidNoiseSettings;
 
 	FNoiseSettings_()
 	{
 		FilterType = EFilterType::Smooth;
 		SimpleNoiseSettings = FSimpleNoiseSettings();
-		RidgidNoiseSettings = FRidgidNoiseSettings();
+		RigidNoiseSettings = FRigidNoiseSettings();
 	}
 
-	FNoiseSettings_(EFilterType filterType, FSimpleNoiseSettings simpleNoiseSettings, FRidgidNoiseSettings ridgidNoiseSettings)
+	FNoiseSettings_(EFilterType filterType, FSimpleNoiseSettings simpleNoiseSettings, FRigidNoiseSettings rigidNoiseSettings)
 	{
 		FilterType = filterType;
 		SimpleNoiseSettings = simpleNoiseSettings;
-		RidgidNoiseSettings = ridgidNoiseSettings;
+		RigidNoiseSettings = rigidNoiseSettings;
 	}
 };
 
@@ -135,10 +135,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FSimpleNoiseSettings GetSimpleNoiseSettings() const { return NoiseSettings.SimpleNoiseSettings; }
 	UFUNCTION(BlueprintCallable)
-	FRidgidNoiseSettings GetRidgidNoiseSettings() const { return NoiseSettings.RidgidNoiseSettings; }
+	FRigidNoiseSettings GetRigidNoiseSettings() const { return NoiseSettings.RigidNoiseSettings; }
 
 	UFUNCTION(BlueprintCallable)
 	void SetSimpleNoiseSettings(FSimpleNoiseSettings NewSettings);
 	UFUNCTION(BlueprintCallable)
-	void SetRidgidNoiseSettings(FRidgidNoiseSettings NewSettings);
+	void SetRigidNoiseSettings(FRigidNoiseSettings NewSettings);
 };

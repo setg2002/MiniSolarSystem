@@ -1,9 +1,9 @@
 // Copyright Soren Gilbertson
 
 
-#include "UIBlueprintFunctionLibrary.h"
-#include "CelestialPlayer.h"
-#include "CelestialBody.h"
+#include "Helpers/UIBlueprintFunctionLibrary.h"
+#include "Player/CelestialPlayer.h"
+#include "Bodies/CelestialBody.h"
 
 
 FVector UUIBlueprintFunctionLibrary::GetRelativeVelocity(ACelestialPlayer* Player, ACelestialBody* Body)

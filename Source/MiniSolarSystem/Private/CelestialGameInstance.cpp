@@ -1,9 +1,9 @@
 // Copyright Soren Gilbertson
 
 
-#include "CelestialGameInstance.h"
+#include "Game/CelestialGameInstance.h"
 #include "LoadingScreen.h"
-#include "NoiseLayer.h"
+#include "Shape/NoiseLayer.h"
 
 void UCelestialGameInstance::Init()
 {
@@ -54,15 +54,15 @@ void UCelestialGameInstance::PasteNoiseLayer(UNoiseLayer* NoiseLayerToPasteTo)
 					StructToCopyFrom.SimpleNoiseSettings.Persistence,
 					StructToCopyFrom.SimpleNoiseSettings.MinValue
 				),
-				FRidgidNoiseSettings(
-					StructToCopyFrom.RidgidNoiseSettings.Strength,
-					StructToCopyFrom.RidgidNoiseSettings.BaseRoughness,
-					StructToCopyFrom.RidgidNoiseSettings.Roughness,
-					StructToCopyFrom.RidgidNoiseSettings.Center,
-					StructToCopyFrom.RidgidNoiseSettings.numLayers,
-					StructToCopyFrom.RidgidNoiseSettings.Persistence,
-					StructToCopyFrom.RidgidNoiseSettings.MinValue,
-					StructToCopyFrom.RidgidNoiseSettings.WeightMultiplier
+				FRigidNoiseSettings(
+					StructToCopyFrom.RigidNoiseSettings.Strength,
+					StructToCopyFrom.RigidNoiseSettings.BaseRoughness,
+					StructToCopyFrom.RigidNoiseSettings.Roughness,
+					StructToCopyFrom.RigidNoiseSettings.Center,
+					StructToCopyFrom.RigidNoiseSettings.numLayers,
+					StructToCopyFrom.RigidNoiseSettings.Persistence,
+					StructToCopyFrom.RigidNoiseSettings.MinValue,
+					StructToCopyFrom.RigidNoiseSettings.WeightMultiplier
 				)
 			)
 		);

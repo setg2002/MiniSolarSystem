@@ -1,10 +1,10 @@
 ﻿// Copyright Soren Gilbertson
 
 
-#include "MSSBlueprintFunctionLibrary.h"
+#include "Helpers/MSSBlueprintFunctionLibrary.h"
 #include "Game/CelestialGameState.h"
-#include "CelestialGameMode.h"
-#include "BodySystemFunctionLibrary.h"
+#include "Game/CelestialGameMode.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 
 ACelestialGameState* UMSSBlueprintFunctionLibrary::GetCelestialGameState(UObject* WorldContextObject)
 {

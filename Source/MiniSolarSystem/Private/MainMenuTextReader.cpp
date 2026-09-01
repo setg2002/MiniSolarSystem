@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "MainMenuTextReader.h"
+#include "Helpers/MainMenuTextReader.h"
 
 
 FText UMainMenuTextReader::GetText()

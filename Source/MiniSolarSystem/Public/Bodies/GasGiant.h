@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CelestialBody.h"
-#include "GasGiantColorSettings.h"
+#include "Color/GasGiantColorSettings.h"
 #include "GasGiant.generated.h"
 
 /**

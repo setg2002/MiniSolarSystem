@@ -1,11 +1,12 @@
 // Copyright Soren Gilbertson
 
 
-#include "ShapeSettings.h"
-#include "CelestialGameMode.h"
+#include "Shape/ShapeSettings.h"
+#include "Game/CelestialGameMode.h"
 #include "OrbitDebugActor.h"
-#include "NoiseLayer.h"
-#include "Planet.h"
+#include "Shape/NoiseLayer.h"
+#include "Bodies/Planet.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 
 
 bool UShapeSettings::IsNoiseLayers()

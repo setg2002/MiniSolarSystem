@@ -2,13 +2,13 @@
 
 
 #include "OrbitDebugActor.h"
-#include "CelestialBody.h"
+#include "Bodies/CelestialBody.h"
 #include "NiagaraSystem.h"
-#include "ShapeSettings.h"
+#include "Shape/ShapeSettings.h"
 #include "NiagaraComponent.h"
-#include "CelestialGameMode.h"
+#include "Game/CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
-#include "BodySystemFunctionLibrary.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 

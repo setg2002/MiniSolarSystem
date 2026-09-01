@@ -1,12 +1,12 @@
 // Copyright Soren Gilbertson
 
 
-#include "OverviewPlayer.h"
+#include "Player/OverviewPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "DataAssets/InputDataConfig.h"
-#include "BodySystemFunctionLibrary.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 #include "Game/CelestialGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/SpringArmComponent.h"

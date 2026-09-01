@@ -1,9 +1,9 @@
 // Copyright Soren Gilbertson
 
 
-#include "RingSystemComponent.h"
-#include "CelestialBody.h"
-#include "GaseousColorGenerator.h"
+#include "Bodies/Components/RingSystemComponent.h"
+#include "Bodies/CelestialBody.h"
+#include "Color/GaseousColorGenerator.h"
 #include "UObject/UObjectGlobals.h"
 #include "Curves/CurveLinearColor.h"
 #include "Materials/MaterialInstanceDynamic.h"

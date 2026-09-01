@@ -1,12 +1,12 @@
 // Copyright Soren Gilbertson
 
 
-#include "ColorGenerator.h"
-#include "MinMax.h"
+#include "Color/ColorGenerator.h"
+#include "Helpers/MinMax.h"
 #include "CoreMinimal.h"
-#include "INoiseFilter.h"
-#include "ColorSettings.h"
-#include "NoiseFilterFactory.h"
+#include "Shape/INoiseFilter.h"
+#include "Color/ColorSettings.h"
+#include "Shape/NoiseFilterFactory.h"
 #include "GameFramework/Actor.h"
 #include "Curves/CurveLinearColor.h"
 #include "Kismet/KismetMathLibrary.h"

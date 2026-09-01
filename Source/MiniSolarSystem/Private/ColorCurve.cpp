@@ -1,20 +1,20 @@
 // Copyright Soren Gilbertson
 
 
-#include "ColorCurve.h"
+#include "Color/ColorCurve.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
-#include "ColorCurveFunctionLibrary.h"
+#include "Color/ColorCurveFunctionLibrary.h"
 #include "Curves/CurveLinearColor.h"
 #include "Components/CanvasPanel.h"
-#include "GasGiantColorSettings.h"
+#include "Color/GasGiantColorSettings.h"
 #include "Blueprint/WidgetTree.h"
-#include "RingSystemComponent.h"
+#include "Bodies/Components/RingSystemComponent.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
-#include "ColorCurveKey.h"
-#include "GasGiant.h"
-#include "Planet.h"
+#include "Color/ColorCurveKey.h"
+#include "Bodies/GasGiant.h"
+#include "Bodies/Planet.h"
 
 
 

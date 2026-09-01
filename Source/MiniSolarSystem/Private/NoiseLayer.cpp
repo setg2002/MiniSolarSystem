@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "NoiseLayer.h"
+#include "Shape/NoiseLayer.h"
 
 void UNoiseLayer::SetEnabled(bool NewEnabled)
 {

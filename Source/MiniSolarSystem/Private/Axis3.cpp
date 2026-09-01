@@ -2,16 +2,16 @@
 
 
 #include "Axis3.h"
-#include "Star.h"
+#include "Bodies/Star.h"
 #include "NiagaraActor.h"
 #include "NiagaraComponent.h"
 #include "OrbitDebugActor.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/PlayerInput.h"
-#include "BodySystemFunctionLibrary.h"
-#include "OverviewPlayer.h"
-#include "CelestialGameMode.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
+#include "Player/OverviewPlayer.h"
+#include "Game/CelestialGameMode.h"
 
 // Delay shortcut
 #define LATER_SECS(seconds, ...) \

@@ -1,16 +1,16 @@
 // Copyright Soren Gilbertson
 
 
-#include "CelestialPlayer.h"
-#include "CelestialBody.h"
-#include "CelestialGameMode.h"
+#include "Player/CelestialPlayer.h"
+#include "Bodies/CelestialBody.h"
+#include "Game/CelestialGameMode.h"
 #include "Blueprint\UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
-#include "BodySystemFunctionLibrary.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "DataAssets/InputDataConfig.h"

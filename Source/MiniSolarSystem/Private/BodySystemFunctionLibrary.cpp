@@ -1,9 +1,9 @@
 // Copyright Soren Gilbertson
 
 
-#include "BodySystemFunctionLibrary.h"
-#include "CelestialGameMode.h"
-#include "CelestialBody.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
+#include "Game/CelestialGameMode.h"
+#include "Bodies/CelestialBody.h"
 
 FBodySystem::FBodySystem(FName Name, TArray<ACelestialBody*> BodiesForIDs)
 {

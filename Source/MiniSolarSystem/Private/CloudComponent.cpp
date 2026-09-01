@@ -1,8 +1,8 @@
 // Copyright Soren Gilbertson
 
 
-#include "CloudComponent.h"
-#include "AtmosphereComponent.h"
+#include "Bodies/Components/CloudComponent.h"
+#include "Bodies/Components/AtmosphereComponent.h"
 
 UCloudComponent::UCloudComponent()
 {

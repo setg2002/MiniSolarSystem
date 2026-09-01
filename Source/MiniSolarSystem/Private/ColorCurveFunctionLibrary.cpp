@@ -1,8 +1,8 @@
 // Copyright Soren Gilbertson
 
 
-#include "ColorCurveFunctionLibrary.h"
-#include "CelestialSaveGameArchive.h"
+#include "Color/ColorCurveFunctionLibrary.h"
+#include "Game/CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "UObject/SavePackage.h"

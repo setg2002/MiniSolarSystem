@@ -3,11 +3,11 @@
 
 #include "Player/CelestialPlayerController.h"
 
-#include "CelestialGameMode.h"
+#include "Game/CelestialGameMode.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "DataAssets/InputDataConfig.h"
-#include "BodySystemFunctionLibrary.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 #include "Game/CelestialGameState.h"
 
 ACelestialPlayerController::ACelestialPlayerController()

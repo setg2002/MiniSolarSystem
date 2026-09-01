@@ -1,9 +1,9 @@
 // Copyright Soren Gilbertson
 
 
-#include "NoiseFilterFactory.h"
-#include "SimpleNoiseFilter.h"
-#include "RidgidNoiseFilter.h"
+#include "Shape/NoiseFilterFactory.h"
+#include "Shape/SimpleNoiseFilter.h"
+#include "Shape/RidgidNoiseFilter.h"
 
 INoiseFilter* NoiseFilterFactory::CreateNoiseFilter(UNoiseSettings* NoiseSettings)
 {
@@ -12,8 +12,8 @@ INoiseFilter* NoiseFilterFactory::CreateNoiseFilter(UNoiseSettings* NoiseSetting
 	{
 	case Smooth:
 		return new SimpleNoiseFilter(NoiseSettings->GetSimpleNoiseSettings());
-	case Ridgid:
-		return new RidgidNoiseFilter(NoiseSettings->GetRidgidNoiseSettings());
+	case Rigid:
+		return new RigidNoiseFilter(NoiseSettings->GetRigidNoiseSettings());
 	default:
 		return new SimpleNoiseFilter(NoiseSettings->GetSimpleNoiseSettings());;
 	}

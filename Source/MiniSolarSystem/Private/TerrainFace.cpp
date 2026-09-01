@@ -1,13 +1,13 @@
 // Copyright Soren Gilbertson
 
 
-#include "TerrainFace.h"
+#include "Bodies/TerrainFace.h"
 #include "KismetProceduralMeshLibrary.h"
 #include "ProceduralMeshComponent.h"
-#include "ShapeGenerator.h"
-#include "ColorGenerator.h"
-#include "ColorSettings.h"
-#include "Planet.h"
+#include "Shape/ShapeGenerator.h"
+#include "Color/ColorGenerator.h"
+#include "Color/ColorSettings.h"
+#include "Bodies/Planet.h"
 
 
 TerrainFace::TerrainFace(int8 FaceMeshSection, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* procMesh)

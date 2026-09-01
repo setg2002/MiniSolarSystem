@@ -1,5 +1,5 @@
 // Copyright Soren Gilbertson
 
 
-#include "StarProperties.h"
+#include "Bodies/StarProperties.h"
 

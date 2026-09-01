@@ -5,7 +5,7 @@
 
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
-#include "ShapeGenerator.h"
+#include "Shape/ShapeGenerator.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine\Texture2DArray.h"
 #include "UObject/SavePackage.h"

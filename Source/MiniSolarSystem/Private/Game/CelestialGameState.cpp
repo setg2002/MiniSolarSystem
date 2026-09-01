@@ -3,8 +3,8 @@
 
 #include "Game/CelestialGameState.h"
 
-#include "CelestialPlayer.h"
-#include "OverviewPlayer.h"
+#include "Player/CelestialPlayer.h"
+#include "Player/OverviewPlayer.h"
 #include "Kismet/GameplayStatics.h"
 
 

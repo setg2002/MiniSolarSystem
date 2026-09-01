@@ -1,10 +1,10 @@
 // Copyright Soren Gilbertson
 
 
-#include "AtmosphereComponent.h"
-#include "Planet.h"
-#include "ShapeSettings.h"
-#include "CloudComponent.h"
+#include "Bodies/Components/AtmosphereComponent.h"
+#include "Bodies/Planet.h"
+#include "Shape/ShapeSettings.h"
+#include "Bodies/Components/CloudComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 

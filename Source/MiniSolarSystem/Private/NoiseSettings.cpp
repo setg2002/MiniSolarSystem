@@ -1,7 +1,7 @@
 // Copyright Soren Gilbertson
 
 
-#include "NoiseSettings.h"
+#include "Shape/NoiseSettings.h"
 
 UNoiseSettings::UNoiseSettings()
 {
@@ -23,8 +23,8 @@ void UNoiseSettings::SetSimpleNoiseSettings(FSimpleNoiseSettings NewSettings)
 	OnSettingsAssetChanged.Broadcast();
 }
 
-void UNoiseSettings::SetRidgidNoiseSettings(FRidgidNoiseSettings NewSettings)
+void UNoiseSettings::SetRigidNoiseSettings(FRigidNoiseSettings NewSettings)
 {
-	NoiseSettings.RidgidNoiseSettings = NewSettings;
+	NoiseSettings.RigidNoiseSettings = NewSettings;
 	OnSettingsAssetChanged.Broadcast();
 }

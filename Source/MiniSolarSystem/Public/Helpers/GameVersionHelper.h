@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameVersion.h"
+#include "Game/GameVersion.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "GameVersionHelper.generated.h"
 

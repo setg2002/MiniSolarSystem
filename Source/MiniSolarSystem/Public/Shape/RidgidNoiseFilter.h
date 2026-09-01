@@ -10,13 +10,13 @@
  * 
  */
 
-class MINISOLARSYSTEM_API RidgidNoiseFilter : public INoiseFilter
+class MINISOLARSYSTEM_API RigidNoiseFilter : public INoiseFilter
 {
 public:
-	RidgidNoiseFilter(FRidgidNoiseSettings settings);
-	~RidgidNoiseFilter();
+	RigidNoiseFilter(FRigidNoiseSettings settings);
+	~RigidNoiseFilter();
 
-	FRidgidNoiseSettings Settings;
+	FRigidNoiseSettings Settings;
 
 	virtual float Evaluate(FVector point) override;
 };

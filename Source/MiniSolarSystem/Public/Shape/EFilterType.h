@@ -13,5 +13,5 @@
  enum EFilterType
  {
 	 Smooth UMETA(DisplayName = "Simple"),
-	 Ridgid UMETA(DisplayName = "Ridgid")
+	 Rigid UMETA(DisplayName = "Rigid")
  };

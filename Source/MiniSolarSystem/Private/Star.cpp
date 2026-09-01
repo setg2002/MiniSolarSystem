@@ -1,15 +1,15 @@
 // Copyright Soren Gilbertson
 
 
-#include "Star.h"
+#include "Bodies/Star.h"
 #include "NiagaraSystem.h"
-#include "OverviewPlayer.h"
-#include "CelestialPlayer.h"
+#include "Player/OverviewPlayer.h"
+#include "Player/CelestialPlayer.h"
 #include "OrbitDebugActor.h"
 #include "NiagaraComponent.h"
-#include "CelestialGameMode.h"
+#include "Game/CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
-#include "BodySystemFunctionLibrary.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"

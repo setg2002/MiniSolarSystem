@@ -1,12 +1,13 @@
 // Copyright Soren Gilbertson
 
 
-#include "GasGiant.h"
+#include "Bodies/GasGiant.h"
 #include "OrbitDebugActor.h"
-#include "CelestialGameMode.h"
-#include "GaseousColorGenerator.h"
+#include "Game/CelestialGameMode.h"
+#include "Color/GaseousColorGenerator.h"
 #include "Curves/CurveLinearColor.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 
 
 AGasGiant::AGasGiant()

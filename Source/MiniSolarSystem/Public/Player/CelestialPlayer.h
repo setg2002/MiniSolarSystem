@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CelestialObject.h"
+#include "Bodies/CelestialObject.h"
 #include "GameFramework/Pawn.h"
 #include "CelestialPlayer.generated.h"
 

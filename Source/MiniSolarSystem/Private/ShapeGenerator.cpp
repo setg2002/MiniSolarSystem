@@ -1,12 +1,12 @@
 // Copyright Soren Gilbertson
 
 
-#include "ShapeGenerator.h"
-#include "NoiseFilterFactory.h"
-#include "ShapeSettings.h"
-#include "INoiseFilter.h"
-#include "NoiseLayer.h"
-#include "MinMax.h"
+#include "Shape/ShapeGenerator.h"
+#include "Shape/NoiseFilterFactory.h"
+#include "Shape/ShapeSettings.h"
+#include "Shape/INoiseFilter.h"
+#include "Shape/NoiseLayer.h"
+#include "Helpers/MinMax.h"
 
 
 ShapeGenerator::ShapeGenerator()

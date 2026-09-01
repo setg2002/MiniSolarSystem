@@ -1,34 +1,34 @@
 // Copyright Soren Gilbertson
 
-#include "CelestialGameMode.h"
+#include "Game/CelestialGameMode.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "BodySystemFunctionLibrary.h"
-#include "ColorCurveFunctionLibrary.h"
-#include "CelestialSaveGameArchive.h"
-#include "GasGiantColorSettings.h"
-#include "CelestialGameInstance.h"
-#include "RingSystemComponent.h"
-#include "AtmosphereComponent.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
+#include "Color/ColorCurveFunctionLibrary.h"
+#include "Game/CelestialSaveGameArchive.h"
+#include "Color/GasGiantColorSettings.h"
+#include "Game/CelestialGameInstance.h"
+#include "Bodies/Components/RingSystemComponent.h"
+#include "Bodies/Components/AtmosphereComponent.h"
 #include "AssetRegistry/AssetRegistryModule.h"
-#include "CelestialSaveGame.h"
+#include "Game/CelestialSaveGame.h"
 #include "NiagaraComponent.h"
 #include "OrbitDebugActor.h"
-#include "CelestialObject.h"
-#include "CelestialPlayer.h"
-#include "OverviewPlayer.h"
-#include "ColorSettings.h"
-#include "ShapeSettings.h"
-#include "CelestialBody.h"
-#include "NoiseSettings.h"
+#include "Bodies/CelestialObject.h"
+#include "Player/CelestialPlayer.h"
+#include "Player/OverviewPlayer.h"
+#include "Color/ColorSettings.h"
+#include "Shape/ShapeSettings.h"
+#include "Bodies/CelestialBody.h"
+#include "Shape/NoiseSettings.h"
 #include "NiagaraActor.h"
 #include "EngineUtils.h"
-#include "NoiseLayer.h"
-#include "GasGiant.h"
-#include "Planet.h"
-#include "Star.h"
+#include "Shape/NoiseLayer.h"
+#include "Bodies/GasGiant.h"
+#include "Bodies/Planet.h"
+#include "Bodies/Star.h"
 #include "Blueprint/UserWidget.h"
 #include "Game/CelestialGameState.h"
 #include "Materials/MaterialParameterCollection.h"
@@ -272,15 +272,15 @@ ACelestialBody* ACelestialGameMode::DuplicateBody(ACelestialBody* BodyToDuplicat
 					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.Persistence,
 					OldBiomeColorSettings.Noise->GetStruct().SimpleNoiseSettings.MinValue
 				),
-				FRidgidNoiseSettings(
-					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.Strength,
-					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.BaseRoughness,
-					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.Roughness,
-					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.Center,
-					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.numLayers,
-					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.Persistence,
-					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.MinValue,
-					OldBiomeColorSettings.Noise->GetStruct().RidgidNoiseSettings.WeightMultiplier
+				FRigidNoiseSettings(
+					OldBiomeColorSettings.Noise->GetStruct().RigidNoiseSettings.Strength,
+					OldBiomeColorSettings.Noise->GetStruct().RigidNoiseSettings.BaseRoughness,
+					OldBiomeColorSettings.Noise->GetStruct().RigidNoiseSettings.Roughness,
+					OldBiomeColorSettings.Noise->GetStruct().RigidNoiseSettings.Center,
+					OldBiomeColorSettings.Noise->GetStruct().RigidNoiseSettings.numLayers,
+					OldBiomeColorSettings.Noise->GetStruct().RigidNoiseSettings.Persistence,
+					OldBiomeColorSettings.Noise->GetStruct().RigidNoiseSettings.MinValue,
+					OldBiomeColorSettings.Noise->GetStruct().RigidNoiseSettings.WeightMultiplier
 				)
 			)
 		);
