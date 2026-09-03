@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameModeBase.h"
+#include "Helpers/BodySystemFunctionLibrary.h"
 #include "CelestialGameMode.generated.h"
 
 /**
@@ -20,7 +21,6 @@ class ANiagaraActor;
 class UUserWidget;
 class APlanet;
 class AStar;
-struct FBodySystem;
 
 UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPerspectiveChanged, uint8, Perspective);
@@ -153,6 +153,7 @@ public:
 	void LoadRuntimeAssetsOfClass(TArray<struct FAssetRecord> LoadedAssets, UClass* ClassToLoad);
 
 private:
+	UPROPERTY()
 	TArray<FBodySystem> BodySystems;
 
 public:

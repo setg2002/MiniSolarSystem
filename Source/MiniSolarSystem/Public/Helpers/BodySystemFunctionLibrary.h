@@ -43,6 +43,10 @@ public:
 	FBodySystem(FName Name, TArray<class ACelestialBody*> BodiesForIDs);
 };
 
+
+// Prevent circular include issues as this file is included in CelestialGameMode.h because we need the full definition of FBodySystem to use it in TArray
+class ACelestialGameMode;
+
 /**
  * 
  */

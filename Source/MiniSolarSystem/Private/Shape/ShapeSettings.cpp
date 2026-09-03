@@ -6,7 +6,6 @@
 #include "OrbitDebugActor.h"
 #include "Shape/NoiseLayer.h"
 #include "Bodies/Planet.h"
-#include "Helpers/BodySystemFunctionLibrary.h"
 
 
 bool UShapeSettings::IsNoiseLayers()

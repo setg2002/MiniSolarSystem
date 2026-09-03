@@ -4,7 +4,6 @@
 #include "Helpers/MSSBlueprintFunctionLibrary.h"
 #include "Game/CelestialGameState.h"
 #include "Game/CelestialGameMode.h"
-#include "Helpers/BodySystemFunctionLibrary.h"
 
 ACelestialGameState* UMSSBlueprintFunctionLibrary::GetCelestialGameState(UObject* WorldContextObject)
 {

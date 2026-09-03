@@ -2,21 +2,15 @@
 
 
 #include "Axis3.h"
-#include "Bodies/Star.h"
 #include "NiagaraActor.h"
 #include "NiagaraComponent.h"
 #include "OrbitDebugActor.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/BoxComponent.h"
-#include "GameFramework/PlayerInput.h"
-#include "Helpers/BodySystemFunctionLibrary.h"
 #include "Player/OverviewPlayer.h"
 #include "Game/CelestialGameMode.h"
+#include "Helpers/MSSMacros.h"
 
-// Delay shortcut
-#define LATER_SECS(seconds, ...) \
-     FTimerHandle __tempTimerHandle; \
-     GetWorldTimerManager().SetTimer(__tempTimerHandle, FTimerDelegate().CreateLambda(__VA_ARGS__), seconds, false);
 
 // Sets default values
 AAxis3::AAxis3()

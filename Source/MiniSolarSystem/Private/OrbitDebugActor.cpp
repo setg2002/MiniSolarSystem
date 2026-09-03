@@ -8,9 +8,7 @@
 #include "NiagaraComponent.h"
 #include "Game/CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Helpers/BodySystemFunctionLibrary.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
-#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 
 AOrbitDebugActor* AOrbitDebugActor::_instance; // Needed for singleton implementation

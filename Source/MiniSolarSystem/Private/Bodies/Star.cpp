@@ -9,19 +9,14 @@
 #include "NiagaraComponent.h"
 #include "Game/CelestialGameMode.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Helpers/BodySystemFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
+#include "Helpers/MSSMacros.h"
 
-
-// Delay shortcut
-#define LATER_SECS(seconds, ...) \
-     FTimerHandle __tempTimerHandle; \
-     GetWorldTimerManager().SetTimer(__tempTimerHandle, FTimerDelegate().CreateLambda(__VA_ARGS__), seconds, false);
 
 AStar::AStar()
 {

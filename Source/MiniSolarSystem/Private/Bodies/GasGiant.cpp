@@ -7,7 +7,6 @@
 #include "Color/GaseousColorGenerator.h"
 #include "Curves/CurveLinearColor.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Helpers/BodySystemFunctionLibrary.h"
 
 
 AGasGiant::AGasGiant()
