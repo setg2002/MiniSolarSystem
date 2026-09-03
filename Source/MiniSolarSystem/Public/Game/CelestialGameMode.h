@@ -210,6 +210,8 @@ private:
 
 	// The spawn count for the asteroid field
 	int32 AsteroidFieldSpawnCount;  // Because you can't get niagara variable values
+	
+	bool bHasInitAsteroidField = false;
 };
 
 

@@ -38,6 +38,7 @@ ACelestialGameMode::ACelestialGameMode()
 	PrimaryActorTick.bCanEverTick = true;
 	currentPerspective = 255;
 	gravitationalConstant = 100;
+	bHasInitAsteroidField = false;
 	
 	GameStateClass = ACelestialGameState::StaticClass();
 }
@@ -407,21 +408,23 @@ void ACelestialGameMode::SetGravitationalConstant(float NewG)
 
 bool ACelestialGameMode::SetAsteroidFieldActor(ANiagaraActor* NewAsteroidFieldActor)
 {
-	if (!AsteroidFieldActor)
+	if (!NewAsteroidFieldActor)
 	{
-		return false;
-	}
-	if (Asteroids.Contains(NewAsteroidFieldActor))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Trying to set asteroid field actor that is already tracked! (%s)"), *NewAsteroidFieldActor->GetName());
 		return false;
 	}
 	
 	AsteroidFieldActor = NewAsteroidFieldActor;
-	Asteroids.Add(NewAsteroidFieldActor);
+	Asteroids.AddUnique(NewAsteroidFieldActor);
 	
-	bool bValidNiagaraVar = false;
-	AsteroidFieldSpawnCount = AsteroidFieldActor->GetNiagaraComponent()->GetVariableInt(FName("SpawnCount"), bValidNiagaraVar);
+	if (!bHasInitAsteroidField)
+	{
+		bool bValidNiagaraVar = false;
+		AsteroidFieldSpawnCount = AsteroidFieldActor->GetNiagaraComponent()->GetVariableInt(FName("SpawnCount"), bValidNiagaraVar);
+	}
+	else
+	{
+		SetAsteroidFieldNum(AsteroidFieldSpawnCount);
+	}
 	
 	return true;
 }
@@ -1095,6 +1098,12 @@ void ACelestialGameMode::PauseGame()
 void ACelestialGameMode::SetAsteroidFieldNum(int32 num)
 {
 	AsteroidFieldSpawnCount = num;
+	bHasInitAsteroidField = true;
+	
+	if (!IsValid(AsteroidFieldActor))
+	{
+		return;
+	}
 	
 	UNiagaraComponent* NiagaraComponent = AsteroidFieldActor->GetNiagaraComponent();
 	if (!NiagaraComponent)
