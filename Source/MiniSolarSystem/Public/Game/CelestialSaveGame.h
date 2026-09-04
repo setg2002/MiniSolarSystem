@@ -103,6 +103,32 @@ struct FComponentRecord : public FActorRecord
 	}
 };
 
+USTRUCT()
+struct FAsteroidRecord
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(SaveGame)
+	int32 SpawnCount;
+	
+	UPROPERTY(SaveGame)
+	int32 Height;
+	
+	UPROPERTY(SaveGame)
+	int32 Radius;
+	
+	UPROPERTY(SaveGame)
+	int32 Width;
+
+	UPROPERTY(SaveGame)
+	FTransform Transform;
+	
+	FAsteroidRecord()
+		: SpawnCount(0), Height(0), Radius(0), Width(0)
+	{
+	}
+};
+
 
 UCLASS()
 class MINISOLARSYSTEM_API UCelestialSaveGame : public USaveGame
@@ -137,7 +163,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	int32 AsteroidFieldNum;
 	
-	// TODO SG- Save player made asteroid belts and their data
+	UPROPERTY(VisibleAnywhere)
+	TArray<FAsteroidRecord> AsteroidBeltData;
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FBodySystemRecord> BodySystemsData;

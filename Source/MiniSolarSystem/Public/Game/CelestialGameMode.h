@@ -12,6 +12,7 @@
  * 
  */
 
+class UNiagaraSystem;
 //Forward Declarations
 class ICelestialObject;
 class ACelestialPlayer;
@@ -135,7 +136,7 @@ public:
 	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform, bool bRegenerate = true);
 	
 	UFUNCTION(BlueprintCallable)
-	ANiagaraActor* AddAsteroidSystem(FTransform Transform, UNiagaraSystem* System, bool bStartPaused = true);
+	ANiagaraActor* AddAsteroidSystem(FTransform Transform, bool bStartPaused = true, int32 SpawnCount = -1, int32 Height = -1, int32 Radius = -1, int32 Width = -1);
 		
 	UFUNCTION(BlueprintCallable)
 	void RemoveAsteroidSystem(ANiagaraActor* SystemToRemove);
@@ -155,6 +156,11 @@ public:
 private:
 	UPROPERTY()
 	TArray<FBodySystem> BodySystems;
+	
+public:
+	// Could be made into soft reference
+	UPROPERTY(EditDefaultsOnly)
+	UNiagaraSystem* AsteroidSystemTemplate;
 
 public:
 	UFUNCTION(BlueprintCallable)

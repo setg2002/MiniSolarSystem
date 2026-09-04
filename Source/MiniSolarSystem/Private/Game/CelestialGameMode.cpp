@@ -166,13 +166,34 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	return NewBody;
 }
 
-ANiagaraActor* ACelestialGameMode::AddAsteroidSystem(FTransform Transform, UNiagaraSystem* System, bool bStartPaused)
+ANiagaraActor* ACelestialGameMode::AddAsteroidSystem(FTransform Transform, bool bStartPaused, int32 SpawnCount, int32 Height, int32 Radius, int32 Width)
 {
+	ensureMsgf(AsteroidSystemTemplate, TEXT("Celestial Game Mode has invalid AsteroidSystemTemplate!"));
+	
 	ANiagaraActor* NewSystem = GetWorld()->SpawnActor<ANiagaraActor>(ANiagaraActor::StaticClass(), Transform);
 
 	if (UNiagaraComponent* NiagaraComponent = NewSystem->GetNiagaraComponent())
 	{
-		NiagaraComponent->SetAsset(System);
+		NiagaraComponent->SetAsset(AsteroidSystemTemplate);
+
+		if (SpawnCount >= 0)
+		{
+			NiagaraComponent->SetIntParameter("SpawnCount", SpawnCount);
+		}
+		if (Height >= 0)
+		{
+			NiagaraComponent->SetFloatParameter("SpawnHeight", Height);
+		}
+		if (Radius >= 0)
+		{
+			NiagaraComponent->SetFloatParameter("SpawnRadius", Radius);
+		}
+		if (Width >= 0)
+		{
+			NiagaraComponent->SetFloatParameter("SpawnWidth", Width);
+		}
+		
+		NiagaraComponent->ReinitializeSystem();
 		NiagaraComponent->SetPaused(bStartPaused);
 	}
 	
@@ -414,7 +435,7 @@ bool ACelestialGameMode::SetAsteroidFieldActor(ANiagaraActor* NewAsteroidFieldAc
 	}
 	
 	AsteroidFieldActor = NewAsteroidFieldActor;
-	Asteroids.AddUnique(NewAsteroidFieldActor);
+	Asteroids.Remove(NewAsteroidFieldActor);
 	
 	if (!bHasInitAsteroidField)
 	{
@@ -455,6 +476,11 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 			System->GetNiagaraComponent()->SetPaused(true);
 		}
 
+		if (IsValid(AsteroidFieldActor))
+		{
+			AsteroidFieldActor->GetNiagaraComponent()->SetPaused(true);
+		}
+
 		for (AStar* Star : Stars)
 		{
 			Star->dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
@@ -484,6 +510,11 @@ void ACelestialGameMode::SetPerspective(uint8 perspective)
 		for (auto& System : Asteroids)
 		{
 			System->GetNiagaraComponent()->SetPaused(false);
+		}
+		
+		if (IsValid(AsteroidFieldActor))
+		{
+			AsteroidFieldActor->GetNiagaraComponent()->SetPaused(false);
 		}
 
 		for (AStar* Star : Stars)
@@ -731,7 +762,19 @@ void ACelestialGameMode::LoadGame()
 			{
 				RemoveBody(Body->GetBodyName().ToString());
 			}
-
+			
+			// Restore Asteroid Belts
+			{
+				// Destroy old asteroids
+				for (int i = Asteroids.Num() - 1; i >= 0; --i)
+				{
+					RemoveAsteroidSystem(Asteroids[i]);
+				}
+				for (FAsteroidRecord& Record : LoadedGame->AsteroidBeltData)
+				{
+					AddAsteroidSystem(Record.Transform, false, Record.SpawnCount, Record.Height, Record.Radius, Record.Width);
+				}
+			}
 			
 			// Load On Disc Settings Assets
 			{
@@ -926,6 +969,26 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 				}
 			}
 		}
+		
+		// Save Asteroid Belt Data
+		for (ANiagaraActor* Belt : Asteroids)
+		{
+			UNiagaraComponent* BeltComponent = Belt->GetNiagaraComponent();
+			if (!BeltComponent)
+			{
+				continue;
+			}
+			bool bIsValid = false;
+			
+			FAsteroidRecord Record;
+			Record.Transform = Belt->GetTransform();
+			Record.SpawnCount = BeltComponent->GetVariableInt(FName("SpawnCount"), bIsValid);
+			Record.Height = BeltComponent->GetVariableFloat(FName("SpawnHeight"), bIsValid);
+			Record.Radius = BeltComponent->GetVariableFloat(FName("SpawnRadius"), bIsValid);
+			Record.Width = BeltComponent->GetVariableFloat(FName("SpawnWidth"), bIsValid);
+			SaveGameInstance->AsteroidBeltData.Add(Record);
+		}
+		
 
 		// Save Celestial Player Data
 		SaveGameInstance->CelestialPlayerData.Class = CelestialPlayer->GetClass();
