@@ -161,6 +161,6 @@ private:
 									FVector().ForwardVector,
 									FVector().BackwardVector };
 
-	const int32 Resolutions[5] = { 16, 32, 64, 128, 256 };
+	const int32 Resolutions[5] = { 16, 32, 64, 256, 1024 };
 	int32 ResolutionLevel;
 };

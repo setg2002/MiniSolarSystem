@@ -73,9 +73,11 @@ void APlanet::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	for (int32 i = 0; i < 6; i++)
 	{
 		if (TerrainFaces[i])
-		{	
-			if (TerrainFaces[i]->Worker)
-				TerrainFaces[i]->Worker->EnsureCompletion();
+		{
+			for (FTerrainFaceWorker* TerrainFaceWorker : TerrainFaces[i]->Workers)
+			{
+				TerrainFaceWorker->EnsureCompletion();
+			}
 		}
 	}
 
@@ -687,7 +689,10 @@ void APlanet::OnShapeSettingsUpdated()
 			// Stop threads
 			for (int8 i = 0; i < 6; i++)
 			{
-				TerrainFaces[i]->Worker->Stop();
+				for (FTerrainFaceWorker* TerrainFaceWorker : TerrainFaces[i]->Workers)
+				{
+					TerrainFaceWorker->Stop();
+				}
 			}
 			GeneratePlanet();
 		}

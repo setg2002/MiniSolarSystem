@@ -75,7 +75,7 @@ public:
 //============== Terrestrial Planet Resolution Level ==============
 private:
 	UPROPERTY(Config)
-	int32 ResMax = 2;
+	int32 ResMax = 3;
 public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetResMax() { return ResMax; }

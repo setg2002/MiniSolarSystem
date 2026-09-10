@@ -87,7 +87,7 @@ public:
 	TerrestrialColorGenerator* colorGenerator;
 	ShapeGenerator* shapeGenerator;
 
-    class FTerrainFaceWorker* Worker;
+    TArray<class FTerrainFaceWorker*> Workers;
 
 	int8 MeshSection;
 
@@ -102,11 +102,16 @@ public:
 	void UpdateTangentsNormalsAsync();
 
     bool GetIsFinished() const { return bFinished; }
+	
+	void ThreadFinished(bool bNeedGenTangentsNormals);
 
 private:
 	TArray<FVector> PointsOnUnitSphere;
 
     bool bFinished;
+	
+	int32 FinishedThreads = 0;
+	int32 TotalThreads = 0;
 };
 
 
@@ -129,6 +134,9 @@ class FTerrainFaceWorker : public FRunnable
     FThreadSafeCounter StopTaskCounter;
 
     bool bGenerateTangentsNormalsOnly;
+	
+	int32 ThreadIndex;
+	int32 TotalThreads;
 
 public:
     //Done?
@@ -137,7 +145,7 @@ public:
     //~~~ Thread Core Functions ~~~
 
     //Constructor / Destructor
-    FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, bool GenerateTangentsNormalsOnly, TArray<FVector>& IN_PointsOnUnitSphere, TerrestrialColorGenerator* IN_ColorGenerator = nullptr, ShapeGenerator* IN_ShapeGenerator = nullptr);
+    FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, bool GenerateTangentsNormalsOnly, int32 IN_TotalThreads, int32 IN_ThreadIndex, TArray<FVector>& IN_PointsOnUnitSphere, TerrestrialColorGenerator* IN_ColorGenerator = nullptr, ShapeGenerator* IN_ShapeGenerator = nullptr);
     ~FTerrainFaceWorker();
 
     // Begin FRunnable interface.
