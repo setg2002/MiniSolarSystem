@@ -28,11 +28,11 @@ I only request that you mention me in the credits for your game in the way that 
 	struct FPoint {
 		GENERATED_BODY()
 		UPROPERTY()
-			float x;
+			float x = 0.f;
 		UPROPERTY()
-			float y;
+			float y = 0.f;
 		UPROPERTY()
-			float z;
+			float z = 0.f;
 	};
 
 
@@ -47,9 +47,9 @@ I only request that you mention me in the credits for your game in the way that 
 	struct FCell {
 		GENERATED_BODY()
 		UPROPERTY()
-			FPoint point[8];
+			FPoint point[8]; 
 		UPROPERTY()
-			float val[8];
+			float val[8] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
 	};
 		
 UCLASS()

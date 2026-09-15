@@ -22,7 +22,7 @@ struct FSimpleNoiseSettings
 	float BaseRoughness = 1;
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float Roughness = 2;
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (IgnoreForMemberInitializationTest))
 	FVector Center;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "8"))
