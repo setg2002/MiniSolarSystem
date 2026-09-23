@@ -7,7 +7,7 @@
 #include "AsteroidManager.generated.h"
 
 
-class ShapeGenerator;
+class FShapeGenerator;
 class UShapeSettings;
 
 UCLASS()
@@ -44,7 +44,7 @@ protected:
 	UTexture2D* CreateSphereTexture(FString TextureName);
 #endif
 
-	ShapeGenerator* shapeGenerator;
+	FShapeGenerator* shapeGenerator;
 
 
 private:	

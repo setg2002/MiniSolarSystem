@@ -1188,6 +1188,8 @@ void GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TArray<FName> PlanetNames,
 {
 	if (!bCurrentlyGenerating)
 	{
+		TRACE_BEGIN_REGION(TEXT("Initial Generate Planets"));
+		
 		bCurrentlyGenerating = true;
 
 		GeneratedPlanets.Empty();
@@ -1216,6 +1218,7 @@ void GeneratePlanetsOrdered::NewGeneratedPlanet(FName PlanetName)
 		GameMode->GetGameInstance<UCelestialGameInstance>()->StopLoadingScreen();
 		GameMode->SetPerspective(1);
 		GameMode->OnLoadingComplete.Broadcast();
+		TRACE_END_REGION(TEXT("Initial Generate Planets"));
 		return;
 	}
 	else if (GeneratedPlanets.Num() < TerrestrialPlanets.Num())

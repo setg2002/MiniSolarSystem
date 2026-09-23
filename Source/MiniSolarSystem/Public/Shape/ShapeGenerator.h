@@ -12,12 +12,12 @@ class MinMax;
 class INoiseFilter;
 class UShapeSettings;
 
-class MINISOLARSYSTEM_API ShapeGenerator
+class MINISOLARSYSTEM_API FShapeGenerator
 {
 public:
-	ShapeGenerator();
+	FShapeGenerator();
 	void UpdateSettings(UShapeSettings* settings);
-	~ShapeGenerator();
+	~FShapeGenerator();
 
 	UShapeSettings* Settings;
 

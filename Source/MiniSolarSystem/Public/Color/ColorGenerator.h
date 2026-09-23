@@ -13,12 +13,12 @@ class INoiseFilter;
 /**
  * 
  */
-class MINISOLARSYSTEM_API TerrestrialColorGenerator
+class MINISOLARSYSTEM_API FTerrestrialColorGenerator
 {
 public:
-	TerrestrialColorGenerator();
+	FTerrestrialColorGenerator();
 	void UpdateSettings(UColorSettings* colorSettings);
-	~TerrestrialColorGenerator();
+	~FTerrestrialColorGenerator();
 
 	UColorSettings* ColorSettings;
 

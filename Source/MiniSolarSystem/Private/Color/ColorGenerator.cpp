@@ -13,28 +13,28 @@
 #include "Materials/MaterialInstanceDynamic.h"
 
 
-TerrestrialColorGenerator::TerrestrialColorGenerator()
+FTerrestrialColorGenerator::FTerrestrialColorGenerator()
 {
 }
 
-void TerrestrialColorGenerator::UpdateSettings(UColorSettings* colorSettings)
+void FTerrestrialColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 {
 	this->ColorSettings = colorSettings;
 	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
 		BiomeNoiseFilter = NoiseFilterFactory::CreateNoiseFilter(ColorSettings->GetBiomeColorSettings()->GetNoise());
 }
 
-TerrestrialColorGenerator::~TerrestrialColorGenerator()
+FTerrestrialColorGenerator::~FTerrestrialColorGenerator()
 {
 }
 
-void TerrestrialColorGenerator::UpdateElevation(MinMax* elevationMinMax)
+void FTerrestrialColorGenerator::UpdateElevation(MinMax* elevationMinMax)
 {
 	if (ColorSettings->DynamicMaterial)
 		ColorSettings->DynamicMaterial->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0));
 }
 
-float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
+float FTerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
 {
 	// Height of the current point from 0 - 1 (0 being south pole 1 being north pole)
 	float HeightPercent = (PointOnUnitSphere.Z + 1.f) / 2.f;
@@ -65,7 +65,7 @@ float TerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere
 	return FMath::Lerp<float>(min, max, BiomeIndex / MaxBiome);
 }
 
-void TerrestrialColorGenerator::UpdateColors()
+void FTerrestrialColorGenerator::UpdateColors()
 {
 	TArray<UCurveLinearColor*> biomeColors;
 	ensure(ColorSettings);
@@ -87,7 +87,7 @@ void TerrestrialColorGenerator::UpdateColors()
 }
 
 
-UTexture2D* TerrestrialColorGenerator::CreateTexture(TArray<UCurveLinearColor*> Gradients)
+UTexture2D* FTerrestrialColorGenerator::CreateTexture(TArray<UCurveLinearColor*> Gradients)
 {
 	if (Gradients.Num() == 0 || Gradients[0] == NULL || IsGarbageCollecting())
 		return nullptr;

@@ -31,14 +31,14 @@ APlanet::APlanet()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ProcMesh = CreateDefaultSubobject<UProceduralMeshComponent>("ProcMesh");
-	shapeGenerator = new ShapeGenerator();
-	colorGenerator = new TerrestrialColorGenerator();
+	ShapeGenerator = new FShapeGenerator();
+	ColorGenerator = new FTerrestrialColorGenerator();
 }
 
 APlanet::~APlanet()
 {
-	delete shapeGenerator;
-	delete colorGenerator;
+	delete ShapeGenerator;
+	delete ColorGenerator;
 }
 
 void APlanet::OnConstruction(const FTransform & Transform)
@@ -69,15 +69,13 @@ void APlanet::BeginPlay()
 
 void APlanet::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// Stop threads
-	for (int32 i = 0; i < 6; i++)
+	// Stop threads, delete faces
+	for (int8 i = 0; i < 6; i++)
 	{
 		if (TerrainFaces[i])
 		{
-			for (FTerrainFaceWorker* TerrainFaceWorker : TerrainFaces[i]->Workers)
-			{
-				TerrainFaceWorker->EnsureCompletion();
-			}
+			delete TerrainFaces[i];
+			TerrainFaces[i] = nullptr;
 		}
 	}
 
@@ -572,6 +570,8 @@ void APlanet::GeneratePlanet()
 {
 	if (!bGenerating && ShapeSettings && ColorSettings)
 	{
+		GenerationTraceId = TRACE_BEGIN_REGION_WITH_ID(*FString::Printf(TEXT("Generate Planet: %s"), *BodyName.ToString()), TEXT("Planets"))
+		
 		if (ResolutionLevel == 0)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s started generating"), *BodyName.ToString());
@@ -617,29 +617,13 @@ void APlanet::ReGenerateColors()
 	OnColorSettingsUpdated();
 }
 
-void APlanet::ReGenerateTangents()
-{
-	if (bMultithreadGeneration)
-	{
-		for (int8 i = 0; i < 6; i++)
-		{
-			TerrainFaces[i]->UpdateTangentsNormalsAsync();
-		}
-	}
-	else
-	{
-		for (int8 i = 0; i < 6; i++)
-		{
-			TerrainFaces[i]->UpdateTangentsNormals();
-		}
-	}
-}
-
 void APlanet::Initialize()
 {
 	BindSettingsIDs();
-	shapeGenerator->UpdateSettings(ShapeSettings);
-	colorGenerator->UpdateSettings(ColorSettings);
+	ShapeGenerator->UpdateSettings(ShapeSettings);
+	ColorGenerator->UpdateSettings(ColorSettings);
+	
+	ResolutionLevel = Cast<UCelestialGameInstance>(GetGameInstance())->GetResMax() - 1;
 
 	if (!ProcMesh->GetMaterial(0))
 		ColorSettings->DynamicMaterial = UMaterialInstanceDynamic::Create(ColorSettings->PlanetMat, this);
@@ -647,7 +631,7 @@ void APlanet::Initialize()
 	for (int8 i = 0; i < 6; i++)
 	{
 		if (!TerrainFaces[i])
-			TerrainFaces[i] = new TerrainFace(i, shapeGenerator, colorGenerator, Resolutions[ResolutionLevel], directions[i], ProcMesh);
+			TerrainFaces[i] = new TerrainFace(i, ShapeGenerator, ColorGenerator, Resolutions[ResolutionLevel], directions[i], ProcMesh);
 		else
 			TerrainFaces[i]->UpdateResolution(Resolutions[ResolutionLevel]);
 			
@@ -662,7 +646,7 @@ void APlanet::GenerateMesh()
 	{
 		for (int8 i = 0; i < 6; i++)
 		{
-			TerrainFaces[i]->ConstructMeshAsync(colorGenerator);
+			TerrainFaces[i]->ConstructMeshAsync();
 		}
 	}
 	else 
@@ -674,7 +658,7 @@ void APlanet::GenerateMesh()
 			else
 				ProcMesh->ClearMeshSection(i);
 		}
-		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
+		ColorGenerator->UpdateElevation(ShapeGenerator->ElevationMinMax);
 	}
 }
 
@@ -686,14 +670,6 @@ void APlanet::OnShapeSettingsUpdated()
 		{
 			ResolutionLevel = 0;
 			bGenerating = false;
-			// Stop threads
-			for (int8 i = 0; i < 6; i++)
-			{
-				for (FTerrainFaceWorker* TerrainFaceWorker : TerrainFaces[i]->Workers)
-				{
-					TerrainFaceWorker->Stop();
-				}
-			}
 			GeneratePlanet();
 		}
 		else
@@ -712,7 +688,7 @@ void APlanet::OnColorSettingsUpdated()
 {
 	if (bAutoGenerate && TerrainFaces[0] != NULL && gameMode->GetCurrentPerspective() != 128)
 	{
-		colorGenerator->UpdateSettings(ColorSettings);
+		ColorGenerator->UpdateSettings(ColorSettings);
 		for (int8 i = 0; i < 6; i++)
 		{
 			TerrainFaces[i]->UpdateBiomePercents();
@@ -723,13 +699,13 @@ void APlanet::OnColorSettingsUpdated()
 
 void APlanet::GenerateColors()
 {
-	colorGenerator->UpdateColors();
+	ColorGenerator->UpdateColors();
 
 	// Reload the texture
 	ProcMesh->GetMaterial(0)->LoadConfig();
 
 	if (bMultithreadGeneration)
-		colorGenerator->UpdateElevation(shapeGenerator->ElevationMinMax);
+		ColorGenerator->UpdateElevation(ShapeGenerator->ElevationMinMax);
 
 	if (GetWorld() && bGenerating)
 	{
@@ -745,6 +721,7 @@ void APlanet::GenerateColors()
 			ResolutionLevel = 0;
 			UE_LOG(LogTemp, Warning, TEXT("%s finished generating"), *BodyName.ToString());
 			OnPlanetGenerated.ExecuteIfBound(this->BodyName);
+			TRACE_END_REGION_WITH_ID(GenerationTraceId);
 		}
 	}	
 }
@@ -763,7 +740,7 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 	{
 		const FName PropertyName(PropertyChangedEvent.Property->GetName());
 
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && bAutoGenerate)
+		/*if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, ShapeSettings) && bAutoGenerate)
 		{
 			OnShapeSettingsUpdated();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }
@@ -773,7 +750,7 @@ void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEven
 			OnColorSettingsUpdated();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }
 		}
-		/*if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask) && bAutoGenerate)
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APlanet, FaceRenderMask) && bAutoGenerate)
 		{
 			GeneratePlanet();
 			if (bAutoGenerateTangents) { ReGenerateTangents(); }

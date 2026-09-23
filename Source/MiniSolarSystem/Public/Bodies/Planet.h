@@ -14,8 +14,8 @@
 class TerrainFace;
 class UProceduralMeshComponent;
 class AOrbitDebugActor;
-class ShapeGenerator;
-class TerrestrialColorGenerator;
+class FShapeGenerator;
+class FTerrestrialColorGenerator;
 class UShapeSettings;
 class UColorSettings;
 
@@ -56,13 +56,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Main mesh	
-	//UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY()
 	UProceduralMeshComponent* ProcMesh;
 
 	TerrainFace* TerrainFaces[6];
 
-	ShapeGenerator* shapeGenerator;
-	TerrestrialColorGenerator* colorGenerator;
+	FShapeGenerator* ShapeGenerator;
+	FTerrestrialColorGenerator* ColorGenerator;
 
 	// When true, the planet will call ReGenerate() every time a parameter is changed
 	UPROPERTY(SaveGame, Category = "Settings", EditAnywhere)
@@ -116,9 +116,6 @@ public:
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
 	void ReGenerateColors();
 
-	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
-	void ReGenerateTangents();
-
 	void GeneratePlanet();
 
 	void GenerateMesh();
@@ -163,4 +160,6 @@ private:
 
 	const int32 Resolutions[5] = { 16, 32, 64, 256, 1024 };
 	int32 ResolutionLevel;
+	
+	uint64 GenerationTraceId;
 };

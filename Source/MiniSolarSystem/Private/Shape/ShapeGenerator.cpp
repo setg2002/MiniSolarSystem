@@ -9,11 +9,11 @@
 #include "Helpers/MinMax.h"
 
 
-ShapeGenerator::ShapeGenerator()
+FShapeGenerator::FShapeGenerator()
 {
 }
 
-void ShapeGenerator::UpdateSettings(UShapeSettings* settings)
+void FShapeGenerator::UpdateSettings(UShapeSettings* settings)
 {
 	this->Settings = settings;
 	NoiseFilters.SetNum(Settings->GetNoiseLayers().Num());
@@ -24,11 +24,11 @@ void ShapeGenerator::UpdateSettings(UShapeSettings* settings)
 	ElevationMinMax = new MinMax();
 }
 
-ShapeGenerator::~ShapeGenerator()
+FShapeGenerator::~FShapeGenerator()
 {
 }
 
-float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
+float FShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 {
 	if (Settings != nullptr)
 	{
@@ -70,7 +70,7 @@ float ShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 	}
 }
 
-float ShapeGenerator::GetScaledElevation(float unscaledElevation)
+float FShapeGenerator::GetScaledElevation(float unscaledElevation)
 {
 	float elevation = FMath::Max<float>(0, unscaledElevation);
 	elevation = Settings->GetRadius() * (1 + elevation);

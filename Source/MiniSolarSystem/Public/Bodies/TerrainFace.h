@@ -10,9 +10,9 @@
 
 struct FProcMeshTangent;
 
-class TerrestrialColorGenerator;
+class FTerrestrialColorGenerator;
 class UProceduralMeshComponent;
-class ShapeGenerator;
+class FShapeGenerator;
 class AActor;
 
 
@@ -75,7 +75,7 @@ struct FTerrainFaceData
 class MINISOLARSYSTEM_API TerrainFace
 {
 public:
-	TerrainFace(int8 FaceMeshSection, ShapeGenerator* shape_Generator, TerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* mesh);
+	TerrainFace(int8 FaceMeshSection, FShapeGenerator* shape_Generator, FTerrestrialColorGenerator* color_Generator, int32 resolution, FVector localUp, UProceduralMeshComponent* mesh);
 	~TerrainFace();
 
     FTerrainFaceData Data;
@@ -84,16 +84,16 @@ public:
 
 	UProceduralMeshComponent* ProcMesh;
 
-	TerrestrialColorGenerator* colorGenerator;
-	ShapeGenerator* shapeGenerator;
-
-    TArray<class FTerrainFaceWorker*> Workers;
+	FTerrestrialColorGenerator* ColorGenerator;
+	FShapeGenerator* ShapeGenerator;
 
 	int8 MeshSection;
 
-	void ConstructMeshAsync(TerrestrialColorGenerator* colorGenerator);
+	void CancelTerrainFaceGeneration();
+	void ConstructMeshAsync();
 
 	void CalculateMesh();
+	void CalculateMeshSection(FTerrainFaceData& OutData, int32 SectionIdx);
 
 	void UpdateBiomePercents();
 
@@ -103,57 +103,25 @@ public:
 
     bool GetIsFinished() const { return bFinished; }
 	
-	void ThreadFinished(bool bNeedGenTangentsNormals);
+	void GenerationThreadFinished(FTerrainFaceData SectionData, int32 ThreadIdx);
+	
 
 private:
 	TArray<FVector> PointsOnUnitSphere;
+	
+	TArray<UE::Tasks::FTask*> Tasks;
 
+	// Is this face finished generating. When false this face is actively being generated
     bool bFinished;
 	
 	int32 FinishedThreads = 0;
 	int32 TotalThreads = 0;
-};
-
-
-//~~~~~ Multi Threading ~~~~~
-class FTerrainFaceWorker : public FRunnable
-{
-    /** Thread to run the worker FRunnable on */
-    FRunnableThread* Thread;
-
-    /** The Terrain Face Data to Fill */
-    FTerrainFaceData& Data;
-
-    TArray<FVector>& PointsOnUnitSphere;
-
-    TerrestrialColorGenerator* ColorGenerator;
-    ShapeGenerator* shapeGenerator;
-    TerrainFace* Parent;
-
-    /** Stop this thread? Uses Thread Safe Counter */
-    FThreadSafeCounter StopTaskCounter;
-
-    bool bGenerateTangentsNormalsOnly;
 	
-	int32 ThreadIndex;
-	int32 TotalThreads;
-
-public:
-    //Done?
-    bool IsFinished() const { return Parent->GetIsFinished(); }
-
-    //~~~ Thread Core Functions ~~~
-
-    //Constructor / Destructor
-    FTerrainFaceWorker(TerrainFace* IN_Parent, FTerrainFaceData& IN_Data, bool GenerateTangentsNormalsOnly, int32 IN_TotalThreads, int32 IN_ThreadIndex, TArray<FVector>& IN_PointsOnUnitSphere, TerrestrialColorGenerator* IN_ColorGenerator = nullptr, ShapeGenerator* IN_ShapeGenerator = nullptr);
-    ~FTerrainFaceWorker();
-
-    // Begin FRunnable interface.
-    virtual bool Init();
-    virtual uint32 Run();
-    virtual void Stop();
-    // End FRunnable interface
-
-    /** Makes sure this thread has stopped properly */
-    void EnsureCompletion();
+	const TCHAR* GetThreadName(int32 ThreadIdx, bool bGeneration) const;
+	int32 GetSectionIndex(int32 ThreadIdx) const;
+	
+	static FString LocalUpString(FVector LocalUp);
+	
+	// 
+	UE::Tasks::FCancellationToken* CancelGen;
 };
