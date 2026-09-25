@@ -213,6 +213,7 @@ void TerrainFace::ConstructMeshAsync()
 		{
 			if (CancelGen->IsCanceled())
 			{
+				delete &SectionData;
 				return;
 			}
 			
@@ -220,21 +221,23 @@ void TerrainFace::ConstructMeshAsync()
 			
 			if (CancelGen->IsCanceled())
 			{
+				delete &SectionData;
 				return;
 			}
 			
 			SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CalcTangents);
-			UKismetProceduralMeshLibrary::CalculateTangentsForMesh(SectionData.vertices, SectionData.triangles, SectionData.uv, SectionData.normals, SectionData.tangents);
+			UKismetProceduralMeshLibrary::CalculateTangentsForMesh(SectionData.vertices, SectionData.triangles, SectionData.uv, SectionData.normals, SectionData.tangents, i);
 		}, LowLevelTasks::ETaskPriority::High );
 		
 		UE::Tasks::FTask CreateSectionTask = UE::Tasks::Launch(GetThreadName(i, false), [this, i, &SectionData]()
 		{
 			if (CancelGen->IsCanceled())
 			{
+				delete &SectionData;
 				return;
 			}
 				
-			GenerationThreadFinished(SectionData, i);	
+			GenerationThreadFinished(&SectionData, i);	
 		}, UE::Tasks::Prerequisites(GenerationTask), LowLevelTasks::ETaskPriority::Normal, UE::Tasks::EExtendedTaskPriority::GameThreadNormalPri);
 	
 		Tasks[i] = &CreateSectionTask;
@@ -253,23 +256,23 @@ void TerrainFace::UpdateTangentsNormalsAsync()
 	UpdateTangentsNormals();
 }
 
-void TerrainFace::GenerationThreadFinished(FTerrainFaceData SectionData, int32 ThreadIdx)
+void TerrainFace::GenerationThreadFinished(FTerrainFaceData* SectionData, int32 ThreadIdx)
 {
 	// Aggregate terrain face data
 	{
 		SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CollectMeshData);
 		
-		int32 Count = SectionData.vertices.Num();
+		int32 Count = SectionData->vertices.Num();
 		int32 StartIndex = ThreadIdx * Count;
-		int32 TrisCount = SectionData.triangles.Num();
+		int32 TrisCount = SectionData->triangles.Num();
 		int32 StartingTriIndex = ThreadIdx * TrisCount;
 	
 		// Create a view of the specific range in the source arrays
-		TArrayView<FVector> VertsSourceView(SectionData.vertices.GetData(), Count);
-		TArrayView<FVector2D> UVSourceView(SectionData.uv.GetData(), Count);
-		TArrayView<int32> TrianglesSourceView(SectionData.triangles.GetData(), TrisCount);
-		TArrayView<FVector> NormalsSourceView(SectionData.normals.GetData(), Count);
-		TArrayView<FProcMeshTangent> TangentsSourceView(SectionData.tangents.GetData(), Count);
+		TArrayView<FVector> VertsSourceView(SectionData->vertices.GetData(), Count);
+		TArrayView<FVector2D> UVSourceView(SectionData->uv.GetData(), Count);
+		TArrayView<int32> TrianglesSourceView(SectionData->triangles.GetData(), TrisCount);
+		TArrayView<FVector> NormalsSourceView(SectionData->normals.GetData(), Count);
+		TArrayView<FProcMeshTangent> TangentsSourceView(SectionData->tangents.GetData(), Count);
 	
 		// Copy the data into the target arrays (TargetArray must have enough allocated space)
 		FMemory::Memcpy(Data.vertices.GetData() + StartIndex, VertsSourceView.GetData(), Count * sizeof(FVector));
@@ -277,6 +280,8 @@ void TerrainFace::GenerationThreadFinished(FTerrainFaceData SectionData, int32 T
 		FMemory::Memcpy(Data.triangles.GetData() + StartingTriIndex, TrianglesSourceView.GetData(), TrisCount * sizeof(int32));
 		FMemory::Memcpy(Data.normals.GetData() + StartIndex, NormalsSourceView.GetData(), Count * sizeof(FVector));
 		FMemory::Memcpy(Data.tangents.GetData() + StartIndex, TangentsSourceView.GetData(), Count * sizeof(FProcMeshTangent));
+	
+		delete SectionData;
 	}
 	
 	// Create final mesh when all threads are finished

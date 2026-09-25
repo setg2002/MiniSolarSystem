@@ -103,7 +103,7 @@ public:
 
     bool GetIsFinished() const { return bFinished; }
 	
-	void GenerationThreadFinished(FTerrainFaceData SectionData, int32 ThreadIdx);
+	void GenerationThreadFinished(FTerrainFaceData* SectionData, int32 ThreadIdx);
 	
 
 private:
