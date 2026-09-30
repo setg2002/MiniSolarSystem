@@ -55,7 +55,6 @@ void ASkybox::Tick(float DeltaTime)
 
 // This is very slow
 #if WITH_EDITOR
-UE_DISABLE_OPTIMIZATION
 void ASkybox::MakeTexture()
 {
 	int16 TextureRes = 2048;
@@ -155,7 +154,6 @@ void ASkybox::MakeTexture()
 	
 	DynamicMaterial->SetTextureParameterValue("StarTexture", SkyboxTexture);
 }
-UE_ENABLE_OPTIMIZATION
 #endif
 
 
