@@ -168,6 +168,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FBodySystemRecord> BodySystemsData;
+	
+	// Array of Confirmation IDs that the player has chosen not to see anymore. TODO- This should be moved to a player save instead of being saved per solar system
+	UPROPERTY(VisibleAnywhere)
+	TArray<FString> ConfirmationIDsToIgnore;
 
 	// ~~~ Asset Saving ~~~
 

@@ -61,6 +61,9 @@ public:
 	bool GetFirstLayerAsMask() const { return NoiseLayer.UseFirstLayerAsMask; }
 	UFUNCTION(BlueprintCallable)
 	void SetFirstLayerAsMask(bool NewFirstLayerAsMask);
+	
+	UFUNCTION(BlueprintCallable)
+	void Randomize();
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UNoiseSettings* NoiseSettings;

@@ -15,7 +15,7 @@ USTRUCT(BlueprintType)
 struct FSimpleNoiseSettings
 {
 	GENERATED_USTRUCT_BODY()
-
+	
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float Strength = 1;
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
@@ -38,6 +38,8 @@ struct FSimpleNoiseSettings
 	{
 		Center = FVector(FMath::VRand() * FMath::RandHelper(1000));
 	}
+	
+	virtual ~FSimpleNoiseSettings() = default;
 
 	FSimpleNoiseSettings(float strength, float baseRoughness, float roughness, FVector center, int NumLayers, float persistence, float minValue)
 	{
@@ -48,6 +50,17 @@ struct FSimpleNoiseSettings
 		numLayers = NumLayers;
 		Persistence = persistence;
 		MinValue = minValue;
+	}
+	
+	virtual void Randomize()
+	{
+		Strength = FMath::RandRange(.01f, 1.f);
+		BaseRoughness = FMath::RandRange(.1f, 5.f);
+		Roughness = FMath::RandRange(.1f, 5.f);
+		Center = FVector(FMath::VRand() * FMath::RandHelper(1000));
+		numLayers = FMath::RandRange(1, 8);
+		Persistence = FMath::RandRange(.01f, 2.f);
+		MinValue = FMath::RandRange(.01f, 1.f);
 	}
 };
 
@@ -75,6 +88,18 @@ struct FRigidNoiseSettings : public FSimpleNoiseSettings
 		Persistence = persistence;
 		MinValue = minValue;
 		WeightMultiplier = weightMultiplier;
+	}
+	
+	virtual void Randomize() override
+	{
+		Strength = FMath::RandRange(.01f, 1.f);
+		BaseRoughness = FMath::RandRange(.1f, 5.f);
+		Roughness = FMath::RandRange(.1f, 5.f);
+		Center = FVector(FMath::VRand() * FMath::RandHelper(1000));
+		numLayers = FMath::RandRange(1, 8);
+		Persistence = FMath::RandRange(.01f, 2.f);
+		MinValue = FMath::RandRange(.01f, 1.f);
+		WeightMultiplier = FMath::RandRange(.1f, 1.f);
 	}
 };
 
@@ -141,4 +166,7 @@ public:
 	void SetSimpleNoiseSettings(FSimpleNoiseSettings NewSettings);
 	UFUNCTION(BlueprintCallable)
 	void SetRigidNoiseSettings(FRigidNoiseSettings NewSettings);
+	
+	UFUNCTION()
+	void Randomize();
 };

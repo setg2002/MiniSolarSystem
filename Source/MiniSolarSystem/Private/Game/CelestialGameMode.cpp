@@ -702,65 +702,80 @@ void ACelestialGameMode::LoadGame()
 
 			gravitationalConstant = LoadedGame->GravConst;
 			SetAsteroidFieldNum(LoadedGame->AsteroidFieldNum);
+			
+			GetGameState<ACelestialGameState>()->SetConfirmationIDsToIgnore(LoadedGame->ConfirmationIDsToIgnore);
 
 			// Restore Celestial Body Data
-			TArray<ACelestialBody*> RestoredBodies;
-			for (auto& data : LoadedGame->CelestialBodyData)
 			{
-				bool BodyAlreadyExists = false;
-				for (int32 i = 0; i < Bodies.Num(); i++)
+				TArray<ACelestialBody*> RestoredBodies;
+				for (auto& data : LoadedGame->CelestialBodyData)
 				{
-					if (Bodies[i]->GetBodyName().ToString() == data.Name.ToString())
+					bool BodyAlreadyExists = false;
+					for (int32 i = 0; i < Bodies.Num(); i++)
 					{
+						if (Bodies[i]->GetBodyName().ToString() == data.Name.ToString())
+						{
+							FMemoryReader MemoryReader(data.ActorData);
+							FCelestialSaveGameArchive Ar(MemoryReader);
+							Bodies[i]->Serialize(Ar);
+							Bodies[i]->SetActorTransform(data.Transform);
+							RestoredBodies.Add(Bodies[i]);
+							
+							if (AGasGiant* GasGiant = Cast<AGasGiant>(Bodies[i]))
+							{
+								GasGiant->ReInit();
+							}
+							
+							BodyAlreadyExists = true;
+							break;
+						}
+					}
+					if (!BodyAlreadyExists)
+					{
+						ACelestialBody* NewBody = AddBody(data.Class, NAME_None, data.Transform);
+
 						FMemoryReader MemoryReader(data.ActorData);
 						FCelestialSaveGameArchive Ar(MemoryReader);
-						Bodies[i]->Serialize(Ar);
-						Bodies[i]->SetActorTransform(data.Transform);
-						RestoredBodies.Add(Bodies[i]);
+						NewBody->Serialize(Ar);
 
-						if (AGasGiant* GasGiant = Cast<AGasGiant>(Bodies[i]))
+						RestoredBodies.Add(NewBody);
+						if (APlanet* planet = Cast<APlanet>(NewBody))
+						{
+							planet->ClearSettingsAssets();
+						}
+						else if (AGasGiant* GasGiant = Cast<AGasGiant>(NewBody))
+						{
 							GasGiant->ReInit();
-
-						BodyAlreadyExists = true;
-						break;
+						}
 					}
+					UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *data.Name.ToString());
 				}
-				if (!BodyAlreadyExists)
+				TArray<ACelestialBody*> BodiesToDelete;
+				for (ACelestialBody* Body : Bodies)
 				{
-					ACelestialBody* NewBody = AddBody(data.Class, NAME_None, data.Transform);
-
-					FMemoryReader MemoryReader(data.ActorData);
-					FCelestialSaveGameArchive Ar(MemoryReader);
-					NewBody->Serialize(Ar);
-
-					RestoredBodies.Add(NewBody);
-					if (APlanet* planet = Cast<APlanet>(NewBody))
-						planet->ClearSettingsAssets();
-					else if (AGasGiant* GasGiant = Cast<AGasGiant>(NewBody))
-						GasGiant->ReInit();
-				}
-				UE_LOG(LogTemp, Warning, TEXT("Data Loaded For: %s"), *data.Name.ToString());
-			}
-			TArray<ACelestialBody*> BodiesToDelete;
-			for (ACelestialBody* Body : Bodies)
-			{
-				bool bBodyWasDeleted = true;
-				for (ACelestialBody* RestoredBody : RestoredBodies)
-				{
-					if (RestoredBody->GetID() == Body->GetID() && RestoredBody->GetBodyName() != Body->GetBodyName())
-						break;
-					if (RestoredBody->GetID() == Body->GetID())
+					bool bBodyWasDeleted = true;
+					for (ACelestialBody* RestoredBody : RestoredBodies)
 					{
-						bBodyWasDeleted = false;
-						break;
+						if (RestoredBody->GetID() == Body->GetID() && RestoredBody->GetBodyName() != Body->GetBodyName())
+						{
+							break;
+						}
+						
+						if (RestoredBody->GetID() == Body->GetID())
+						{
+							bBodyWasDeleted = false;
+							break;
+						}
+					}
+					if (bBodyWasDeleted)
+					{
+						BodiesToDelete.Add(Body);
 					}
 				}
-				if (bBodyWasDeleted)
-					BodiesToDelete.Add(Body);
-			}
-			for (ACelestialBody* Body : BodiesToDelete)
-			{
-				RemoveBody(Body->GetBodyName().ToString());
+				for (ACelestialBody* Body : BodiesToDelete)
+				{
+					RemoveBody(Body->GetBodyName().ToString());
+				}
 			}
 			
 			// Restore Asteroid Belts
@@ -923,6 +938,8 @@ void ACelestialGameMode::SaveAsync(FAsyncSaveGameToSlotDelegate Out)
 
 		SaveGameInstance->GravConst = gravitationalConstant;
 		SaveGameInstance->AsteroidFieldNum = AsteroidFieldSpawnCount;
+		
+		SaveGameInstance->ConfirmationIDsToIgnore = GetGameState<ACelestialGameState>()->GetConfirmationIDsToIgnore();
 
 		// Save BodySystems
 		SaveGameInstance->BodySystemsData.SetNum(BodySystems.Num());

@@ -14,3 +14,8 @@ void UNoiseLayer::SetFirstLayerAsMask(bool NewFirstLayerAsMask)
 	NoiseLayer.UseFirstLayerAsMask = NewFirstLayerAsMask;
 	OnSettingsAssetChanged.Broadcast();
 }
+
+void UNoiseLayer::Randomize()
+{
+	NoiseSettings->Randomize();
+}

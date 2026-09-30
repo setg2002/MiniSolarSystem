@@ -30,6 +30,24 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	AOverviewPlayer* OverviewPlayer;
 	
+	UPROPERTY(VisibleAnywhere)
+	TArray<FString> ConfirmationIDsToIgnore;
+	
+public:
+	UFUNCTION(BlueprintCallable)
+	bool ShouldIgnoreConfirmationID(const FString& ConfirmationID) const;
+	
+	UFUNCTION(BlueprintCallable)
+	void AddConfirmationIDToIgnore(const FString& ConfirmationID);
+	
+	UFUNCTION()
+	TArray<FString> GetConfirmationIDsToIgnore() const { return ConfirmationIDsToIgnore; }
+	
+	UFUNCTION()
+	void SetConfirmationIDsToIgnore(const TArray<FString>& InConfirmationIDs);
+	
+	UFUNCTION(BlueprintCallable)
+	void ClearConfirmationIDsToIgnore();
 	
 protected:
 	/** MappingContext for player input. */

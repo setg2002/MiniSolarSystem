@@ -28,3 +28,20 @@ void UNoiseSettings::SetRigidNoiseSettings(FRigidNoiseSettings NewSettings)
 	NoiseSettings.RigidNoiseSettings = NewSettings;
 	OnSettingsAssetChanged.Broadcast();
 }
+
+void UNoiseSettings::Randomize()
+{
+	switch (GetFilterType())
+	{
+	case Smooth:
+		NoiseSettings.SimpleNoiseSettings.Randomize();
+		break;
+	case Rigid:
+		NoiseSettings.RigidNoiseSettings.Randomize();
+		break;
+	default:
+		break;
+	}
+	
+	OnSettingsAssetChanged.Broadcast();
+}
