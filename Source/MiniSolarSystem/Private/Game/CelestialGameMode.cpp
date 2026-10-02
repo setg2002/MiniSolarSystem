@@ -693,6 +693,27 @@ void ACelestialGameMode::LoadGame()
 			{
 				UCurveLinearColor* NewCurve = UColorCurveFunctionLibrary::CreateNewCurve(Asset.Name, Asset.AssetData);
 			}
+			
+			// Load On Disc Settings Assets
+			{
+				TArray<FAssetData> AssetData;
+				FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets", AssetData, true, true);
+				LoadOnDiscAssetsOfClass(LoadedGame->OnDiscSettingsAssets, AssetData, UColorSettings::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UBiomeColorSettings::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UShapeSettings::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UNoiseLayer::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UNoiseSettings::StaticClass());
+				LoadOnDiscAssetsOfClass({}, {}, UBiome::StaticClass());
+			}
+			// Load Runtime Settings Assets
+			{
+				LoadRuntimeAssetsOfClass(LoadedGame->SettingsAssets, UColorSettings::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UBiomeColorSettings::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UShapeSettings::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UNoiseLayer::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UNoiseSettings::StaticClass());
+				LoadRuntimeAssetsOfClass({}, UBiome::StaticClass());
+			}
 
 			// Restore Orbit Visualization Data
 			AOrbitDebugActor* ODA = AOrbitDebugActor::Get();
@@ -789,27 +810,6 @@ void ACelestialGameMode::LoadGame()
 				{
 					AddAsteroidSystem(Record.Transform, false, Record.SpawnCount, Record.Height, Record.Radius, Record.Width);
 				}
-			}
-			
-			// Load On Disc Settings Assets
-			{
-				TArray<FAssetData> AssetData;
-				FAssetRegistryModule::GetRegistry().GetAssetsByPath("/Game/DataAssets", AssetData, true, true);
-				LoadOnDiscAssetsOfClass(LoadedGame->OnDiscSettingsAssets, AssetData, UColorSettings::StaticClass());
-				LoadOnDiscAssetsOfClass({}, {}, UBiomeColorSettings::StaticClass());
-				LoadOnDiscAssetsOfClass({}, {}, UShapeSettings::StaticClass());
-				LoadOnDiscAssetsOfClass({}, {}, UNoiseLayer::StaticClass());
-				LoadOnDiscAssetsOfClass({}, {}, UNoiseSettings::StaticClass());
-				LoadOnDiscAssetsOfClass({}, {}, UBiome::StaticClass());
-			}
-			// Load Runtime Settings Assets
-			{
-				LoadRuntimeAssetsOfClass(LoadedGame->SettingsAssets, UColorSettings::StaticClass());
-				LoadRuntimeAssetsOfClass({}, UBiomeColorSettings::StaticClass());
-				LoadRuntimeAssetsOfClass({}, UShapeSettings::StaticClass());
-				LoadRuntimeAssetsOfClass({}, UNoiseLayer::StaticClass());
-				LoadRuntimeAssetsOfClass({}, UNoiseSettings::StaticClass());
-				LoadRuntimeAssetsOfClass({}, UBiome::StaticClass());
 			}
 			
 			for (ACelestialBody* Body : Bodies) // Make sure the newly created and assigned asset's delegates are bound

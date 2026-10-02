@@ -11,6 +11,7 @@
  */
 
 class UNoiseSettings;
+class APlanet;
 
 USTRUCT(BlueprintType)
 struct FBiome_
@@ -61,6 +62,8 @@ public:
 	UCurveLinearColor* GetGradient() const { return Biome.Gradient; }
 	UFUNCTION(BlueprintCallable)
 	void SetGradient(UCurveLinearColor* NewGradient);
+	
+	void Randomize(const float GivenStartHeight = -1);
 };
 
 
@@ -149,6 +152,8 @@ public:
 	UNoiseSettings* GetNoise() const { return BiomeColorSettings.Noise; }
 	UFUNCTION(BlueprintCallable)
 	void SetNoise(UNoiseSettings* NewNoise);
+	
+	void Randomize(APlanet* ForPlanet);
 };
 
 
@@ -211,4 +216,7 @@ public:
 	float GetTintPercent() const { return ColorSettings.BiomeTintPercent; }
 	UFUNCTION(BlueprintCallable)
 	void SetTintPercent(float NewTintPercent);
+	
+	UFUNCTION(BlueprintCallable)
+	void Randomize(APlanet* ForPlanet);
 };

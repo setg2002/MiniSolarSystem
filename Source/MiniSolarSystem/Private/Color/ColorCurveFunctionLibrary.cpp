@@ -74,3 +74,37 @@ UCurveLinearColor* UColorCurveFunctionLibrary::CreateNewCurve(FName Name, TArray
 	UPackage::SavePackage(Package, NewGradient, *FilePath, Args);
 	return NewGradient;
 }
+
+UCurveLinearColor* UColorCurveFunctionLibrary::CreateRandomCurve(int32 NumPoints, bool bClampColorDelta, uint8 MaxDelta)
+{
+	if (NumPoints <= 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UColorCurveFunctionLibrary::CreateRandomCurve: Cannot create a curve with non-positive number of points"));
+		return nullptr;
+	}
+	
+	UCurveLinearColor* NewGradient = CreateNewCurve(FName(FString::Printf(TEXT("RandomGradient_%s"), *FGuid::NewGuid().ToString())), TArray<uint8>());
+
+	float MinPointTime = 0.f;
+	uint8 PreviousHue = FMath::RandRange(0, 255);
+	for (int32 i = 0; i < NumPoints; i++)
+	{
+		float NewPointTime = FMath::FRandRange(MinPointTime, (1.f / NumPoints) * i);
+		
+		// Generate a random hue value, optionally clamping how far it can deviate from the previous hue
+		uint8 RandomHue = bClampColorDelta ? FMath::Clamp(PreviousHue + FMath::RandRange(-MaxDelta, MaxDelta), 0, 255) : FMath::RandRange(0, 255);
+		FLinearColor NewPointColor = FLinearColor::MakeFromHSV8(RandomHue, 255, 255);
+		
+		// Add keys to each Red, Green, and Blue curve according to the random color that was generated
+		for (int32 RGB = 0; RGB < 3; ++RGB)
+		{
+			NewGradient->FloatCurves[RGB].AddKey(NewPointTime, NewPointColor.RGBA[RGB]);
+		}
+		NewGradient->FloatCurves[3].AddKey(NewPointTime, 1.f); // All alpha values are forced to maximum
+		
+		MinPointTime = FMath::Min(NewPointTime + 0.1f, 1.f);
+		PreviousHue = RandomHue;
+	}
+
+	return NewGradient;
+}

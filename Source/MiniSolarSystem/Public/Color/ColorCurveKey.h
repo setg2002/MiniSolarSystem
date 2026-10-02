@@ -16,9 +16,10 @@ class MINISOLARSYSTEM_API UColorCurveKey : public UUserWidget
 
 	DECLARE_DELEGATE(FCurveKeyUpdated)
 
-public:
+protected:
 	virtual void NativeConstruct() override;
-
+	
+public:
 	FCurveKeyUpdated OnKeyUpdated;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -30,6 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Time;
 
+	UPROPERTY()
 	UCurveLinearColor* Gradient;
 	FKeyHandle Handle;
 
