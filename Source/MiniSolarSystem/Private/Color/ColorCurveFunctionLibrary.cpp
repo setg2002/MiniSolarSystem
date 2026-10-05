@@ -98,7 +98,15 @@ UCurveLinearColor* UColorCurveFunctionLibrary::CreateRandomCurve(int32 NumPoints
 		// Add keys to each Red, Green, and Blue curve according to the random color that was generated
 		for (int32 RGB = 0; RGB < 3; ++RGB)
 		{
-			NewGradient->FloatCurves[RGB].AddKey(NewPointTime, NewPointColor.RGBA[RGB]);
+			float NewPointValue = 0.f;
+			switch (RGB)
+			{
+				case 0: NewPointValue = NewPointColor.R; break;
+				case 1: NewPointValue = NewPointColor.G; break;
+				case 2: NewPointValue = NewPointColor.B; break;
+			default: break;
+			}
+			NewGradient->FloatCurves[RGB].AddKey(NewPointTime, NewPointValue);
 		}
 		NewGradient->FloatCurves[3].AddKey(NewPointTime, 1.f); // All alpha values are forced to maximum
 		
