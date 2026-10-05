@@ -2,8 +2,6 @@
 
 
 #include "Bodies/Planet.h"
-#include "RawMesh.h"
-#include "EngineUtils.h"
 #include "Shape/NoiseLayer.h"
 #include "Bodies/TerrainFace.h"
 #include "Shape/ShapeSettings.h"
@@ -21,6 +19,7 @@
 #include "Game/CelestialGameMode.h"
 #include "ProceduralMeshComponent.h"
 #include "Game/CelestialSaveGameArchive.h"
+#include "Helpers/SaveDataBlueprintFunctionLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/SavePackage.h"
 
@@ -62,9 +61,6 @@ void APlanet::BeginPlay()
 
 	ResolutionLevel = 0;
 
-	CreateSettingsAssets();
-
-	BindDelegates();
 }
 
 void APlanet::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -370,11 +366,10 @@ void APlanet::CreateSettingsAssets()
 
 	if (!GIsEditor || GWorld->HasBegunPlay())
 	{ 
-		if (ColorSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UColorSettings::StaticClass()->GetName())))
+		UColorSettings* LoadedColorSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UColorSettings>(ID);
+		if (ColorSettings == nullptr && LoadedColorSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UColorSettings::StaticClass());
-			ColorSettings = LoadObject<UColorSettings>(Outer, *AssetName, *PackagePath);
-			ColorSettings->AddAppliedID(ID);
+			ColorSettings = LoadedColorSettings;
 		}
 		else if (ColorSettings == nullptr)
 		{
@@ -383,11 +378,10 @@ void APlanet::CreateSettingsAssets()
 			ColorSettings->AddAppliedID(ID);
 		}
 
-		if (ColorSettings->GetBiomeColorSettings() == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UBiomeColorSettings::StaticClass()->GetName())))
+		UBiomeColorSettings* LoadedBiomeColorSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UBiomeColorSettings>(ColorSettings->GetID());
+		if (ColorSettings->GetBiomeColorSettings() == nullptr && LoadedBiomeColorSettings)
 		{	
-			CreatePackageName(AssetName, PackagePath, *Outer, UBiomeColorSettings::StaticClass());
-			ColorSettings->SetBiomeColorSettings(LoadObject<UBiomeColorSettings>(Outer, *AssetName, *PackagePath));
-			ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
+			ColorSettings->SetBiomeColorSettings(LoadedBiomeColorSettings);
 		}
 		else if (ColorSettings->GetBiomeColorSettings() == nullptr)
 		{
@@ -396,11 +390,10 @@ void APlanet::CreateSettingsAssets()
 			ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
 		}
 
-		if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseSettings::StaticClass()->GetName())))
+		UNoiseSettings* LoadedBiomeNoiseSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UNoiseSettings>(ColorSettings->GetBiomeColorSettings()->GetID());
+		if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr && LoadedBiomeNoiseSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
-			ColorSettings->GetBiomeColorSettings()->SetNoise(LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath));
-			ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
+			ColorSettings->GetBiomeColorSettings()->SetNoise(LoadedBiomeNoiseSettings);
 		}
 		else if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr)
 		{
@@ -409,7 +402,16 @@ void APlanet::CreateSettingsAssets()
 			ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
 		}
 
-		if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UBiome::StaticClass()->GetName())))
+		TArray<UBiome*> LoadedBiomeAssets = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UBiome>(ColorSettings->GetBiomeColorSettings()->GetID());
+		if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && LoadedBiomeAssets.Num() > 0)
+		{
+			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
+			for (UBiome* LoadedBiomeAsset : LoadedBiomeAssets)
+			{
+				ColorSettings->GetBiomeColorSettings()->GetBiomes().Add(LoadedBiomeAsset);
+			}
+		}
+		else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
 		{
 			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
 			CreatePackageName(AssetName, PackagePath, *Outer, UBiome::StaticClass());
@@ -425,11 +427,10 @@ void APlanet::CreateSettingsAssets()
 		}
 
 
-		if (ShapeSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UShapeSettings::StaticClass()->GetName())))
+		UShapeSettings* LoadedShapeSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UShapeSettings>(ID);
+		if (ShapeSettings == nullptr && LoadedShapeSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UShapeSettings::StaticClass());
-			ShapeSettings = LoadObject<UShapeSettings>(Outer, *AssetName, *PackagePath);
-			ShapeSettings->AddAppliedID(ID);
+			ShapeSettings = LoadedShapeSettings;
 		}
 		else if (ShapeSettings == nullptr)
 		{
@@ -438,6 +439,7 @@ void APlanet::CreateSettingsAssets()
 			ShapeSettings->AddAppliedID(ID);
 		}
 
+		TArray<UNoiseLayer*> LoadedShapeNoiseLayers = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UNoiseLayer>(ShapeSettings->GetID());
 		if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseLayer::StaticClass()->GetName())))
 		{
 			ShapeSettings->GetNoiseLayers().Empty();
@@ -453,11 +455,10 @@ void APlanet::CreateSettingsAssets()
 			ShapeSettings->GetNoiseLayers()[0]->AddAppliedID(ShapeSettings->GetID());
 		}
 
-		if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseSettings::StaticClass()->GetName())))
+		UNoiseSettings* LoadedFirstNoiseLayerNoiseSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UNoiseSettings>(ShapeSettings->GetNoiseLayers()[0]->GetID());
+		if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr && LoadedFirstNoiseLayerNoiseSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath);
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->AddAppliedID(ShapeSettings->GetNoiseLayers()[0]->GetID());
+			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = LoadedFirstNoiseLayerNoiseSettings;
 		}
 		else if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr)
 		{
@@ -468,11 +469,10 @@ void APlanet::CreateSettingsAssets()
 	}
 	else
 	{
-		if (ColorSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UColorSettings::StaticClass()->GetName())))
+		UColorSettings* LoadedColorSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UColorSettings>(ID);
+		if (ColorSettings == nullptr && LoadedColorSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UColorSettings::StaticClass());
-			ColorSettings = LoadObject<UColorSettings>(Outer, *AssetName, *PackagePath);
-			ColorSettings->AddAppliedID(ID);
+			ColorSettings = LoadedColorSettings;
 		}
 		else if (ColorSettings == nullptr)
 		{
@@ -481,11 +481,10 @@ void APlanet::CreateSettingsAssets()
 			ColorSettings->AddAppliedID(ID);
 		}
 
-		if (ColorSettings->GetBiomeColorSettings() == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UBiomeColorSettings::StaticClass()->GetName())))
+		UBiomeColorSettings* LoadedBiomeColorSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UBiomeColorSettings>(ColorSettings->GetID());
+		if (ColorSettings->GetBiomeColorSettings() == nullptr && LoadedBiomeColorSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UBiomeColorSettings::StaticClass());
-			ColorSettings->SetBiomeColorSettings(LoadObject<UBiomeColorSettings>(Outer, *AssetName, *PackagePath));
-			ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
+			ColorSettings->SetBiomeColorSettings(LoadedBiomeColorSettings);
 		}
 		else if (ColorSettings->GetBiomeColorSettings() == nullptr)
 		{
@@ -494,11 +493,10 @@ void APlanet::CreateSettingsAssets()
 			ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
 		}
 
-		if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseSettings::StaticClass()->GetName())))
+		UNoiseSettings* LoadedBiomeNoiseSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UNoiseSettings>(ColorSettings->GetBiomeColorSettings()->GetID());
+		if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr && LoadedBiomeNoiseSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
-			ColorSettings->GetBiomeColorSettings()->SetNoise(LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath));
-			ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
+			ColorSettings->GetBiomeColorSettings()->SetNoise(LoadedBiomeNoiseSettings);
 		}
 		else if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr)
 		{
@@ -507,12 +505,14 @@ void APlanet::CreateSettingsAssets()
 			ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
 		}
 
-		if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UBiome::StaticClass()->GetName())))
+		TArray<UBiome*> LoadedBiomes = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UBiome>(ColorSettings->GetBiomeColorSettings()->GetID());
+		if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && LoadedBiomes.Num() > 0)
 		{
 			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
-			CreatePackageName(AssetName, PackagePath, *Outer, UBiome::StaticClass());
-			ColorSettings->GetBiomeColorSettings()->AddBiome(LoadObject<UBiome>(Outer, *AssetName, *PackagePath));
-			ColorSettings->GetBiomeColorSettings()->GetBiomes().Last()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
+			for (UBiome* LoadedBiome : LoadedBiomes)
+			{
+				ColorSettings->GetBiomeColorSettings()->AddBiome(LoadedBiome);	
+			}
 		}
 		else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
 		{
@@ -523,11 +523,10 @@ void APlanet::CreateSettingsAssets()
 		}
 
 
-		if (ShapeSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UShapeSettings::StaticClass()->GetName())))
+		UShapeSettings* LoadedShapeSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UShapeSettings>(ID);
+		if (ShapeSettings == nullptr && LoadedShapeSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UShapeSettings::StaticClass());
-			ShapeSettings = LoadObject<UShapeSettings>(Outer, *AssetName, *PackagePath);
-			ShapeSettings->AddAppliedID(ID);
+			ShapeSettings = LoadedShapeSettings;
 		}
 		else if (ShapeSettings == nullptr)
 		{
@@ -536,12 +535,14 @@ void APlanet::CreateSettingsAssets()
 			ShapeSettings->AddAppliedID(ID);
 		}
 
-		if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseLayer::StaticClass()->GetName())))
+		TArray<UNoiseLayer*> LoadedShapeNoiseLayers = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UNoiseLayer>(ShapeSettings->GetID());
+		if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && LoadedShapeNoiseLayers.Num() > 0)
 		{
 			ShapeSettings->GetNoiseLayers().Empty();
-			CreatePackageName(AssetName, PackagePath, *Outer, UNoiseLayer::StaticClass());
-			ShapeSettings->AddNoiseLayer(LoadObject<UNoiseLayer>(Outer, *AssetName, *PackagePath));
-			ShapeSettings->GetNoiseLayers().Last()->AddAppliedID(ShapeSettings->GetID());
+			for (UNoiseLayer* LoadedNoiseLayer : LoadedShapeNoiseLayers)
+			{
+				ShapeSettings->AddNoiseLayer(LoadedNoiseLayer);
+			}
 		}
 		else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
 		{
@@ -551,11 +552,10 @@ void APlanet::CreateSettingsAssets()
 			ShapeSettings->GetNoiseLayers()[0]->AddAppliedID(ShapeSettings->GetID());
 		}
 
-		if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseSettings::StaticClass()->GetName())))
+		UNoiseSettings* LoadedFirstNoiseLayerNoiseSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UNoiseSettings>(ShapeSettings->GetNoiseLayers()[0]->GetID());
+		if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr && LoadedFirstNoiseLayerNoiseSettings)
 		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UNoiseSettings::StaticClass());
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = LoadObject<UNoiseSettings>(Outer, *AssetName, *PackagePath);
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->AddAppliedID(ShapeSettings->GetNoiseLayers()[0]->GetID());
+			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = LoadedFirstNoiseLayerNoiseSettings;
 		}
 		else if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr)
 		{

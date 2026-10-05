@@ -152,7 +152,11 @@ ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, F
 	else if (bRegenerate)
 	{
 		if (APlanet* Planet = Cast<APlanet>(NewBody))
+		{
+			Planet->CreateSettingsAssets();
+			Planet->BindDelegates();
 			Planet->ReGenerate();
+		}
 	}
 
 	const auto &Interface = Cast<ICelestialObject>(NewBody);
@@ -753,7 +757,7 @@ void ACelestialGameMode::LoadGame()
 					}
 					if (!BodyAlreadyExists)
 					{
-						ACelestialBody* NewBody = AddBody(data.Class, NAME_None, data.Transform);
+						ACelestialBody* NewBody = AddBody(data.Class, NAME_None, data.Transform, false);
 
 						FMemoryReader MemoryReader(data.ActorData);
 						FCelestialSaveGameArchive Ar(MemoryReader);
@@ -762,7 +766,7 @@ void ACelestialGameMode::LoadGame()
 						RestoredBodies.Add(NewBody);
 						if (APlanet* planet = Cast<APlanet>(NewBody))
 						{
-							planet->ClearSettingsAssets();
+							planet->CreateSettingsAssets();
 						}
 						else if (AGasGiant* GasGiant = Cast<AGasGiant>(NewBody))
 						{

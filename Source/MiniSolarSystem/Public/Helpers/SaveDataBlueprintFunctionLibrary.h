@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "ISettingsAssetID.h"
+#include "AssetRegistry/IAssetRegistry.h"
 #include "SaveDataBlueprintFunctionLibrary.generated.h"
 
 /**
@@ -68,6 +70,97 @@ public:
 			return true;
 		}
 		return false;
+	}
+	
+};
+
+
+UCLASS()
+class MINISOLARSYSTEM_API UMSSAssetFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	
+	template <class T>
+	static T* FindSettingsAssetFromAppliedID(uint32 ID)
+	{
+		UClass* Class = T::StaticClass();
+		if (!IsValid(Class))
+		{
+			return nullptr;
+		}
+		
+		if (!Class->ImplementsInterface(USettingsAssetID::StaticClass()))
+		{
+			return nullptr;
+		}
+		
+		TArray<FAssetData> AssetData;
+		IAssetRegistry::Get()->GetAssetsByClass(Class->GetClassPathName(), AssetData);
+		
+		for (const FAssetData& Asset : AssetData)
+		{
+			UObject* LoadedAsset = Asset.GetAsset();
+			if (!IsValid(LoadedAsset))
+			{
+				continue;
+			}
+			
+			ISettingsAssetID* LoadedSettingsAsset = Cast<ISettingsAssetID>(LoadedAsset);
+			if (!LoadedSettingsAsset || !LoadedSettingsAsset->GetAppliedIDs().Contains(ID))
+			{
+				continue;
+			}
+
+			if (T* LoadedTypedAsset = Cast<T>(LoadedAsset))
+			{
+				return LoadedTypedAsset;
+			}
+		}
+			
+		return nullptr;
+	}
+	
+	template <class T>
+	static TArray<T*> FindSettingsAssetsFromAppliedID(uint32 ID)
+	{
+		UClass* Class = T::StaticClass();
+		if (!IsValid(Class))
+		{
+			return TArray<T*>();
+		}
+		
+		if (!Class->ImplementsInterface(USettingsAssetID::StaticClass()))
+		{
+			return TArray<T*>();
+		}
+		
+		TArray<FAssetData> AssetData;
+		IAssetRegistry::Get()->GetAssetsByClass(Class->GetClassPathName(), AssetData);
+		
+		TArray<T*> OutAssets;
+		for (const FAssetData& Asset : AssetData)
+		{
+			UObject* LoadedAsset = Asset.GetAsset();
+			if (!IsValid(LoadedAsset))
+			{
+				continue;
+			}
+			
+			ISettingsAssetID* LoadedSettingsAsset = Cast<ISettingsAssetID>(LoadedAsset);
+			if (!LoadedSettingsAsset || !LoadedSettingsAsset->GetAppliedIDs().Contains(ID))
+			{
+				continue;
+			}
+
+			if (T* LoadedTypedAsset = Cast<T>(LoadedAsset))
+			{
+				OutAssets.Add(LoadedTypedAsset);
+			}
+		}
+			
+		return OutAssets;
 	}
 	
 };
