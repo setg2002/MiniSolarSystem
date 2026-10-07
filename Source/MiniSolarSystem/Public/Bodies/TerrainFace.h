@@ -28,6 +28,7 @@ struct FTerrainFaceData
     FVector LocalUp;
     FVector axisA;
     FVector axisB;
+	int32 NumTris;
 
     FTerrainFaceData()
     {
@@ -41,6 +42,7 @@ struct FTerrainFaceData
         normals = TArray<FVector>();
         tangents = TArray<FProcMeshTangent>();
         VertexColors = TArray<FColor>();
+    	NumTris = 0;
     }
 
     FTerrainFaceData(int32 IN_Resolution, FVector IN_LocalUp)
@@ -54,19 +56,20 @@ struct FTerrainFaceData
         normals = TArray<FVector>();
         tangents = TArray<FProcMeshTangent>();
         VertexColors = TArray<FColor>();
+    	NumTris = 0;
     }
 
     FTerrainFaceData(TArray<FVector> IN_Verticies, TArray<int32> IN_Triangles, TArray<FVector2D> IN_uv, TArray<FVector> IN_Normals, TArray<FProcMeshTangent> IN_Tangents)
-        : vertices(IN_Verticies), 
-        triangles(IN_Triangles), 
-        uv(IN_uv), 
-        normals(IN_Normals), 
-        tangents(IN_Tangents),
-        VertexColors(TArray<FColor>()),
-        Resolution(0),
-        LocalUp(FVector::ZeroVector),
-        axisA(FVector::ZeroVector),
-        axisB(FVector::ZeroVector)
+	    : vertices(IN_Verticies),
+	      triangles(IN_Triangles),
+	      uv(IN_uv),
+	      normals(IN_Normals),
+	      tangents(IN_Tangents),
+	      VertexColors(TArray<FColor>()),
+	      Resolution(0),
+	      LocalUp(FVector::ZeroVector),
+	      axisA(FVector::ZeroVector),
+	      axisB(FVector::ZeroVector), NumTris(0)
     {
     }
 };

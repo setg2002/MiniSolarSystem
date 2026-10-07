@@ -87,8 +87,18 @@ void TerrainFace::CalculateMeshSection(FTerrainFaceData& OutData, int32 SectionI
 	OutData.tangents.SetNum((OutData.Resolution * OutData.Resolution) / TotalThreads);
 	int32 triIndex = 0;
 	int32 YCount = OutData.Resolution / TotalThreads;
+	int32 ScaledYCount = YCount;
 	
-	for (int32 y = 0; y < YCount; y++)
+	if (SectionIdx != TotalThreads - 1)
+	{
+		ScaledYCount += 2; // Calculate two extra rows (for all but the last section) so that normals and tangents calculation is smooth between sections
+		OutData.vertices.AddUninitialized(OutData.Resolution * 2);
+		OutData.uv.AddUninitialized(OutData.Resolution * 2);
+		OutData.normals.AddUninitialized(OutData.Resolution * 2);
+		OutData.tangents.AddUninitialized(OutData.Resolution * 2);
+	}
+	
+	for (int32 y = 0; y < ScaledYCount; y++)
 	{
 		for (int32 x = 0; x < OutData.Resolution; x++)
 		{
@@ -115,6 +125,11 @@ void TerrainFace::CalculateMeshSection(FTerrainFaceData& OutData, int32 SectionI
 				OutData.triangles.Insert(ii + OutData.Resolution + 1, triIndex + 5);
 
 				triIndex += 6;
+				
+				if (y < YCount)
+				{
+					OutData.NumTris += 2;
+				}
 			}
 		}
 	}
@@ -226,7 +241,7 @@ void TerrainFace::ConstructMeshAsync()
 			}
 			
 			SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CalcTangents);
-			UKismetProceduralMeshLibrary::CalculateTangentsForMesh(SectionData.vertices, SectionData.triangles, SectionData.uv, SectionData.normals, SectionData.tangents, i);
+			UKismetProceduralMeshLibrary::CalculateTangentsForMesh(SectionData.vertices, SectionData.triangles, SectionData.uv, SectionData.normals, SectionData.tangents, SectionData.triangles[0], i);
 		}, LowLevelTasks::ETaskPriority::High );
 		
 		UE::Tasks::FTask CreateSectionTask = UE::Tasks::Launch(GetThreadName(i, false), [this, i, &SectionData]()
@@ -262,9 +277,9 @@ void TerrainFace::GenerationThreadFinished(FTerrainFaceData* SectionData, int32 
 	{
 		SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CollectMeshData);
 		
-		int32 Count = SectionData->vertices.Num();
+		int32 Count = (SectionData->Resolution * SectionData->Resolution) / TotalThreads;
 		int32 StartIndex = ThreadIdx * Count;
-		int32 TrisCount = SectionData->triangles.Num();
+		int32 TrisCount = SectionData->NumTris * 3;
 		int32 StartingTriIndex = ThreadIdx * TrisCount;
 	
 		// Create a view of the specific range in the source arrays
