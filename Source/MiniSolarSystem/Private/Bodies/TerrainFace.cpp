@@ -81,22 +81,14 @@ void TerrainFace::CalculateMeshSection(FTerrainFaceData& OutData, int32 SectionI
 {
 	SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CalcMeshSection);
 	
-	OutData.vertices.SetNum((OutData.Resolution * OutData.Resolution) / TotalThreads);
-	OutData.uv.SetNum((OutData.Resolution * OutData.Resolution) / TotalThreads);
-	OutData.normals.SetNum((OutData.Resolution * OutData.Resolution) / TotalThreads);
-	OutData.tangents.SetNum((OutData.Resolution * OutData.Resolution) / TotalThreads);
+	int32 ArraySize = ((OutData.Resolution * OutData.Resolution) / TotalThreads) + (OutData.Resolution * 2);
+	OutData.vertices.SetNumUninitialized(ArraySize);
+	OutData.uv.SetNumUninitialized(ArraySize);
+	OutData.normals.SetNumUninitialized(ArraySize);
+	OutData.tangents.SetNumUninitialized(ArraySize);
 	int32 triIndex = 0;
 	int32 YCount = OutData.Resolution / TotalThreads;
-	int32 ScaledYCount = YCount;
-	
-	if (SectionIdx != TotalThreads - 1)
-	{
-		ScaledYCount += 2; // Calculate two extra rows (for all but the last section) so that normals and tangents calculation is smooth between sections
-		OutData.vertices.AddUninitialized(OutData.Resolution * 2);
-		OutData.uv.AddUninitialized(OutData.Resolution * 2);
-		OutData.normals.AddUninitialized(OutData.Resolution * 2);
-		OutData.tangents.AddUninitialized(OutData.Resolution * 2);
-	}
+	int32 ScaledYCount = YCount + 2; // Calculate two extra rows so that normals and tangents calculation is smooth between sections
 	
 	for (int32 y = 0; y < ScaledYCount; y++)
 	{
