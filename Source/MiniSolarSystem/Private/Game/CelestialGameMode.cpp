@@ -1130,9 +1130,16 @@ void ACelestialGameMode::ReBind(FString Planet)
 
 void ACelestialGameMode::tp(FString toPlanet)
 {
-	AActor* planet = GetBodyByName(toPlanet);
-	if (planet)
-		GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(planet->GetRootComponent()->GetComponentLocation());
+	ACelestialBody* Body = GetBodyByName(toPlanet);
+	if (Body)
+	{
+		GetWorld()->GetFirstPlayerController()->GetPawn()->SetActorLocation(Body->GetRootComponent()->GetComponentLocation());
+		
+		if (GetCurrentPerspective() == 0)
+		{
+			GetOverviewPlayer()->GetSpringArm()->TargetArmLength = Body->GetBodyRadius() * 6;
+		}
+	}
 }
 
 void ACelestialGameMode::PauseGame()

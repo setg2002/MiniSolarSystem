@@ -115,6 +115,7 @@ public:
 	UFUNCTION(Exec, BlueprintCallable)
 	void ReBind(FString Planet);
 
+	// Teleport to a Celestial Body by name
 	UFUNCTION(Exec, BlueprintCallable)
 	void tp(FString toPlanet);
 
