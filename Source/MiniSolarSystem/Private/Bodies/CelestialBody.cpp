@@ -34,17 +34,26 @@ void ACelestialBody::RequestDestroyComponent(UActorComponent* ComponentToDestroy
 	ComponentToDestroy->DestroyComponent();
 }
 
-int ACelestialBody::SetMass(int newMass)
+int32 ACelestialBody::SetMass(int32 newMass)
 {
+	if (newMass == mass || newMass <= 0)
+	{
+		return mass;
+	}
+	
 	mass = newMass; 
 
 	if (AOrbitDebugActor::Get()->bAutoDraw)
+	{
 		AOrbitDebugActor::Get()->DrawOrbits();
+	}
+	
+	OnMassChanged.Broadcast(mass);
 
 	return mass;
 }
 
-int ACelestialBody::GetMass() const { return mass; }
+int32 ACelestialBody::GetMass() const { return mass; }
 
 bool ACelestialBody::SetName(FName NewName)
 {

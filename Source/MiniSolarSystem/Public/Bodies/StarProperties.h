@@ -37,4 +37,22 @@ public:
 	{
 		return !(*this == other);
 	}
+	
+	void Randomize()
+	{
+		RandomizeShape();
+		RandomizeColor();
+	}
+	
+	void RandomizeShape()
+	{
+		radius = FMath::InterpEaseIn<float>(5.f, 500.f, FMath::FRand(), 6.f); // Prefer smaller radii
+		mass = radius * FMath::RandRange(10, 30);
+	}
+	
+	void RandomizeColor()
+	{
+		luminosity = FMath::RandRange(10, 100);
+		color = FColor::MakeRandomColor();
+	}
 };

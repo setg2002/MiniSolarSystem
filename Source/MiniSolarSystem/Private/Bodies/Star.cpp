@@ -97,6 +97,7 @@ void AStar::SetStarNum(uint8 num)
 bool AStar::SetStarProperties(FStarProperties NewProperties)
 {
 	starProperties = NewProperties;
+	SetMass(starProperties.mass);
 	SetRadius(starProperties.radius);
 	SetLuminosity(starProperties.luminosity);
 	UpdateColor();
@@ -167,6 +168,20 @@ void AStar::UpdateColor()
 		FMath::Max(starProperties.color.G, uint8(178.5f)),
 		FMath::Max(starProperties.color.B, uint8(178.5f))
 		));
+	
+	OnColorChanged.Broadcast(starProperties.color);
+}
+
+void AStar::RandomizeShape()
+{
+	starProperties.RandomizeShape();
+	SetStarProperties(starProperties);
+}
+
+void AStar::RandomizeColor()
+{
+	starProperties.RandomizeColor();
+	UpdateColor();
 }
 
 #if WITH_EDITOR

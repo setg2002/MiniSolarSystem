@@ -7,6 +7,7 @@
 #include "StarProperties.h"
 #include "Star.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FColorChanged, FColor, NewColor);
 
 /**
  * 
@@ -71,7 +72,20 @@ public:
 	void SetColor(FColor NewColor);
 
 	void UpdateColor();
+	
+	UFUNCTION(BlueprintCallable)
+	void Randomize()
+	{
+		RandomizeShape();
+		RandomizeColor();
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	void RandomizeShape();
 
+	UFUNCTION(BlueprintCallable)
+	void RandomizeColor();
+	
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
@@ -84,6 +98,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UNiagaraComponent* GetParticleComp() const { return ParticleComponent; }
+	
+	UPROPERTY(BlueprintAssignable)
+	FColorChanged OnColorChanged;
 
 protected:
 	UMaterialParameterCollectionInstance* PlanetIlluminationInst;

@@ -9,6 +9,7 @@
 #include "Components/SphereComponent.h"
 #include "CelestialBody.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMassChanged, int, newMass);
 
 //Forward Declarations
 class ACelestialGameMode;
@@ -51,10 +52,10 @@ public:
 	void RequestDestroyComponent(UActorComponent* ComponentToDestroy);
 
 	UFUNCTION(BlueprintCallable)
-	int SetMass(int newMass);
+	int32 SetMass(int32 newMass);
 
 	UFUNCTION(BlueprintCallable)
-	virtual int GetMass() const override;
+	virtual int32 GetMass() const override;
 
 	UFUNCTION()
 	virtual void UpdateVelocity(TArray<ACelestialBody*> allBodies, float timeStep) override;
@@ -144,4 +145,7 @@ public:
 
 	UPROPERTY(Category = "Orbits", AdvancedDisplay, EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bVectorDebug"))
 	int32 VectorDuration = 10;
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnMassChanged OnMassChanged;
 };
