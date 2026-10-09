@@ -81,16 +81,17 @@ void TerrainFace::CalculateMeshSection(FTerrainFaceData& OutData, int32 SectionI
 {
 	SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CalcMeshSection);
 	
-	int32 ArraySize = ((OutData.Resolution * OutData.Resolution) / TotalThreads) + (OutData.Resolution * 2);
+	// Size enough for this section plus one extra row
+	int32 ArraySize = ((OutData.Resolution * OutData.Resolution) / TotalThreads) + OutData.Resolution;
+	
 	OutData.vertices.SetNumUninitialized(ArraySize);
 	OutData.uv.SetNumUninitialized(ArraySize);
 	OutData.normals.SetNumUninitialized(ArraySize);
 	OutData.tangents.SetNumUninitialized(ArraySize);
-	int32 triIndex = 0;
 	int32 YCount = OutData.Resolution / TotalThreads;
-	int32 ScaledYCount = YCount + 2; // Calculate two extra rows so that normals and tangents calculation is smooth between sections
+	int32 triIndex = 0;
 	
-	for (int32 y = 0; y < ScaledYCount; y++)
+	for (int32 y = 0; y < YCount + 1; y++) // Calculate one extra row so that normals and tangents calculation is smooth between sections
 	{
 		for (int32 x = 0; x < OutData.Resolution; x++)
 		{
