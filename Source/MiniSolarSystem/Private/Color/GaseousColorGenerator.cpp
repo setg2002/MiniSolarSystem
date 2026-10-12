@@ -50,7 +50,7 @@ UTexture2D* GaseousColorGenerator::CreateTexture(FString TextureName, UCurveLine
 		delete[] Regions;
 	};
 
-	DynamicTexture->UpdateTextureRegions(0, 1, Region, sizeX * 4, 4, Pixels);
+	DynamicTexture->UpdateTextureRegions(0, 1, Region, sizeX * 4, 4, Pixels, DataCleanupFunc);
 
 	return DynamicTexture;
 }
@@ -113,9 +113,11 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float Sto
 			// Find the closest point to that other point to determine radius of storm
 			float PointDist = 1;
 			if (StormRadii.Num() != 0)
+			{
 				PointDist = StormRadii[ClosePoint];
+			}
 
-			// How far away from the point is the currnet pixel
+			// How far away from the point is the current pixel
 			float percent = FMath::Clamp<float>(PixelDist / PointDist, 0, 1);
 			float color = FMath::Lerp<float>(255, 0, percent);
 
@@ -141,7 +143,7 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float Sto
 		delete[] Regions;
 	};
 
-	DynamicTexture->UpdateTextureRegions(0, 1, Region, TextureResolution * 4, 4, Pixels);
+	DynamicTexture->UpdateTextureRegions(0, 1, Region, TextureResolution * 4, 4, Pixels, DataCleanupFunc);
 
 	return DynamicTexture;
 }

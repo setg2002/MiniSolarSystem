@@ -7,6 +7,8 @@
 #include "Color/GasGiantColorSettings.h"
 #include "GasGiant.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGradientChanged, UCurveLinearColor*, NewGradient);
+
 /**
  * 
  */
@@ -38,6 +40,9 @@ public:
 	virtual float GetBodyRadius() const override { return Radius * 100; }
 
 	GaseousColorGenerator* ColorGenerator;
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnGradientChanged OnGradientChanged;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -65,6 +70,9 @@ public:
 	UCurveLinearColor* GetGradient() const { return ColorSettings.Gradient; }
 	UFUNCTION(BlueprintCallable)
 	void SetGradient(UCurveLinearColor* NewGradient);
+	
+	UFUNCTION(BlueprintCallable)
+	void Randomize(bool bRandomizeRadius = false);
 
 	// ~~~ Voronoi Settings ~~~
 

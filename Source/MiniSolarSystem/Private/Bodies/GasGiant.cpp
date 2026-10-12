@@ -75,6 +75,20 @@ void AGasGiant::SetGradient(UCurveLinearColor* NewGradient)
 		GenerateMaterial();
 	if (ColorSettings.Gradient)
 		DynamicMaterial->SetTextureParameterValue(FName("_Texture"), GaseousColorGenerator::CreateTexture("GasTexture", ColorSettings.Gradient));
+
+	OnGradientChanged.Broadcast(NewGradient);
+}
+
+void AGasGiant::Randomize(bool bRandomizeRadius)
+{
+	ColorSettings.Randomize();
+	NewVoronoiForStorms();
+	SetGradient(ColorSettings.Gradient);
+
+	if (bRandomizeRadius)
+	{
+		SetRadius(FMath::RandRange(1.f, 10.f));
+	}
 }
 
 void AGasGiant::SetNumStorms(int NewNumStorms)

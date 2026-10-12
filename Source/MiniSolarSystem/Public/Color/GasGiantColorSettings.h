@@ -23,4 +23,6 @@ public:
 
 	UPROPERTY(SaveGame, EditAnywhere, Category = "Storm Settings", meta = (ClampMin = "0"))
 	float StormFalloff = 2.5f;
+	
+	void Randomize();
 };
