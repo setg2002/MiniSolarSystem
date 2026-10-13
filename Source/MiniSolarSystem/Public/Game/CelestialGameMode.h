@@ -38,7 +38,9 @@ class MINISOLARSYSTEM_API ACelestialGameMode : public AGameModeBase
 public:
 	UFUNCTION(Exec, BlueprintCallable)
 	void ApplySettingsAssets();
+
 private:
+	UPROPERTY()
 	TArray<class USettingsAsset*> SettingsAssets;
 
 private:
@@ -154,6 +156,9 @@ public:
 	void LoadOnDiscAssetsOfClass(TArray<struct FDiscAssetRecord> LoadedAssets, TArray<FAssetData> OnDiscAssets, UClass* ClassToLoad);
 	void LoadRuntimeAssetsOfClass(TArray<struct FAssetRecord> LoadedAssets, UClass* ClassToLoad);
 
+	UFUNCTION(BlueprintCallable)
+	void RandomizeAsteroids();
+	
 private:
 	UPROPERTY()
 	TArray<FBodySystem> BodySystems;

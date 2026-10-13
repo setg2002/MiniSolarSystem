@@ -198,7 +198,11 @@ ANiagaraActor* ACelestialGameMode::AddAsteroidSystem(FTransform Transform, bool 
 		}
 		
 		NiagaraComponent->ReinitializeSystem();
-		NiagaraComponent->SetPaused(bStartPaused);
+		
+		if (bStartPaused)
+		{
+			GetWorldTimerManager().SetTimerForNextTick([NiagaraComponent](){ NiagaraComponent->SetPaused(true); });
+		}
 	}
 	
 	Asteroids.Add(NewSystem);
@@ -621,9 +625,32 @@ void ACelestialGameMode::LoadRuntimeAssetsOfClass(TArray<FAssetRecord> LoadedAss
 	ApplySettingsAssets();
 }
 
+void ACelestialGameMode::RandomizeAsteroids()
+{
+	SetAsteroidFieldNum(FMath::RandRange(1, 10) * 100);
+	
+	for (int i = Asteroids.Num() - 1; i >= 0; i--)
+	{
+		RemoveAsteroidSystem(Asteroids[i]);
+	}
+	
+	int32 PrevRadius = 5000; // Radius of the previous belt used to make sure belts don't overlap
+	int32 NumBelts = FMath::RandRange(0, 4);
+	for (int i = 0; i < NumBelts; i++)
+	{
+		int32 SpawnCount = FMath::RandRange(1, 80) * 100;
+		int32 Height = FMath::RandRange(1, 50) * 100;
+		int32 Radius = FMath::RandRange(PrevRadius, PrevRadius + 100000);
+		int32 Width = FMath::RandRange(1, 200) * 100;
+		AddAsteroidSystem(FTransform(), true, SpawnCount, Height, Radius, Width);
+		
+		PrevRadius = Radius + Width;
+	}
+}
+
 void ACelestialGameMode::ApplySettingsAssets()
 {
-	// This is so dumb
+	//TODO- Rewrite this better
 	for (USettingsAsset* Asset : SettingsAssets)
 	{
 		TArray<uint32> Ids = Asset->GetAppliedIDs();
