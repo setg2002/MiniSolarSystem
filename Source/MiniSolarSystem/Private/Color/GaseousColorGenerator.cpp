@@ -93,39 +93,42 @@ UTexture2D* GaseousColorGenerator::MakeVoronoiTexture(int16 NumStorms, float Sto
 	DynamicTexture->UpdateResource();
 
 	uint8* Pixels = new uint8[TextureResolution * TextureResolution * 4];
-	for (int32 y = 0; y < TextureResolution; y++)
+	if (NumStorms > 0)
 	{
-		for (int32 x = 0; x < TextureResolution; x++)
+		for (int32 y = 0; y < TextureResolution; y++)
 		{
-			// Find the closest point to the current pixel
-			float PixelDist = 1024;
-			FVector2D ClosePoint;
-			for (auto& Point : Points)
+			for (int32 x = 0; x < TextureResolution; x++)
 			{
-				float dist = FVector2D::Distance(FVector2D(x, y), Point);
-				if (dist < PixelDist)
+				// Find the closest point to the current pixel
+				float PixelDist = 1024;
+				FVector2D ClosePoint;
+				for (auto& Point : Points)
 				{
-					PixelDist = dist;
-					ClosePoint = Point;
+					float dist = FVector2D::Distance(FVector2D(x, y), Point);
+					if (dist < PixelDist)
+					{
+						PixelDist = dist;
+						ClosePoint = Point;
+					}
 				}
+
+				// Find the closest point to that other point to determine radius of storm
+				float PointDist = 1;
+				if (StormRadii.Num() != 0)
+				{
+					PointDist = StormRadii[ClosePoint];
+				}
+
+				// How far away from the point is the current pixel
+				float percent = FMath::Clamp<float>(PixelDist / PointDist, 0, 1);
+				float color = FMath::Lerp<float>(255, 0, percent);
+
+				int32 curPixelIndex = ((y * 1024) + x);
+				Pixels[4 * curPixelIndex] = color;
+				Pixels[4 * curPixelIndex + 1] = color;
+				Pixels[4 * curPixelIndex + 2] = color;
+				Pixels[4 * curPixelIndex + 3] = 255;
 			}
-
-			// Find the closest point to that other point to determine radius of storm
-			float PointDist = 1;
-			if (StormRadii.Num() != 0)
-			{
-				PointDist = StormRadii[ClosePoint];
-			}
-
-			// How far away from the point is the current pixel
-			float percent = FMath::Clamp<float>(PixelDist / PointDist, 0, 1);
-			float color = FMath::Lerp<float>(255, 0, percent);
-
-			int32 curPixelIndex = ((y * 1024) + x);
-			Pixels[4 * curPixelIndex] = color;
-			Pixels[4 * curPixelIndex + 1] = color;
-			Pixels[4 * curPixelIndex + 2] = color;
-			Pixels[4 * curPixelIndex + 3] = 255;
 		}
 	}
 
