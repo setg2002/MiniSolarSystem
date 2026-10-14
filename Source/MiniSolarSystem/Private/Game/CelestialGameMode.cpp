@@ -29,6 +29,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Game/CelestialGameState.h"
 #include "Materials/MaterialParameterCollection.h"
+#include "Widgets/OverviewWidgetBase.h"
 
 
 float ACelestialGameMode::gravitationalConstant;
@@ -65,7 +66,7 @@ void ACelestialGameMode::BeginPlay()
 
 	// Make widgets
 	CelestialWidget = CreateWidget<UUserWidget, APlayerController*>(GetWorld()->GetFirstPlayerController(), CelestialWidgetClass);
-	OverviewWidget  = CreateWidget<UUserWidget, APlayerController*>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
+	OverviewWidget  = CreateWidget<UOverviewWidgetBase, APlayerController*>(GetWorld()->GetFirstPlayerController(), OverviewWidgetClass);
 	PauseWidget = CreateWidget<UUserWidget, APlayerController*>(GetWorld()->GetFirstPlayerController(), PauseWidgetClass);
 
 	CelestialPlayer = Cast<ACelestialPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACelestialPlayer::StaticClass()));

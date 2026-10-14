@@ -42,6 +42,12 @@ public:
 	FVector GetCameraLocation();
 
 	USpringArmComponent* GetSpringArm() const { return SpringArm; }
+	
+	UFUNCTION(BlueprintCallable)
+	ACelestialBody* GetFocusedBody() const { return FocusedBody; }
+	
+	UFUNCTION(BlueprintCallable)
+	void SetFocusedBody(ACelestialBody* Body);
 
 protected:
 	// Called when the game starts or when spawned
@@ -53,6 +59,9 @@ protected:
 	USpringArmComponent* SpringArm;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCameraComponent* Camera;
+	
+	UPROPERTY()
+	ACelestialBody* FocusedBody;
 
 public:	
 	// Called every frame

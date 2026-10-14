@@ -30,6 +30,11 @@ AOverviewPlayer::AOverviewPlayer()
 	Camera->SetupAttachment(SpringArm);
 }
 
+void AOverviewPlayer::SetFocusedBody(ACelestialBody* Body)
+{
+	FocusedBody = Body;
+}
+
 void AOverviewPlayer::BeginPlay()
 {
 	Super::BeginPlay();
@@ -63,6 +68,8 @@ void AOverviewPlayer::Tick(float DeltaTime)
 			GetWorld()->GetFirstPlayerController()->GetInputMouseDelta(dX, dY);
 
 			this->SetActorLocation(this->GetActorLocation() + (speedMultiplier * dX * Camera->GetRightVector()) + (speedMultiplier * dY * Camera->GetUpVector()));
+		
+			FocusedBody = nullptr;
 		}
 
 		// Mouse drag movememt w/ right click
@@ -74,6 +81,8 @@ void AOverviewPlayer::Tick(float DeltaTime)
 			GetWorld()->GetFirstPlayerController()->GetInputMouseDelta(dX, dY);
 
 			this->SetActorLocation(this->GetActorLocation() + (Root->GetForwardVector() * (dY * Speed)) + (Root->GetRightVector() * (dX * Speed)));
+		
+			FocusedBody = nullptr;
 		}
 	}
 }
@@ -109,6 +118,8 @@ void AOverviewPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 void AOverviewPlayer::Move(const FInputActionValue& Value)
 {
 	SetActorLocation(GetActorLocation() + (GetActorRotation().RotateVector(Value.Get<FVector>()) * Speed));
+
+	FocusedBody = nullptr;
 }
 
 void AOverviewPlayer::Rotate(const FInputActionValue& Value)

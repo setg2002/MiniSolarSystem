@@ -12,12 +12,13 @@
  * 
  */
 
-class UNiagaraSystem;
 //Forward Declarations
+class UOverviewWidgetBase;
 class ICelestialObject;
 class ACelestialPlayer;
 class AOverviewPlayer;
 class ACelestialBody;
+class UNiagaraSystem;
 class ANiagaraActor;
 class UUserWidget;
 class APlanet;
@@ -64,7 +65,7 @@ public:
 	void SetGravitationalConstant(float NewG);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UUserWidget> OverviewWidgetClass;
+	TSubclassOf<UOverviewWidgetBase> OverviewWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> CelestialWidgetClass;
@@ -191,8 +192,8 @@ protected:
 	
 	TArray<ICelestialObject*> CelestialObjects;
 
-	UPROPERTY() // Prevents garbage collection
-	UUserWidget* OverviewWidget;
+	UPROPERTY(BlueprintReadOnly) // Prevents garbage collection
+	UOverviewWidgetBase* OverviewWidget;
 	UPROPERTY(BlueprintReadOnly)
 	UUserWidget* CelestialWidget;
 	UPROPERTY()
