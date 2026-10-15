@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Color/ColorCurveReplacedEvent.h"
 #include "Components/StaticMeshComponent.h"
 #include "RingSystemComponent.generated.h"
 
@@ -11,7 +12,7 @@ class GaseousColorGenerator;
 
 
 UCLASS(BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class MINISOLARSYSTEM_API URingSystemComponent : public UStaticMeshComponent
+class MINISOLARSYSTEM_API URingSystemComponent : public UStaticMeshComponent, public IColorCurveReplacedEvent
 {
 	GENERATED_BODY()
 
@@ -51,6 +52,25 @@ public:
 	UMaterialInstanceDynamic* GetDynamicMaterial() const { return DynamicMaterial; }
 
 	void UpdateProperties();
+	
+	UPROPERTY()
+	FOnGradientChanged OnGradientChanged;
+	
+	UFUNCTION(BlueprintCallable)
+	virtual void RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback) override;
+	
+	UFUNCTION(BlueprintCallable)
+	void Randomize()
+	{
+		RandomizeShape();
+		RandomizeColors();
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	void RandomizeColors();
+	
+	UFUNCTION(BlueprintCallable)
+	void RandomizeShape();
 
 protected:
 	// Called when the game starts

@@ -103,6 +103,11 @@ void AGasGiant::SetStormFalloff(float NewStormFalloff)
 	NewVoronoiForStorms();
 }
 
+void AGasGiant::RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback)
+{
+	OnGradientChanged.Add(Callback);
+}
+
 #if WITH_EDITOR
 void AGasGiant::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {

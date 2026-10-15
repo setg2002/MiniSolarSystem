@@ -3,6 +3,7 @@
 
 #include "Bodies/Components/RingSystemComponent.h"
 #include "Bodies/CelestialBody.h"
+#include "Color/ColorCurveFunctionLibrary.h"
 #include "Color/GaseousColorGenerator.h"
 #include "UObject/UObjectGlobals.h"
 #include "Curves/CurveLinearColor.h"
@@ -32,7 +33,10 @@ void URingSystemComponent::OnComponentCreated()
 void URingSystemComponent::CreateMaterial()
 {
 	if (!DynamicMaterial)
+	{
 		DynamicMaterial = this->CreateAndSetMaterialInstanceDynamicFromMaterial(0, LoadObject<UMaterialInterface>(NULL, TEXT("MaterialInstanceConstant'/Game/Materials/Instances/M_Ring_Inst.M_Ring_Inst'"), NULL, LOAD_None, NULL));
+	}
+	
 	DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
 	if (Gradient)
 	{
@@ -45,20 +49,27 @@ void URingSystemComponent::SetRadius(float NewRadius)
 {
 	Radius = NewRadius;
 	if (GetOwner())
+	{
 		this->SetRelativeScale3D(GetOwner()->GetActorScale() * Radius);
+	}
 }
 
 void URingSystemComponent::SetWidth(float NewWidth)
 {
 	RingWidth = NewWidth;
 	if (DynamicMaterial)
+	{
 		DynamicMaterial->SetScalarParameterValue("_ringWidth", RingWidth);
+	}
 }
 
 void URingSystemComponent::SetGradient(UCurveLinearColor* NewGradient)
 {
 	if (Gradient)
+	{
 		Gradient->OnGradientUpdated.RemoveDynamic(this, &URingSystemComponent::CreateMaterial);
+	}
+	
 	Gradient = NewGradient;
 	Gradient->OnGradientUpdated.AddDynamic(this, &URingSystemComponent::CreateMaterial);
 	if (DynamicMaterial)
@@ -66,6 +77,8 @@ void URingSystemComponent::SetGradient(UCurveLinearColor* NewGradient)
 		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 	}
+	
+	OnGradientChanged.Broadcast(Gradient);
 }
 
 // Called when the game starts
@@ -89,6 +102,23 @@ void URingSystemComponent::UpdateProperties()
 		GradientTexture = ColorGenerator->CreateTexture("RingTexture", Gradient);
 		DynamicMaterial->SetTextureParameterValue(FName("_Gradient"), GradientTexture);
 	}
+}
+
+void URingSystemComponent::RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback)
+{
+	OnGradientChanged.Add(Callback);
+}
+
+void URingSystemComponent::RandomizeColors()
+{
+	int32 RndNumPoints = FMath::RandRange(2, 20);
+	SetGradient(UColorCurveFunctionLibrary::CreateRandomCurve(RndNumPoints, true));
+}
+
+void URingSystemComponent::RandomizeShape()
+{
+	SetRadius(FMath::RandRange(0.01f, 2.f));
+	SetWidth(FMath::RandRange(0.01f, 1.f));
 }
 
 

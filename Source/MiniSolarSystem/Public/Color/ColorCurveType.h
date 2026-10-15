@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/UserDefinedEnum.h"
 #include "ColorCurveType.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGradientChanged, UCurveLinearColor*, NewGradient);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGradientChangedCallback, UCurveLinearColor*, NewGradient);
 
 /**
  * 
@@ -18,3 +20,4 @@ enum EColorCurveType
 	GasGiant,
 	RingSystem
 };
+

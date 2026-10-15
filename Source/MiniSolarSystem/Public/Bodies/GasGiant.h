@@ -4,10 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "CelestialBody.h"
+#include "Color/ColorCurveReplacedEvent.h"
 #include "Color/GasGiantColorSettings.h"
 #include "GasGiant.generated.h"
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGradientChanged, UCurveLinearColor*, NewGradient);
 
 /**
  * 
@@ -18,7 +17,7 @@ class GaseousColorGenerator;
 
 
 UCLASS()
-class MINISOLARSYSTEM_API AGasGiant : public ACelestialBody
+class MINISOLARSYSTEM_API AGasGiant : public ACelestialBody, public IColorCurveReplacedEvent
 {
 	GENERATED_BODY()
 	
@@ -41,8 +40,11 @@ public:
 
 	GaseousColorGenerator* ColorGenerator;
 	
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY()
 	FOnGradientChanged OnGradientChanged;
+	
+	UFUNCTION(BlueprintCallable)
+	virtual void RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback) override;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
