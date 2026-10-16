@@ -7,9 +7,6 @@
 #include "UObject/NoExportTypes.h"
 #include "SettingsAsset.generated.h"
 
-UDELEGATE(BlueprintAuthorityOnly)
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSettingsAssetChanged);
-
 /**
  * 
  */
@@ -47,6 +44,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, BlueprintAssignable)
 	FSettingsAssetChanged OnSettingsAssetChanged;
+	
+	UFUNCTION()
+	void RegisterOnSettingsAssetChanged_Implementation(const FSettingsAssetChangedCallback& Callback) override;
 
 	UFUNCTION(BlueprintCallable)
 	FName GetName();

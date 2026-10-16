@@ -105,7 +105,7 @@ void AGasGiant::SetStormFalloff(float NewStormFalloff)
 
 void AGasGiant::RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback)
 {
-	OnGradientChanged.Add(Callback);
+	OnGradientChanged.AddUnique(Callback);
 }
 
 #if WITH_EDITOR

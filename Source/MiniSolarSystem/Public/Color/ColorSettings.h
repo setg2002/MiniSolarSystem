@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ColorCurveReplacedEvent.h"
+#include "ColorCurveType.h"
 #include "SettingsAsset.h"
 #include "ColorSettings.generated.h"
 
@@ -31,7 +33,7 @@ UDELEGATE(BlueprintAuthorityOnly)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBiomeHeightUpdated);
 
 UCLASS(BlueprintType)
-class UBiome : public USettingsAsset
+class UBiome : public USettingsAsset, public IColorCurveReplacedEvent
 {
 	GENERATED_BODY()
 
@@ -64,6 +66,12 @@ public:
 	void SetGradient(UCurveLinearColor* NewGradient);
 	
 	void Randomize(const float GivenStartHeight = -1);
+	
+	UPROPERTY()
+	FOnGradientChanged OnGradientChanged;
+	
+	UFUNCTION()
+	virtual void RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback) override;
 };
 
 
@@ -174,7 +182,7 @@ public:
 };
 
 UCLASS()
-class MINISOLARSYSTEM_API UColorSettings : public USettingsAsset
+class MINISOLARSYSTEM_API UColorSettings : public USettingsAsset, public IColorCurveReplacedEvent
 {
 	GENERATED_BODY()
 
@@ -219,4 +227,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void Randomize(APlanet* ForPlanet);
+	
+	UPROPERTY()
+	FOnGradientChanged OnOceanGradiantChanged;
+	
+	UFUNCTION()
+	virtual void RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback) override;
 };

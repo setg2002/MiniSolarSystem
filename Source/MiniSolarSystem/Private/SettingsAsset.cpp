@@ -29,6 +29,11 @@ void USettingsAsset::RemoveAppliedIDs(TArray<uint32> IDsToRemove)
 	}
 }
 
+void USettingsAsset::RegisterOnSettingsAssetChanged_Implementation(const FSettingsAssetChangedCallback& Callback)
+{
+	OnSettingsAssetChanged.Add(Callback);
+}
+
 FName USettingsAsset::GetName()
 {
 	return (FName)LocalName;//this->GetFName();

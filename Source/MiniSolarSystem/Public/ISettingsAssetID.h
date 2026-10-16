@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "ISettingsAssetID.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSettingsAssetChanged);
+DECLARE_DYNAMIC_DELEGATE(FSettingsAssetChangedCallback);
+
 /**
  * 
  */
@@ -24,4 +27,7 @@ public:
 
 	UFUNCTION()
 	virtual uint32 GetID() const { return 0; }
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void RegisterOnSettingsAssetChanged(const FSettingsAssetChangedCallback& Callback);
 };
