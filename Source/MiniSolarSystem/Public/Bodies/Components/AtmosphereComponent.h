@@ -98,6 +98,9 @@ public:
 	void SetRay(FLinearColor NewRay);
 
 	void UpdateProperties();
+	
+	UFUNCTION(BlueprintCallable)
+	void Randomize();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

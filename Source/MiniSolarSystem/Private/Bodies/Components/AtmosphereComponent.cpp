@@ -137,6 +137,15 @@ void UAtmosphereComponent::UpdateProperties()
 	DynamicMaterial->SetVectorParameterValue("beta_ray", AtmosphereProperties.Ray);
 }
 
+void UAtmosphereComponent::Randomize()
+{
+	AtmosphereProperties.RandomizeProperties(PlanetRadius);
+	bClouds = FMath::FRand() > 0.9f; // 10% chance of clouds
+	CloudHeight = FMath::FRandRange(1.f, 1.15f);
+	
+	UpdateProperties();
+}
+
 #if WITH_EDITOR
 void UAtmosphereComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {

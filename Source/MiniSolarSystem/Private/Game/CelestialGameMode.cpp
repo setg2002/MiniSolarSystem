@@ -847,7 +847,9 @@ void ACelestialGameMode::LoadGame()
 			for (ACelestialBody* Body : Bodies) // Make sure the newly created and assigned asset's delegates are bound
 			{
 				if (APlanet* planet = Cast<APlanet>(Body))
+				{
 					planet->BindDelegates();
+				}
 			}
 
 			// Restore BodySystems
@@ -914,11 +916,12 @@ void ACelestialGameMode::LoadGame()
 			UE_LOG(LogTemp, Warning, TEXT("NOT LOADED"));
 
 			TArray<FName> TerrestrialBodyNames;
-			for (TActorIterator<ACelestialBody> Itr(GetWorld()); Itr; ++Itr) 
+			for (ACelestialBody* Body : Bodies) 
 			{
-				if (APlanet* Planet = Cast<APlanet>(*Itr))
+				if (APlanet* Planet = Cast<APlanet>(Body))
 				{
 					TerrestrialBodyNames.Add(Planet->GetBodyName());
+					Planet->BindDelegates(); // Gotta bind delegates even if no save was loaded
 				}
 			}
 			
