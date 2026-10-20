@@ -105,6 +105,15 @@ void ACelestialGameMode::BeginPlay()
 	LoadGame();
 }
 
+void ACelestialGameMode::CreateRandomSolarSystem()
+{
+	// Randomize Bodies
+	
+	
+	
+	RandomizeAsteroids();
+}
+
 void ACelestialGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -913,29 +922,59 @@ void ACelestialGameMode::LoadGame()
 			}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("NOT LOADED"));
+			UE_LOG(LogTemp, Warning, TEXT("LOADING NEW GAME"));
 
-			TArray<FName> TerrestrialBodyNames;
-			for (ACelestialBody* Body : Bodies) 
+			bool bRandomSolarSystem = UGameplayStatics::HasOption(OptionsString, TEXT("RandomSolarSystem"));
+			bool bEmptySolarSystem = UGameplayStatics::HasOption(OptionsString, TEXT("EmptySolarSystem"));
+
+			if (bRandomSolarSystem || bEmptySolarSystem)
 			{
-				if (APlanet* Planet = Cast<APlanet>(Body))
+				// Start by removing default bodies and asteroid systems
+				for (int i = Bodies.Num() - 1; i >= 0; --i)
 				{
-					TerrestrialBodyNames.Add(Planet->GetBodyName());
-					Planet->BindDelegates(); // Gotta bind delegates even if no save was loaded
+					RemoveBody(Bodies[i]->GetBodyName().ToString());
 				}
-			}
-			
-			if (TerrestrialBodyNames.Num() > 0)
-			{
-				TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
-				GeneratePlanetsOrdered::bCurrentlyGenerating = false;
-				GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
-			}
-			else
-			{
+				for (int i = Asteroids.Num() - 1; i >= 0; --i)
+				{
+					RemoveAsteroidSystem(Asteroids[i]);
+				}
+				
+				if (bRandomSolarSystem) // Randomize system if option is set
+				{
+					CreateRandomSolarSystem();
+				}
+				
+				UGameplayStatics::SetGamePaused(GetWorld(), false);
 				GetGameInstance<UCelestialGameInstance>()->StopLoadingScreen();
 				SetPerspective(1);
 				OnLoadingComplete.Broadcast();
+			}
+			// Start with the default solar system
+			else
+			{
+				TArray<FName> TerrestrialBodyNames;
+				for (ACelestialBody* Body : Bodies) 
+				{
+					if (APlanet* Planet = Cast<APlanet>(Body))
+					{
+						TerrestrialBodyNames.Add(Planet->GetBodyName());
+						Planet->BindDelegates(); // Gotta bind delegates even if no save was loaded
+					}
+				}
+			
+				if (TerrestrialBodyNames.Num() > 0)
+				{
+					TerrestrialBodyNames.Sort([](const FName& a, const FName& b) { return b.FastLess(a); });
+					GeneratePlanetsOrdered::bCurrentlyGenerating = false;
+					GeneratePlanetsOrdered::DoGeneratePlanetsOrdered(TerrestrialBodyNames, this);
+				}
+				else
+				{
+					UGameplayStatics::SetGamePaused(GetWorld(), false);
+					GetGameInstance<UCelestialGameInstance>()->StopLoadingScreen();
+					SetPerspective(1);
+					OnLoadingComplete.Broadcast();
+				}
 			}
 		}
 	});

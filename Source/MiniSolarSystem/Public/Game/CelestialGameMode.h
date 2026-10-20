@@ -181,6 +181,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	
+	void CreateRandomSolarSystem();
+	
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ACelestialBody*> Bodies;
 	

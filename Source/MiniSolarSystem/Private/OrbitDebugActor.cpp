@@ -78,6 +78,12 @@ void AOrbitDebugActor::DrawOrbits()
 
 		TArray<ACelestialBody*> Bodies;
 		Bodies = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetBodies();
+		
+		if (Bodies.Num() == 0)
+		{
+			return;
+		}
+		
 		if (IDs.Num() == 0)
 		{
 			for (ACelestialBody* Body : Bodies)
