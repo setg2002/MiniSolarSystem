@@ -73,8 +73,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetGradient(UCurveLinearColor* NewGradient);
 	
-	UFUNCTION(BlueprintCallable)
-	void Randomize(bool bRandomizeRadius = false);
+	virtual void Randomize() override;
 
 	// ~~~ Voronoi Settings ~~~
 

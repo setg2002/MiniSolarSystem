@@ -125,7 +125,7 @@ void AStar::SetLuminosity(int NewLuminosity)
 {
 	starProperties.luminosity = NewLuminosity;
 
-	if (Sphere->GetMaterial(0) != dynamicMaterial)
+	if (Sphere->GetMaterial(0) != dynamicMaterial || !dynamicMaterial)
 	{
 		dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
 		Sphere->SetMaterial(0, dynamicMaterial);
@@ -155,7 +155,7 @@ void AStar::ReInitParticles()
 
 void AStar::UpdateColor()
 {
-	if (Sphere->GetMaterial(0) != dynamicMaterial)
+	if (Sphere->GetMaterial(0) != dynamicMaterial || !dynamicMaterial)
 	{
 		dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
 		Sphere->SetMaterial(0, dynamicMaterial);
@@ -170,6 +170,14 @@ void AStar::UpdateColor()
 		));
 	
 	OnColorChanged.Broadcast(starProperties.color);
+}
+
+void AStar::Randomize()
+{
+	Super::Randomize();
+	
+	RandomizeShape();
+	RandomizeColor();
 }
 
 void AStar::RandomizeShape()
@@ -202,7 +210,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, color))
 		{
-			if (Sphere->GetMaterial(0) != dynamicMaterial)
+			if (Sphere->GetMaterial(0) != dynamicMaterial || !dynamicMaterial)
 			{
 				dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
 				Sphere->SetMaterial(0, dynamicMaterial);
@@ -215,7 +223,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 		}
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FStarProperties, luminosity))
 		{
-			if (Sphere->GetMaterial(0) != dynamicMaterial)
+			if (Sphere->GetMaterial(0) != dynamicMaterial || !dynamicMaterial)
 			{
 				dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
 				Sphere->SetMaterial(0, dynamicMaterial);
@@ -235,7 +243,7 @@ void AStar::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 			Sphere->SetRelativeScale3D(FVector(starProperties.radius, starProperties.radius, starProperties.radius));
 			this->mass = starProperties.mass;
 
-			if (Sphere->GetMaterial(0) != dynamicMaterial)
+			if (Sphere->GetMaterial(0) != dynamicMaterial || !dynamicMaterial)
 			{
 				dynamicMaterial = Sphere->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Sphere->GetMaterial(0));
 				Sphere->SetMaterial(0, dynamicMaterial);

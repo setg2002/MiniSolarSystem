@@ -62,8 +62,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetFirstLayerAsMask(bool NewFirstLayerAsMask);
 	
-	UFUNCTION(BlueprintCallable)
-	void Randomize();
+	virtual void Randomize() override;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite)
 	UNoiseSettings* NoiseSettings;

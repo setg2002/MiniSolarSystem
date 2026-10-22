@@ -621,6 +621,14 @@ void APlanet::ReGenerateColors()
 	OnColorSettingsUpdated();
 }
 
+void APlanet::Randomize()
+{
+	Super::Randomize();
+	
+	ShapeSettings->RandomizeForPlanet(this);
+	ColorSettings->RandomizeForPlanet(this);
+}
+
 void APlanet::Initialize()
 {
 	BindSettingsIDs();
@@ -775,7 +783,8 @@ void APlanet::PostEditMove(bool bFinished)
 
 	if (AOrbitDebugActor::Get()->bAutoDraw)
 	{
-		AOrbitDebugActor::Get()->DrawOrbits();
+		//TODO SG- Disabled for now as DrawOrbits uses the auth game mode to get bodies which is not available in editor when not PIE
+		//AOrbitDebugActor::Get()->DrawOrbits();
 	}
 }
 #endif

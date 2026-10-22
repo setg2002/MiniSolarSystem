@@ -59,7 +59,7 @@ void UBiome::SetGradient(UCurveLinearColor* NewGradient)
 	OnSettingsAssetChanged.Broadcast();
 }
 
-void UBiome::Randomize(const float GivenStartHeight)
+void UBiome::RandomizeWithStartHeight(const float GivenStartHeight)
 {
 	if (GivenStartHeight < 0.f)
 	{
@@ -168,7 +168,7 @@ void UBiomeColorSettings::SetNoise(UNoiseSettings* NewNoise)
 	OnSettingsAssetChanged.Broadcast();
 }
 
-void UBiomeColorSettings::Randomize(APlanet* ForPlanet)
+void UBiomeColorSettings::RandomizeForPlanet(APlanet* ForPlanet)
 {
 	BiomeColorSettings.bUsingNoise = FMath::RandRange(0.0f, 1.0f) >= 0.2;
 	BiomeColorSettings.NoiseOffset = FMath::RandRange(0.0f, 1.0f);
@@ -185,7 +185,7 @@ void UBiomeColorSettings::Randomize(APlanet* ForPlanet)
 		float RandomStartHeight = FMath::FRandRange(MinBiomeHeight, (1.f / NumBiomes) * i);
 		
 		UBiome* NewBiome = ForPlanet->CreateSettingsAsset<UBiome>(UBiome::StaticClass());
-		NewBiome->Randomize(RandomStartHeight);
+		NewBiome->RandomizeWithStartHeight(RandomStartHeight);
 		AddBiome(NewBiome);
 		
 		MinBiomeHeight = FMath::Min(RandomStartHeight + 0.1f, 1.f);
@@ -207,12 +207,12 @@ void UColorSettings::SetTintPercent(float NewTintPercent)
 	OnSettingsAssetChanged.Broadcast();
 }
 
-void UColorSettings::Randomize(APlanet* ForPlanet)
+void UColorSettings::RandomizeForPlanet(APlanet* ForPlanet)
 {
 	ForPlanet->UnBindDelegates();
 	
 	ColorSettings.BiomeTintPercent = FMath::RandRange(0.0f, 1.0f);
-	ColorSettings.BiomeColorSettings->Randomize(ForPlanet);
+	ColorSettings.BiomeColorSettings->RandomizeForPlanet(ForPlanet);
 	SetOceanColor(UColorCurveFunctionLibrary::CreateRandomCurve(FMath::RandRange(1, 4), false));
 	
 	ForPlanet->BindDelegates();

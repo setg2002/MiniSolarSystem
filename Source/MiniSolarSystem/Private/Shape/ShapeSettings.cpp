@@ -52,3 +52,20 @@ void UShapeSettings::RemoveAllNoiseLayers()
 		RemoveNoiseLayer(0);
 	}
 }
+
+void UShapeSettings::RandomizeForPlanet(APlanet* Planet)
+{
+	RemoveAllNoiseLayers();
+	
+	ShapeSettings.PlanetRadius = FMath::RandRange(10.f, 500.f);
+	
+	int32 RandomNoiseLayerCount = FMath::RandRange(1, 5);
+	for (int32 i = 0; i < RandomNoiseLayerCount; i++)
+	{
+		UNoiseLayer* NewNoiseLayer = NewObject<UNoiseLayer>();
+		ShapeSettings.NoiseLayers.Add(NewNoiseLayer);
+		NewNoiseLayer->NoiseSettings = Planet->CreateSettingsAsset<UNoiseSettings>(UNoiseSettings::StaticClass());
+		NewNoiseLayer->Randomize();
+	}
+	OnSettingsAssetChanged.Broadcast();
+}

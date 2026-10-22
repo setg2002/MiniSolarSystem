@@ -159,6 +159,12 @@ void ACelestialBody::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* O
 	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && (OtherActor == OverlappedActor)) OverlappedActor = nullptr;
 }
 
+void ACelestialBody::Randomize()
+{
+	rotationRate = FMath::RandRange(0.f, 40.f);
+	mass = FMath::RandRange(1.f, 1000.f);
+}
+
 FVector ACelestialBody::GetCurrentVelocity() const
 {
 	if (currentVelocity == FVector::ZeroVector)

@@ -73,12 +73,7 @@ public:
 
 	void UpdateColor();
 	
-	UFUNCTION(BlueprintCallable)
-	void Randomize()
-	{
-		RandomizeShape();
-		RandomizeColor();
-	}
+	virtual void Randomize() override;
 	
 	UFUNCTION(BlueprintCallable)
 	void RandomizeShape();

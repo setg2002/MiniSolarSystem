@@ -149,6 +149,11 @@ void TerrainFace::CancelTerrainFaceGeneration()
 		CancelGen->Cancel();
 		for (const UE::Tasks::FTask* Task : Tasks)
 		{
+			if (!Task)
+			{
+				continue;
+			}
+			
 			if (!Task->IsCompleted())
 			{
 				Task->Wait();

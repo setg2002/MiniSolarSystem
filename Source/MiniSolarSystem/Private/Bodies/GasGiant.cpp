@@ -79,16 +79,16 @@ void AGasGiant::SetGradient(UCurveLinearColor* NewGradient)
 	OnGradientChanged.Broadcast(NewGradient);
 }
 
-void AGasGiant::Randomize(bool bRandomizeRadius)
+void AGasGiant::Randomize()
 {
+	Super::Randomize();
+	
 	ColorSettings.Randomize();
 	NewVoronoiForStorms();
 	SetGradient(ColorSettings.Gradient);
 
-	if (bRandomizeRadius)
-	{
-		SetRadius(FMath::RandRange(1.f, 10.f));
-	}
+	SetRadius(FMath::RandRange(1.f, 10.f));
+	SetMass(Radius * FMath::RandRange(5.f, 10.f));
 }
 
 void AGasGiant::SetNumStorms(int NewNumStorms)

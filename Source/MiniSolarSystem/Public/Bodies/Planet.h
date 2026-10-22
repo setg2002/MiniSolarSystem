@@ -115,7 +115,9 @@ public:
 
 	UFUNCTION(Category = "Settings", BlueprintCallable, CallInEditor)
 	void ReGenerateColors();
-
+	
+	virtual void Randomize() override;
+	
 	void GeneratePlanet();
 
 	void GenerateMesh();

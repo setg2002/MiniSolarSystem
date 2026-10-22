@@ -167,6 +167,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetRigidNoiseSettings(FRigidNoiseSettings NewSettings);
 	
-	UFUNCTION()
-	void Randomize();
+	virtual void Randomize() override;
 };

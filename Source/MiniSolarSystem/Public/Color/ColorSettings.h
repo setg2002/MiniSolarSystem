@@ -65,7 +65,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetGradient(UCurveLinearColor* NewGradient);
 	
-	void Randomize(const float GivenStartHeight = -1);
+	void RandomizeWithStartHeight(const float GivenStartHeight = -1);
 	
 	UPROPERTY()
 	FOnGradientChanged OnGradientChanged;
@@ -161,7 +161,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetNoise(UNoiseSettings* NewNoise);
 	
-	void Randomize(APlanet* ForPlanet);
+	void RandomizeForPlanet(APlanet* ForPlanet);
 };
 
 
@@ -226,7 +226,7 @@ public:
 	void SetTintPercent(float NewTintPercent);
 	
 	UFUNCTION(BlueprintCallable)
-	void Randomize(APlanet* ForPlanet);
+	void RandomizeForPlanet(APlanet* ForPlanet);
 	
 	UPROPERTY()
 	FOnGradientChanged OnOceanGradiantChanged;

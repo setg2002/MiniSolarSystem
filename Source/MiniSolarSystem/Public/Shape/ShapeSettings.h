@@ -7,6 +7,7 @@
 #include "ShapeSettings.generated.h"
 
 class UNoiseLayer;
+class APlanet;
 
 /**
  * 
@@ -59,4 +60,6 @@ public:
 	void RemoveNoiseLayer(int32 index);
 	UFUNCTION(BlueprintCallable)
 	void RemoveAllNoiseLayers();
+	
+	void RandomizeForPlanet(APlanet* Planet);
 };

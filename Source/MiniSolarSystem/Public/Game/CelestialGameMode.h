@@ -21,6 +21,7 @@ class ACelestialBody;
 class UNiagaraSystem;
 class ANiagaraActor;
 class UUserWidget;
+class AGasGiant;
 class APlanet;
 class AStar;
 
@@ -75,6 +76,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UUserWidget> PauseWidgetClass;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AStar> StarBPClass;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<APlanet> PlanetBPClass;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AGasGiant> GasGiantBPClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	ANiagaraActor* AsteroidFieldActor;
