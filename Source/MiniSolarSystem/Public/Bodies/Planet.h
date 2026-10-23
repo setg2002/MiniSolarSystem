@@ -139,6 +139,8 @@ public:
 	void BindSettingsIDs();
 
 	virtual float GetBodyRadius() const override;
+	
+	void SetRadius(float Radius);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

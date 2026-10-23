@@ -46,7 +46,7 @@ public:
 	
 	void RandomizeShape()
 	{
-		radius = FMath::InterpEaseIn<float>(5.f, 500.f, FMath::FRand(), 6.f); // Prefer smaller radii
+		radius = FMath::InterpEaseIn<float>(10.f, 350.f, FMath::FRand(), 6.f); // Prefer smaller radii
 		mass = radius * FMath::RandRange(10, 30);
 	}
 	

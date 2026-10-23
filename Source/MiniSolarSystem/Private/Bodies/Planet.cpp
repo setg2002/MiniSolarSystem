@@ -743,6 +743,11 @@ float APlanet::GetBodyRadius() const
 	return ShapeSettings->GetRadius();
 }
 
+void APlanet::SetRadius(float Radius)
+{
+	ShapeSettings->SetRadius(Radius);
+}
+
 #if WITH_EDITOR
 void APlanet::PostEditChangeProperty(FPropertyChangedEvent & PropertyChangedEvent)
 {

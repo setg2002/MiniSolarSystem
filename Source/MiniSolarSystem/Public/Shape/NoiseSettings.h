@@ -55,11 +55,11 @@ struct FSimpleNoiseSettings
 	virtual void Randomize()
 	{
 		Strength = FMath::RandRange(.01f, 1.f);
-		BaseRoughness = FMath::RandRange(.1f, 5.f);
-		Roughness = FMath::RandRange(.1f, 5.f);
+		BaseRoughness = FMath::RandRange(.1f, 2.f);
+		Roughness = FMath::RandRange(.1f, 3.f);
 		Center = FVector(FMath::VRand() * FMath::RandHelper(1000));
-		numLayers = FMath::RandRange(1, 8);
-		Persistence = FMath::RandRange(.01f, 2.f);
+		numLayers = FMath::RandRange(1, 3);
+		Persistence = FMath::RandRange(.01f, 1.f);
 		MinValue = FMath::RandRange(.01f, 1.f);
 	}
 };
@@ -93,11 +93,11 @@ struct FRigidNoiseSettings : public FSimpleNoiseSettings
 	virtual void Randomize() override
 	{
 		Strength = FMath::RandRange(.01f, 1.f);
-		BaseRoughness = FMath::RandRange(.1f, 5.f);
-		Roughness = FMath::RandRange(.1f, 5.f);
+		BaseRoughness = FMath::RandRange(.1f, 2.f);
+		Roughness = FMath::RandRange(.1f, 3.f);
 		Center = FVector(FMath::VRand() * FMath::RandHelper(1000));
-		numLayers = FMath::RandRange(1, 8);
-		Persistence = FMath::RandRange(.01f, 2.f);
+		numLayers = FMath::RandRange(1, 3);
+		Persistence = FMath::RandRange(.01f, 1.f);
 		MinValue = FMath::RandRange(.01f, 1.f);
 		WeightMultiplier = FMath::RandRange(.1f, 1.f);
 	}

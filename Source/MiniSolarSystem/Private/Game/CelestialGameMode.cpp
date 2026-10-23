@@ -104,25 +104,39 @@ void ACelestialGameMode::BeginPlay()
 
 	LoadGame();
 }
-
+UE_DISABLE_OPTIMIZATION
 void ACelestialGameMode::CreateRandomSolarSystem()
 {
 	// Start with 1 star TODO- Allow for multi-star systems
 	ACelestialBody* Star = AddBody(StarBPClass, FName("Star"), FTransform());
 	Star->Randomize();
 	
+	AOrbitDebugActor* OrbitDebugActor = AOrbitDebugActor::Get();
+	if (OrbitDebugActor)
+	{
+		OrbitDebugActor->SetRelativeToBody(true);
+		OrbitDebugActor->SetRelativeBody(Star);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No OrbitDebugActor found when creating random solar system"));
+	}
+	
 	// Randomize Bodies
 	int32 NumBodies = 2;//FMath::RandRange(0, 6);
+	float LastBodyOrbitDistance = Star->GetBodyRadius() * 3.f;
+	
 	for (int32 i = 0; i < NumBodies; i++)
 	{
 		// 80% chance for Planet, 20% for Gas Giant
-		bool bPlanet = FMath::FRand() < 0.8f;
-		TSubclassOf<ACelestialBody> BodyClass = i == 0 ? PlanetBPClass : GasGiantBPClass;//bPlanet ? PlanetBPClass : GasGiantBPClass;
+		bool bPlanet = i == 0;//FMath::FRand() < 0.8f;
+		TSubclassOf<ACelestialBody> BodyClass = bPlanet ? PlanetBPClass : GasGiantBPClass;
 		
 		FTransform NewBodyTransform;
-		FVector BodyLocation = FVector(FMath::RandRange(25000.f, 300000.f));
+		FVector BodyLocation = FVector(LastBodyOrbitDistance + FMath::RandRange(5000.f, 20000.f), 0.f, 0.f);
+		LastBodyOrbitDistance = BodyLocation.Size();
 		BodyLocation = BodyLocation.RotateAngleAxis(FMath::RandRange(0.f, 360.f), FVector::UpVector); // Randomize the location around the Z axis
-		BodyLocation = BodyLocation.RotateAngleAxis(FMath::Pow(FMath::Rand(), 4.f) * 10.f, FVector::UpVector.Cross(BodyLocation)); // Randomize z offset to a maximum of 10 degrees from XY plane, biased towards 0
+		BodyLocation = BodyLocation.RotateAngleAxis(FMath::RandRange(0.f, 10.f), BodyLocation.GetSafeNormal().Cross(FVector::UpVector)); // Randomize z offset to a maximum of 10 degrees from XY plane
 		NewBodyTransform.SetLocation(BodyLocation);
 		
 		//TODO Generate random names via algorithm?
@@ -139,25 +153,33 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 		}
 		NewBody->Randomize();
 		NewBody->OrbitingBody = Star;
+		NewBody->CalculateOrbitVelocity();
 		NewBody->SetToOrbit();
 		
 		// Make moons
-		/*int32 NumMoons = FMath::Floor(0.06f * FMath::Pow(FMath::RandRange(0.f, 2.f), 6.f)); // Random number between 0 and 3 with bias towards lower numbers
+		int32 NumMoons = FMath::RandBool();//FMath::Floor(0.06f * FMath::Pow(FMath::RandRange(0.f, 2.f), 6.f)); // Random number between 0 and 3 with bias towards lower numbers
 		for (int32 ii = 0; ii < NumMoons; ++ii)
 		{
 			FTransform NewMoonTransform;
-			FVector MoonLocation = BodyLocation + FVector(NewBody->GetBodyRadius() + FMath::RandRange(100.f, 3000.f));
-			MoonLocation = BodyLocation.RotateAngleAxis(FMath::RandRange(0.f, 360.f), FVector::UpVector); // Randomize the location around the Z axis
-			MoonLocation = BodyLocation.RotateAngleAxis(FMath::Pow(FMath::Rand(), 4.f) * 25.f, FVector::UpVector.Cross(BodyLocation)); // Randomize z offset to a maximum of 25 degrees from XY plane, biased towards 0
+			FVector MoonLocation = FVector(NewBody->GetBodyRadius() + FMath::RandRange(100.f, 600.f), 0.f, 0.f);
+			MoonLocation = MoonLocation.RotateAngleAxis(FMath::RandRange(0.f, 360.f), FVector::UpVector); // Randomize the location around the Z axis
+			MoonLocation = MoonLocation.RotateAngleAxis(FMath::RandRange(0.f, 25.f), MoonLocation.GetSafeNormal().Cross(FVector::UpVector)); // Randomize z offset to a maximum of 25 degrees from XY plane, biased towards 0
+			MoonLocation += BodyLocation;
 			NewMoonTransform.SetLocation(MoonLocation);
 			
-			FName MoonName = FName(FString::Printf(TEXT("%s Moon_%d"), *BodyName.ToString(), i));
-			ACelestialBody* NewMoon = AddBody(PlanetBPClass, MoonName, NewMoonTransform, false);
+			FName MoonName = FName(FString::Printf(TEXT("%s_Moon_%d"), *BodyName.ToString(), i));
+			APlanet* NewMoon = Cast<APlanet>(AddBody(PlanetBPClass, MoonName, NewMoonTransform, false));
+			NewMoon->bAutoGenerate = false;
+			NewMoon->CreateSettingsAssets();
+			NewMoon->BindDelegates();
 			NewMoon->Randomize();
+			NewMoon->SetRadius(FMath::RandRange(NewBody->GetBodyRadius() / 10.f, NewBody->GetBodyRadius() / 4.f));
 			NewMoon->SetMass(FMath::RandRange(NewBody->GetMass() / 50.f, NewBody->GetMass() / 10.f));
 			NewMoon->OrbitingBody = NewBody;
+			NewMoon->CalculateOrbitVelocity();
 			NewMoon->SetToOrbit();
-		}*/
+			NewMoon->bAutoGenerate = bCachedAutoGenerate;
+		}
 
 		if (NewPlanet)
 		{
@@ -196,7 +218,7 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 	// Finally, randomize asteroids
 	RandomizeAsteroids();
 }
-
+UE_ENABLE_OPTIMIZATION
 void ACelestialGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
