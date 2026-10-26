@@ -141,20 +141,7 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 		
 		//TODO Generate random names via algorithm?
 		FName BodyName = FName(FString::Printf(TEXT("%s_%d"), bPlanet ? TEXT("Planet") : TEXT("GasGiant"), i));
-		ACelestialBody* NewBody = AddBody(BodyClass, BodyName, NewBodyTransform, false);
-		bool bCachedAutoGenerate = false;
-		APlanet* NewPlanet = Cast<APlanet>(NewBody);
-		if (NewPlanet)
-		{
-			bCachedAutoGenerate = NewPlanet->bAutoGenerate;
-			NewPlanet->bAutoGenerate = false;
-			NewPlanet->CreateSettingsAssets();
-			NewPlanet->BindDelegates();
-		}
-		NewBody->Randomize();
-		NewBody->OrbitingBody = Star;
-		NewBody->CalculateOrbitVelocity();
-		NewBody->SetToOrbit();
+		ACelestialBody* NewBody = CreateRandomizedCelestialBody(BodyClass, BodyName, NewBodyTransform, Star);
 		
 		// Make moons
 		int32 NumMoons = FMath::RandBool();//FMath::Floor(0.06f * FMath::Pow(FMath::RandRange(0.f, 2.f), 6.f)); // Random number between 0 and 3 with bias towards lower numbers
@@ -168,26 +155,14 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 			NewMoonTransform.SetLocation(MoonLocation);
 			
 			FName MoonName = FName(FString::Printf(TEXT("%s_Moon_%d"), *BodyName.ToString(), i));
-			APlanet* NewMoon = Cast<APlanet>(AddBody(PlanetBPClass, MoonName, NewMoonTransform, false));
-			NewMoon->bAutoGenerate = false;
-			NewMoon->CreateSettingsAssets();
-			NewMoon->BindDelegates();
-			NewMoon->Randomize();
+			APlanet* NewMoon = Cast<APlanet>(CreateRandomizedCelestialBody(PlanetBPClass, MoonName, NewMoonTransform, NewBody));
 			NewMoon->SetRadius(FMath::RandRange(NewBody->GetBodyRadius() / 10.f, NewBody->GetBodyRadius() / 4.f));
 			NewMoon->SetMass(FMath::RandRange(NewBody->GetMass() / 50.f, NewBody->GetMass() / 10.f));
-			NewMoon->OrbitingBody = NewBody;
-			NewMoon->CalculateOrbitVelocity();
-			NewMoon->SetToOrbit();
-			NewMoon->bAutoGenerate = bCachedAutoGenerate;
-		}
 
-		if (NewPlanet)
-		{
-			NewPlanet->bAutoGenerate = bCachedAutoGenerate;
 		}
 	}
 	
-	// After everything is ready, set terrestrial planets to to generate
+	// After everything is ready, set terrestrial planets to generate
 	{
 		TArray<FName> TerrestrialBodyNames;
 		for (ACelestialBody* Body : Bodies) 
@@ -218,7 +193,54 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 	// Finally, randomize asteroids
 	RandomizeAsteroids();
 }
+
+ACelestialBody* ACelestialGameMode::CreateRandomizedCelestialBody(TSubclassOf<ACelestialBody> BodyClass, FName BodyName, FTransform Transform, ACelestialBody* BodyToOrbit)
+{
+	ACelestialBody* NewBody = AddBody(BodyClass, BodyName, Transform, false);
+	
+	bool bCachedAutoGenerate = false;
+	APlanet* NewPlanet = Cast<APlanet>(NewBody);
+	if (NewPlanet)
+	{
+		bCachedAutoGenerate = NewPlanet->bAutoGenerate;
+		NewPlanet->bAutoGenerate = false;
+		NewPlanet->CreateSettingsAssets();
+		NewPlanet->BindDelegates();
+	}
+	NewBody->Randomize();
+	
+	if (BodyToOrbit)
+	{
+		NewBody->OrbitingBody = BodyToOrbit;
+		NewBody->CalculateOrbitVelocity();
+		NewBody->SetToOrbit();
+	}
+	
+	if (NewPlanet)
+	{
+		NewPlanet->bAutoGenerate = bCachedAutoGenerate;
+		
+		bool bHasAtmosphere = FMath::FRand() < 0.2f; // 20% chance to generate an atmosphere
+		if (bHasAtmosphere)
+		{
+			UAtmosphereComponent* AtmosphereComponent = Cast<UAtmosphereComponent>(AddBodyComponent(NewPlanet, UAtmosphereComponent::StaticClass()));
+			AtmosphereComponent->Randomize();
+		}
+	}
+	
+	float RingSystemChance = FMath::FRand();
+	bool bHasRingSystem = BodyClass == GasGiantBPClass ? RingSystemChance < 0.3f : RingSystemChance < 0.1f; // 30% chance to generate ring system on gas giants, 10% chance for other bodies
+	if (bHasRingSystem)
+	{
+		URingSystemComponent* RingSystemComponent = Cast<URingSystemComponent>(AddBodyComponent(NewBody, URingSystemComponent::StaticClass()));
+		RingSystemComponent->Randomize();
+	}
+	
+	return NewBody;
+}
+
 UE_ENABLE_OPTIMIZATION
+
 void ACelestialGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -248,6 +270,13 @@ void ACelestialGameMode::Tick(float DeltaTime)
 	{
 		System->GetNiagaraComponent()->SetVariableVec3(FName("GravityPos"), LargestBody->GetActorLocation());
 	}
+}
+
+UStaticMeshComponent* ACelestialGameMode::AddBodyComponent(ACelestialBody* Body, TSubclassOf<UStaticMeshComponent> ComponentClass)
+{
+	UStaticMeshComponent* NewComponent = Cast<UStaticMeshComponent>(Body->AddComponentByClass(ComponentClass, false, FTransform(), false));
+	Body->AddCelestialComponent(NewComponent);
+	return NewComponent;
 }
 
 ACelestialBody* ACelestialGameMode::AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform, bool bRegenerate)
@@ -1382,7 +1411,6 @@ void ACelestialGameMode::SetAsteroidFieldNum(int32 num)
 	NiagaraComponent->ReinitializeSystem();
 	NiagaraComponent->SetPaused(WasPaused);
 }
-
 
 // ======= End Runtime Console Commands ==================================================
 

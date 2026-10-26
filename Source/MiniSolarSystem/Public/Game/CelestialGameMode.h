@@ -13,6 +13,8 @@
  */
 
 //Forward Declarations
+class UAtmosphereComponent;
+class URingSystemComponent;
 class UOverviewWidgetBase;
 class ICelestialObject;
 class ACelestialPlayer;
@@ -147,6 +149,9 @@ public:
 	int32 GetAsteroidFieldNum() { return AsteroidFieldSpawnCount; }
 
 	UFUNCTION(BlueprintCallable)
+	UStaticMeshComponent* AddBodyComponent(ACelestialBody* Body, TSubclassOf<UStaticMeshComponent> ComponentClass);
+	
+	UFUNCTION(BlueprintCallable)
 	ACelestialBody* AddBody(TSubclassOf<ACelestialBody> Class, FName Name, FTransform Transform, bool bRegenerate = true);
 	
 	UFUNCTION(BlueprintCallable)
@@ -192,6 +197,8 @@ protected:
 	virtual void BeginPlay() override;
 	
 	void CreateRandomSolarSystem();
+	
+	ACelestialBody* CreateRandomizedCelestialBody(TSubclassOf<ACelestialBody> BodyClass, FName BodyName, FTransform Transform, ACelestialBody* BodyToOrbit = nullptr);
 	
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ACelestialBody*> Bodies;

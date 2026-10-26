@@ -3,6 +3,7 @@
 
 #include "Game/CelestialGameInstance.h"
 #include "LoadingScreen.h"
+#include "Kismet/GameplayStatics.h"
 #include "Shape/NoiseLayer.h"
 
 void UCelestialGameInstance::Init()
@@ -29,6 +30,14 @@ void UCelestialGameInstance::StopLoadingScreen()
 {
 	ILoadingScreenModule& LoadingScreenModule = ILoadingScreenModule::Get();
 	LoadingScreenModule.StopInGameLoadingScreen();
+}
+
+bool UCelestialGameInstance::SetGameSlot(uint8 NewSlot)
+{ 
+	Slot = NewSlot; 
+	
+	FString SlotName = FString("Save" + FString::FromInt(Slot));
+	return UGameplayStatics::DoesSaveGameExist(SlotName, 0);
 }
 
 void UCelestialGameInstance::CopyNoiseLayer(UNoiseLayer* NoiseLayerToCopy)

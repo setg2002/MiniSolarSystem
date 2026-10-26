@@ -43,8 +43,10 @@ private:
 public:
 	UFUNCTION(BLueprintCallable)
 	uint8 GetGameSlot() const { return Slot; }
+	
+	// Sets the save game slot and returns if the slot exists or not
 	UFUNCTION(BLueprintCallable)
-	void SetGameSlot(uint8 NewSlot) { Slot = NewSlot; }
+	bool SetGameSlot(uint8 NewSlot);
 
 //============== Volume Control ==============
 public:
