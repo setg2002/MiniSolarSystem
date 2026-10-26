@@ -98,12 +98,16 @@ public:
 	FColorChanged OnColorChanged;
 
 protected:
+	UPROPERTY()
 	UMaterialParameterCollectionInstance* PlanetIlluminationInst;
 
+	UPROPERTY()
 	UNiagaraComponent* ParticleComponent;
 
+	UPROPERTY()
 	UDirectionalLightComponent* Light;
 
+	UPROPERTY()
 	UNiagaraSystem* SolarParticleTemplate;
 
 #if WITH_EDITOR
@@ -115,8 +119,12 @@ protected:
 	virtual void OnConstruction(const FTransform & Transform) override;
 
 private:
+	UPROPERTY()
 	APawn* PlayerPawn;
 
+	UPROPERTY()
+	ACelestialGameMode* CachedGameMode;
+	
 	FStarProperties OldProperties;
 
 	// The number of this star used for planetMateralParameterCollectionInst

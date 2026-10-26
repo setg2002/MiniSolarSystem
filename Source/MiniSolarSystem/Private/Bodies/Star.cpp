@@ -61,7 +61,9 @@ void AStar::BeginPlay()
 
 	SetStarProperties(starProperties);
 
-	if (Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode())->GetCurrentPerspective() == 0)
+	CachedGameMode = Cast<ACelestialGameMode>(GetWorld()->GetAuthGameMode());
+	
+	if (CachedGameMode->GetCurrentPerspective() == 0)
 	{
 		ParticleComponent->SetPaused(true);
 		dynamicMaterial->SetScalarParameterValue("bIsPaused", 1);
@@ -72,15 +74,19 @@ void AStar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Probably not the most effieient way of detecting a change in star properties.
+	// Probably not the most efficient way of detecting a change in star properties.
 	if (OldProperties != starProperties) { SetStarProperties(starProperties); }
 
 	PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 
 	if (Cast<ACelestialPlayer>(PlayerPawn))
+	{
 		Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), PlayerPawn->GetActorLocation()));
+	}
 	else if (Cast<AOverviewPlayer>(PlayerPawn))
+	{
 		Light->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), Cast<AOverviewPlayer>(PlayerPawn)->GetCameraLocation()));
+	}
 
 	PlanetIlluminationInst->SetVectorParameterValue(FName("StarPos" + FString::FromInt(StarNum)), this->GetActorLocation());
 
