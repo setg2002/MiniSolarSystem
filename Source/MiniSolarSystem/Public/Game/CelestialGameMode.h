@@ -198,7 +198,7 @@ protected:
 	
 	void CreateRandomSolarSystem();
 	
-	ACelestialBody* CreateRandomizedCelestialBody(TSubclassOf<ACelestialBody> BodyClass, FName BodyName, FTransform Transform, ACelestialBody* BodyToOrbit = nullptr);
+	ACelestialBody* CreateRandomizedCelestialBody(TSubclassOf<ACelestialBody> BodyClass, FName BodyName, FTransform Transform, ACelestialBody* BodyToOrbit = nullptr, bool bAllowAtmosphere = true, bool bAllowRingSystem = true);
 	
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ACelestialBody*> Bodies;

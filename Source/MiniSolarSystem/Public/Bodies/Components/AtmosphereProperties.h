@@ -44,8 +44,8 @@ public:
 		MieHeightScale = FMath::RandRange(0.f, 1.f);
 		OpacityMultiplier = FMath::RandRange(0.f, 2.f);
 		
-		Ambient = FLinearColor(FMath::FRand(), FMath::FRand(), FMath::FRand(), FMath::Pow(FMath::FRand(), 90)); // Fully random color but bias the alpha towards 0 so the color is not overwhelming
+		Ambient = FLinearColor(FMath::Pow(FMath::FRand(), 90) / 5.f, FMath::Pow(FMath::FRand(), 90) / 5.f, FMath::Pow(FMath::FRand(), 90) / 5.f, 0.f); // Fully random color but heavily bias towards 0 so the color is not overwhelming
 		Mie = FLinearColor(FMath::FRand(), FMath::FRand(), FMath::FRand(), FMath::FRand());
-		Ray = FLinearColor(FMath::FRand(), FMath::FRand(), FMath::FRand(), 1.f - FMath::Pow(FMath::FRand(), 5)); // Bias the alpha towards 1 so the color can be seen
+		Ray = FLinearColor(FMath::FRand(), FMath::FRand(), FMath::FRand(), 1.f - FMath::Pow(FMath::FRand(), 5.f)); // Bias the alpha towards 1 so the color can be seen
 	}
 };

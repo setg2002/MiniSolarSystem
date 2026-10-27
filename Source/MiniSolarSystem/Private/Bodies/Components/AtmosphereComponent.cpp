@@ -141,7 +141,7 @@ void UAtmosphereComponent::Randomize()
 {
 	AtmosphereProperties.RandomizeProperties(PlanetRadius);
 	bClouds = FMath::FRand() > 0.9f; // 10% chance of clouds
-	CloudHeight = FMath::FRandRange(1.f, 1.15f);
+	CloudHeight = FMath::FRandRange(1.01f, 1.15f);
 	
 	UpdateProperties();
 }

@@ -54,12 +54,12 @@ struct FSimpleNoiseSettings
 	
 	virtual void Randomize()
 	{
-		Strength = FMath::RandRange(.01f, 1.f);
+		Strength = FMath::Pow(FMath::RandRange(.01f, 0.8f), 1.2f);
 		BaseRoughness = FMath::RandRange(.1f, 2.f);
-		Roughness = FMath::RandRange(.1f, 3.f);
+		Roughness = FMath::RandRange(.1f, 4.f);
 		Center = FVector(FMath::VRand() * FMath::RandHelper(1000));
-		numLayers = FMath::RandRange(1, 3);
-		Persistence = FMath::RandRange(.01f, 1.f);
+		numLayers = FMath::RandRange(1, 8);
+		Persistence = FMath::RandRange(.01f, 1.f);// / FMath::Pow(numLayers, 1.2f); // Decrease as num layers increase
 		MinValue = FMath::RandRange(.01f, 1.f);
 	}
 };

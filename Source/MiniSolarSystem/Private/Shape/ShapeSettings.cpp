@@ -59,7 +59,8 @@ void UShapeSettings::RandomizeForPlanet(APlanet* Planet)
 	
 	ShapeSettings.PlanetRadius = FMath::RandRange(10.f, 500.f);
 	
-	int32 RandomNoiseLayerCount = FMath::RandRange(1, 3);
+	// TODO implement better system for multiple layers
+	int32 RandomNoiseLayerCount = 1;// FMath::RandRange(1, 3);
 	for (int32 i = 0; i < RandomNoiseLayerCount; i++)
 	{
 		UNoiseLayer* NewNoiseLayer = NewObject<UNoiseLayer>();

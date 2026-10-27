@@ -99,7 +99,12 @@ void TerrainFace::CalculateMeshSection(FTerrainFaceData& OutData, int32 SectionI
 			FVector2D percent = FVector2D(x, y + (YCount * SectionIdx)) / (OutData.Resolution - 1);
 			FVector pointOnUnitCube = -OutData.LocalUp + (percent.X - .5f) * 2 * OutData.axisA + (percent.Y - .5f) * 2 * OutData.axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
-			PointsOnUnitSphere[i] = pointOnUnitSphere;
+			
+			if (y < YCount) // Only add points to this parent array that are actually within the current section
+			{	
+				PointsOnUnitSphere[x + (y + SectionIdx * YCount) * OutData.Resolution] = pointOnUnitSphere;
+			}
+			
 			float unscaledElevation = ShapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
 			OutData.vertices[i] = pointOnUnitSphere * ShapeGenerator->GetScaledElevation(unscaledElevation);
 			OutData.uv[i].X = ColorGenerator->BiomePercentFromPoint(pointOnUnitSphere);

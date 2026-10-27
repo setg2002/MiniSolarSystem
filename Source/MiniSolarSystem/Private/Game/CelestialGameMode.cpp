@@ -104,7 +104,7 @@ void ACelestialGameMode::BeginPlay()
 
 	LoadGame();
 }
-UE_DISABLE_OPTIMIZATION
+
 void ACelestialGameMode::CreateRandomSolarSystem()
 {
 	// Start with 1 star TODO- Allow for multi-star systems
@@ -155,10 +155,9 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 			NewMoonTransform.SetLocation(MoonLocation);
 			
 			FName MoonName = FName(FString::Printf(TEXT("%s_Moon_%d"), *BodyName.ToString(), i));
-			APlanet* NewMoon = Cast<APlanet>(CreateRandomizedCelestialBody(PlanetBPClass, MoonName, NewMoonTransform, NewBody));
+			APlanet* NewMoon = Cast<APlanet>(CreateRandomizedCelestialBody(PlanetBPClass, MoonName, NewMoonTransform, NewBody, false, false));
 			NewMoon->SetRadius(FMath::RandRange(NewBody->GetBodyRadius() / 10.f, NewBody->GetBodyRadius() / 4.f));
 			NewMoon->SetMass(FMath::RandRange(NewBody->GetMass() / 50.f, NewBody->GetMass() / 10.f));
-
 		}
 	}
 	
@@ -194,7 +193,7 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 	RandomizeAsteroids();
 }
 
-ACelestialBody* ACelestialGameMode::CreateRandomizedCelestialBody(TSubclassOf<ACelestialBody> BodyClass, FName BodyName, FTransform Transform, ACelestialBody* BodyToOrbit)
+ACelestialBody* ACelestialGameMode::CreateRandomizedCelestialBody(TSubclassOf<ACelestialBody> BodyClass, FName BodyName, FTransform Transform, ACelestialBody* BodyToOrbit, bool bAllowAtmosphere, bool bAllowRingSystem)
 {
 	ACelestialBody* NewBody = AddBody(BodyClass, BodyName, Transform, false);
 	
@@ -220,7 +219,7 @@ ACelestialBody* ACelestialGameMode::CreateRandomizedCelestialBody(TSubclassOf<AC
 	{
 		NewPlanet->bAutoGenerate = bCachedAutoGenerate;
 		
-		bool bHasAtmosphere = FMath::FRand() < 0.2f; // 20% chance to generate an atmosphere
+		bool bHasAtmosphere = bAllowAtmosphere ? FMath::FRand() < 0.2f : false; // 20% chance to generate an atmosphere
 		if (bHasAtmosphere)
 		{
 			UAtmosphereComponent* AtmosphereComponent = Cast<UAtmosphereComponent>(AddBodyComponent(NewPlanet, UAtmosphereComponent::StaticClass()));
@@ -229,7 +228,7 @@ ACelestialBody* ACelestialGameMode::CreateRandomizedCelestialBody(TSubclassOf<AC
 	}
 	
 	float RingSystemChance = FMath::FRand();
-	bool bHasRingSystem = BodyClass == GasGiantBPClass ? RingSystemChance < 0.3f : RingSystemChance < 0.1f; // 30% chance to generate ring system on gas giants, 10% chance for other bodies
+	bool bHasRingSystem = bAllowRingSystem ? (BodyClass == GasGiantBPClass ? RingSystemChance < 0.3f: RingSystemChance < 0.1f) : false; // 30% chance to generate ring system on gas giants, 10% chance for other bodies
 	if (bHasRingSystem)
 	{
 		URingSystemComponent* RingSystemComponent = Cast<URingSystemComponent>(AddBodyComponent(NewBody, URingSystemComponent::StaticClass()));
@@ -239,7 +238,6 @@ ACelestialBody* ACelestialGameMode::CreateRandomizedCelestialBody(TSubclassOf<AC
 	return NewBody;
 }
 
-UE_ENABLE_OPTIMIZATION
 
 void ACelestialGameMode::Tick(float DeltaTime)
 {
