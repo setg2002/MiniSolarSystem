@@ -106,7 +106,7 @@ void URingSystemComponent::UpdateProperties()
 
 void URingSystemComponent::RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback)
 {
-	OnGradientChanged.Add(Callback);
+	OnGradientChanged.AddUnique(Callback);
 }
 
 void URingSystemComponent::RandomizeColors()
