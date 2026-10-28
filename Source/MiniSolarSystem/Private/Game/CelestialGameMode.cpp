@@ -131,6 +131,7 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 		// 80% chance for Planet, 20% for Gas Giant
 		bool bPlanet = i == 0;//FMath::FRand() < 0.8f;
 		TSubclassOf<ACelestialBody> BodyClass = bPlanet ? PlanetBPClass : GasGiantBPClass;
+		TArray<uint32> BodySystemIDs = {};
 		
 		FTransform NewBodyTransform;
 		FVector BodyLocation = FVector(LastBodyOrbitDistance + FMath::RandRange(5000.f, 20000.f), 0.f, 0.f);
@@ -142,6 +143,7 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 		//TODO Generate random names via algorithm?
 		FName BodyName = FName(FString::Printf(TEXT("%s_%d"), bPlanet ? TEXT("Planet") : TEXT("GasGiant"), i));
 		ACelestialBody* NewBody = CreateRandomizedCelestialBody(BodyClass, BodyName, NewBodyTransform, Star);
+		BodySystemIDs.Add(NewBody->GetID());
 		
 		// Make moons
 		int32 NumMoons = FMath::RandBool();//FMath::Floor(0.06f * FMath::Pow(FMath::RandRange(0.f, 2.f), 6.f)); // Random number between 0 and 3 with bias towards lower numbers
@@ -158,6 +160,14 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 			APlanet* NewMoon = Cast<APlanet>(CreateRandomizedCelestialBody(PlanetBPClass, MoonName, NewMoonTransform, NewBody, false, false));
 			NewMoon->SetRadius(FMath::RandRange(NewBody->GetBodyRadius() / 10.f, NewBody->GetBodyRadius() / 4.f));
 			NewMoon->SetMass(FMath::RandRange(NewBody->GetMass() / 50.f, NewBody->GetMass() / 10.f));
+			BodySystemIDs.Add(NewMoon->GetID());
+		}
+		
+		if (NumMoons > 0)
+		{
+			FName BodySystemName = FName(FString::Printf(TEXT("%s_System"), *BodyName.ToString()));
+			FBodySystem NewBodySystem(BodySystemName, BodySystemIDs);
+			AddBodySystem(NewBodySystem);
 		}
 	}
 	
