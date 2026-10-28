@@ -173,7 +173,7 @@ public:
 	void LoadRuntimeAssetsOfClass(TArray<struct FAssetRecord> LoadedAssets, UClass* ClassToLoad);
 
 	UFUNCTION(BlueprintCallable)
-	void RandomizeAsteroids();
+	void RandomizeAsteroids(bool bStartPaused = true);
 	
 private:
 	UPROPERTY()

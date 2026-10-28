@@ -190,7 +190,7 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 	
 	
 	// Finally, randomize asteroids
-	RandomizeAsteroids();
+	RandomizeAsteroids(false);
 }
 
 ACelestialBody* ACelestialGameMode::CreateRandomizedCelestialBody(TSubclassOf<ACelestialBody> BodyClass, FName BodyName, FTransform Transform, ACelestialBody* BodyToOrbit, bool bAllowAtmosphere, bool bAllowRingSystem)
@@ -767,7 +767,7 @@ void ACelestialGameMode::LoadRuntimeAssetsOfClass(TArray<FAssetRecord> LoadedAss
 	ApplySettingsAssets();
 }
 
-void ACelestialGameMode::RandomizeAsteroids()
+void ACelestialGameMode::RandomizeAsteroids(bool bStartPaused)
 {
 	SetAsteroidFieldNum(FMath::RandRange(1, 10) * 100);
 	
@@ -784,7 +784,7 @@ void ACelestialGameMode::RandomizeAsteroids()
 		int32 Height = FMath::RandRange(1, 50) * 100;
 		int32 Radius = FMath::RandRange(PrevRadius, PrevRadius + 100000);
 		int32 Width = FMath::RandRange(1, 200) * 100;
-		AddAsteroidSystem(FTransform(), true, SpawnCount, Height, Radius, Width);
+		AddAsteroidSystem(FTransform(), bStartPaused, SpawnCount, Height, Radius, Width);
 		
 		PrevRadius = Radius + Width;
 	}
