@@ -3,6 +3,9 @@
 
 #include "Helpers/MainMenuTextReader.h"
 
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+
 
 FText UMainMenuTextReader::GetText()
 {

@@ -1,6 +1,7 @@
 // Copyright Soren Gilbertson
 
 #pragma once
+#include "UObject/Interface.h"
 
 #include "INoiseFilter.generated.h"
 

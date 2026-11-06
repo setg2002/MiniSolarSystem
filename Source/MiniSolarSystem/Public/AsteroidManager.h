@@ -7,6 +7,7 @@
 #include "AsteroidManager.generated.h"
 
 
+class UTexture2DArray;
 class FShapeGenerator;
 class UShapeSettings;
 
@@ -25,10 +26,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UShapeSettings* ShapeSettings;
 
+#if WITH_EDITOR
 	// Make new heightmaps
 	UFUNCTION(BlueprintCallable, CallInEditor)
 	void NewVariants();
-
+#endif
 
 protected:
 	// Called when the game starts or when spawned
@@ -48,6 +50,7 @@ protected:
 
 
 private:	
+	UPROPERTY()
 	UTexture2DArray* HeightmapsArray;
 
 	// Returns the point on a unit sphere projected onto the UVs of cube

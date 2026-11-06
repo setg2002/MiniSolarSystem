@@ -5,12 +5,13 @@
 #include "Bodies/Planet.h"
 #include "Shape/ShapeSettings.h"
 #include "Bodies/Components/CloudComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 
 UAtmosphereComponent::UAtmosphereComponent()
 {
-	this->SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/StaticMeshes/Atmosphere_mesh.Atmosphere_mesh'"), NULL, LOAD_None, NULL));
+	UStaticMeshComponent::SetStaticMesh(LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/StaticMeshes/Atmosphere_mesh.Atmosphere_mesh'"), NULL, LOAD_None, NULL));
 
 	CloudComponent = CreateDefaultSubobject<UCloudComponent>("Clouds");
 	CloudComponent->SetRelativeLocation(FVector::ZeroVector);

@@ -7,6 +7,8 @@
 #include "Color/GaseousColorGenerator.h"
 #include "UObject/UObjectGlobals.h"
 #include "Curves/CurveLinearColor.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/Texture2D.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 

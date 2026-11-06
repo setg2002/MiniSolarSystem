@@ -227,7 +227,7 @@ void TerrainFace::ConstructMeshAsync()
 		SectionData.axisB = Data.axisB;
 		SectionData.Resolution = Data.Resolution;
 		
-		UE::Tasks::FTask GenerationTask = UE::Tasks::Launch(GetThreadName(i, true), [this, i, &SectionData]()
+		UE::Tasks::FTask GenerationTask = UE::Tasks::Launch(TEXT("TerrainFaceGeneration"), [this, i, &SectionData]()
 		{
 			if (CancelGen->IsCanceled())
 			{
@@ -247,7 +247,7 @@ void TerrainFace::ConstructMeshAsync()
 			UKismetProceduralMeshLibrary::CalculateTangentsForMesh(SectionData.vertices, SectionData.triangles, SectionData.uv, SectionData.normals, SectionData.tangents, SectionData.triangles[0], i);
 		}, LowLevelTasks::ETaskPriority::High );
 		
-		UE::Tasks::FTask CreateSectionTask = UE::Tasks::Launch(GetThreadName(i, false), [this, i, &SectionData]()
+		UE::Tasks::FTask CreateSectionTask = UE::Tasks::Launch(TEXT("TerrainFaceCreateSection"), [this, i, &SectionData]()
 		{
 			if (CancelGen->IsCanceled())
 			{
@@ -319,41 +319,6 @@ void TerrainFace::CreateMesh()
 	TArray<FVector2D> EmptyArray;
 	ProcMesh->CreateMeshSection(MeshSection, Data.vertices, Data.triangles, Data.normals, Data.uv, EmptyArray, EmptyArray, EmptyArray, Data.VertexColors, Data.tangents, false);
 	bFinished = true;
-}
-
-const TCHAR* TerrainFace::GetThreadName(int32 ThreadIdx, bool bGeneration) const
-{
-	return *FString::Printf(TEXT("%s%sThread%i"), *LocalUpString(Data.LocalUp), bGeneration ? TEXT("Generation") : TEXT("Create"), ThreadIdx);
-}
-
-FString TerrainFace::LocalUpString(FVector LocalUp)
-{
-	if (LocalUp == FVector::UpVector)
-	{
-		return FString("Up");
-	}
-	if (LocalUp == FVector::DownVector)
-	{
-		return FString("Down");
-	}
-	if (LocalUp == FVector::LeftVector)
-	{
-		return FString("Left");
-	}
-	if (LocalUp == FVector::RightVector)
-	{
-		return FString("Right");
-	}
-	if (LocalUp == FVector::ForwardVector)
-	{
-		return FString("Front");
-	}
-	if (LocalUp == FVector::BackwardVector)
-	{
-		return FString("Back");
-	}
-	
-	return FString("???");
 }
 
 int32 TerrainFace::GetSectionIndex(int32 ThreadIdx) const

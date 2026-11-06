@@ -2,7 +2,10 @@
 
 
 #include "Color/GaseousColorGenerator.h"
+
+#include "RHITypes.h"
 #include "Curves/CurveLinearColor.h"
+#include "Engine/Texture2D.h"
 
 GaseousColorGenerator::GaseousColorGenerator()
 {

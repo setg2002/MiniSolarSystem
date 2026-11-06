@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Curves/KeyHandle.h"
 #include "ColorCurveKey.generated.h"
 
+class UCurveLinearColor;
 /**
  * 
  */

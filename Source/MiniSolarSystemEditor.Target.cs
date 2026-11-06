@@ -90,6 +90,7 @@ public class MiniSolarSystemEditorTarget : TargetRules
         BuildEnvironment = TargetBuildEnvironment.Unique;
 
         DefaultBuildSettings = BuildSettingsVersion.Latest;
+        CppStandard = CppStandardVersion.Latest;
         IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 	}
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/Interface.h"
 #include "ISettingsAssetID.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSettingsAssetChanged);

@@ -2,7 +2,7 @@
 REM #push build to itch.io using butler / refinery
 
 REM ### fill out config settings ####
-set pathToBuild=g:\Builds\SpaceGame\_BuildToPush
+set pathToBuild=b:\MiniSolarSystem\Builds\SpaceGame\_BuildToPush
 set butlerNameWin=setg2002/MiniSolarSystem:win
 set butlerNameLnx=setg2002/MiniSolarSystem:linux
 
@@ -19,7 +19,7 @@ REM #Zip windows version
 7z a MiniSolarSystemWin.zip %pathToBuild%\*
 
 REM #send file to itch.io via Butler:
-cd g:\UnrealProjects\MiniSolarSystem\Source\MiniSolarSystem
+cd b:\MiniSolarSystem\Game\Source\MiniSolarSystem
 butler push %pathToBuild%\MiniSolarSystemWin.zip %butlerNameWin% --userversion-file GAME_BUILD.txt
 
 REM #cleanup zip file:

@@ -3,10 +3,15 @@
 
 #include "AsteroidManager.h"
 
+#if WITH_EDITOR
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
+#endif
+
+#include "TextureResource.h"
 #include "Shape/ShapeGenerator.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Engine/World.h"
 #include "Engine\Texture2DArray.h"
 #include "UObject/SavePackage.h"
 
@@ -27,7 +32,7 @@ void AAsteroidManager::BeginPlay()
 	
 }
 
-
+#if WITH_EDITOR	
 void AAsteroidManager::NewVariants()
 {
 	shapeGenerator->UpdateSettings(ShapeSettings);
@@ -51,7 +56,6 @@ void AAsteroidManager::NewVariants()
 	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("Success") : TEXT("FAIL"));
 	//~ End making the Texture2DArray asset
 
-#if WITH_EDITOR	
 	// Make the sphere offset texture
 	if (bMakeSphere)
 	{
@@ -68,11 +72,10 @@ void AAsteroidManager::NewVariants()
 		HeightmapsArray->SourceTextures[i] = CreateHeightmapTexture(Name);
 	}
 	//HeightmapsArray->ReloadConfig(UTexture2DArray::StaticClass());  // Why aren't the new heightmaps showing up?
-#endif
+
 }
 
 
-#if WITH_EDITOR
 UTexture2D* AAsteroidManager::CreateHeightmapTexture(FString TextureName)
 {
 	const int Resolution = 1024;

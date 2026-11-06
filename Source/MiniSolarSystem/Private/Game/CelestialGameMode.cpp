@@ -22,6 +22,7 @@
 #include "Shape/NoiseSettings.h"
 #include "NiagaraActor.h"
 #include "EngineUtils.h"
+#include "TimerManager.h"
 #include "Shape/NoiseLayer.h"
 #include "Bodies/GasGiant.h"
 #include "Bodies/Planet.h"
@@ -29,6 +30,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Game/CelestialGameState.h"
 #include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Widgets/OverviewWidgetBase.h"
 
 
@@ -160,6 +162,14 @@ void ACelestialGameMode::CreateRandomSolarSystem()
 			APlanet* NewMoon = Cast<APlanet>(CreateRandomizedCelestialBody(PlanetBPClass, MoonName, NewMoonTransform, NewBody, false, false));
 			NewMoon->SetRadius(FMath::RandRange(NewBody->GetBodyRadius() / 10.f, NewBody->GetBodyRadius() / 4.f));
 			NewMoon->SetMass(FMath::RandRange(NewBody->GetMass() / 50.f, NewBody->GetMass() / 10.f));
+			
+			// Prevents ocean from appearing on moons
+			for (UNoiseLayer* Layer : NewMoon->ShapeSettings->GetNoiseLayers())
+			{
+				Layer->NoiseSettings->GetSimpleNoiseSettingsRef().MinValue = 0.01f;
+				Layer->NoiseSettings->GetRigidNoiseSettingsRef().MinValue = 0.01f;
+			}
+			
 			BodySystemIDs.Add(NewMoon->GetID());
 		}
 		

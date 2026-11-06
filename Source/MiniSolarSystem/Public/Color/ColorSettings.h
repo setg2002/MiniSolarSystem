@@ -12,6 +12,8 @@
  * 
  */
 
+class UMaterialInstanceDynamic;
+class UMaterialInterface;
 class UNoiseSettings;
 class APlanet;
 
@@ -205,6 +207,7 @@ public:
 
 	void Init();
 
+	UPROPERTY()
 	UMaterialInterface* PlanetMat;
 
 	UPROPERTY(BlueprintReadOnly)

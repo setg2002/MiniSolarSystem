@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Tasks/Task.h"
 
 /**
  * 
@@ -119,11 +120,8 @@ private:
 	
 	int32 FinishedThreads = 0;
 	int32 TotalThreads = 0;
-	
-	const TCHAR* GetThreadName(int32 ThreadIdx, bool bGeneration) const;
+
 	int32 GetSectionIndex(int32 ThreadIdx) const;
-	
-	static FString LocalUpString(FVector LocalUp);
 	
 	// 
 	UE::Tasks::FCancellationToken* CancelGen;

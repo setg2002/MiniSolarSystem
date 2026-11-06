@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 
 class AActor;
-
+class UTexture2D;
+class UCurveLinearColor;
 
 /**
  * 

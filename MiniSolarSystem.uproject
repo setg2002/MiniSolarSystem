@@ -62,6 +62,8 @@
 		"AllDesktop",
 		"WindowsNoEditor",
 		"LinuxNoEditor",
-		"MacNoEditor"
+		"MacNoEditor",
+		"Windows",
+		"Linux"
 	]
 }

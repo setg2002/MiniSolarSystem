@@ -6,6 +6,7 @@
 #include "Bodies/Planet.h"
 #include "Color/ColorCurveFunctionLibrary.h"
 #include "Curves/CurveLinearColor.h"
+#include "Materials/MaterialInterface.h"
 #include "Shape/NoiseSettings.h"
 
 UColorSettings::UColorSettings()

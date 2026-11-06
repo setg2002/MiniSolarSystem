@@ -6,7 +6,9 @@
 #include "JsonObjectConverter.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ISettingsAssetID.h"
+#include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/IAssetRegistry.h"
+#include "Misc/FileHelper.h"
 #include "SaveDataBlueprintFunctionLibrary.generated.h"
 
 /**

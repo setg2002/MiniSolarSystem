@@ -13,8 +13,10 @@
 #include "Components/SceneComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Components/DirectionalLightComponent.h"
-#include "Materials/MaterialParameterCollection.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
+#include "Materials/MaterialParameterCollection.h"
 #include "Helpers/MSSMacros.h"
 
 

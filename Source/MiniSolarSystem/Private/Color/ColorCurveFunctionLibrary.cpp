@@ -2,9 +2,14 @@
 
 
 #include "Color/ColorCurveFunctionLibrary.h"
+
+#include "RHITypes.h"
 #include "Game/CelestialSaveGameArchive.h"
 #include "Curves/CurveLinearColor.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Engine/Texture2D.h"
+#include "Misc/PackageName.h"
+#include "Serialization/MemoryReader.h"
 #include "UObject/SavePackage.h"
 
 

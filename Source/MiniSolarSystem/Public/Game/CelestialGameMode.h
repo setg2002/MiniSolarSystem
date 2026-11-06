@@ -13,6 +13,7 @@
  */
 
 //Forward Declarations
+class UMaterialParameterCollectionInstance;
 class UAtmosphereComponent;
 class URingSystemComponent;
 class UOverviewWidgetBase;

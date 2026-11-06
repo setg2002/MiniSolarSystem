@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 
+class UCurveLinearColor;
+class UTexture2D;
 class AActor;
 class MinMax;
 class UColorSettings;

@@ -7,6 +7,7 @@
 #include "StarProperties.h"
 #include "Star.generated.h"
 
+class UMaterialParameterCollectionInstance;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FColorChanged, FColor, NewColor);
 
 /**

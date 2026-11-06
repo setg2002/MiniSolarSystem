@@ -3,9 +3,17 @@
 
 #include "Skybox.h"
 
+#if WITH_EDITOR
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
+#endif
+
+#include "TextureResource.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/Texture.h"
+#include "Engine/Texture2D.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/SavePackage.h"
 

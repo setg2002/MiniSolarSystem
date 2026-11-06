@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TimerManager.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "MSSMacros.generated.h"
 

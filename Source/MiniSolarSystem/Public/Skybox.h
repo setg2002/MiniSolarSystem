@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Skybox.generated.h"
 
+class UMaterialInstanceDynamic;
 
 UCLASS()
 class MINISOLARSYSTEM_API ASkybox : public AActor
@@ -57,6 +58,7 @@ protected:
 	UStaticMeshComponent* Mesh;
 
 private:
+	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicMaterial;
 
 	const TArray<FColor> possibleColors = {

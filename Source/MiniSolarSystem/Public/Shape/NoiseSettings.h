@@ -156,6 +156,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FRigidNoiseSettings GetRigidNoiseSettings() const { return NoiseSettings.RigidNoiseSettings; }
 
+	FSimpleNoiseSettings& GetSimpleNoiseSettingsRef() { return NoiseSettings.SimpleNoiseSettings; }
+	FRigidNoiseSettings& GetRigidNoiseSettingsRef() { return NoiseSettings.RigidNoiseSettings; }
+	
 	UFUNCTION(BlueprintCallable)
 	void SetSimpleNoiseSettings(FSimpleNoiseSettings NewSettings);
 	UFUNCTION(BlueprintCallable)

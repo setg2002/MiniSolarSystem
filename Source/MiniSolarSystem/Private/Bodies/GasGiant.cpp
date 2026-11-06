@@ -5,8 +5,12 @@
 #include "OrbitDebugActor.h"
 #include "Game/CelestialGameMode.h"
 #include "Color/GaseousColorGenerator.h"
+#include "Components/StaticMeshComponent.h"
 #include "Curves/CurveLinearColor.h"
+#include "Engine/Texture2D.h"
+#include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "UObject/ConstructorHelpers.h"
 
 
 AGasGiant::AGasGiant()

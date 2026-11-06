@@ -9,6 +9,7 @@
 #include "Shape/NoiseFilterFactory.h"
 #include "GameFramework/Actor.h"
 #include "Curves/CurveLinearColor.h"
+#include "Engine/Texture2D.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
