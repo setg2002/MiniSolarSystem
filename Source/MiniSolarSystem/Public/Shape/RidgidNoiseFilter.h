@@ -14,7 +14,7 @@ class MINISOLARSYSTEM_API RigidNoiseFilter : public INoiseFilter
 {
 public:
 	RigidNoiseFilter(FRigidNoiseSettings settings);
-	~RigidNoiseFilter();
+	virtual ~RigidNoiseFilter() override;
 
 	FRigidNoiseSettings Settings;
 

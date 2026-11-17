@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Helpers/MinMax.h"
 #include "Tasks/Task.h"
 
 /**
@@ -30,6 +31,8 @@ struct FTerrainFaceData
     FVector axisA;
     FVector axisB;
 	int32 NumTris;
+	
+	MinMax ElevationMinMax;
 
     FTerrainFaceData()
     {
@@ -44,6 +47,7 @@ struct FTerrainFaceData
         tangents = TArray<FProcMeshTangent>();
         VertexColors = TArray<FColor>();
     	NumTris = 0;
+    	ElevationMinMax.Reset();
     }
 
     FTerrainFaceData(int32 IN_Resolution, FVector IN_LocalUp)
@@ -58,6 +62,7 @@ struct FTerrainFaceData
         tangents = TArray<FProcMeshTangent>();
         VertexColors = TArray<FColor>();
     	NumTris = 0;
+    	ElevationMinMax.Reset();
     }
 
     FTerrainFaceData(TArray<FVector> IN_Verticies, TArray<int32> IN_Triangles, TArray<FVector2D> IN_uv, TArray<FVector> IN_Normals, TArray<FProcMeshTangent> IN_Tangents)
@@ -70,7 +75,8 @@ struct FTerrainFaceData
 	      Resolution(0),
 	      LocalUp(FVector::ZeroVector),
 	      axisA(FVector::ZeroVector),
-	      axisB(FVector::ZeroVector), NumTris(0)
+	      axisB(FVector::ZeroVector), NumTris(0),
+	      ElevationMinMax()
     {
     }
 };

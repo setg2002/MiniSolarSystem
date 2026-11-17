@@ -175,6 +175,9 @@ struct FColorSettings_
 public:
 	UPROPERTY(SaveGame, EditAnywhere, meta = (ClampMin = "0", ClampMax = "1"))
 	float BiomeTintPercent = 0;
+	
+	UPROPERTY(SaveGame, EditAnywhere)
+	bool bHasOcean = true;
 
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly)
 	UCurveLinearColor* OceanColor = nullptr;

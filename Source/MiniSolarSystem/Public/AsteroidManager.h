@@ -19,6 +19,7 @@ class MINISOLARSYSTEM_API AAsteroidManager : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AAsteroidManager();
+	~AAsteroidManager();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "10"))
 	int32 NumVariants;

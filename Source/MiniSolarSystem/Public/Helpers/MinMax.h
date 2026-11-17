@@ -17,4 +17,6 @@ public:
 	float Max;
 
 	void AddValue(float v);
+	void Merge(const MinMax& Other);
+	void Reset();
 };

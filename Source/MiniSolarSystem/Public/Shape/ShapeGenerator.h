@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Helpers/MinMax.h"
 
 /**
  * 
  */
 
-class MinMax;
 class INoiseFilter;
 class UShapeSettings;
 
@@ -27,5 +27,5 @@ public:
 
 	TArray<INoiseFilter*> NoiseFilters;
 
-	MinMax* ElevationMinMax;
+	MinMax ElevationMinMax;
 };

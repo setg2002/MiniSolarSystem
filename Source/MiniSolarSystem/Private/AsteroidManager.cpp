@@ -25,6 +25,11 @@ AAsteroidManager::AAsteroidManager()
 	shapeGenerator = new FShapeGenerator();
 }
 
+AAsteroidManager::~AAsteroidManager()
+{
+	delete shapeGenerator;
+}
+
 // Called when the game starts or when spawned
 void AAsteroidManager::BeginPlay()
 {

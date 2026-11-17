@@ -185,21 +185,32 @@ void APlanet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bGenerating && bMultithreadGeneration)
+	if (bGenerating && bMultithreadGeneration && !AreFacesGenerating())
 	{
-		bool bAllThreadsFinished = true;
-		for (int8 i = 0; i < 6; i++)
+		if (bColorSettingsDirty)
 		{
-			if (!TerrainFaces[i]->GetIsFinished())
-			{
-				bAllThreadsFinished = false;
-				break;
-			}
+			// All workers are done, so the color generator and PointsOnUnitSphere are safe to touch.
+			// OnColorSettingsUpdated finishes with GenerateColors(), which advances or completes generation
+			bColorSettingsDirty = false;
+			OnColorSettingsUpdated();
+			return;
 		}
-		if (bAllThreadsFinished)
-			GenerateColors();
+
+		GenerateColors();
 	}
 
+}
+
+bool APlanet::AreFacesGenerating() const
+{
+	for (TerrainFace* Face : TerrainFaces)
+	{
+		if (Face && !Face->GetIsFinished())
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void APlanet::ResetPosition()
@@ -600,7 +611,9 @@ void APlanet::GeneratePlanet()
 		}
 	}
 	else
+	{
 		OnPlanetGenerated.ExecuteIfBound(GetBodyName());
+	}
 }
 
 void APlanet::ClearMeshSections()
@@ -631,6 +644,15 @@ void APlanet::Randomize()
 
 void APlanet::Initialize()
 {
+	// Make sure old terrain faces are canceled
+	for (TerrainFace* Face : TerrainFaces)
+	{
+		if (Face)
+		{
+			Face->CancelTerrainFaceGeneration();
+		}
+	}
+	
 	BindSettingsIDs();
 	ShapeGenerator->UpdateSettings(ShapeSettings);
 	ColorGenerator->UpdateSettings(ColorSettings);
@@ -698,15 +720,25 @@ void APlanet::OnShapeSettingsUpdated()
 
 void APlanet::OnColorSettingsUpdated()
 {
-	if (bAutoGenerate && TerrainFaces[0] != NULL && gameMode->GetCurrentPerspective() != 128)
+	if (!bAutoGenerate || TerrainFaces[0] == nullptr || gameMode->GetCurrentPerspective() == 128)
 	{
-		ColorGenerator->UpdateSettings(ColorSettings);
-		for (int8 i = 0; i < 6; i++)
-		{
-			TerrainFaces[i]->UpdateBiomePercents();
-		}
-		GenerateColors();
+		return;
 	}
+	
+	if (AreFacesGenerating())
+	{
+		// Workers are reading ColorGenerator and writing PointsOnUnitSphere. Apply after they finish, without cancelling
+		bColorSettingsDirty = true;
+		return;
+	}
+	
+	ColorGenerator->UpdateSettings(ColorSettings);
+	for (int8 i = 0; i < 6; i++)
+	{
+		TerrainFaces[i]->UpdateBiomePercents();
+	}
+	
+	GenerateColors();
 }
 
 void APlanet::GenerateColors()

@@ -24,9 +24,9 @@ public:
 
 	UColorSettings* ColorSettings;
 
-	INoiseFilter* BiomeNoiseFilter;
+	INoiseFilter* BiomeNoiseFilter = nullptr;
 
-	void UpdateElevation(MinMax* elevationMinMax);
+	void UpdateElevation(const MinMax& elevationMinMax);
 
 	float BiomePercentFromPoint(FVector PointOnUnitSphere);
 

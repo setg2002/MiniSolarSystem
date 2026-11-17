@@ -46,9 +46,9 @@ public:
 
 	FPlanetGenerated OnPlanetGenerated;
 	
-	// True when the planet is already generating
-	UPROPERTY(BlueprintReadWrite)
-	bool bGenerating;
+	// True when any face of the planet is still generating
+	UFUNCTION(BlueprintCallable)
+	bool AreFacesGenerating() const;
 
 	void ResetPosition();
 
@@ -154,6 +154,10 @@ protected:
 
 	void CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UObject> DataAssetClass);
 
+	// True from GeneratePlanet() until OnPlanetGenerated fires (spans all resolution levels)
+	UPROPERTY(BlueprintReadOnly)
+	bool bGenerating = false;
+	
 private:
 	const FVector directions[6] = { FVector().UpVector,
 									FVector().DownVector,
@@ -166,4 +170,7 @@ private:
 	int32 ResolutionLevel;
 	
 	uint64 GenerationTraceId;
+	
+	// Color settings changed while faces were generating. Will be applied when the current pass finishes
+	bool bColorSettingsDirty = false;
 };

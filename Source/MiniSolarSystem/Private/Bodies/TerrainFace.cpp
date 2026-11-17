@@ -56,6 +56,8 @@ void TerrainFace::CalculateMesh()
 			Data.vertices.EmplaceAt(i, pointOnUnitSphere * scaledElevation);
 			Data.uv[i].X = ColorGenerator->BiomePercentFromPoint(pointOnUnitSphere);
 			Data.uv[i].Y = unscaledElevation;
+			
+			ShapeGenerator->ElevationMinMax.AddValue(unscaledElevation);
 
 			if (x != Data.Resolution - 1 && y != Data.Resolution - 1)
 			{
@@ -100,15 +102,16 @@ void TerrainFace::CalculateMeshSection(FTerrainFaceData& OutData, int32 SectionI
 			FVector pointOnUnitCube = -OutData.LocalUp + (percent.X - .5f) * 2 * OutData.axisA + (percent.Y - .5f) * 2 * OutData.axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
 			
-			if (y < YCount) // Only add points to this parent array that are actually within the current section
-			{	
-				PointsOnUnitSphere[x + gy * OutData.Resolution] = pointOnUnitSphere;
-			}
-			
 			float unscaledElevation = ShapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
 			OutData.vertices[i] = pointOnUnitSphere * ShapeGenerator->GetScaledElevation(unscaledElevation);
 			OutData.uv[i].X = ColorGenerator->BiomePercentFromPoint(pointOnUnitSphere);
 			OutData.uv[i].Y = unscaledElevation;
+			
+			if (y < YCount) // Only add points to this parent array that are actually within the current section
+			{	
+				PointsOnUnitSphere[x + gy * OutData.Resolution] = pointOnUnitSphere;
+				OutData.ElevationMinMax.AddValue(unscaledElevation);
+			}
 			
 			if (x != OutData.Resolution - 1 && gy != OutData.Resolution - 1)
 			{
@@ -279,6 +282,9 @@ void TerrainFace::GenerationThreadFinished(const FTerrainFaceData& SectionData, 
 	// Aggregate terrain face data
 	{
 		SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CollectMeshData);
+		
+		// Aggregate elevation min/max from all sections
+		ShapeGenerator->ElevationMinMax.Merge(SectionData.ElevationMinMax);
 
 		int32 Count = (SectionData.Resolution * SectionData.Resolution) / TotalThreads;
 		int32 StartIndex = ThreadIdx * Count;

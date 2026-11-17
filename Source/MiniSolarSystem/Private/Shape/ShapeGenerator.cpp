@@ -16,16 +16,26 @@ FShapeGenerator::FShapeGenerator()
 void FShapeGenerator::UpdateSettings(UShapeSettings* settings)
 {
 	this->Settings = settings;
+	
+	for (INoiseFilter* Filter : NoiseFilters)
+	{
+		delete Filter;
+	}
+	
 	NoiseFilters.SetNum(Settings->GetNoiseLayers().Num());
-	for (int i = 0; i < Settings->GetNoiseLayers().Num(); i++)
+	for (int32 i = 0; i < Settings->GetNoiseLayers().Num(); i++)
 	{
 		NoiseFilters[i] = NoiseFilterFactory::CreateNoiseFilter(Settings->GetNoiseLayers()[i]->NoiseSettings);
 	}
-	ElevationMinMax = new MinMax();
+	ElevationMinMax.Reset();
 }
 
 FShapeGenerator::~FShapeGenerator()
 {
+	for (INoiseFilter* Filter : NoiseFilters)
+	{
+		delete Filter;
+	}
 }
 
 float FShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
@@ -60,8 +70,7 @@ float FShapeGenerator::CalculateUnscaledElevation(FVector PointOnUnitSphere)
 				}
 			}
 		}
-
-		ElevationMinMax->AddValue(elevation);
+		
 		return elevation;
 	}
 	else

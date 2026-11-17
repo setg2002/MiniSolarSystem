@@ -14,7 +14,7 @@ class MINISOLARSYSTEM_API SimpleNoiseFilter : public INoiseFilter
 {
 public:
 	SimpleNoiseFilter(FSimpleNoiseSettings settings);
-	~SimpleNoiseFilter();
+	virtual ~SimpleNoiseFilter() override;
 
 	FSimpleNoiseSettings Settings;
 

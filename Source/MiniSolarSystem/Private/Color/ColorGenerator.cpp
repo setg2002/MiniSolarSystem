@@ -21,18 +21,22 @@ FTerrestrialColorGenerator::FTerrestrialColorGenerator()
 void FTerrestrialColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 {
 	this->ColorSettings = colorSettings;
+	
+	delete BiomeNoiseFilter;
+	BiomeNoiseFilter = nullptr;
 	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
 		BiomeNoiseFilter = NoiseFilterFactory::CreateNoiseFilter(ColorSettings->GetBiomeColorSettings()->GetNoise());
 }
 
 FTerrestrialColorGenerator::~FTerrestrialColorGenerator()
 {
+	delete BiomeNoiseFilter;
 }
 
-void FTerrestrialColorGenerator::UpdateElevation(MinMax* elevationMinMax)
+void FTerrestrialColorGenerator::UpdateElevation(const MinMax& elevationMinMax)
 {
 	if (ColorSettings->DynamicMaterial)
-		ColorSettings->DynamicMaterial->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax->Min, elevationMinMax->Max, 0));
+		ColorSettings->DynamicMaterial->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax.Min, elevationMinMax.Max, 0));
 }
 
 float FTerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
