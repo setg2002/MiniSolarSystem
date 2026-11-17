@@ -18,16 +18,13 @@ TerrainFace::TerrainFace(int8 FaceMeshSection, FShapeGenerator* shape_Generator,
 	: ProcMesh(procMesh), ColorGenerator(color_Generator), ShapeGenerator(shape_Generator), MeshSection(FaceMeshSection), bFinished(false)
 {
 	Data = FTerrainFaceData(resolution, localUp);
-	CancelGen = new UE::Tasks::FCancellationToken();
+	CancelGen = MakeShared<UE::Tasks::FCancellationToken, ESPMode::ThreadSafe>();
 }
 
 TerrainFace::~TerrainFace()
 {
+	// Waits for all worker tasks. Pending game-thread tasks see their cancelled token and never touch this face.
 	CancelTerrainFaceGeneration();
-	if (CancelGen)
-	{
-		delete CancelGen;
-	}	
 }
 
 void TerrainFace::UpdateResolution(int32 NewResolution)
@@ -93,26 +90,29 @@ void TerrainFace::CalculateMeshSection(FTerrainFaceData& OutData, int32 SectionI
 	
 	for (int32 y = 0; y < YCount + 1; y++) // Calculate one extra row so that normals and tangents calculation is smooth between sections
 	{
+		// global y-index
+		int32 gy = y + YCount*SectionIdx;
+		
 		for (int32 x = 0; x < OutData.Resolution; x++)
 		{
 			int32 i = x + y * OutData.Resolution;
-			FVector2D percent = FVector2D(x, y + (YCount * SectionIdx)) / (OutData.Resolution - 1);
+			FVector2D percent = FVector2D(x, gy) / (OutData.Resolution - 1);
 			FVector pointOnUnitCube = -OutData.LocalUp + (percent.X - .5f) * 2 * OutData.axisA + (percent.Y - .5f) * 2 * OutData.axisB;
 			FVector pointOnUnitSphere = pointOnUnitCube.GetSafeNormal();
 			
 			if (y < YCount) // Only add points to this parent array that are actually within the current section
 			{	
-				PointsOnUnitSphere[x + (y + SectionIdx * YCount) * OutData.Resolution] = pointOnUnitSphere;
+				PointsOnUnitSphere[x + gy * OutData.Resolution] = pointOnUnitSphere;
 			}
 			
 			float unscaledElevation = ShapeGenerator->CalculateUnscaledElevation(pointOnUnitSphere);
 			OutData.vertices[i] = pointOnUnitSphere * ShapeGenerator->GetScaledElevation(unscaledElevation);
 			OutData.uv[i].X = ColorGenerator->BiomePercentFromPoint(pointOnUnitSphere);
 			OutData.uv[i].Y = unscaledElevation;
-
-			if (x != OutData.Resolution - 1 && y != OutData.Resolution - 1)
+			
+			if (x != OutData.Resolution - 1 && gy != OutData.Resolution - 1)
 			{
-				int32 ii = x + (y + (YCount * SectionIdx)) * OutData.Resolution;
+				int32 ii = x + gy * OutData.Resolution;
 				
 				OutData.triangles.Insert(ii, triIndex);
 				OutData.triangles.Insert(ii + OutData.Resolution + 1, triIndex + 1);
@@ -149,30 +149,28 @@ void TerrainFace::UpdateBiomePercents()
 
 void TerrainFace::CancelTerrainFaceGeneration()
 {
-	if (Tasks.Num() != 0)
+	if (GenerationTasks.Num() == 0)
 	{
-		CancelGen->Cancel();
-		for (const UE::Tasks::FTask* Task : Tasks)
+		return;
+	}
+
+	// Cancel the current generation
+	CancelGen->Cancel();
+
+	// Since worker tasks write into this face (PointsOnUnitSphere) right now and read the shape/color generators we need to wait for them.
+	// The game-thread tasks are not waited on: they only check their own (now cancelled) token and return, and the
+	// section data they hold is freed with the last shared reference.
+	for (const UE::Tasks::FTask& Task : GenerationTasks)
+	{
+		if (Task.IsValid())
 		{
-			if (!Task)
-			{
-				continue;
-			}
-			
-			if (!Task->IsCompleted())
-			{
-				Task->Wait();
-			}
+			Task.Wait();
 		}
-		Tasks.Empty();
 	}
-	
-	// Create new cancellation token
-	if (CancelGen)
-	{
-		delete CancelGen;
-	}
-	CancelGen = new UE::Tasks::FCancellationToken();
+	GenerationTasks.Empty();
+
+	// Fresh token for the next generation. Tasks from the cancelled generation keep the old one alive from the shared ptr.
+	CancelGen = MakeShared<UE::Tasks::FCancellationToken, ESPMode::ThreadSafe>();
 }
 
 void TerrainFace::ConstructMeshAsync()
@@ -218,47 +216,49 @@ void TerrainFace::ConstructMeshAsync()
 	}
 	
 	// Launch tasks for each section of this face
-	Tasks.SetNum(TotalThreads);
-	for (int i = 0; i < TotalThreads; ++i)
+	GenerationTasks.Reset(TotalThreads);
+	for (int32 i = 0; i < TotalThreads; ++i)
 	{
-		FTerrainFaceData& SectionData = *new FTerrainFaceData();
-		SectionData.LocalUp = Data.LocalUp;
-		SectionData.axisA = Data.axisA;
-		SectionData.axisB = Data.axisB;
-		SectionData.Resolution = Data.Resolution;
-		
-		UE::Tasks::FTask GenerationTask = UE::Tasks::Launch(TEXT("TerrainFaceGeneration"), [this, i, &SectionData]()
+		// Shared by both tasks of this section and freed when the last of them releases it, whether it finished or was cancelled
+		TSharedRef<FTerrainFaceData, ESPMode::ThreadSafe> SectionData = MakeShared<FTerrainFaceData, ESPMode::ThreadSafe>();
+		SectionData->LocalUp = Data.LocalUp;
+		SectionData->axisA = Data.axisA;
+		SectionData->axisB = Data.axisB;
+		SectionData->Resolution = Data.Resolution;
+
+		// Captured by value so a task always checks the token of the generation it belongs to, even after CancelGen is replaced
+		TSharedPtr<UE::Tasks::FCancellationToken, ESPMode::ThreadSafe> Token = CancelGen;
+
+		UE::Tasks::FTask GenerationTask = UE::Tasks::Launch(TEXT("TerrainFaceGeneration"), [this, i, SectionData, Token]()
 		{
-			if (CancelGen->IsCanceled())
+			if (Token->IsCanceled())
 			{
-				delete &SectionData;
 				return;
 			}
-			
-			CalculateMeshSection(SectionData, i);
-			
-			if (CancelGen->IsCanceled())
+
+			CalculateMeshSection(*SectionData, i);
+
+			if (Token->IsCanceled())
 			{
-				delete &SectionData;
 				return;
 			}
-			
+
 			SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CalcTangents);
-			UKismetProceduralMeshLibrary::CalculateTangentsForMesh(SectionData.vertices, SectionData.triangles, SectionData.uv, SectionData.normals, SectionData.tangents, SectionData.triangles[0], i);
+			UKismetProceduralMeshLibrary::CalculateTangentsForMesh(SectionData->vertices, SectionData->triangles, SectionData->uv, SectionData->normals, SectionData->tangents, SectionData->triangles[0], i);
 		}, LowLevelTasks::ETaskPriority::High );
-		
-		UE::Tasks::FTask CreateSectionTask = UE::Tasks::Launch(TEXT("TerrainFaceCreateSection"), [this, i, &SectionData]()
+
+		// Runs on the game thread. Must not touch `this` before checking the token: the face may have been destroyed
+		UE::Tasks::Launch(TEXT("TerrainFaceCreateSection"), [this, i, SectionData, Token]()
 		{
-			if (CancelGen->IsCanceled())
+			if (Token->IsCanceled())
 			{
-				delete &SectionData;
 				return;
 			}
-				
-			GenerationThreadFinished(&SectionData, i);	
+
+			GenerationThreadFinished(*SectionData, i);
 		}, UE::Tasks::Prerequisites(GenerationTask), LowLevelTasks::ETaskPriority::Normal, UE::Tasks::EExtendedTaskPriority::GameThreadNormalPri);
-	
-		Tasks[i] = &CreateSectionTask;
+
+		GenerationTasks.Add(GenerationTask);
 	}
 }
 
@@ -274,32 +274,32 @@ void TerrainFace::UpdateTangentsNormalsAsync()
 	UpdateTangentsNormals();
 }
 
-void TerrainFace::GenerationThreadFinished(FTerrainFaceData* SectionData, int32 ThreadIdx)
+void TerrainFace::GenerationThreadFinished(const FTerrainFaceData& SectionData, int32 ThreadIdx)
 {
 	// Aggregate terrain face data
 	{
 		SCOPE_CYCLE_COUNTER(STAT_ProcMesh_CollectMeshData);
-		
-		int32 Count = (SectionData->Resolution * SectionData->Resolution) / TotalThreads;
+
+		int32 Count = (SectionData.Resolution * SectionData.Resolution) / TotalThreads;
 		int32 StartIndex = ThreadIdx * Count;
-		int32 TrisCount = SectionData->NumTris * 3;
-		int32 StartingTriIndex = ThreadIdx * TrisCount;
-	
+		int32 TrisCount = SectionData.NumTris * 3;
+		// Every section but the last holds RowsPerSection full rows of triangles, so offset by that rather than this section's own count
+		const int32 RowsPerSection = SectionData.Resolution / TotalThreads;
+		int32 StartingTriIndex = ThreadIdx * RowsPerSection * (SectionData.Resolution - 1) * 6;
+
 		// Create a view of the specific range in the source arrays
-		TArrayView<FVector> VertsSourceView(SectionData->vertices.GetData(), Count);
-		TArrayView<FVector2D> UVSourceView(SectionData->uv.GetData(), Count);
-		TArrayView<int32> TrianglesSourceView(SectionData->triangles.GetData(), TrisCount);
-		TArrayView<FVector> NormalsSourceView(SectionData->normals.GetData(), Count);
-		TArrayView<FProcMeshTangent> TangentsSourceView(SectionData->tangents.GetData(), Count);
-	
+		TConstArrayView<FVector> VertsSourceView(SectionData.vertices.GetData(), Count);
+		TConstArrayView<FVector2D> UVSourceView(SectionData.uv.GetData(), Count);
+		TConstArrayView<int32> TrianglesSourceView(SectionData.triangles.GetData(), TrisCount);
+		TConstArrayView<FVector> NormalsSourceView(SectionData.normals.GetData(), Count);
+		TConstArrayView<FProcMeshTangent> TangentsSourceView(SectionData.tangents.GetData(), Count);
+
 		// Copy the data into the target arrays (TargetArray must have enough allocated space)
 		FMemory::Memcpy(Data.vertices.GetData() + StartIndex, VertsSourceView.GetData(), Count * sizeof(FVector));
 		FMemory::Memcpy(Data.uv.GetData() + StartIndex, UVSourceView.GetData(), Count * sizeof(FVector2D));
 		FMemory::Memcpy(Data.triangles.GetData() + StartingTriIndex, TrianglesSourceView.GetData(), TrisCount * sizeof(int32));
 		FMemory::Memcpy(Data.normals.GetData() + StartIndex, NormalsSourceView.GetData(), Count * sizeof(FVector));
 		FMemory::Memcpy(Data.tangents.GetData() + StartIndex, TangentsSourceView.GetData(), Count * sizeof(FProcMeshTangent));
-	
-		delete SectionData;
 	}
 	
 	// Create final mesh when all threads are finished
@@ -307,7 +307,7 @@ void TerrainFace::GenerationThreadFinished(FTerrainFaceData* SectionData, int32 
 	if (FinishedThreads == TotalThreads)
 	{
 		TotalThreads = 0;
-		Tasks.Empty();
+		GenerationTasks.Empty();
 		
 		CreateMesh();
 	}

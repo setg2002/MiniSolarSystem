@@ -6,6 +6,7 @@
 #include "OrbitDebugActor.h"
 #include "Shape/NoiseLayer.h"
 #include "Bodies/Planet.h"
+#include "Engine/World.h"
 
 
 bool UShapeSettings::IsNoiseLayers()
@@ -25,8 +26,23 @@ void UShapeSettings::SetRadius(float NewRadius)
 {
 	ShapeSettings.PlanetRadius = NewRadius;
 	OnSettingsAssetChanged.Broadcast();
-	// This is probably the single worst line in this solution
-	AOrbitDebugActor::Get()->UpdateWidthSpecificBody((Cast<ACelestialBody>(Cast<ACelestialGameMode>(AOrbitDebugActor::Get()->GetWorld()->GetAuthGameMode())->GetAssetByID(this->IDs[0]))));
+	
+	if (!IDs.IsEmpty())
+	{
+		if (AOrbitDebugActor* OrbitDebugActor = AOrbitDebugActor::Get())
+		{
+			if (UWorld* World = OrbitDebugActor->GetWorld())
+			{
+				if (ACelestialGameMode* GameMode = Cast<ACelestialGameMode>(World->GetAuthGameMode()))
+				{
+					if (ACelestialBody* TargetBody = Cast<ACelestialBody>(GameMode->GetAssetByID(IDs[0])))
+					{
+						OrbitDebugActor->UpdateWidthSpecificBody(TargetBody);
+					}
+				}
+			}
+		}
+	}
 }
 
 void UShapeSettings::AddNoiseLayer(UNoiseLayer* NewNoiseLayer)

@@ -107,13 +107,15 @@ public:
 
     bool GetIsFinished() const { return bFinished; }
 	
-	void GenerationThreadFinished(FTerrainFaceData* SectionData, int32 ThreadIdx);
+	void GenerationThreadFinished(const FTerrainFaceData& SectionData, int32 ThreadIdx);
 	
 
 private:
 	TArray<FVector> PointsOnUnitSphere;
 	
-	TArray<UE::Tasks::FTask*> Tasks;
+	// Worker tasks of the current generation. Only these are waited on when cancelling; the game-thread tasks that
+	// follow them are guarded by the cancellation token instead
+	TArray<UE::Tasks::FTask> GenerationTasks;
 
 	// Is this face finished generating. When false this face is actively being generated
     bool bFinished;
@@ -123,6 +125,6 @@ private:
 
 	int32 GetSectionIndex(int32 ThreadIdx) const;
 	
-	// 
-	UE::Tasks::FCancellationToken* CancelGen;
+	// Cancellation token of the current generation. Each task holds its own reference, so replacing this never frees a token a task still reads
+	TSharedPtr<UE::Tasks::FCancellationToken, ESPMode::ThreadSafe> CancelGen;
 };
