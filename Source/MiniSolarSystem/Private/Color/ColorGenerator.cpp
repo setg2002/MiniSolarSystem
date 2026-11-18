@@ -24,8 +24,34 @@ void FTerrestrialColorGenerator::UpdateSettings(UColorSettings* colorSettings)
 	
 	delete BiomeNoiseFilter;
 	BiomeNoiseFilter = nullptr;
-	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise())
-		BiomeNoiseFilter = NoiseFilterFactory::CreateNoiseFilter(ColorSettings->GetBiomeColorSettings()->GetNoise());
+
+	BiomeStartHeights.Reset();
+	BiomeBlendAmount = 0.f;
+	BiomeNoiseOffset = 0.f;
+	BiomeNoiseStrength = 0.f;
+
+	const UBiomeColorSettings* BiomeSettings = ColorSettings ? ColorSettings->GetBiomeColorSettings() : nullptr;
+	if (BiomeSettings == nullptr)
+	{
+		return;
+	}
+
+	// Only create the filter when noise is used, so a null filter means "no noise" in BiomePercentFromPoint
+	if (BiomeSettings->GetUsingNoise())
+	{
+		BiomeNoiseFilter = NoiseFilterFactory::CreateNoiseFilter(BiomeSettings->GetNoise());
+	}
+	BiomeNoiseOffset = BiomeSettings->GetNoiseOffset();
+	BiomeNoiseStrength = BiomeSettings->GetNoiseStrength();
+	BiomeBlendAmount = BiomeSettings->GetBlendAmount();
+
+	// Keep one entry per biome, even null ones, so biome indices still line up with the gradient texture rows in UpdateColors
+	const TArray<UBiome*>& Biomes = BiomeSettings->GetBiomes();
+	BiomeStartHeights.Reserve(Biomes.Num());
+	for (const UBiome* Biome : Biomes)
+	{
+		BiomeStartHeights.Add(Biome ? Biome->GetStartHeight() : 0.f);
+	}
 }
 
 FTerrestrialColorGenerator::~FTerrestrialColorGenerator()
@@ -39,24 +65,24 @@ void FTerrestrialColorGenerator::UpdateElevation(const MinMax& elevationMinMax)
 		ColorSettings->DynamicMaterial->SetVectorParameterValue(FName("elevationMinMax"), FLinearColor(elevationMinMax.Min, elevationMinMax.Max, 0));
 }
 
-float FTerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere)
+float FTerrestrialColorGenerator::BiomePercentFromPoint(FVector PointOnUnitSphere) const
 {
 	// Height of the current point from 0 - 1 (0 being south pole 1 being north pole)
 	float HeightPercent = (PointOnUnitSphere.Z + 1.f) / 2.f;
-	
-	// Offset for using noise
-	if (ColorSettings->GetBiomeColorSettings()->GetUsingNoise() && BiomeNoiseFilter)
-	{
-		HeightPercent += (BiomeNoiseFilter->Evaluate(PointOnUnitSphere) - ColorSettings->GetBiomeColorSettings()->GetNoiseOffset()) * ColorSettings->GetBiomeColorSettings()->GetNoiseStrength();
-	}
-	
-	float BiomeIndex = 0;
-	int16 NumBiomes = ColorSettings->GetBiomeColorSettings()->GetBiomes().Num();
-	float blendRange = ColorSettings->GetBiomeColorSettings()->GetBlendAmount() / 2.f + 0.001f;
 
-	for (int16 i = 0; i < NumBiomes; i++)
+	// Offset for using noise (the filter only exists when the biome settings use noise)
+	if (BiomeNoiseFilter)
 	{
-		float dst = HeightPercent - ColorSettings->GetBiomeColorSettings()->GetBiomes()[i]->GetStartHeight();
+		HeightPercent += (BiomeNoiseFilter->Evaluate(PointOnUnitSphere) - BiomeNoiseOffset) * BiomeNoiseStrength;
+	}
+
+	float BiomeIndex = 0;
+	const int32 NumBiomes = BiomeStartHeights.Num();
+	float blendRange = BiomeBlendAmount / 2.f + 0.001f;
+
+	for (int32 i = 0; i < NumBiomes; i++)
+	{
+		float dst = HeightPercent - BiomeStartHeights[i];
 		float weight = FMath::Clamp<float>(UKismetMathLibrary::NormalizeToRange(dst, -blendRange, blendRange), 0, 1);
 		BiomeIndex *= (1 - weight);
 		BiomeIndex += i * weight;

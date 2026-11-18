@@ -358,10 +358,7 @@ void APlanet::ClearSettingsAssets()
 	{
 		if (ColorSettings->GetBiomeColorSettings())
 		{
-			for (UBiome* biome : ColorSettings->GetBiomeColorSettings()->GetBiomes())
-			{
-				ColorSettings->GetBiomeColorSettings()->RemoveBiomeByRef(biome);
-			}
+			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
 			ColorSettings->SetBiomeColorSettings(nullptr);
 		}
 		ColorSettings = nullptr;
@@ -374,8 +371,8 @@ void APlanet::ClearSettingsAssets()
 			{
 				Layer->NoiseSettings = nullptr;
 			}
-			ShapeSettings->RemoveNoiseLayer(ShapeSettings->GetNoiseLayers().Num() - 1);
 		}
+		ShapeSettings->RemoveAllNoiseLayers();
 		ShapeSettings = nullptr;
 	}
 }
@@ -427,7 +424,7 @@ void APlanet::CreateSettingsAssets()
 		TArray<UBiome*> LoadedBiomeAssets = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UBiome>(ColorSettings->GetBiomeColorSettings()->GetID());
 		if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && LoadedBiomeAssets.Num() > 0)
 		{
-			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
+			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
 			for (UBiome* LoadedBiomeAsset : LoadedBiomeAssets)
 			{
 				ColorSettings->GetBiomeColorSettings()->AddBiome(LoadedBiomeAsset);
@@ -435,7 +432,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
 		{
-			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
+			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
 			ColorSettings->GetBiomeColorSettings()->AddBiome(CreateSettingsAsset<UBiome>(UBiome::StaticClass()));
 			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
 			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
@@ -457,14 +454,19 @@ void APlanet::CreateSettingsAssets()
 		TArray<UNoiseLayer*> LoadedShapeNoiseLayers = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UNoiseLayer>(ShapeSettings->GetID());
 		if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseLayer::StaticClass()->GetName())))
 		{
-			ShapeSettings->GetNoiseLayers().Empty();
 			CreatePackageName(AssetName, PackagePath, *Outer, UNoiseLayer::StaticClass());
-			ShapeSettings->GetNoiseLayers().Add(LoadObject<UNoiseLayer>(Outer, *AssetName, *PackagePath));
-			ShapeSettings->GetNoiseLayers().Last()->AddAppliedID(ShapeSettings->GetID());
+			UNoiseLayer* LoadedNoiseLayer = LoadObject<UNoiseLayer>(Outer, *AssetName, *PackagePath);
+			ShapeSettings->RemoveAllNoiseLayers();
+			if (LoadedNoiseLayer)
+			{
+				ShapeSettings->AddNoiseLayer(LoadedNoiseLayer);
+				LoadedNoiseLayer->AddAppliedID(ShapeSettings->GetID());
+			}
 		}
-		else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
+		// Not an else-if: also creates a fresh layer when the package existed but failed to load
+		if (ShapeSettings->GetNoiseLayers().IsEmpty() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
 		{
-			ShapeSettings->GetNoiseLayers().Empty();
+			ShapeSettings->RemoveAllNoiseLayers();
 			ShapeSettings->AddNoiseLayer(CreateSettingsAsset<UNoiseLayer>(UNoiseLayer::StaticClass()));
 			ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
 			ShapeSettings->GetNoiseLayers()[0]->AddAppliedID(ShapeSettings->GetID());
@@ -523,7 +525,7 @@ void APlanet::CreateSettingsAssets()
 		TArray<UBiome*> LoadedBiomes = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UBiome>(ColorSettings->GetBiomeColorSettings()->GetID());
 		if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && LoadedBiomes.Num() > 0)
 		{
-			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
+			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
 			for (UBiome* LoadedBiome : LoadedBiomes)
 			{
 				ColorSettings->GetBiomeColorSettings()->AddBiome(LoadedBiome);	
@@ -531,7 +533,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
 		{
-			ColorSettings->GetBiomeColorSettings()->GetBiomes().Empty();
+			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
 			ColorSettings->GetBiomeColorSettings()->AddBiome(CreateSettingsAssetEditor<UBiome>(UBiome::StaticClass()));
 			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
 			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
@@ -553,7 +555,7 @@ void APlanet::CreateSettingsAssets()
 		TArray<UNoiseLayer*> LoadedShapeNoiseLayers = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UNoiseLayer>(ShapeSettings->GetID());
 		if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && LoadedShapeNoiseLayers.Num() > 0)
 		{
-			ShapeSettings->GetNoiseLayers().Empty();
+			ShapeSettings->RemoveAllNoiseLayers();
 			for (UNoiseLayer* LoadedNoiseLayer : LoadedShapeNoiseLayers)
 			{
 				ShapeSettings->AddNoiseLayer(LoadedNoiseLayer);
@@ -561,7 +563,7 @@ void APlanet::CreateSettingsAssets()
 		}
 		else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
 		{
-			ShapeSettings->GetNoiseLayers().Empty();
+			ShapeSettings->RemoveAllNoiseLayers();
 			ShapeSettings->AddNoiseLayer(CreateSettingsAssetEditor<UNoiseLayer>(UNoiseLayer::StaticClass()));
 			ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
 			ShapeSettings->GetNoiseLayers()[0]->AddAppliedID(ShapeSettings->GetID());

@@ -51,22 +51,30 @@ void UShapeSettings::AddNoiseLayer(UNoiseLayer* NewNoiseLayer)
 	OnSettingsAssetChanged.Broadcast();
 }
 
-void UShapeSettings::RemoveNoiseLayer(int32 index)
+void UShapeSettings::RemoveNoiseLayer(int32 index, bool bBroadcastChange)
 {
 	if (ShapeSettings.NoiseLayers.IsValidIndex(index))
 	{
-		ShapeSettings.NoiseLayers[index]->RemoveAppliedID(ID);
+		if (UNoiseLayer* NoiseLayer = ShapeSettings.NoiseLayers[index])
+		{
+			NoiseLayer->RemoveAppliedID(ID);
+		}
 		ShapeSettings.NoiseLayers.RemoveAt(index);
-		OnSettingsAssetChanged.Broadcast();
+		
+		if (bBroadcastChange)
+		{
+			OnSettingsAssetChanged.Broadcast();
+		}
 	}
 }
 
 void UShapeSettings::RemoveAllNoiseLayers()
 {
-	for (uint16 i = 0; i < ShapeSettings.NoiseLayers.Num(); i++)
+	for (int32 i = ShapeSettings.NoiseLayers.Num() - 1; i >= 0; --i)
 	{
-		RemoveNoiseLayer(0);
+		RemoveNoiseLayer(i, false);
 	}
+	OnSettingsAssetChanged.Broadcast(); // Only broadcast change once after all layers are removed
 }
 
 void UShapeSettings::RandomizeForPlanet(APlanet* Planet)

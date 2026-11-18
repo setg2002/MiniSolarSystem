@@ -117,13 +117,20 @@ void UBiomeColorSettings::AddBiome(UBiome* NewBiome)
 	OnSettingsAssetChanged.Broadcast();
 }
 
-void UBiomeColorSettings::RemoveBiome(int32 index)
+void UBiomeColorSettings::RemoveBiome(int32 index, bool bBroadcastChange)
 {
 	if (BiomeColorSettings.Biomes.IsValidIndex(index))
 	{
-		BiomeColorSettings.Biomes[index]->RemoveAppliedID(ID);
+		if (UBiome* Biome = BiomeColorSettings.Biomes[index])
+		{
+			Biome->RemoveAppliedID(ID);
+		}
 		BiomeColorSettings.Biomes.RemoveAt(index);
-		OnSettingsAssetChanged.Broadcast();
+		
+		if (bBroadcastChange)
+		{
+			OnSettingsAssetChanged.Broadcast();
+		}
 	}
 }
 
@@ -136,15 +143,19 @@ void UBiomeColorSettings::RemoveAllBiomes()
 
 	for (int i = BiomeColorSettings.Biomes.Num() - 1; i >= 0; --i)
 	{
-		RemoveBiomeByRef(BiomeColorSettings.Biomes[i]);
+		RemoveBiome(i, false); // By index: RemoveBiomeByRef removes every matching entry, which can skip past the end with duplicates (e.g. several nulls)
 	}
+	OnSettingsAssetChanged.Broadcast(); // Broadcast change only after removing all biomes
 }
 
 void UBiomeColorSettings::RemoveBiomeByRef(UBiome* ref)
 {
 	if (BiomeColorSettings.Biomes.Contains(ref))
 	{
-		ref->RemoveAppliedID(ID);
+		if (ref)
+		{
+			ref->RemoveAppliedID(ID);
+		}
 		BiomeColorSettings.Biomes.Remove(ref);
 		OnSettingsAssetChanged.Broadcast();
 	}

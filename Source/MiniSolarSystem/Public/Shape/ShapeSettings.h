@@ -53,11 +53,12 @@ public:
 	void SetRadius(float NewRadius);
 
 	UFUNCTION(BlueprintCallable)
-	TArray<UNoiseLayer*> GetNoiseLayers() const { return ShapeSettings.NoiseLayers; }
+	// Read-only view. Use AddNoiseLayer/RemoveNoiseLayer/RemoveAllNoiseLayers to change the layers
+	const TArray<UNoiseLayer*>& GetNoiseLayers() const { return ShapeSettings.NoiseLayers; }
 	UFUNCTION(BlueprintCallable)
 	void AddNoiseLayer(UNoiseLayer* NewNoiseLayer);
 	UFUNCTION(BlueprintCallable)
-	void RemoveNoiseLayer(int32 index);
+	void RemoveNoiseLayer(int32 index, bool bBroadcastChange = true);
 	UFUNCTION(BlueprintCallable)
 	void RemoveAllNoiseLayers();
 	

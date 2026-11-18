@@ -141,11 +141,12 @@ public:
 	void SetNoiseStrength(float NewNoiseStrength);
 
 	UFUNCTION(BlueprintCallable)
-	TArray<UBiome*> GetBiomes() const { return BiomeColorSettings.Biomes; }
+	// Read-only view. Use AddBiome/RemoveBiome/RemoveAllBiomes to change the biomes
+	const TArray<UBiome*>& GetBiomes() const { return BiomeColorSettings.Biomes; }
 	UFUNCTION(BlueprintCallable)
 	void AddBiome(UBiome* NewBiome);
 	UFUNCTION(BlueprintCallable)
-	void RemoveBiome(int32 index);
+	void RemoveBiome(int32 index, bool bBroadcastChange = true);
 	UFUNCTION(BlueprintCallable)
 	void RemoveBiomeByRef(UBiome* ref);
 	UFUNCTION(BlueprintCallable)

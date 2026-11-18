@@ -22,13 +22,14 @@ public:
 	void UpdateSettings(UColorSettings* colorSettings);
 	~FTerrestrialColorGenerator();
 
-	UColorSettings* ColorSettings;
+	UColorSettings* ColorSettings = nullptr;
 
 	INoiseFilter* BiomeNoiseFilter = nullptr;
 
 	void UpdateElevation(const MinMax& elevationMinMax);
 
-	float BiomePercentFromPoint(FVector PointOnUnitSphere);
+	// Safe to call from worker threads: reads only the snapshot taken in UpdateSettings, never the settings UObjects
+	float BiomePercentFromPoint(FVector PointOnUnitSphere) const;
 
 	void UpdateColors();
 
@@ -36,4 +37,10 @@ public:
 
 private:
 	const int32 TextureResolution = 256;
+
+	// Snapshot of the biome settings used by BiomePercentFromPoint, taken on the game thread in UpdateSettings
+	TArray<float> BiomeStartHeights;
+	float BiomeBlendAmount = 0.f;
+	float BiomeNoiseOffset = 0.f;
+	float BiomeNoiseStrength = 0.f;
 };
