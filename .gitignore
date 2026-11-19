@@ -77,3 +77,4 @@ Content/ProceduralTextures/
 .idea/
 *.slnx
 .vsconfig
+*.user

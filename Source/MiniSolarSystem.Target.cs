@@ -9,7 +9,6 @@ public class MiniSolarSystemTarget : TargetRules
 	{
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.Latest;
-		CppStandard = CppStandardVersion.Latest;
 		ExtraModuleNames.AddRange( new string[] { "MiniSolarSystem" } );
 	}
 }
