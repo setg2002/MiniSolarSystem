@@ -88,13 +88,21 @@ public:
 	// Initializes TerrainFaces
 	void Initialize();
 
-	// Makes new empty data asset for given data asset
+	// Makes new empty data asset for given data asset, in the runtime folder (in memory only, like CreateSettingsAsset)
 	UFUNCTION(BlueprintCallable)
 	UObject* CreateSettingsAssetBP(TSubclassOf<UObject> AssetClass);
+	// New in-memory asset in /Game/DataAssets/Runtime/. Never saved to disk: its data persists through the save game only
 	template< class T >
-	T* CreateSettingsAsset(TSubclassOf<UObject> AssetClass);
+	T* CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
+	{
+		return CastChecked<T>(CreateSettingsAssetInDirectory(AssetClass, GetRuntimeSettingsAssetDirectory(), false));
+	}
+	// New asset in /Game/DataAssets/<BodyName>/, saved to disk
 	template< class T >
-	T* CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass);
+	T* CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
+	{
+		return CastChecked<T>(CreateSettingsAssetInDirectory(AssetClass, GetEditorSettingsAssetDirectory(), true));
+	}
 	static UObject* RestoreSettingsAsset(FName Name, TArray<uint8> Data, UClass* Class);
 
 	// Sets color and shape settings to null for regenerating planets from save i guess
@@ -152,8 +160,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	void CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UObject> DataAssetClass);
-
 	// True from GeneratePlanet() until OnPlanetGenerated fires (spans all resolution levels)
 	UPROPERTY(BlueprintReadOnly)
 	bool bGenerating = false;
@@ -173,4 +179,26 @@ private:
 	
 	// Color settings changed while faces were generating. Will be applied when the current pass finishes
 	bool bColorSettingsDirty = false;
+
+	// Outside the editor, or once play has begun, settings assets go in /Game/DataAssets/Runtime/ instead of the body's editor folder
+	bool UsesRuntimeSettingsAssets() const;
+
+	// Creates and registers a new asset named DA_<ID>_<Class>_<N> in Directory (a long package path ending in '/'),
+	// and saves it to disk if bSaveToDisk
+	UObject* CreateSettingsAssetInDirectory(TSubclassOf<UObject> AssetClass, const FString& Directory, bool bSaveToDisk);
+	static FString GetRuntimeSettingsAssetDirectory();
+	FString GetEditorSettingsAssetDirectory() const;
+
+	// CreateSettingsAsset or CreateSettingsAssetEditor, depending on UsesRuntimeSettingsAssets()
+	template< class T >
+	T* CreateSettingsAssetForContext();
+
+	// Returns Existing if set, otherwise the asset applied to OwnerID, otherwise a new asset applied to OwnerID.
+	// Only searches the asset registry when Existing is null
+	template< class T >
+	T* FindOrCreateSettingsAsset(T* Existing, uint32 OwnerID);
+
+	// All assets applied to OwnerID, or a single new one applied to OwnerID if there are none
+	template< class T >
+	TArray<T*> FindOrCreateSettingsAssets(uint32 OwnerID);
 };

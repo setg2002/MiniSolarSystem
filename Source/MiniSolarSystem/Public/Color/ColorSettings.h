@@ -120,6 +120,11 @@ public:
 		BiomeColorSettings = NewStruct;
 		for (UBiome* Biome : BiomeColorSettings.Biomes)
 		{
+			if (!Biome)
+			{
+				continue;
+			}
+			
 			Biome->OnBiomeHeightUpdated.AddDynamic(this, &UBiomeColorSettings::SortBiomesByHeight);
 		}
 		return true;

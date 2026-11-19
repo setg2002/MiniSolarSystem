@@ -5,6 +5,7 @@
 
 #include "RHITypes.h"
 #include "Game/CelestialSaveGameArchive.h"
+#include "Helpers/SaveDataBlueprintFunctionLibrary.h"
 #include "Curves/CurveLinearColor.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/Texture2D.h"
@@ -57,10 +58,24 @@ UTexture2D* UColorCurveFunctionLibrary::TextureFromCurve(UCurveLinearColor* Grad
 
 UCurveLinearColor* UColorCurveFunctionLibrary::CreateNewCurve(FName Name, TArray<uint8> Data)
 {
-	FString PackageName = TEXT("/Game/Materials/Gradients/Runtime/");
-	UPackage* Package = CreatePackage(*PackageName);
+	// One package per gradient (/Game/Materials/Gradients/Runtime/<Name>), named after the asset like any other asset.
+	// Previously every gradient went into a single package called ".../Runtime/", which is not a valid package name
+	// Blueprint callers may leave Name empty. NewObject would then auto-name the gradient (CurveLinearColor_N) inside a package
+	// called ".../Runtime/None", so the package and object names would differ and references to it could not be restored
+	if (Name.IsNone())
+	{
+		Name = FName(FString::Printf(TEXT("Gradient_%s"), *FGuid::NewGuid().ToString()));
+	}
+	const FString AssetName = Name.ToString();
+	const FString PackageName = TEXT("/Game/Materials/Gradients/Runtime/") + AssetName;
 
-	UCurveLinearColor* NewGradient =  NewObject<UCurveLinearColor>(Package, Name, EObjectFlags::RF_Public);
+	// Runtime gradients only live in memory and in the save game, so this is never saved to disk.
+	// Reuse the gradient if it is still in memory (e.g. loading a save twice in one session), overwriting its SaveGame data
+	UCurveLinearColor* NewGradient = Cast<UCurveLinearColor>(UMSSAssetFunctionLibrary::FindLoadedAsset(PackageName, Name, UCurveLinearColor::StaticClass()));
+	if (!NewGradient)
+	{
+		NewGradient = NewObject<UCurveLinearColor>(CreatePackage(*PackageName), Name, EObjectFlags::RF_Public);
+	}
 
 	if (NewGradient != NULL && Data.Num() > 1)
 	{
@@ -70,13 +85,8 @@ UCurveLinearColor* UColorCurveFunctionLibrary::CreateNewCurve(FName Name, TArray
 		NewGradient->Serialize(Ar);
 	}
 
+	// Registered so SaveGame's GetAssetsByPath("/Game/Materials/Gradients/Runtime") finds it while it only exists in memory
 	FAssetRegistryModule::AssetCreated(NewGradient);
-	NewGradient->MarkPackageDirty();
-	FString AssetName = Name.ToString();
-	FString FilePath = FString::Printf(TEXT("%s%s%s"), *PackageName, *AssetName, *FPackageName::GetAssetPackageExtension());
-	FSavePackageArgs Args = FSavePackageArgs();
-	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-	UPackage::SavePackage(Package, NewGradient, *FilePath, Args);
 	return NewGradient;
 }
 

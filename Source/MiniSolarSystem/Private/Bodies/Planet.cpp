@@ -218,110 +218,72 @@ void APlanet::ResetPosition()
 	ProcMesh->SetRelativeLocation(FVector::ZeroVector);
 }
 
-UObject* APlanet::CreateSettingsAssetBP(TSubclassOf<UObject> AssetClass)
+UObject* APlanet::CreateSettingsAssetInDirectory(TSubclassOf<UObject> AssetClass, const FString& Directory, bool bSaveToDisk)
 {
-	FString AssetPath = FString("/Game/DataAssets/Runtime/");
-	FString AssetName = FString(TEXT("DA_")) + FString::FromInt(this->GetID()) + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
-	FString PackagePath = AssetPath + AssetName;
-
-	int AssetNum = 0;
-	bool PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
-	while (PackageExists)
+	// DA_<ID>_<Class>_<N>, using the first N that is neither a loaded package nor a package on disk. A package that is only on
+	// disk must be skipped too: CreatePackage would give an empty, "partially loaded" package that SavePackage refuses to save
+	const FString NamePrefix = FString::Printf(TEXT("DA_%u_%s_"), GetID(), *AssetClass->GetName());
+	FString AssetName;
+	FString PackagePath;
+	int32 AssetNum = 0;
+	do
 	{
-		AssetNum++;
-		AssetName = FString(TEXT("DA_")) + this->BodyName.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_" + FString::FromInt(AssetNum);
-		PackagePath = AssetPath + AssetName;
-
-		PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
+		AssetName = NamePrefix + FString::FromInt(AssetNum++);
+		PackagePath = Directory + AssetName;
 	}
+	while (FindObject<UPackage>(nullptr, *PackagePath) != nullptr || FPackageName::DoesPackageExist(PackagePath));
 
 	UPackage* Package = CreatePackage(*PackagePath);
 	UObject* NewAsset = NewObject<UObject>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
 
+	// Registered so the asset registry finds it (FindSettingsAsset(s)FromAppliedID, SaveGame's GetAssetsByPath) while it
+	// only exists in memory
 	FAssetRegistryModule::AssetCreated(NewAsset);
+
+	if (!bSaveToDisk)
+	{
+		return NewAsset;
+	}
+
 	NewAsset->MarkPackageDirty();
 
-	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
-	FSavePackageArgs Args = FSavePackageArgs();
+	// SavePackage writes to disk, so map the package path (/Game/...) to the file in the project's Content folder
+	const FString FilePath = FPackageName::LongPackageNameToFilename(PackagePath, FPackageName::GetAssetPackageExtension());
+	FSavePackageArgs Args;
 	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-	bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
+	Args.SaveFlags = SAVE_NoError; // Without this, a failed save goes to GError and crashes. The asset still works in memory
+	const bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
 	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
 
 	return NewAsset;
 }
 
-template< class T >
-T* APlanet::CreateSettingsAsset(TSubclassOf<UObject> AssetClass)
+FString APlanet::GetRuntimeSettingsAssetDirectory()
 {
-	FString AssetPath = FString("/Game/DataAssets/Runtime/");
-	FString AssetName = FString(TEXT("DA_")) + FString::FromInt(this->GetID()) + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
-	FString PackagePath = AssetPath + AssetName;
-	
-	int AssetNum = 0;
-	bool PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
-	while (PackageExists)
-	{
-		AssetNum++;
-		AssetName = FString(TEXT("DA_")) + FString::FromInt(this->GetID()) + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_" + FString::FromInt(AssetNum);
-		PackagePath = AssetPath + AssetName;
-
-		PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
-	}
-
-	UPackage *Package = CreatePackage(*PackagePath);
-	T* NewAsset = NewObject<T>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
-
-	FAssetRegistryModule::AssetCreated(NewAsset);
-	NewAsset->MarkPackageDirty();
-
-	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
-	FSavePackageArgs Args = FSavePackageArgs();
-	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-	bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
-	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
-
-	return NewAsset;
+	return TEXT("/Game/DataAssets/Runtime/");
 }
 
-template< class T >
-T* APlanet::CreateSettingsAssetEditor(TSubclassOf<UObject> AssetClass)
+FString APlanet::GetEditorSettingsAssetDirectory() const
 {
-	FString AssetPath = FString("/Game/DataAssets/" + this->BodyName.ToString() + "/");
-	FString AssetName = FString(TEXT("DA_")) + FString::FromInt(this->GetID()) + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_0";
-	FString PackagePath = AssetPath + AssetName;
+	return TEXT("/Game/DataAssets/") + BodyName.ToString() + TEXT("/");
+}
 
-	int AssetNum = 0;
-	bool PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
-	while (PackageExists)
-	{
-		AssetNum++;
-		AssetName = FString(TEXT("DA_")) + this->BodyName.ToString() + FString(TEXT("_")) + AssetClass.Get()->GetName() + "_" + FString::FromInt(AssetNum);
-		PackagePath = AssetPath + AssetName;
-
-		PackageExists = FindObject<UPackage>(nullptr, *PackagePath) == NULL ? false : true;
-	}
-
-	UPackage *Package = CreatePackage(*PackagePath);
-	T* NewAsset = NewObject<T>(Package, AssetClass.Get(), *AssetName, EObjectFlags::RF_Public | EObjectFlags::RF_Standalone);
-
-	FAssetRegistryModule::AssetCreated(NewAsset);
-	NewAsset->MarkPackageDirty();
-
-	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
-	FSavePackageArgs Args = FSavePackageArgs();
-	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-	bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
-	UE_LOG(LogTemp, Warning, TEXT("Saved Package: %s"), bSuccess ? TEXT("True") : TEXT("False"));
-
-	return NewAsset;
+UObject* APlanet::CreateSettingsAssetBP(TSubclassOf<UObject> AssetClass)
+{
+	return CreateSettingsAssetInDirectory(AssetClass, GetRuntimeSettingsAssetDirectory(), false);
 }
 
 UObject* APlanet::RestoreSettingsAsset(FName Name, TArray<uint8> Data, UClass* Class)
 {
-	FString PackageName = TEXT("/Game/DataAssets/Runtime/" + Name.ToString());
-	UPackage* Package = CreatePackage(*PackageName);
+	// Runtime assets only live in memory and in the save game, so this is never saved to disk
+	const FString PackageName = GetRuntimeSettingsAssetDirectory() + Name.ToString();
 
-	UObject* NewAsset = NewObject<UObject>(Package, Class, Name, EObjectFlags::RF_Public);
+	// Reuse the asset if it is still in memory (e.g. loading a save twice in one session), overwriting its SaveGame data
+	UObject* NewAsset = UMSSAssetFunctionLibrary::FindLoadedAsset(PackageName, Name, Class);
+	if (!NewAsset)
+	{
+		NewAsset = NewObject<UObject>(CreatePackage(*PackageName), Class, Name, EObjectFlags::RF_Public);
+	}
 
 	if (NewAsset != NULL && Data.Num() > 1)
 	{
@@ -332,22 +294,55 @@ UObject* APlanet::RestoreSettingsAsset(FName Name, TArray<uint8> Data, UClass* C
 	}
 
 	FAssetRegistryModule::AssetCreated(NewAsset);
-	NewAsset->MarkPackageDirty();
-	FString AssetName = Name.ToString();
-	FString FilePath = FString::Printf(TEXT("%s%s%s"), *PackageName, *AssetName, *FPackageName::GetAssetPackageExtension());
-	FSavePackageArgs Args = FSavePackageArgs();
-	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-	bool bSuccess = UPackage::SavePackage(Package, NewAsset, *FilePath, Args);
 	return NewAsset;
 }
 
-void APlanet::CreatePackageName(FString& OutAssetName, FString& OutPackagePath, UObject& OutOuter, TSubclassOf<UObject> DataAssetClass)
+bool APlanet::UsesRuntimeSettingsAssets() const
 {
-	FString AssetPath = FString("/Game/DataAssets/" + FString::FromInt(this->GetID()) + "/");
-	OutAssetName = FString(TEXT("DA_")) + FString::FromInt(this->GetID()) + FString(TEXT("_")) + DataAssetClass->GetName();
-	OutPackagePath = AssetPath + OutAssetName;
-	UObject* OuterPtr = &OutOuter;
-	OuterPtr = FindPackage(this, *OutPackagePath);
+	return !GIsEditor || (GWorld && GWorld->HasBegunPlay());
+}
+
+template< class T >
+T* APlanet::CreateSettingsAssetForContext()
+{
+	return UsesRuntimeSettingsAssets() ? CreateSettingsAsset<T>(T::StaticClass())
+	                                   : CreateSettingsAssetEditor<T>(T::StaticClass());
+}
+
+template< class T >
+T* APlanet::FindOrCreateSettingsAsset(T* Existing, uint32 OwnerID)
+{
+	if (Existing)
+	{
+		return Existing;
+	}
+	if (T* Loaded = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<T>(OwnerID))
+	{
+		return Loaded;
+	}
+	T* Created = CreateSettingsAssetForContext<T>();
+	Created->AddAppliedID(OwnerID);
+	return Created;
+}
+
+template< class T >
+TArray<T*> APlanet::FindOrCreateSettingsAssets(uint32 OwnerID)
+{
+	TArray<T*> Found = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<T>(OwnerID);
+	if (Found.IsEmpty())
+	{
+		T* Created = CreateSettingsAssetForContext<T>();
+		Created->AddAppliedID(OwnerID);
+		Found.Add(Created);
+	}
+	return Found;
+}
+
+// True when the array has no usable first entry, e.g. a freshly created settings asset or one whose references failed to load
+template< class T >
+static bool IsMissingFirstAsset(const TArray<T*>& Assets)
+{
+	return Assets.IsEmpty() || Assets[0] == nullptr;
 }
 
 void APlanet::ClearSettingsAssets()
@@ -379,206 +374,48 @@ void APlanet::ClearSettingsAssets()
 
 void APlanet::CreateSettingsAssets()
 {
-	FString AssetName;
-	FString PackagePath;
-	UObject* Outer = nullptr;
+	// Color settings -> biome color settings -> biome noise + biomes
+	ColorSettings = FindOrCreateSettingsAsset(ColorSettings, ID);
 
-	if (!GIsEditor || GWorld->HasBegunPlay())
-	{ 
-		UColorSettings* LoadedColorSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UColorSettings>(ID);
-		if (ColorSettings == nullptr && LoadedColorSettings)
-		{
-			ColorSettings = LoadedColorSettings;
-		}
-		else if (ColorSettings == nullptr)
-		{
-			ColorSettings = CreateSettingsAsset<UColorSettings>(UColorSettings::StaticClass());
-			ColorSettings->GetPackage()->MarkPackageDirty();
-			ColorSettings->AddAppliedID(ID);
-		}
+	// The setters broadcast OnSettingsAssetChanged, so they are only called when the value actually changes
+	UBiomeColorSettings* BiomeSettings = FindOrCreateSettingsAsset(ColorSettings->GetBiomeColorSettings(), ColorSettings->GetID());
+	if (ColorSettings->GetBiomeColorSettings() != BiomeSettings)
+	{
+		ColorSettings->SetBiomeColorSettings(BiomeSettings);
+	}
 
-		UBiomeColorSettings* LoadedBiomeColorSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UBiomeColorSettings>(ColorSettings->GetID());
-		if (ColorSettings->GetBiomeColorSettings() == nullptr && LoadedBiomeColorSettings)
-		{	
-			ColorSettings->SetBiomeColorSettings(LoadedBiomeColorSettings);
-		}
-		else if (ColorSettings->GetBiomeColorSettings() == nullptr)
-		{
-			ColorSettings->SetBiomeColorSettings(CreateSettingsAsset<UBiomeColorSettings>(UBiomeColorSettings::StaticClass()));
-			ColorSettings->GetBiomeColorSettings()->GetPackage()->MarkPackageDirty();
-			ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
-		}
+	UNoiseSettings* BiomeNoise = FindOrCreateSettingsAsset(BiomeSettings->GetNoise(), BiomeSettings->GetID());
+	if (BiomeSettings->GetNoise() != BiomeNoise)
+	{
+		BiomeSettings->SetNoise(BiomeNoise);
+	}
 
-		UNoiseSettings* LoadedBiomeNoiseSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UNoiseSettings>(ColorSettings->GetBiomeColorSettings()->GetID());
-		if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr && LoadedBiomeNoiseSettings)
+	if (IsMissingFirstAsset(BiomeSettings->GetBiomes()))
+	{
+		BiomeSettings->RemoveAllBiomes();
+		for (UBiome* Biome : FindOrCreateSettingsAssets<UBiome>(BiomeSettings->GetID()))
 		{
-			ColorSettings->GetBiomeColorSettings()->SetNoise(LoadedBiomeNoiseSettings);
-		}
-		else if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr)
-		{
-			ColorSettings->GetBiomeColorSettings()->SetNoise(CreateSettingsAsset<UNoiseSettings>(UNoiseSettings::StaticClass()));
-			ColorSettings->GetBiomeColorSettings()->GetNoise()->GetPackage()->MarkPackageDirty();
-			ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
-		}
-
-		TArray<UBiome*> LoadedBiomeAssets = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UBiome>(ColorSettings->GetBiomeColorSettings()->GetID());
-		if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && LoadedBiomeAssets.Num() > 0)
-		{
-			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
-			for (UBiome* LoadedBiomeAsset : LoadedBiomeAssets)
-			{
-				ColorSettings->GetBiomeColorSettings()->AddBiome(LoadedBiomeAsset);
-			}
-		}
-		else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
-		{
-			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
-			ColorSettings->GetBiomeColorSettings()->AddBiome(CreateSettingsAsset<UBiome>(UBiome::StaticClass()));
-			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
-			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
-		}
-
-
-		UShapeSettings* LoadedShapeSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UShapeSettings>(ID);
-		if (ShapeSettings == nullptr && LoadedShapeSettings)
-		{
-			ShapeSettings = LoadedShapeSettings;
-		}
-		else if (ShapeSettings == nullptr)
-		{
-			ShapeSettings = CreateSettingsAsset<UShapeSettings>(UShapeSettings::StaticClass());
-			ShapeSettings->GetPackage()->MarkPackageDirty();
-			ShapeSettings->AddAppliedID(ID);
-		}
-
-		TArray<UNoiseLayer*> LoadedShapeNoiseLayers = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UNoiseLayer>(ShapeSettings->GetID());
-		if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && FPackageName::DoesPackageExist(FString("/Game/DataAssets/" + this->BodyName.ToString() + "/" + "DA_" + this->BodyName.ToString() + "_" + UNoiseLayer::StaticClass()->GetName())))
-		{
-			CreatePackageName(AssetName, PackagePath, *Outer, UNoiseLayer::StaticClass());
-			UNoiseLayer* LoadedNoiseLayer = LoadObject<UNoiseLayer>(Outer, *AssetName, *PackagePath);
-			ShapeSettings->RemoveAllNoiseLayers();
-			if (LoadedNoiseLayer)
-			{
-				ShapeSettings->AddNoiseLayer(LoadedNoiseLayer);
-				LoadedNoiseLayer->AddAppliedID(ShapeSettings->GetID());
-			}
-		}
-		// Not an else-if: also creates a fresh layer when the package existed but failed to load
-		if (ShapeSettings->GetNoiseLayers().IsEmpty() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
-		{
-			ShapeSettings->RemoveAllNoiseLayers();
-			ShapeSettings->AddNoiseLayer(CreateSettingsAsset<UNoiseLayer>(UNoiseLayer::StaticClass()));
-			ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
-			ShapeSettings->GetNoiseLayers()[0]->AddAppliedID(ShapeSettings->GetID());
-		}
-
-		UNoiseSettings* LoadedFirstNoiseLayerNoiseSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UNoiseSettings>(ShapeSettings->GetNoiseLayers()[0]->GetID());
-		if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr && LoadedFirstNoiseLayerNoiseSettings)
-		{
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = LoadedFirstNoiseLayerNoiseSettings;
-		}
-		else if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr)
-		{
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = CreateSettingsAsset<UNoiseSettings>(UNoiseSettings::StaticClass());
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->AddAppliedID(ShapeSettings->GetNoiseLayers()[0]->GetID());
+			BiomeSettings->AddBiome(Biome);
 		}
 	}
-	else
+
+	// Shape settings -> noise layers -> each layer's noise settings
+	ShapeSettings = FindOrCreateSettingsAsset(ShapeSettings, ID);
+
+	if (IsMissingFirstAsset(ShapeSettings->GetNoiseLayers()))
 	{
-		UColorSettings* LoadedColorSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UColorSettings>(ID);
-		if (ColorSettings == nullptr && LoadedColorSettings)
+		ShapeSettings->RemoveAllNoiseLayers();
+		for (UNoiseLayer* Layer : FindOrCreateSettingsAssets<UNoiseLayer>(ShapeSettings->GetID()))
 		{
-			ColorSettings = LoadedColorSettings;
+			ShapeSettings->AddNoiseLayer(Layer);
 		}
-		else if (ColorSettings == nullptr)
-		{
-			ColorSettings = CreateSettingsAssetEditor<UColorSettings>(UColorSettings::StaticClass());
-			ColorSettings->GetPackage()->MarkPackageDirty();
-			ColorSettings->AddAppliedID(ID);
-		}
+	}
 
-		UBiomeColorSettings* LoadedBiomeColorSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UBiomeColorSettings>(ColorSettings->GetID());
-		if (ColorSettings->GetBiomeColorSettings() == nullptr && LoadedBiomeColorSettings)
+	for (UNoiseLayer* Layer : ShapeSettings->GetNoiseLayers())
+	{
+		if (Layer)
 		{
-			ColorSettings->SetBiomeColorSettings(LoadedBiomeColorSettings);
-		}
-		else if (ColorSettings->GetBiomeColorSettings() == nullptr)
-		{
-			ColorSettings->SetBiomeColorSettings(CreateSettingsAssetEditor<UBiomeColorSettings>(UBiomeColorSettings::StaticClass()));
-			ColorSettings->GetBiomeColorSettings()->GetPackage()->MarkPackageDirty();
-			ColorSettings->GetBiomeColorSettings()->AddAppliedID(ColorSettings->GetID());
-		}
-
-		UNoiseSettings* LoadedBiomeNoiseSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UNoiseSettings>(ColorSettings->GetBiomeColorSettings()->GetID());
-		if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr && LoadedBiomeNoiseSettings)
-		{
-			ColorSettings->GetBiomeColorSettings()->SetNoise(LoadedBiomeNoiseSettings);
-		}
-		else if (ColorSettings->GetBiomeColorSettings()->GetNoise() == nullptr)
-		{
-			ColorSettings->GetBiomeColorSettings()->SetNoise(CreateSettingsAssetEditor<UNoiseSettings>(UNoiseSettings::StaticClass()));
-			ColorSettings->GetBiomeColorSettings()->GetNoise()->GetPackage()->MarkPackageDirty();
-			ColorSettings->GetBiomeColorSettings()->GetNoise()->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
-		}
-
-		TArray<UBiome*> LoadedBiomes = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UBiome>(ColorSettings->GetBiomeColorSettings()->GetID());
-		if ((ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr) && LoadedBiomes.Num() > 0)
-		{
-			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
-			for (UBiome* LoadedBiome : LoadedBiomes)
-			{
-				ColorSettings->GetBiomeColorSettings()->AddBiome(LoadedBiome);	
-			}
-		}
-		else if (ColorSettings->GetBiomeColorSettings()->GetBiomes() == TArray<UBiome*>() || ColorSettings->GetBiomeColorSettings()->GetBiomes()[0] == nullptr)
-		{
-			ColorSettings->GetBiomeColorSettings()->RemoveAllBiomes();
-			ColorSettings->GetBiomeColorSettings()->AddBiome(CreateSettingsAssetEditor<UBiome>(UBiome::StaticClass()));
-			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->GetPackage()->MarkPackageDirty();
-			ColorSettings->GetBiomeColorSettings()->GetBiomes()[0]->AddAppliedID(ColorSettings->GetBiomeColorSettings()->GetID());
-		}
-
-
-		UShapeSettings* LoadedShapeSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UShapeSettings>(ID);
-		if (ShapeSettings == nullptr && LoadedShapeSettings)
-		{
-			ShapeSettings = LoadedShapeSettings;
-		}
-		else if (ShapeSettings == nullptr)
-		{
-			ShapeSettings = CreateSettingsAssetEditor<UShapeSettings>(UShapeSettings::StaticClass());
-			ShapeSettings->GetPackage()->MarkPackageDirty();
-			ShapeSettings->AddAppliedID(ID);
-		}
-
-		TArray<UNoiseLayer*> LoadedShapeNoiseLayers = UMSSAssetFunctionLibrary::FindSettingsAssetsFromAppliedID<UNoiseLayer>(ShapeSettings->GetID());
-		if ((ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr) && LoadedShapeNoiseLayers.Num() > 0)
-		{
-			ShapeSettings->RemoveAllNoiseLayers();
-			for (UNoiseLayer* LoadedNoiseLayer : LoadedShapeNoiseLayers)
-			{
-				ShapeSettings->AddNoiseLayer(LoadedNoiseLayer);
-			}
-		}
-		else if (ShapeSettings->GetNoiseLayers() == TArray<UNoiseLayer*>() || ShapeSettings->GetNoiseLayers()[0] == nullptr)
-		{
-			ShapeSettings->RemoveAllNoiseLayers();
-			ShapeSettings->AddNoiseLayer(CreateSettingsAssetEditor<UNoiseLayer>(UNoiseLayer::StaticClass()));
-			ShapeSettings->GetNoiseLayers()[0]->GetPackage()->MarkPackageDirty();
-			ShapeSettings->GetNoiseLayers()[0]->AddAppliedID(ShapeSettings->GetID());
-		}
-
-		UNoiseSettings* LoadedFirstNoiseLayerNoiseSettings = UMSSAssetFunctionLibrary::FindSettingsAssetFromAppliedID<UNoiseSettings>(ShapeSettings->GetNoiseLayers()[0]->GetID());
-		if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr && LoadedFirstNoiseLayerNoiseSettings)
-		{
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = LoadedFirstNoiseLayerNoiseSettings;
-		}
-		else if (ShapeSettings->GetNoiseLayers()[0]->NoiseSettings == nullptr)
-		{
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings = CreateSettingsAssetEditor<UNoiseSettings>(UNoiseSettings::StaticClass());
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->GetPackage()->MarkPackageDirty();
-			ShapeSettings->GetNoiseLayers()[0]->NoiseSettings->AddAppliedID(ShapeSettings->GetNoiseLayers()[0]->GetID());
+			Layer->NoiseSettings = FindOrCreateSettingsAsset(Layer->NoiseSettings, Layer->GetID());
 		}
 	}
 }

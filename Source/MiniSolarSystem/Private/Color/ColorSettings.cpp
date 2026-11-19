@@ -56,8 +56,13 @@ void UBiome::SetGradient(UCurveLinearColor* NewGradient)
 	}
 	
 	Biome.Gradient = NewGradient;
-	Biome.Gradient->OnGradientUpdated.AddDynamic(this, &UBiome::BiomeUpdated);
+	if (Biome.Gradient)
+	{
+		Biome.Gradient->OnGradientUpdated.AddDynamic(this, &UBiome::BiomeUpdated);
+	}
 	OnSettingsAssetChanged.Broadcast();
+
+	OnGradientChanged.Broadcast(Biome.Gradient);
 }
 
 void UBiome::RandomizeWithStartHeight(const float GivenStartHeight)
@@ -72,24 +77,18 @@ void UBiome::RandomizeWithStartHeight(const float GivenStartHeight)
 	}
 	
 	Biome.Tint = FMath::RandRange(0.0f, 1.0f) >= 0.9f ? FColor::MakeRandomColor() : FColor::White;
-	Biome.Gradient = UColorCurveFunctionLibrary::CreateRandomCurve(FMath::RandRange(1, 10), true);
-	
-	OnSettingsAssetChanged.Broadcast();
+	SetGradient(UColorCurveFunctionLibrary::CreateRandomCurve(FMath::RandRange(1, 10), true)); // Broadcasts OnSettingsAssetChanged
 }
 
 void UBiome::RegisterOnGradientReplaced_Implementation(const FOnGradientChangedCallback& Callback)
 {
-	OnSettingsAssetChanged.AddUnique(Callback);
+	OnGradientChanged.AddUnique(Callback);
 }
 
 
 UBiomeColorSettings::UBiomeColorSettings()
 {
-	for (UBiome* Biome : BiomeColorSettings.Biomes)
-	{
-		Biome->OnBiomeHeightUpdated.AddDynamic(this, &UBiomeColorSettings::SortBiomesByHeight);
-		Biome->GetGradient()->OnGradientUpdated.AddDynamic(Biome, &UBiome::BiomeUpdated);
-	}
+	
 }
 
 void UBiomeColorSettings::SetUsingNoise(bool NewUsingNoise)
@@ -241,8 +240,12 @@ void UColorSettings::SetOceanColor(UCurveLinearColor* NewOceanColor)
 {
 	if (ColorSettings.OceanColor)
 		ColorSettings.OceanColor->OnGradientUpdated.RemoveDynamic(this, &UColorSettings::ColorSettingsUpdated);
+	
 	ColorSettings.OceanColor = NewOceanColor;
-	ColorSettings.OceanColor->OnGradientUpdated.AddDynamic(this, &UColorSettings::ColorSettingsUpdated);
+	if (ColorSettings.OceanColor)
+	{
+		ColorSettings.OceanColor->OnGradientUpdated.AddDynamic(this, &UColorSettings::ColorSettingsUpdated);
+	}
 	OnSettingsAssetChanged.Broadcast();
 	
 	OnOceanGradiantChanged.Broadcast(ColorSettings.OceanColor);

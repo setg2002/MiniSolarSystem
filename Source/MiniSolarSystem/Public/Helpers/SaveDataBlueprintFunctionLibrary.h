@@ -83,7 +83,11 @@ class MINISOLARSYSTEM_API UMSSAssetFunctionLibrary : public UBlueprintFunctionLi
 	GENERATED_BODY()
 
 public:
-	
+
+	// The asset Name of class Class in package PackageName, if it is currently in memory. Never loads from disk.
+	// Null if not found, or if an object with that name has a different class
+	static UObject* FindLoadedAsset(const FString& PackageName, FName Name, UClass* Class);
+
 	template <class T>
 	static T* FindSettingsAssetFromAppliedID(uint32 ID)
 	{

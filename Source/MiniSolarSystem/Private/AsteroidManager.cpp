@@ -53,7 +53,8 @@ void AAsteroidManager::NewVariants()
 	FAssetRegistryModule::AssetCreated(HeightmapsArray);
 	HeightmapsArray->MarkPackageDirty();
 
-	FString FilePath = FString::Printf(TEXT("%s%s%s"), *AssetPath, *AssetName, *FPackageName::GetAssetPackageExtension());
+	// SavePackage writes to disk, so map the package path (/Game/...) to the file in the project's Content folder
+	FString FilePath = FPackageName::LongPackageNameToFilename(PackagePath, FPackageName::GetAssetPackageExtension());
 	FSavePackageArgs Args = FSavePackageArgs();
 	Args.SaveFlags = SAVE_NoError;
 	Args.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
